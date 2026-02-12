@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study Sessions – Practice Quizzes</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --font: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+      --accent: #64748b;
+      --oci: #f97316;
+      --gcp: #4285f4;
+      --azure: #0078d4;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    .container { max-width: 720px; margin: 0 auto; }
+    h1 {
+      font-size: 1.5rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem; }
+    .quiz-list { display: flex; flex-direction: column; gap: 1rem; }
+    a.quiz-card {
+      display: block;
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      text-decoration: none;
+      color: var(--text);
+      border-left: 4px solid var(--accent);
+      transition: background 0.15s, transform 0.1s;
+    }
+    a.quiz-card:hover {
+      background: #151d2b;
+      transform: translateX(2px);
+    }
+    a.quiz-card.oci { border-left-color: var(--oci); }
+    a.quiz-card.gcp { border-left-color: var(--gcp); }
+    a.quiz-card.azure { border-left-color: var(--azure); }
+    .quiz-card .name { font-weight: 600; font-size: 1.05rem; margin-bottom: 0.25rem; }
+    .quiz-card .desc { font-size: 0.9rem; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Study Sessions</h1>
+    <p class="subtitle">Choose a practice quiz</p>
+    <nav class="quiz-list">
+      <a href="oci_foundations_quiz.html" class="quiz-card oci">
+        <span class="name">OCI Foundations Associate</span>
+        <span class="desc">1Z0-1085-25 • OCI ↔ AWS comparison &amp; exam-style</span>
+      </a>
+      <a href="gcp_cloud_digital_leader_quiz.html" class="quiz-card gcp">
+        <span class="name">GCP Cloud Digital Leader</span>
+        <span class="desc">GCP ↔ AWS comparison &amp; exam-style</span>
+      </a>
+      <a href="az900_azure_fundamentals_quiz.html" class="quiz-card azure">
+        <span class="name">AZ-900 Azure Fundamentals</span>
+        <span class="desc">Microsoft Certified: Azure Fundamentals • Azure ↔ AWS &amp; exam-style</span>
+      </a>
+    </nav>
+  </div>
+</body>
+</html>

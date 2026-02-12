@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GCP Cloud Digital Leader Practice Quiz</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --accent: #4285f4;
+      --accent-dim: #1a73e8;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --correct: #22c55e;
+      --wrong: #ef4444;
+      --font: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    .container { max-width: 720px; margin: 0 auto; }
+    h1 {
+      font-size: 1.5rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem; }
+    .stats {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .stats span { color: var(--accent); font-weight: 600; }
+    .question-card {
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border-left: 3px solid var(--accent);
+    }
+    .question-text {
+      font-size: 1.05rem;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+    .options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .option {
+      padding: 0.75rem 1rem;
+      background: var(--bg);
+      border: 2px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .option:hover:not(.disabled) {
+      border-color: var(--accent-dim);
+      background: #151d2b;
+    }
+    .option.selected { border-color: var(--accent); background: #151d2b; }
+    .option.correct { border-color: var(--correct); background: rgba(34,197,94,0.1); }
+    .option.wrong { border-color: var(--wrong); background: rgba(239,68,68,0.1); }
+    .option.disabled { cursor: not-allowed; opacity: 0.7; }
+    .feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+    .feedback.correct-msg { background: rgba(34,197,94,0.15); border-left: 4px solid var(--correct); }
+    .feedback.wrong-msg { background: rgba(239,68,68,0.15); border-left: 4px solid var(--wrong); }
+    .feedback .explanation { margin-top: 0.5rem; color: var(--text-muted); }
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.5rem;
+    }
+    button {
+      padding: 0.6rem 1.2rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: var(--accent-dim); }
+    button.secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+    }
+    button.secondary:hover { background: rgba(66,133,244,0.1); }
+    .results {
+      text-align: center;
+      padding: 2rem;
+    }
+    .results h2 { color: var(--accent); margin-bottom: 1rem; }
+    .score { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .results-actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
+    .results-actions button.secondary { margin: 0; }
+    .copy-toast { font-size: 0.85rem; color: var(--correct); margin-top: 0.5rem; }
+    .score.pass { color: var(--correct); }
+    .score.fail { color: var(--wrong); }
+    .start-screen { text-align: center; padding: 3rem 0; }
+    .start-screen p { margin-bottom: 1.5rem; color: var(--text-muted); }
+    .mode-selector { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; max-width: 360px; margin-left: auto; margin-right: auto; }
+    .mode-btn {
+      padding: 1rem 1.5rem;
+      text-align: left;
+      background: var(--surface);
+      border: 2px solid transparent;
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .mode-btn:hover { border-color: var(--accent-dim); background: #151d2b; }
+    .mode-btn.selected { border-color: var(--accent); background: rgba(66,133,244,0.1); }
+    .mode-btn .label { font-weight: 600; display: block; }
+    .mode-btn .desc { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .profile-hint { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.75rem; }
+    .import-area { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--surface); text-align: left; }
+    .import-area label { display: block; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--text-muted); }
+    .import-area textarea { width: 100%; min-height: 80px; padding: 0.5rem; background: var(--surface); border: 1px solid var(--accent-dim); border-radius: 6px; color: var(--text); font-family: inherit; font-size: 0.85rem; resize: vertical; }
+    .import-toast { font-size: 0.85rem; margin-top: 0.5rem; }
+    .import-toast.success { color: var(--correct); }
+    .import-toast.err { color: var(--wrong); }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>GCP Cloud Digital Leader Practice Quiz</h1>
+    <p class="subtitle">Based on gcp_cloud_digital_leader_guide.md</p>
+
+    <div id="start-screen" class="start-screen">
+      <p>40 questions per session, drawn from a pool of 60+. Randomized each run. Choose your mode:</p>
+      <p id="focus-hint" class="profile-hint hidden"></p>
+      <div class="mode-selector">
+        <button type="button" class="mode-btn" data-mode="comparison" onclick="selectMode('comparison')">
+          <span class="label">Comparison (GCP ↔ AWS)</span>
+          <span class="desc">Map GCP services to AWS equivalents. Leverage your SAA/CCP knowledge.</span>
+        </button>
+        <button type="button" class="mode-btn" data-mode="exam" onclick="selectMode('exam')">
+          <span class="label">Exam (Scenario-based)</span>
+          <span class="desc">Business use cases, product selection, Cloud Digital Leader domains.</span>
+        </button>
+        <button type="button" class="mode-btn selected" data-mode="mixed" onclick="selectMode('mixed')">
+          <span class="label">Mixed</span>
+          <span class="desc">Both comparison and exam-style. Simulates full exam.</span>
+        </button>
+      </div>
+      <button id="start-btn" onclick="startQuiz()">Start Quiz</button>
+      <div class="import-area">
+        <label for="import-results">Import past results (paste .md or choose file) to focus on weak topics:</label>
+        <textarea id="import-results" placeholder="Paste quiz results markdown here..."></textarea>
+        <button type="button" class="secondary" style="margin-top: 0.5rem;" onclick="importResults()">Import results</button>
+        <input type="file" id="import-file" accept=".md,text/markdown" style="display: none;" onchange="onImportFile(event)">
+        <button type="button" class="secondary" style="margin-top: 0.5rem; margin-left: 0.5rem;" onclick="document.getElementById('import-file').click()">Choose file</button>
+        <p id="import-toast" class="import-toast hidden"></p>
+      </div>
+    </div>
+
+    <div id="quiz-area" class="hidden">
+      <div class="stats">
+        <span>Question <span id="q-num">1</span> of <span id="q-total">40</span></span>
+        <span>Correct: <span id="score-display">0</span></span>
+      </div>
+      <div class="question-card">
+        <div class="question-text" id="question-text"></div>
+        <div class="options" id="options"></div>
+        <div id="feedback" class="feedback hidden"></div>
+      </div>
+      <div class="nav-row">
+        <button id="prev-btn" class="secondary" onclick="prevQuestion()">← Previous</button>
+        <button id="next-btn" onclick="nextQuestion()">Next →</button>
+      </div>
+    </div>
+
+    <div id="results-screen" class="results hidden">
+      <h2>Quiz Complete</h2>
+      <div class="score" id="final-score"></div>
+      <p id="result-msg" style="margin-bottom: 1.5rem; color: var(--text-muted);"></p>
+      <div class="results-actions">
+        <button onclick="startQuiz()">Try Again</button>
+        <button class="secondary" onclick="downloadResults()">Download Results</button>
+        <button class="secondary" onclick="copyResultsToClipboard()">Copy to Clipboard</button>
+      </div>
+      <p id="copy-toast" class="copy-toast hidden">Copied! Paste into Cursor chat for AI refactoring.</p>
+    </div>
+  </div>
+
+  <script>
+    const QUIZ_ID = 'gcp';
+    const PROFILE_KEY = 'study_sessions_profile_' + QUIZ_ID;
+
+    const questionBank = [
+      // === COMPARISON (GCP ↔ AWS) ===
+      { mode: "comparison", topic: "Compute",
+        q: "What is the GCP equivalent of AWS EC2?",
+        options: ["Cloud Run", "Compute Engine", "App Engine", "GKE"],
+        correct: 1,
+        explain: "Compute Engine = EC2. VMs on Google's infrastructure; rehost / lift-and-shift."
+      },
+      { mode: "comparison", topic: "Compute",
+        q: "What is the GCP equivalent of AWS Lambda?",
+        options: ["Cloud Run", "Compute Engine", "Cloud Functions", "App Engine"],
+        correct: 2,
+        explain: "Cloud Functions = Lambda. Event-driven, serverless functions."
+      },
+      { mode: "comparison", topic: "Storage",
+        q: "What is the GCP equivalent of Amazon S3?",
+        options: ["Cloud SQL", "BigQuery", "Cloud Storage", "Firestore"],
+        correct: 2,
+        explain: "Cloud Storage = S3. Object storage with classes: Standard, Nearline, Coldline, Archive."
+      },
+      { mode: "comparison", topic: "Database",
+        q: "What is the GCP equivalent of Amazon Redshift?",
+        options: ["Cloud SQL", "BigQuery", "Cloud Spanner", "Firestore"],
+        correct: 1,
+        explain: "BigQuery = serverless data warehouse / analytics; like Redshift but serverless."
+      },
+      { mode: "comparison", topic: "Database",
+        q: "What is the GCP equivalent of Amazon RDS?",
+        options: ["BigQuery", "Cloud Spanner", "Cloud SQL", "Bigtable"],
+        correct: 2,
+        explain: "Cloud SQL = RDS. Managed MySQL, PostgreSQL, SQL Server."
+      },
+      { mode: "comparison", topic: "Database",
+        q: "Which GCP service is most like AWS DynamoDB?",
+        options: ["Cloud SQL", "BigQuery", "Firestore or Cloud Bigtable", "Cloud Storage"],
+        correct: 2,
+        explain: "Firestore (document) and Bigtable (wide-column) = NoSQL; DynamoDB-like."
+      },
+      { mode: "comparison", topic: "Data",
+        q: "Which GCP services are used for streaming data like AWS Kinesis?",
+        options: ["BigQuery only", "Pub/Sub and Dataflow", "Cloud Storage only", "Looker"],
+        correct: 1,
+        explain: "Pub/Sub = messaging; Dataflow = stream/batch processing. Like Kinesis + processing."
+      },
+      { mode: "comparison", topic: "Security",
+        q: "What is the GCP equivalent of AWS WAF or DDoS protection?",
+        options: ["Cloud IAM", "Cloud Armor", "VPC", "Secret Manager"],
+        correct: 1,
+        explain: "Cloud Armor = WAF + DDoS protection at the edge."
+      },
+      { mode: "comparison", topic: "Infrastructure",
+        q: "What is the GCP equivalent of AWS Elastic Beanstalk?",
+        options: ["Compute Engine", "Cloud Run", "App Engine", "GKE"],
+        correct: 2,
+        explain: "App Engine = PaaS; deploy code without managing servers. Like Elastic Beanstalk."
+      },
+      { mode: "comparison", topic: "Infrastructure",
+        q: "Which GCP service is used for managed Kubernetes?",
+        options: ["Cloud Run", "App Engine", "GKE (Google Kubernetes Engine)", "Compute Engine"],
+        correct: 2,
+        explain: "GKE = managed Kubernetes. Like EKS."
+      },
+      { mode: "comparison", topic: "Hybrid",
+        q: "Which GCP product provides a single control plane for hybrid and multicloud?",
+        options: ["Cloud Run", "Anthos", "Apigee", "Compute Engine"],
+        correct: 1,
+        explain: "Anthos = manage workloads across on-prem, GCP, and other clouds. No direct AWS single equivalent."
+      },
+      { mode: "comparison", topic: "AI",
+        q: "GCP pre-trained APIs (Vision, Natural Language, etc.) are most similar to which AWS services?",
+        options: ["EC2", "Rekognition, Comprehend, Translate, etc.", "Redshift", "Lambda"],
+        correct: 1,
+        explain: "Pre-trained APIs = ready-made AI (vision, NL, translation, speech). Like Rekognition, Comprehend, etc."
+      },
+      // === DIGITAL TRANSFORMATION ===
+      { mode: "exam", topic: "Digital Transformation",
+        q: "In the cloud shared responsibility model, who is typically responsible for securing customer data and IAM policies?",
+        options: ["Google only", "Customer only", "Third-party auditor", "Shared—customer secures data, apps, IAM; Google secures infrastructure"],
+        correct: 3,
+        explain: "Customer secures: data, identity, access, OS (IaaS), apps (PaaS). Google secures: physical, network, hypervisor."
+      },
+      { mode: "exam", topic: "Digital Transformation",
+        q: "A company runs some workloads on-premises and some in Google Cloud. What deployment model is this?",
+        options: ["Public cloud only", "Private cloud only", "Hybrid cloud", "Multicloud"],
+        correct: 2,
+        explain: "Hybrid = mix of on-prem and public cloud. Multicloud = multiple public clouds (e.g., GCP + AWS)."
+      },
+      { mode: "exam", topic: "Digital Transformation",
+        q: "Which computing model requires the customer to manage the OS and applications but not the physical hardware?",
+        options: ["SaaS", "PaaS", "IaaS", "FaaS"],
+        correct: 2,
+        explain: "IaaS (e.g., Compute Engine): you manage OS, apps, data; provider manages hardware, network, hypervisor."
+      },
+      { mode: "exam", topic: "Digital Transformation",
+        q: "Which Google Cloud differentiator emphasizes AI/ML capabilities and open source?",
+        options: ["Intelligence and freedom", "Only cost", "Only compliance", "None of these"],
+        correct: 0,
+        explain: "GCP differentiators: Intelligence (AI/ML), freedom (open source, multicloud), collaboration, trust, sustainability."
+      },
+      // === DATA TRANSFORMATION ===
+      { mode: "exam", topic: "Data",
+        q: "For data accessed about once a month (e.g., backups), which Cloud Storage class is most cost-effective?",
+        options: ["Standard", "Nearline", "Coldline", "Archive"],
+        correct: 1,
+        explain: "Nearline = ~1×/month; 30-day minimum; retrieval fees. Coldline = quarterly; Archive = yearly."
+      },
+      { mode: "exam", topic: "Data",
+        q: "A team needs a serverless data warehouse for analytics and SQL on large datasets. Which service?",
+        options: ["Cloud SQL", "Cloud Spanner", "BigQuery", "Firestore"],
+        correct: 2,
+        explain: "BigQuery = serverless data warehouse and analytics engine; SQL at scale."
+      },
+      { mode: "exam", topic: "Data",
+        q: "Which Cloud Storage class has a 365-day minimum storage duration and the lowest storage cost?",
+        options: ["Standard", "Nearline", "Coldline", "Archive"],
+        correct: 3,
+        explain: "Archive = ~1×/year access; 365-day minimum; lowest cost; retrieval fees apply."
+      },
+      { mode: "exam", topic: "Data",
+        q: "A business wants self-serve BI, dashboards, and reports integrated with their data warehouse. Which product?",
+        options: ["BigQuery only", "Looker", "Cloud Storage", "Pub/Sub"],
+        correct: 1,
+        explain: "Looker = business intelligence; dashboards, reports; integrates with BigQuery."
+      },
+      { mode: "exam", topic: "Data",
+        q: "For real-time streaming analytics and event pipelines, which GCP products are commonly used together?",
+        options: ["Cloud SQL and BigQuery", "Pub/Sub and Dataflow", "Cloud Storage and Looker", "Compute Engine only"],
+        correct: 1,
+        explain: "Pub/Sub = messaging/events; Dataflow = stream and batch processing. Together for real-time pipelines."
+      },
+      { mode: "exam", topic: "Data",
+        q: "Which GCP database is a good fit for a mobile app backend with document-style, flexible schema data?",
+        options: ["Cloud SQL", "BigQuery", "Firestore", "Cloud Storage"],
+        correct: 2,
+        explain: "Firestore = document NoSQL; flexible schema; good for mobile and web app backends."
+      },
+      { mode: "exam", topic: "Data",
+        q: "Which GCP database is a managed relational service supporting MySQL, PostgreSQL, and SQL Server?",
+        options: ["BigQuery", "Cloud Spanner", "Cloud SQL", "Bigtable"],
+        correct: 2,
+        explain: "Cloud SQL = managed relational (MySQL, PostgreSQL, SQL Server). Like RDS."
+      },
+      // === AI ===
+      { mode: "exam", topic: "AI",
+        q: "A company wants to transcribe audio to text with no custom model training. Which GCP product?",
+        options: ["Vertex AI", "Speech-to-Text API", "BigQuery ML", "AutoML"],
+        correct: 1,
+        explain: "Speech-to-Text API = pre-trained; transcribe audio to text. No training needed."
+      },
+      { mode: "exam", topic: "AI",
+        q: "Which approach is fastest to implement when you need image labeling with no custom training?",
+        options: ["Build custom model with Vertex AI", "Use Vision API", "BigQuery ML only", "TensorFlow from scratch"],
+        correct: 1,
+        explain: "Vision API = pre-trained image analysis (labels, faces, text). Fastest; no training."
+      },
+      { mode: "exam", topic: "AI",
+        q: "Where can you build and run ML models using standard SQL inside a data warehouse?",
+        options: ["Only with Vertex AI", "BigQuery ML", "Only pre-trained APIs", "Cloud Functions"],
+        correct: 1,
+        explain: "BigQuery ML = create and run ML models in BigQuery using SQL. For analytics teams."
+      },
+      { mode: "exam", topic: "AI",
+        q: "For training custom ML models with your own data and full control, which GCP platform is typically used?",
+        options: ["Only pre-trained APIs", "Vertex AI", "Cloud Storage only", "Looker"],
+        correct: 1,
+        explain: "Vertex AI = full ML platform; custom models, your data; differentiation. AutoML = less code, still custom."
+      },
+      { mode: "exam", topic: "AI",
+        q: "Which Google hardware is optimized for TensorFlow and ML performance?",
+        options: ["Only standard VMs", "Cloud TPU", "Cloud Storage", "BigQuery"],
+        correct: 1,
+        explain: "Cloud TPU = Google's proprietary ML-optimized hardware; works with TensorFlow."
+      },
+      // === INFRASTRUCTURE / MODERNIZE ===
+      { mode: "exam", topic: "Infrastructure",
+        q: "A company wants to migrate existing VMs to the cloud with minimal changes. Which migration approach and GCP product?",
+        options: ["Refactor to microservices on Cloud Run", "Rehost (lift and shift) with Compute Engine", "Retire the workload", "Use only BigQuery"],
+        correct: 1,
+        explain: "Rehost = lift and shift; minimal changes. Compute Engine = VMs on GCP."
+      },
+      { mode: "exam", topic: "Infrastructure",
+        q: "Which GCP product is best for running serverless containers that scale to zero?",
+        options: ["Compute Engine", "GKE only", "Cloud Run", "Cloud Storage"],
+        correct: 2,
+        explain: "Cloud Run = serverless containers; scale to zero; no cluster to manage."
+      },
+      { mode: "exam", topic: "Infrastructure",
+        q: "A business wants to expose and monetize APIs with rate limiting and developer portal. Which product?",
+        options: ["Cloud Functions", "Apigee", "Cloud Armor", "VPC"],
+        correct: 1,
+        explain: "Apigee = API management; expose, secure, monetize APIs; rate limits, developer portal."
+      },
+      { mode: "exam", topic: "Infrastructure",
+        q: "Which term means moving an application to the cloud with minimal changes?",
+        options: ["Refactor", "Replatform", "Rehost (lift and shift)", "Retire"],
+        correct: 2,
+        explain: "Rehost = lift and shift; move as-is. Replatform = some optimization; refactor = redesign."
+      },
+      { mode: "exam", topic: "Infrastructure",
+        q: "For a fully managed PaaS where developers deploy code without managing servers, which GCP product?",
+        options: ["Compute Engine", "GKE", "App Engine", "Cloud Storage"],
+        correct: 2,
+        explain: "App Engine = PaaS; deploy code; Google manages runtime, scaling, infrastructure."
+      },
+      // === SECURITY ===
+      { mode: "exam", topic: "Security",
+        q: "Which GCP product helps protect applications from DDoS and application-layer attacks (e.g., WAF)?",
+        options: ["Cloud IAM only", "Cloud Armor", "VPC only", "Secret Manager"],
+        correct: 1,
+        explain: "Cloud Armor = DDoS protection and WAF at the edge."
+      },
+      { mode: "exam", topic: "Security",
+        q: "What does two-step verification (2SV) provide?",
+        options: ["Only encryption", "A second factor for sign-in (e.g., phone or key)", "API rate limiting", "Data residency"],
+        correct: 1,
+        explain: "2SV = something you know + something you have; strengthens authentication."
+      },
+      { mode: "exam", topic: "Security",
+        q: "A company must keep data stored only in the EU for compliance. What GCP capability addresses this?",
+        options: ["Only encryption", "Data residency / region selection", "Cloud Armor", "Apigee"],
+        correct: 1,
+        explain: "Data residency = where data is stored; GCP lets you choose regions to meet sovereignty/compliance."
+      },
+      { mode: "exam", topic: "Security",
+        q: "Authentication in IAM is best described as:",
+        options: ["What an identity is allowed to do", "Verifying identity (who you are)", "Encrypting data", "Auditing actions"],
+        correct: 1,
+        explain: "Authentication = verifying identity. Authorization = what you're allowed to do (permissions)."
+      },
+      // === OPERATIONS ===
+      { mode: "exam", topic: "Operations",
+        q: "A team wants to visualize and analyze cloud spend by project and service. Which GCP tool?",
+        options: ["Only quotas", "Cloud Billing Reports", "Cloud Armor", "Apigee"],
+        correct: 1,
+        explain: "Cloud Billing Reports = visualize and analyze cost; set budgets and alerts."
+      },
+      { mode: "exam", topic: "Operations",
+        q: "To get alerts when spending reaches 80% of a threshold, what should be configured?",
+        options: ["Only quotas", "Budget and budget alerts (threshold rules)", "Cloud Armor", "IAM roles only"],
+        correct: 1,
+        explain: "Budgets + threshold rules (e.g., 50%, 90%, 100%) send alerts; they do not block spending."
+      },
+      { mode: "exam", topic: "Operations",
+        q: "Which concept describes measuring reliability with metrics (SLIs) and targets (SLOs)?",
+        options: ["Only DevOps", "SRE (Site Reliability Engineering)", "Only IAM", "Data residency"],
+        correct: 1,
+        explain: "SRE uses SLIs (metrics), SLOs (targets), and error budgets for reliability."
+      },
+      { mode: "exam", topic: "Operations",
+        q: "Google Cloud's commitment to carbon-neutral operations and efficiency aligns with which theme?",
+        options: ["Only cost", "Sustainability", "Only compliance", "API management"],
+        correct: 1,
+        explain: "Sustainability = efficiency, carbon-neutral operations, tools for environmental impact."
+      },
+      // === MORE COMPARISON ===
+      { mode: "comparison", topic: "Data",
+        q: "AWS Athena (SQL on S3) is most similar to which GCP capability?",
+        options: ["Cloud SQL", "BigQuery (serverless SQL, including on Cloud Storage)", "Looker only", "Pub/Sub"],
+        correct: 1,
+        explain: "BigQuery = serverless SQL analytics; can query data in Cloud Storage and other sources."
+      },
+      { mode: "comparison", topic: "Security",
+        q: "GCP Cloud IAM is equivalent to which AWS service?",
+        options: ["S3", "IAM", "Lambda", "Redshift"],
+        correct: 1,
+        explain: "Cloud IAM = AWS IAM. Roles, permissions, identity for GCP resources."
+      },
+      { mode: "comparison", topic: "Infrastructure",
+        q: "Which GCP service is equivalent to AWS Lambda for event-driven serverless functions?",
+        options: ["Compute Engine", "Cloud Run", "Cloud Functions", "App Engine"],
+        correct: 2,
+        explain: "Cloud Functions = Lambda. Event-driven, serverless functions."
+      },
+      { mode: "exam", topic: "Data",
+        q: "Which Cloud Storage class has no minimum storage duration and no retrieval fee?",
+        options: ["Nearline", "Coldline", "Archive", "Standard"],
+        correct: 3,
+        explain: "Standard = hot data; no minimum, no retrieval fee. Best for frequently accessed data."
+      },
+      { mode: "exam", topic: "AI",
+        q: "Which pre-trained API would you use to detect sentiment and entities in text?",
+        options: ["Vision API", "Natural Language API", "Speech-to-Text API", "Cloud Storage"],
+        correct: 1,
+        explain: "Natural Language API = entity recognition, sentiment analysis, syntax, content classification."
+      },
+      { mode: "exam", topic: "AI",
+        q: "Which pre-trained API is used to translate text between languages?",
+        options: ["Vision API", "Natural Language API", "Cloud Translation API", "Text-to-Speech API"],
+        correct: 2,
+        explain: "Cloud Translation API = translate text between languages."
+      },
+      { mode: "exam", topic: "Digital Transformation",
+        q: "When an organization uses both GCP and AWS for different workloads, what is this called?",
+        options: ["Hybrid cloud only", "Multicloud", "Private cloud", "On-premises only"],
+        correct: 1,
+        explain: "Multicloud = multiple public clouds (e.g., GCP + AWS). Hybrid = on-prem + cloud."
+      },
+      { mode: "exam", topic: "Infrastructure",
+        q: "What does Anthos provide for organizations?",
+        options: ["Only API management", "Single control plane for hybrid and multicloud workloads", "Only object storage", "Only networking"],
+        correct: 1,
+        explain: "Anthos = manage workloads across on-prem, GCP, and other clouds with a consistent platform."
+      },
+      { mode: "exam", topic: "Security",
+        q: "In the shared responsibility model, who is responsible for securing the physical data center?",
+        options: ["Customer only", "Google (cloud provider)", "Shared equally", "Third party only"],
+        correct: 1,
+        explain: "Google secures: physical infrastructure, network, hypervisor. Customer secures: data, IAM, apps, OS (in IaaS)."
+      },
+      { mode: "exam", topic: "Data",
+        q: "Which GCP database is suited to global scale, strong consistency, and relational semantics?",
+        options: ["Firestore only", "Cloud SQL", "Cloud Spanner", "Bigtable only"],
+        correct: 2,
+        explain: "Cloud Spanner = globally distributed relational; strong consistency; horizontal scale."
+      },
+      { mode: "exam", topic: "Operations",
+        q: "GCP resource hierarchy (Organization → Folders → Projects) is mainly used for:",
+        options: ["Only networking", "Organizing resources and applying IAM/governance", "Only AI", "Only storage classes"],
+        correct: 1,
+        explain: "Resource hierarchy = organize resources and inherit IAM policies; governance and cost organization."
+      },
+      { topic: "Digital Transformation",
+        q: "Which of these is a benefit of moving from on-premises to the cloud?",
+        options: ["Higher capital expenditure (CapEx)", "Shift from CapEx to OpEx (pay as you go)", "Less elasticity", "Fixed capacity only"],
+        correct: 1,
+        explain: "Cloud shifts CapEx to OpEx; pay for what you use; scalable and elastic."
+      },
+      { topic: "Data",
+        q: "Coldline storage is best for data accessed how often?",
+        options: ["Daily", "About once a month", "About once a quarter or less", "Multiple times per day"],
+        correct: 2,
+        explain: "Coldline = ~1×/quarter; 90-day minimum; lower storage cost, retrieval fees."
+      },
+      { topic: "Infrastructure",
+        q: "Which GCP product runs event-triggered code without managing servers?",
+        options: ["Compute Engine", "Cloud Functions", "Cloud Storage", "BigQuery"],
+        correct: 1,
+        explain: "Cloud Functions = serverless, event-driven; no server management."
+      },
+      // More comparison for mode balance
+      { mode: "comparison", topic: "Storage",
+        q: "GCP Cloud Storage Coldline and Archive are most similar to which AWS storage?",
+        options: ["S3 Standard", "EBS", "S3 Glacier / Glacier Deep Archive", "EFS"],
+        correct: 2,
+        explain: "Coldline/Archive = infrequent/archival; like S3 Glacier tiers."
+      },
+      { mode: "comparison", topic: "Infrastructure",
+        q: "GCP Cloud Run (serverless containers) is most similar to which AWS offering?",
+        options: ["EC2", "Lambda", "Fargate (serverless containers) or Lambda", "RDS"],
+        correct: 2,
+        explain: "Cloud Run = serverless containers; like Fargate. Also comparable to Lambda for event-driven."
+      },
+      { mode: "comparison", topic: "Data",
+        q: "GCP Looker is most similar to which AWS service for BI and dashboards?",
+        options: ["S3", "QuickSight", "Redshift", "Lambda"],
+        correct: 1,
+        explain: "Looker = BI, dashboards, self-serve analytics; like QuickSight."
+      },
+      { mode: "comparison", topic: "Database",
+        q: "GCP Cloud Spanner (global relational) has no direct AWS equivalent that matches all features. It is closest to:",
+        options: ["RDS", "DynamoDB", "Aurora (global scale + strong consistency)", "Redshift"],
+        correct: 2,
+        explain: "Cloud Spanner = globally distributed, strongly consistent relational; Aurora Global is closest."
+      },
+      { mode: "comparison", topic: "AI",
+        q: "GCP Vertex AI is most similar to which AWS service for custom ML?",
+        options: ["S3", "SageMaker", "Redshift", "Lambda"],
+        correct: 1,
+        explain: "Vertex AI = full ML platform, custom models; like SageMaker."
+      },
+    ];
+
+    const QUESTIONS_PER_QUIZ = 40;
+    let currentIndex = 0;
+    let score = 0;
+    let answered = [];
+    let sessionQuestions = [];
+    let selectedMode = 'mixed';
+
+    function getProfile() {
+      try {
+        const raw = localStorage.getItem(PROFILE_KEY);
+        if (!raw) return { quizId: QUIZ_ID, topicStats: {}, topicMissesFromImports: {} };
+        const p = JSON.parse(raw);
+        return {
+          quizId: p.quizId || QUIZ_ID,
+          topicStats: p.topicStats || {},
+          topicMissesFromImports: p.topicMissesFromImports || {}
+        };
+      } catch (e) {
+        return { quizId: QUIZ_ID, topicStats: {}, topicMissesFromImports: {} };
+      }
+    }
+
+    function saveProfile(profile) {
+      try {
+        localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+      } catch (e) {}
+    }
+
+    function getTopicWeight(profile, topic) {
+      const t = topic || 'Other';
+      let missRate = 0;
+      if (profile.topicStats[t] && profile.topicStats[t].total > 0) {
+        missRate = 1 - (profile.topicStats[t].correct / profile.topicStats[t].total);
+      }
+      const importMisses = (profile.topicMissesFromImports[t] || 0) * 0.2;
+      return 1 + Math.min(missRate + importMisses, 2);
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function weightedSample(arr, n, profile) {
+      const hasData = profile && (Object.keys(profile.topicStats).length > 0 || Object.keys(profile.topicMissesFromImports).length > 0);
+      if (!hasData) {
+        const shuffled = shuffle(arr);
+        return shuffled.slice(0, Math.min(n, shuffled.length));
+      }
+      const withKeys = arr.map(q => {
+        const w = getTopicWeight(profile, q.topic);
+        return { q, key: Math.pow(Math.random(), 1 / w) };
+      });
+      withKeys.sort((a, b) => b.key - a.key);
+      return withKeys.slice(0, Math.min(n, withKeys.length)).map(x => x.q);
+    }
+
+    function getWeakTopics(profile, topN) {
+      const scores = [];
+      const topics = new Set([
+        ...Object.keys(profile.topicStats || {}),
+        ...Object.keys(profile.topicMissesFromImports || {})
+      ]);
+      topics.forEach(t => {
+        let weakness = 0;
+        if (profile.topicStats[t] && profile.topicStats[t].total > 0) {
+          weakness = 1 - (profile.topicStats[t].correct / profile.topicStats[t].total);
+        }
+        weakness += (profile.topicMissesFromImports[t] || 0) * 0.15;
+        scores.push({ topic: t, weakness });
+      });
+      scores.sort((a, b) => b.weakness - a.weakness);
+      return scores.slice(0, topN).filter(x => x.weakness > 0.1).map(x => x.topic);
+    }
+
+    function selectMode(mode) {
+      selectedMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
+      document.querySelector('[data-mode="' + mode + '"]').classList.add('selected');
+    }
+
+    function startQuiz() {
+      const filtered = questionBank.filter(q => {
+        if (selectedMode === 'comparison') return q.mode === 'comparison';
+        if (selectedMode === 'exam') return q.mode === 'exam';
+        return true;
+      });
+      const profile = getProfile();
+      sessionQuestions = weightedSample(filtered, QUESTIONS_PER_QUIZ, profile);
+      currentIndex = 0;
+      score = 0;
+      answered = [];
+      const hintEl = document.getElementById('focus-hint');
+      const weak = getWeakTopics(profile, 3);
+      if (weak.length > 0) {
+        hintEl.textContent = "We'll focus more on: " + weak.join(', ') + '.';
+        hintEl.classList.remove('hidden');
+      } else {
+        hintEl.classList.add('hidden');
+      }
+      document.getElementById('start-screen').classList.add('hidden');
+      document.getElementById('results-screen').classList.add('hidden');
+      document.getElementById('quiz-area').classList.remove('hidden');
+      document.getElementById('q-total').textContent = sessionQuestions.length;
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = sessionQuestions[currentIndex];
+      document.getElementById('q-num').textContent = currentIndex + 1;
+      document.getElementById('score-display').textContent = score;
+      document.getElementById('question-text').textContent = q.q;
+      const opts = document.getElementById('options');
+      opts.innerHTML = '';
+      const fb = document.getElementById('feedback');
+      fb.classList.add('hidden');
+      fb.className = 'feedback hidden';
+
+      q.options.forEach((opt, i) => {
+        const div = document.createElement('div');
+        div.className = 'option';
+        div.textContent = opt;
+        div.dataset.index = i;
+        if (answered[currentIndex] !== undefined) {
+          div.classList.add('disabled');
+          if (i === q.correct) div.classList.add('correct');
+          else if (i === answered[currentIndex]) div.classList.add('wrong');
+        } else {
+          div.onclick = () => selectOption(currentIndex, i, q);
+        }
+        opts.appendChild(div);
+      });
+
+      if (answered[currentIndex] !== undefined) {
+        fb.classList.remove('hidden');
+        fb.className = 'feedback ' + (answered[currentIndex] === q.correct ? 'correct-msg' : 'wrong-msg');
+        fb.innerHTML = (answered[currentIndex] === q.correct ? '✓ Correct. ' : '✗ Incorrect. ') + '<span class="explanation">' + q.explain + '</span>';
+      }
+
+      document.getElementById('prev-btn').disabled = currentIndex === 0;
+    }
+
+    function selectOption(pos, optIdx, q) {
+      if (answered[pos] !== undefined) return;
+      answered[pos] = optIdx;
+      if (optIdx === q.correct) score++;
+
+      document.querySelectorAll('#options .option').forEach(o => {
+        o.classList.add('disabled');
+        o.onclick = null;
+        if (parseInt(o.dataset.index) === q.correct) o.classList.add('correct');
+        else if (parseInt(o.dataset.index) === optIdx) o.classList.add('wrong');
+      });
+
+      const fb = document.getElementById('feedback');
+      fb.classList.remove('hidden');
+      fb.innerHTML = (optIdx === q.correct ? '✓ Correct. ' : '✗ Incorrect. ') + '<span class="explanation">' + q.explain + '</span>';
+      fb.className = 'feedback ' + (optIdx === q.correct ? 'correct-msg' : 'wrong-msg');
+      document.getElementById('score-display').textContent = score;
+    }
+
+    function nextQuestion() {
+      if (currentIndex < sessionQuestions.length - 1) {
+        currentIndex++;
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderQuestion();
+      }
+    }
+
+    function saveSessionToProfile() {
+      const profile = getProfile();
+      sessionQuestions.forEach((q, i) => {
+        const t = q.topic || 'Other';
+        if (!profile.topicStats[t]) profile.topicStats[t] = { correct: 0, total: 0 };
+        profile.topicStats[t].total++;
+        if (answered[i] !== undefined && answered[i] === q.correct) {
+          profile.topicStats[t].correct++;
+        }
+      });
+      saveProfile(profile);
+    }
+
+    function showResults() {
+      saveSessionToProfile();
+      document.getElementById('quiz-area').classList.add('hidden');
+      const r = document.getElementById('results-screen');
+      r.classList.remove('hidden');
+      const total = sessionQuestions.length;
+      const pct = Math.round((score / total) * 100);
+      document.getElementById('final-score').textContent = score + ' / ' + total + ' (' + pct + '%)';
+      document.getElementById('final-score').className = 'score ' + (pct >= 70 ? 'pass' : 'fail');
+      document.getElementById('result-msg').textContent = pct >= 70
+        ? 'Passing is ~70%. You\'re on track!'
+        : 'Aim for 70%+ on the real exam. Review the pattern guide and try again.';
+      document.getElementById('copy-toast').classList.add('hidden');
+    }
+
+    function getResultsMarkdown() {
+      const total = sessionQuestions.length;
+      const pct = Math.round((score / total) * 100);
+      const missed = sessionQuestions.map((q, i) => ({ q, i })).filter(x => answered[x.i] !== undefined && answered[x.i] !== x.q.correct);
+      const topicCounts = {};
+      missed.forEach(x => {
+        const t = x.q.topic || 'Other';
+        topicCounts[t] = (topicCounts[t] || 0) + 1;
+      });
+      let md = '# GCP Cloud Digital Leader Quiz Results\n\n';
+      md += '**Date:** ' + new Date().toISOString().slice(0, 10) + '\n';
+      md += '**Mode:** ' + (selectedMode === 'comparison' ? 'Comparison (GCP↔AWS)' : selectedMode === 'exam' ? 'Exam' : 'Mixed') + '\n';
+      md += '**Score:** ' + score + '/' + total + ' (' + pct + '%)\n';
+      md += '**Pass (70%):** ' + (pct >= 70 ? 'Yes' : 'No') + '\n\n';
+      md += '---\n\n';
+      md += '## Instructions for AI Refactoring\n\n';
+      md += 'Paste this entire block into a Cursor chat and say:\n';
+      md += '> "Refactor the GCP Cloud Digital Leader quiz based on my mistakes. Add more questions on my weak topics and create a focused retake quiz."\n\n';
+      if (Object.keys(topicCounts).length > 0) {
+        md += '## Misses by Topic\n\n';
+        Object.entries(topicCounts).sort((a, b) => b[1] - a[1]).forEach(([t, n]) => {
+          md += '- **' + t + ':** ' + n + ' missed\n';
+        });
+        md += '\n';
+      }
+      if (missed.length > 0) {
+        md += '## Missed Questions (for AI refactoring)\n\n';
+        missed.forEach((x, i) => {
+          const q = x.q;
+          const yourAns = q.options[answered[x.i]];
+          const correctAns = q.options[q.correct];
+          md += '### ' + (i + 1) + '. [' + (q.topic || 'General') + ']\n';
+          md += '**Q:** ' + q.q + '\n';
+          md += '**Your answer:** ' + yourAns + '\n';
+          md += '**Correct answer:** ' + correctAns + '\n';
+          md += '**Explanation:** ' + q.explain + '\n\n';
+        });
+      }
+      return md;
+    }
+
+    function downloadResults() {
+      const blob = new Blob([getResultsMarkdown()], { type: 'text/markdown' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'gcp_cloud_digital_leader_quiz_results_' + new Date().toISOString().slice(0, 10) + '.md';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function copyResultsToClipboard() {
+      navigator.clipboard.writeText(getResultsMarkdown()).then(() => {
+        document.getElementById('copy-toast').classList.remove('hidden');
+        setTimeout(() => document.getElementById('copy-toast').classList.add('hidden'), 2500);
+      });
+    }
+
+    function parseImportedResults(mdText) {
+      const lines = mdText.split('\n');
+      const firstLine = (lines[0] || '').toLowerCase();
+      if (QUIZ_ID !== 'oci' && firstLine.includes('oci foundations')) return { ok: false, error: 'This file is for OCI quiz. Open the OCI quiz to import it.' };
+      if (QUIZ_ID !== 'gcp' && firstLine.includes('gcp cloud digital leader')) return { ok: false, error: 'This file is for GCP quiz. Open the GCP quiz to import it.' };
+      if (QUIZ_ID !== 'az900' && (firstLine.includes('az-900') || firstLine.includes('azure'))) return { ok: false, error: 'This file is for AZ-900 quiz. Open the AZ-900 quiz to import it.' };
+      if (QUIZ_ID === 'gcp' && !firstLine.includes('gcp')) return { ok: false, error: 'Not a GCP results file.' };
+      let inSection = false;
+      const topicMisses = {};
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.indexOf('## Misses by Topic') !== -1) {
+          inSection = true;
+          continue;
+        }
+        if (inSection && line.startsWith('## ')) break;
+        if (inSection && line.match(/^\s*-\s*\*\*(.+?)\*\*:\s*(\d+)\s+missed/)) {
+          const m = line.match(/^\s*-\s*\*\*(.+?)\*\*:\s*(\d+)\s+missed/);
+          const topic = m[1].trim();
+          const n = parseInt(m[2], 10);
+          topicMisses[topic] = (topicMisses[topic] || 0) + n;
+        }
+      }
+      if (Object.keys(topicMisses).length === 0) return { ok: false, error: 'No "Misses by Topic" section found.' };
+      return { ok: true, topicMisses };
+    }
+
+    function importResults() {
+      const ta = document.getElementById('import-results');
+      const mdText = (ta && ta.value || '').trim();
+      if (!mdText) {
+        showImportToast('Paste results markdown first, or choose a file.', true);
+        return;
+      }
+      const result = parseImportedResults(mdText);
+      if (!result.ok) {
+        showImportToast(result.error || 'Could not parse results.', true);
+        return;
+      }
+      const profile = getProfile();
+      if (!profile.topicMissesFromImports) profile.topicMissesFromImports = {};
+      Object.entries(result.topicMisses).forEach(([topic, n]) => {
+        profile.topicMissesFromImports[topic] = (profile.topicMissesFromImports[topic] || 0) + n;
+      });
+      saveProfile(profile);
+      const top = Object.entries(result.topicMisses).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]);
+      showImportToast('Imported. We\'ll focus more on: ' + top.join(', ') + '.', false);
+      if (ta) ta.value = '';
+    }
+
+    function onImportFile(ev) {
+      const f = ev.target.files && ev.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = function () {
+        const ta = document.getElementById('import-results');
+        if (ta) ta.value = r.result || '';
+        importResults();
+      };
+      r.readAsText(f);
+      ev.target.value = '';
+    }
+
+    function showImportToast(msg, isError) {
+      const el = document.getElementById('import-toast');
+      if (!el) return;
+      el.textContent = msg;
+      el.className = 'import-toast ' + (isError ? 'err' : 'success');
+      el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 4000);
+    }
+
+    (function initFocusHint() {
+      const profile = getProfile();
+      const weak = getWeakTopics(profile, 3);
+      const hintEl = document.getElementById('focus-hint');
+      if (hintEl && weak.length > 0) {
+        hintEl.textContent = "We'll focus more on: " + weak.join(', ') + '.';
+        hintEl.classList.remove('hidden');
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OCI Foundations Associate Practice Quiz</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --accent: #f97316;
+      --accent-dim: #c2410c;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --correct: #22c55e;
+      --wrong: #ef4444;
+      --font: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    .container { max-width: 720px; margin: 0 auto; }
+    h1 {
+      font-size: 1.5rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem; }
+    .stats {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .stats span { color: var(--accent); font-weight: 600; }
+    .question-card {
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border-left: 3px solid var(--accent);
+    }
+    .question-text {
+      font-size: 1.05rem;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+    .options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .option {
+      padding: 0.75rem 1rem;
+      background: var(--bg);
+      border: 2px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .option:hover:not(.disabled) {
+      border-color: var(--accent-dim);
+      background: #151d2b;
+    }
+    .option.selected { border-color: var(--accent); background: #151d2b; }
+    .option.correct { border-color: var(--correct); background: rgba(34,197,94,0.1); }
+    .option.wrong { border-color: var(--wrong); background: rgba(239,68,68,0.1); }
+    .option.disabled { cursor: not-allowed; opacity: 0.7; }
+    .feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+    .feedback.correct-msg { background: rgba(34,197,94,0.15); border-left: 4px solid var(--correct); }
+    .feedback.wrong-msg { background: rgba(239,68,68,0.15); border-left: 4px solid var(--wrong); }
+    .feedback .explanation { margin-top: 0.5rem; color: var(--text-muted); }
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.5rem;
+    }
+    button {
+      padding: 0.6rem 1.2rem;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: var(--accent-dim); }
+    button.secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+    }
+    button.secondary:hover { background: rgba(249,115,22,0.1); }
+    .results {
+      text-align: center;
+      padding: 2rem;
+    }
+    .results h2 { color: var(--accent); margin-bottom: 1rem; }
+    .score { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .results-actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
+    .results-actions button.secondary { margin: 0; }
+    .copy-toast { font-size: 0.85rem; color: var(--correct); margin-top: 0.5rem; }
+    .score.pass { color: var(--correct); }
+    .score.fail { color: var(--wrong); }
+    .start-screen { text-align: center; padding: 3rem 0; }
+    .start-screen p { margin-bottom: 1.5rem; color: var(--text-muted); }
+    .mode-selector { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; max-width: 360px; margin-left: auto; margin-right: auto; }
+    .mode-btn {
+      padding: 1rem 1.5rem;
+      text-align: left;
+      background: var(--surface);
+      border: 2px solid transparent;
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .mode-btn:hover { border-color: var(--accent-dim); background: #151d2b; }
+    .mode-btn.selected { border-color: var(--accent); background: rgba(249,115,22,0.1); }
+    .mode-btn .label { font-weight: 600; display: block; }
+    .mode-btn .desc { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .profile-hint { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.75rem; }
+    .import-area { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--surface); text-align: left; }
+    .import-area label { display: block; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--text-muted); }
+    .import-area textarea { width: 100%; min-height: 80px; padding: 0.5rem; background: var(--surface); border: 1px solid var(--accent-dim); border-radius: 6px; color: var(--text); font-family: inherit; font-size: 0.85rem; resize: vertical; }
+    .import-toast { font-size: 0.85rem; margin-top: 0.5rem; }
+    .import-toast.success { color: var(--correct); }
+    .import-toast.err { color: var(--wrong); }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>OCI Foundations Associate Practice Quiz</h1>
+    <p class="subtitle">1Z0-1085-25 • Based on oci_foundations_pattern_guide.md</p>
+
+    <div id="start-screen" class="start-screen">
+      <p>41 questions per session, drawn from a pool of 77+. Randomized each run. Choose your mode:</p>
+      <p id="focus-hint" class="profile-hint hidden"></p>
+      <div class="mode-selector">
+        <button type="button" class="mode-btn" data-mode="comparison" onclick="selectMode('comparison')">
+          <span class="label">Comparison (OCI ↔ AWS)</span>
+          <span class="desc">Map OCI services to AWS equivalents. Leverage your SAA knowledge.</span>
+        </button>
+        <button type="button" class="mode-btn" data-mode="exam" onclick="selectMode('exam')">
+          <span class="label">Exam (Scenario-based)</span>
+          <span class="desc">Real exam-style questions: scenarios, best practices, OCI-specific concepts.</span>
+        </button>
+        <button type="button" class="mode-btn selected" data-mode="mixed" onclick="selectMode('mixed')">
+          <span class="label">Mixed</span>
+          <span class="desc">Both comparison and exam-style. Simulates full exam.</span>
+        </button>
+      </div>
+      <button id="start-btn" onclick="startQuiz()">Start Quiz</button>
+      <div class="import-area">
+        <label for="import-results">Import past results (paste .md or choose file) to focus on weak topics:</label>
+        <textarea id="import-results" placeholder="Paste quiz results markdown here..."></textarea>
+        <button type="button" class="secondary" style="margin-top: 0.5rem;" onclick="importResults()">Import results</button>
+        <input type="file" id="import-file" accept=".md,text/markdown" style="display: none;" onchange="onImportFile(event)">
+        <button type="button" class="secondary" style="margin-top: 0.5rem; margin-left: 0.5rem;" onclick="document.getElementById('import-file').click()">Choose file</button>
+        <p id="import-toast" class="import-toast hidden"></p>
+      </div>
+    </div>
+
+    <div id="quiz-area" class="hidden">
+      <div class="stats">
+        <span>Question <span id="q-num">1</span> of <span id="q-total">41</span></span>
+        <span>Correct: <span id="score-display">0</span></span>
+      </div>
+      <div class="question-card">
+        <div class="question-text" id="question-text"></div>
+        <div class="options" id="options"></div>
+        <div id="feedback" class="feedback hidden"></div>
+      </div>
+      <div class="nav-row">
+        <button id="prev-btn" class="secondary" onclick="prevQuestion()">← Previous</button>
+        <button id="next-btn" onclick="nextQuestion()">Next →</button>
+      </div>
+    </div>
+
+    <div id="results-screen" class="results hidden">
+      <h2>Quiz Complete</h2>
+      <div class="score" id="final-score"></div>
+      <p id="result-msg" style="margin-bottom: 1.5rem; color: var(--text-muted);"></p>
+      <div class="results-actions">
+        <button onclick="startQuiz()">Try Again</button>
+        <button class="secondary" onclick="downloadResults()">Download Results</button>
+        <button class="secondary" onclick="copyResultsToClipboard()">Copy to Clipboard</button>
+      </div>
+      <p id="copy-toast" class="copy-toast hidden">Copied! Paste into Cursor chat for AI refactoring.</p>
+    </div>
+  </div>
+
+  <script>
+    const QUIZ_ID = 'oci';
+    const PROFILE_KEY = 'study_sessions_profile_' + QUIZ_ID;
+
+    const questionBank = [
+      // === COMPARISON MODE (OCI ↔ AWS) ===
+      { mode: "comparison", topic: "Architecture",
+        q: "What is the OCI equivalent of an AWS Availability Zone?",
+        options: ["Region", "Availability Domain", "Fault Domain", "Compartment"],
+        correct: 1,
+        explain: "Availability Domain (AD) = AZ. Each region has 1-3 ADs; they're physically separate, fault-isolated data centers."
+      },
+      { mode: "exam", topic: "Architecture",
+        q: "A company needs to subdivide hardware within a single Availability Domain to improve high availability. What OCI concept should they use?",
+        options: ["Regions", "Compartments", "Fault Domains", "Subnets"],
+        correct: 2,
+        explain: "Fault Domains subdivide an AD—groupings of hardware (racks, power) for HA within one AD. OCI-only concept."
+      },
+      { mode: "comparison", topic: "Architecture",
+        q: "Which OCI construct is used for both resource organization AND access control?",
+        options: ["Regions", "Tags", "Compartments", "Availability Domains"],
+        correct: 2,
+        explain: "Compartments = logical groupings for organizing resources AND controlling IAM. AWS equivalent: Organizations + resource groups."
+      },
+      { mode: "comparison", topic: "Architecture",
+        q: "What is the top-level container for all OCI resources?",
+        options: ["Region", "Tenancy", "Root Compartment", "Both B and C"],
+        correct: 3,
+        explain: "Tenancy = your Oracle Cloud account = root compartment. It's the top-level container."
+      },
+      { mode: "exam", topic: "Storage",
+        q: "Which service automatically moves Object Storage objects between Standard and Infrequent Access based on usage patterns?",
+        options: ["Object Lifecycle Management", "Auto-Tiering", "Cost Analysis", "Data Transfer Service"],
+        correct: 1,
+        explain: "Object Storage Auto-Tiering moves objects between Standard and Infrequent Access automatically; it's free."
+      },
+      { mode: "exam", topic: "Storage",
+        q: "For data that is rarely accessed and must be retained for compliance, which Object Storage tier is best?",
+        options: ["Standard", "Infrequent Access", "Archive", "Auto-Tiering"],
+        correct: 2,
+        explain: "Archive = coldest tier; 90-day minimum; offline (must restore before access). Lowest cost."
+      },
+      { mode: "comparison", topic: "Networking",
+        q: "What is the OCI equivalent of AWS VPC?",
+        options: ["Subnet", "VCN", "FastConnect", "Load Balancer"],
+        correct: 1,
+        explain: "VCN = Virtual Cloud Network = AWS VPC. Logically isolated network with subnets, route tables, gateways."
+      },
+      { mode: "exam", topic: "Networking",
+        q: "Oracle recommends which firewall option for new OCI deployments?",
+        options: ["Security Lists only", "NSGs only", "NSGs (over Security Lists)", "Neither—use third-party firewall"],
+        correct: 2,
+        explain: "NSGs (Network Security Groups) are recommended over Security Lists—more granular, apply to specific VNICs."
+      },
+      { mode: "exam", topic: "Security",
+        q: "A Compute Instance needs to call OCI APIs (e.g., Object Storage) without storing credentials. What should you use?",
+        options: ["IAM User with access keys", "IAM Group", "Dynamic Group", "Security List"],
+        correct: 2,
+        explain: "Dynamic Groups = like EC2 Instance Roles. Allow resources (instances, Functions) to call OCI APIs without credentials."
+      },
+      { mode: "comparison", topic: "Security",
+        q: "Which service automatically records all API calls made in OCI?",
+        options: ["Cloud Guard", "Audit", "Vault", "Monitoring"],
+        correct: 1,
+        explain: "Audit = CloudTrail. Records who made what API call, when, and the response."
+      },
+      { mode: "comparison", topic: "Security",
+        q: "Which service detects misconfigured resources and security threats, with optional auto-remediation?",
+        options: ["Audit", "Vault", "Cloud Guard", "Security Lists"],
+        correct: 2,
+        explain: "Cloud Guard = GuardDuty + Security Hub. Detects misconfigurations, threats; has detector recipes and remediation."
+      },
+      { mode: "exam", topic: "Security",
+        q: "Where should Cloud Guard be enabled to monitor all compartments?",
+        options: ["Each compartment individually", "Tenancy (root) level", "At the region level", "Per VCN"],
+        correct: 1,
+        explain: "Enable Cloud Guard at tenancy (root) level—it monitors from root down across all compartments."
+      },
+      { mode: "comparison", topic: "Networking",
+        q: "A company needs a dedicated private connection from on-premises to OCI. Which service?",
+        options: ["Site-to-Site VPN", "FastConnect", "Internet Gateway", "NAT Gateway"],
+        correct: 1,
+        explain: "FastConnect = Direct Connect. Dedicated private connection from on-prem to OCI."
+      },
+      { mode: "exam", topic: "Networking",
+        q: "Private subnet instances need outbound internet access for software updates. Which component?",
+        options: ["Internet Gateway", "NAT Gateway", "FastConnect", "Load Balancer"],
+        correct: 1,
+        explain: "NAT Gateway allows private resources to initiate outbound connections without inbound exposure."
+      },
+      { mode: "comparison", topic: "Database",
+        q: "Which OCI database service is fully self-managing with automatic patching and tuning?",
+        options: ["Database Service", "Autonomous Database", "NoSQL Database", "MySQL HeatWave"],
+        correct: 1,
+        explain: "Autonomous Database = OCI flagship. Fully self-managing; automatic tuning, patching, scaling."
+      },
+      { mode: "comparison", topic: "Security",
+        q: "What manages encryption keys in OCI?",
+        options: ["Cloud Guard", "Audit", "Vault", "Security Lists"],
+        correct: 2,
+        explain: "Vault = KMS. Hardware security modules; create/manage encryption keys; integrates with OCI services."
+      },
+      { mode: "comparison", topic: "Governance",
+        q: "A team wants to visualize costs grouped by compartment and tag. Which tool?",
+        options: ["Budgets", "Cost Analysis", "Tags", "Billing Console"],
+        correct: 1,
+        explain: "Cost Analysis = Cost Explorer. Charts, reports; group by service, tag, compartment."
+      },
+      { topic: "Governance",
+        q: "A team wants to set a spending limit and receive email alerts when 80% is reached. Which tool?",
+        options: ["Cost Analysis", "Budgets", "Tags", "Vault"],
+        correct: 1,
+        explain: "Budgets = soft limits + email alerts at % or amount. Can target compartments or tags."
+      },
+      { mode: "comparison", topic: "Governance",
+        q: "Which is an OCI pricing differentiator compared to AWS?",
+        options: ["Higher data egress costs", "No data egress charges for same-region traffic", "Pay-per-request only", "No free tier"],
+        correct: 1,
+        explain: "OCI has no data egress charges for same-region traffic; predictable pricing; universal credits."
+      },
+      { mode: "exam", topic: "Compute",
+        q: "What type of Compute Instance provides direct access to physical hardware with no hypervisor?",
+        options: ["Flexible Shape VM", "Standard VM", "Bare Metal", "OCI Functions"],
+        correct: 2,
+        explain: "Bare Metal = direct physical hardware; no virtualization. OCI differentiator."
+      },
+      { mode: "exam", topic: "Compute",
+        q: "Which Compute option allows custom OCPU and memory sizing?",
+        options: ["Fixed Shapes only", "Flexible Shapes", "Bare Metal only", "OCI Functions"],
+        correct: 1,
+        explain: "Flexible Shapes let you choose OCPU and memory independently; pay for what you need."
+      },
+      { mode: "exam", topic: "Storage",
+        q: "Which Object Storage tier has a 31-day minimum retention and retrieval fees?",
+        options: ["Standard", "Infrequent Access", "Archive", "Auto-Tiering"],
+        correct: 1,
+        explain: "Infrequent Access = cool tier; 31-day minimum; cheaper storage but retrieval fees."
+      },
+      { mode: "comparison", topic: "Networking",
+        q: "OCI subnets are __________ by default, unlike AWS where subnets are AZ-specific.",
+        options: ["availability-domain-specific", "regional", "global", "compartment-scoped"],
+        correct: 1,
+        explain: "OCI subnets span all ADs in a region by default. AWS subnets are tied to one AZ."
+      },
+      { mode: "comparison", topic: "Compute",
+        q: "What is the OCI managed Kubernetes service?",
+        options: ["ECS", "Container Instances", "OKE", "Fargate"],
+        correct: 2,
+        explain: "OKE = Oracle Kubernetes Engine = Container Engine for Kubernetes. OCI's managed K8s."
+      },
+      { topic: "Storage",
+        q: "Which OCI storage service provides NFS-compatible shared file storage?",
+        options: ["Block Volume", "Object Storage", "File Storage Service", "Archive Storage"],
+        correct: 2,
+        explain: "File Storage Service = EFS. NFS-compatible shared file storage across instances."
+      },
+      { mode: "exam", topic: "Security",
+        q: "In the OCI Shared Security Model, who is responsible for securing customer data and IAM policies?",
+        options: ["Oracle only", "Customer only", "Third-party auditor", "Shared—customer secures data/apps/IAM"],
+        correct: 3,
+        explain: "Customer secures: data, apps, IAM, network config. Oracle secures: infrastructure."
+      },
+      { topic: "Security",
+        q: "IAM policies in OCI use which structure?",
+        options: ["ARN-based", "Allow <subject> to <verb> <resource-type> in <location>", "JSON only", "YAML config files"],
+        correct: 1,
+        explain: "OCI policy: Allow group X to manage all-resources in compartment Y."
+      },
+      { mode: "exam", topic: "Governance",
+        q: "Budgets in OCI can target which of the following?",
+        options: ["Compartments only", "Tags only", "Both compartments and tags", "Regions only"],
+        correct: 2,
+        explain: "Budgets apply to compartments (including child) or tags. Flexible targeting."
+      },
+      { topic: "Security",
+        q: "Which service stores and can rotate secrets like passwords and API keys?",
+        options: ["Audit", "Cloud Guard", "Vault", "Security Lists"],
+        correct: 2,
+        explain: "Vault holds both encryption keys and secrets. Can store and rotate secrets."
+      },
+      { mode: "exam", topic: "Governance",
+        q: "What does OCI Always Free Tier provide?",
+        options: ["Temporary 30-day trial", "Perpetual free resources for learning", "Credits that expire", "Discounts only"],
+        correct: 1,
+        explain: "Always Free = perpetual free resources (compute, storage, DB) for learning and small workloads."
+      },
+      { topic: "Security",
+        q: "Which AWS service does OCI Audit correspond to?",
+        options: ["Config", "CloudTrail", "GuardDuty", "KMS"],
+        correct: 1,
+        explain: "Audit = CloudTrail. Tracks API calls."
+      },
+      { mode: "comparison", topic: "Networking",
+        q: "Which AWS service does OCI FastConnect correspond to?",
+        options: ["VPN", "Direct Connect", "Transit Gateway", "Route 53"],
+        correct: 1,
+        explain: "FastConnect = Direct Connect. Dedicated private connection."
+      },
+      { mode: "exam", topic: "Networking",
+        q: "Security Lists in OCI are applied at which level?",
+        options: ["Instance (VNIC) level", "Subnet level", "VCN level", "Region level"],
+        correct: 1,
+        explain: "Security Lists = subnet level; all VNICs in the subnet share the same security list rules."
+      },
+      { topic: "Governance",
+        q: "Cost Analysis can group costs by which of the following?",
+        options: ["Service only", "Compartment only", "Service, compartment, tag, and SKU", "Region only"],
+        correct: 2,
+        explain: "Cost Analysis supports grouping by service, tag, compartment, or product (SKU)."
+      },
+      { mode: "exam", topic: "Governance",
+        q: "Do OCI Budgets block spending when the limit is reached?",
+        options: ["Yes, spending stops automatically", "No, they are soft limits with alerts only", "Only for free tier", "Only in root compartment"],
+        correct: 1,
+        explain: "Budgets = soft limits. They send alerts but do NOT block spending."
+      },
+      {
+        q: "OCI Distributed Cloud includes which deployment options?",
+        options: ["Public regions only", "Public, dedicated (customer DC), and hybrid", "Hybrid only", "Edge only"],
+        correct: 1,
+        explain: "OCI Distributed Cloud = public regions, dedicated regions (in customer DCs), and hybrid."
+      },
+      { mode: "comparison", topic: "Database",
+        q: "Which OCI database service is like AWS DynamoDB?",
+        options: ["Autonomous Database", "Database Service", "NoSQL Database Cloud Service", "MySQL HeatWave"],
+        correct: 2,
+        explain: "NoSQL Database Cloud Service = DynamoDB. Managed NoSQL; key-value and document."
+      },
+      { topic: "Architecture",
+        q: "What is the correct hierarchy order in OCI?",
+        options: ["Region → Tenancy → AD → FD", "Tenancy → Region → AD → FD", "AD → Region → FD → Compartment", "Compartment → Region → AD"],
+        correct: 1,
+        explain: "Tenancy (root) → Region → Availability Domain → Fault Domain. Compartments are separate (logical)."
+      },
+      { mode: "comparison", topic: "Compute",
+        q: "Which service would you use for serverless, event-driven compute in OCI?",
+        options: ["Compute Instance", "OKE", "OCI Functions", "Bare Metal"],
+        correct: 2,
+        explain: "OCI Functions = Lambda. Serverless, event-driven compute."
+      },
+      { topic: "Storage",
+        q: "Block Volume in OCI is equivalent to which AWS service?",
+        options: ["S3", "EFS", "EBS", "Glacier"],
+        correct: 2,
+        explain: "Block Volume = EBS. Persistent block storage for compute instances."
+      },
+      { mode: "exam", topic: "Storage",
+        q: "Which is true about OCI Object Storage Archive tier?",
+        options: ["Immediate access like Standard", "Data is offline—must restore first (up to 1 hour)", "No minimum retention", "Same cost as Standard"],
+        correct: 1,
+        explain: "Archive = offline. Must restore before access; can take up to 1 hour. 90-day minimum."
+      },
+      // === NEW COMPARISON QUESTIONS ===
+      { mode: "comparison", topic: "Storage",
+        q: "OCI Object Storage is equivalent to which AWS service?",
+        options: ["EBS", "EFS", "S3", "Glacier"],
+        correct: 2,
+        explain: "Object Storage = S3. REST APIs, buckets, lifecycle, tiers."
+      },
+      { mode: "comparison", topic: "Security",
+        q: "OCI Vault is equivalent to which AWS service?",
+        options: ["CloudTrail", "KMS", "Secrets Manager", "Both B and C"],
+        correct: 3,
+        explain: "Vault = KMS + Secrets Manager. Manages encryption keys and secrets."
+      },
+      { mode: "comparison", topic: "Governance",
+        q: "OCI Cost Analysis is equivalent to which AWS service?",
+        options: ["Budgets", "Cost Explorer", "Billing", "Trusted Advisor"],
+        correct: 1,
+        explain: "Cost Analysis = Cost Explorer. Visualize and analyze spending."
+      },
+      { mode: "comparison", topic: "Compute",
+        q: "OCI Compute Instance is equivalent to which AWS service?",
+        options: ["Lambda", "ECS", "EC2", "Fargate"],
+        correct: 2,
+        explain: "Compute Instance = EC2. VMs and bare metal."
+      },
+      { mode: "comparison", topic: "Database",
+        q: "OCI Autonomous Database is most similar to which AWS offering?",
+        options: ["RDS", "Aurora (with more automation)", "DynamoDB", "Redshift"],
+        correct: 1,
+        explain: "Autonomous DB = Aurora-like but fully self-managing."
+      },
+      { mode: "comparison", topic: "Networking",
+        q: "OCI Load Balancer is equivalent to which AWS service?",
+        options: ["Route 53", "CloudFront", "ELB", "NAT Gateway"],
+        correct: 2,
+        explain: "Load Balancer = ELB. Layer 4 and Layer 7."
+      },
+      { mode: "comparison", topic: "Security",
+        q: "OCI Cloud Guard is equivalent to which AWS services?",
+        options: ["CloudTrail only", "GuardDuty + Security Hub", "Config only", "WAF"],
+        correct: 1,
+        explain: "Cloud Guard = GuardDuty + Security Hub."
+      },
+      { mode: "comparison", topic: "Architecture",
+        q: "AWS has no direct equivalent for which OCI concept?",
+        options: ["Regions", "Fault Domains", "Subnets", "Compartments"],
+        correct: 1,
+        explain: "Fault Domains = OCI-only. Subdivisions of an AD."
+      },
+      { mode: "comparison", topic: "Compute",
+        q: "OCI Functions corresponds to which AWS service?",
+        options: ["EC2", "Lambda", "Step Functions", "ECS"],
+        correct: 1,
+        explain: "OCI Functions = Lambda. Serverless compute."
+      },
+      { mode: "comparison", topic: "Storage",
+        q: "OCI File Storage Service corresponds to which AWS service?",
+        options: ["S3", "EBS", "EFS", "Storage Gateway"],
+        correct: 2,
+        explain: "File Storage Service = EFS. NFS-compatible shared file storage."
+      },
+      { mode: "comparison", topic: "Networking",
+        q: "AWS Direct Connect maps to which OCI service?",
+        options: ["Site-to-Site VPN", "FastConnect", "Load Balancer", "Internet Gateway"],
+        correct: 1,
+        explain: "Direct Connect = FastConnect."
+      },
+      // === NEW EXAM QUESTIONS ===
+      { mode: "exam", topic: "Architecture",
+        q: "How many Availability Domains does each OCI region typically have?",
+        options: ["1 only", "1–3 (varies by region)", "Exactly 3", "Unlimited"],
+        correct: 1,
+        explain: "Each region has 1–3 ADs."
+      },
+      { mode: "exam", topic: "Networking",
+        q: "A developer needs to allow public internet traffic into a web server in a subnet. Which gateway is required?",
+        options: ["NAT Gateway", "Internet Gateway", "FastConnect", "Service Gateway"],
+        correct: 1,
+        explain: "Internet Gateway allows bidirectional traffic (public subnets)."
+      },
+      { mode: "exam", topic: "Security",
+        q: "Which OCI component allows resources like Compute instances to access OCI services without access keys?",
+        options: ["IAM User", "API Key", "Dynamic Group", "Security List"],
+        correct: 2,
+        explain: "Dynamic Groups + policies. No stored credentials."
+      },
+      { mode: "exam", topic: "Storage",
+        q: "Standard tier Object Storage has which characteristic?",
+        options: ["31-day minimum retention", "Retrieval fees apply", "No minimum retention, no retrieval fees", "Data is offline"],
+        correct: 2,
+        explain: "Standard = hot tier. No minimum, no retrieval fees."
+      },
+      { mode: "exam", topic: "Governance",
+        q: "Budget alerts in OCI are evaluated how often?",
+        options: ["Real-time", "Every 24 hours", "Weekly", "Monthly only"],
+        correct: 1,
+        explain: "Budget alerts evaluated every 24 hours."
+      },
+      { mode: "exam", topic: "Database",
+        q: "Autonomous Database supports which workload types?",
+        options: ["Transaction Processing only", "Data Warehouse only", "Both Transaction Processing and Data Warehouse", "NoSQL only"],
+        correct: 2,
+        explain: "Autonomous DB offers both TP and DW workloads."
+      },
+      { mode: "exam", topic: "Networking",
+        q: "NSGs (Network Security Groups) apply to which level?",
+        options: ["Subnet (all VNICs)", "Specific VNICs only", "VCN level", "Region level"],
+        correct: 1,
+        explain: "NSGs apply to specific VNICs. More granular than Security Lists."
+      },
+      { mode: "exam", topic: "Architecture",
+        q: "Compartments can contain which of the following?",
+        options: ["Only resources", "Resources and child compartments", "Only other compartments", "Regions only"],
+        correct: 1,
+        explain: "Compartments are hierarchical; contain resources and child compartments."
+      },
+      { mode: "exam", topic: "Storage",
+        q: "Auto-Tiering for Object Storage moves objects between which tiers?",
+        options: ["Standard and Archive", "Infrequent Access and Archive", "Standard and Infrequent Access", "All three tiers"],
+        correct: 2,
+        explain: "Auto-Tiering: Standard ↔ Infrequent Access. Archive needs lifecycle policies."
+      },
+      { mode: "exam", topic: "Governance",
+        q: "Budgets in OCI are created in which compartment?",
+        options: ["Any compartment", "Root compartment only", "The target compartment", "Cannot use compartments"],
+        correct: 1,
+        explain: "All budgets created in root compartment."
+      },
+      { mode: "exam", topic: "Networking",
+        q: "For encrypted connectivity over the public internet to OCI, which service?",
+        options: ["FastConnect only", "Site-to-Site VPN", "Internet Gateway", "NAT Gateway"],
+        correct: 1,
+        explain: "Site-to-Site VPN = encrypted over internet. FastConnect = dedicated."
+      },
+      { mode: "exam", topic: "Compute",
+        q: "OKE stands for what?",
+        options: ["Oracle Key Engine", "Oracle Kubernetes Engine", "OCI Knowledge Exchange", "Oracle Key Escrow"],
+        correct: 1,
+        explain: "OKE = Oracle Kubernetes Engine."
+      },
+      { mode: "exam", topic: "Storage",
+        q: "Infrequent Access tier has a minimum retention period of how many days?",
+        options: ["7 days", "31 days", "90 days", "No minimum"],
+        correct: 1,
+        explain: "Infrequent Access = 31-day minimum. Archive = 90-day minimum."
+      },
+      { mode: "exam", topic: "Networking",
+        q: "Security Lists and NSGs can be used together. How do their rules interact?",
+        options: ["NSG overrides Security List", "Rules are additive (both apply)", "Security List overrides NSG", "Only one per VNIC"],
+        correct: 1,
+        explain: "Rules from both apply; they are additive."
+      },
+      { mode: "comparison", topic: "Governance",
+        q: "OCI Budgets is most similar to which AWS feature?",
+        options: ["Cost Explorer", "AWS Budgets", "Billing alerts", "Both B and C"],
+        correct: 3,
+        explain: "Budgets = AWS Budgets. Soft limits, alerts."
+      },
+      { mode: "comparison", topic: "Compute",
+        q: "Which OCI compute offering has no hypervisor (direct physical hardware)?",
+        options: ["Compute Instance VM", "Bare Metal Instance", "OKE", "Functions"],
+        correct: 1,
+        explain: "Bare Metal = direct physical hardware. OCI differentiator."
+      },
+      { mode: "exam", topic: "Security",
+        q: "What permission is required for Cost Analysis?",
+        options: ["manage all-resources", "read usage-report", "manage buckets", "inspect users"],
+        correct: 1,
+        explain: "Cost Analysis requires read usage-report at tenancy level."
+      },
+      { mode: "exam", topic: "Database",
+        q: "Which OCI service offers managed Oracle/MySQL/PostgreSQL without autonomous features?",
+        options: ["Autonomous Database", "NoSQL Database", "Database Service (Base Database)", "Object Storage"],
+        correct: 2,
+        explain: "Database Service (Base Database) = managed RDBMS, you control more."
+      },
+      { mode: "exam", topic: "Security",
+        q: "Cloud Guard detector recipes detect which of the following?",
+        options: ["API calls only", "Misconfigured resources and insecure activity", "Network latency", "Cost overruns"],
+        correct: 1,
+        explain: "Cloud Guard detects misconfigurations and insecure activity."
+      },
+      { mode: "exam", topic: "Compute",
+        q: "Which statement about OCI Flexible Shapes is true?",
+        options: ["Fixed CPU:memory ratio only", "Choose OCPU and memory independently", "Bare metal only", "Not for VMs"],
+        correct: 1,
+        explain: "Flexible Shapes: pick OCPU and memory independently."
+      },
+      { mode: "exam", topic: "Architecture",
+        q: "What is a tenancy in OCI?",
+        options: ["A region", "A compartment", "The root container for your OCI account", "An Availability Domain"],
+        correct: 2,
+        explain: "Tenancy = your Oracle Cloud account = root compartment."
+      },
+    ];
+
+    const QUESTIONS_PER_QUIZ = 41;
+    let currentIndex = 0;
+    let score = 0;
+    let answered = [];
+    let sessionQuestions = [];
+    let selectedMode = 'mixed';
+
+    function getProfile() {
+      try {
+        const raw = localStorage.getItem(PROFILE_KEY);
+        if (!raw) return { quizId: QUIZ_ID, topicStats: {}, topicMissesFromImports: {} };
+        const p = JSON.parse(raw);
+        return {
+          quizId: p.quizId || QUIZ_ID,
+          topicStats: p.topicStats || {},
+          topicMissesFromImports: p.topicMissesFromImports || {}
+        };
+      } catch (e) {
+        return { quizId: QUIZ_ID, topicStats: {}, topicMissesFromImports: {} };
+      }
+    }
+
+    function saveProfile(profile) {
+      try {
+        localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+      } catch (e) {}
+    }
+
+    function getTopicWeight(profile, topic) {
+      const t = topic || 'Other';
+      let missRate = 0;
+      if (profile.topicStats[t] && profile.topicStats[t].total > 0) {
+        missRate = 1 - (profile.topicStats[t].correct / profile.topicStats[t].total);
+      }
+      const importMisses = (profile.topicMissesFromImports[t] || 0) * 0.2;
+      return 1 + Math.min(missRate + importMisses, 2);
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function weightedSample(arr, n, profile) {
+      const hasData = profile && (Object.keys(profile.topicStats).length > 0 || Object.keys(profile.topicMissesFromImports).length > 0);
+      if (!hasData) {
+        const shuffled = shuffle(arr);
+        return shuffled.slice(0, Math.min(n, shuffled.length));
+      }
+      const withKeys = arr.map(q => {
+        const w = getTopicWeight(profile, q.topic);
+        return { q, key: Math.pow(Math.random(), 1 / w) };
+      });
+      withKeys.sort((a, b) => b.key - a.key);
+      return withKeys.slice(0, Math.min(n, withKeys.length)).map(x => x.q);
+    }
+
+    function getWeakTopics(profile, topN) {
+      const scores = [];
+      const topics = new Set([
+        ...Object.keys(profile.topicStats || {}),
+        ...Object.keys(profile.topicMissesFromImports || {})
+      ]);
+      topics.forEach(t => {
+        let weakness = 0;
+        if (profile.topicStats[t] && profile.topicStats[t].total > 0) {
+          weakness = 1 - (profile.topicStats[t].correct / profile.topicStats[t].total);
+        }
+        weakness += (profile.topicMissesFromImports[t] || 0) * 0.15;
+        scores.push({ topic: t, weakness });
+      });
+      scores.sort((a, b) => b.weakness - a.weakness);
+      return scores.slice(0, topN).filter(x => x.weakness > 0.1).map(x => x.topic);
+    }
+
+    function selectMode(mode) {
+      selectedMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
+      document.querySelector('[data-mode="' + mode + '"]').classList.add('selected');
+    }
+
+    function startQuiz() {
+      const filtered = questionBank.filter(q => {
+        if (selectedMode === 'comparison') return q.mode === 'comparison';
+        if (selectedMode === 'exam') return q.mode === 'exam';
+        return true;
+      });
+      const profile = getProfile();
+      sessionQuestions = weightedSample(filtered, QUESTIONS_PER_QUIZ, profile);
+      currentIndex = 0;
+      score = 0;
+      answered = [];
+      const hintEl = document.getElementById('focus-hint');
+      const weak = getWeakTopics(profile, 3);
+      if (weak.length > 0) {
+        hintEl.textContent = "We'll focus more on: " + weak.join(', ') + '.';
+        hintEl.classList.remove('hidden');
+      } else {
+        hintEl.classList.add('hidden');
+      }
+      document.getElementById('start-screen').classList.add('hidden');
+      document.getElementById('results-screen').classList.add('hidden');
+      document.getElementById('quiz-area').classList.remove('hidden');
+      document.getElementById('q-total').textContent = sessionQuestions.length;
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = sessionQuestions[currentIndex];
+      document.getElementById('q-num').textContent = currentIndex + 1;
+      document.getElementById('score-display').textContent = score;
+      document.getElementById('question-text').textContent = q.q;
+      const opts = document.getElementById('options');
+      opts.innerHTML = '';
+      const fb = document.getElementById('feedback');
+      fb.classList.add('hidden');
+      fb.className = 'feedback hidden';
+
+      q.options.forEach((opt, i) => {
+        const div = document.createElement('div');
+        div.className = 'option';
+        div.textContent = opt;
+        div.dataset.index = i;
+        if (answered[currentIndex] !== undefined) {
+          div.classList.add('disabled');
+          if (i === q.correct) div.classList.add('correct');
+          else if (i === answered[currentIndex]) div.classList.add('wrong');
+        } else {
+          div.onclick = () => selectOption(currentIndex, i, q);
+        }
+        opts.appendChild(div);
+      });
+
+      if (answered[currentIndex] !== undefined) {
+        fb.classList.remove('hidden');
+        fb.className = 'feedback ' + (answered[currentIndex] === q.correct ? 'correct-msg' : 'wrong-msg');
+        fb.innerHTML = (answered[currentIndex] === q.correct ? '✓ Correct. ' : '✗ Incorrect. ') + '<span class="explanation">' + q.explain + '</span>';
+      }
+
+      document.getElementById('prev-btn').disabled = currentIndex === 0;
+    }
+
+    function selectOption(pos, optIdx, q) {
+      if (answered[pos] !== undefined) return;
+      answered[pos] = optIdx;
+      if (optIdx === q.correct) score++;
+
+      document.querySelectorAll('#options .option').forEach(o => {
+        o.classList.add('disabled');
+        o.onclick = null;
+        if (parseInt(o.dataset.index) === q.correct) o.classList.add('correct');
+        else if (parseInt(o.dataset.index) === optIdx) o.classList.add('wrong');
+      });
+
+      const fb = document.getElementById('feedback');
+      fb.classList.remove('hidden');
+      fb.innerHTML = (optIdx === q.correct ? '✓ Correct. ' : '✗ Incorrect. ') + '<span class="explanation">' + q.explain + '</span>';
+      fb.className = 'feedback ' + (optIdx === q.correct ? 'correct-msg' : 'wrong-msg');
+      document.getElementById('score-display').textContent = score;
+    }
+
+    function nextQuestion() {
+      if (currentIndex < sessionQuestions.length - 1) {
+        currentIndex++;
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderQuestion();
+      }
+    }
+
+    function saveSessionToProfile() {
+      const profile = getProfile();
+      sessionQuestions.forEach((q, i) => {
+        const t = q.topic || 'Other';
+        if (!profile.topicStats[t]) profile.topicStats[t] = { correct: 0, total: 0 };
+        profile.topicStats[t].total++;
+        if (answered[i] !== undefined && answered[i] === q.correct) {
+          profile.topicStats[t].correct++;
+        }
+      });
+      saveProfile(profile);
+    }
+
+    function showResults() {
+      saveSessionToProfile();
+      document.getElementById('quiz-area').classList.add('hidden');
+      const r = document.getElementById('results-screen');
+      r.classList.remove('hidden');
+      const total = sessionQuestions.length;
+      const pct = Math.round((score / total) * 100);
+      document.getElementById('final-score').textContent = score + ' / ' + total + ' (' + pct + '%)';
+      document.getElementById('final-score').className = 'score ' + (pct >= 65 ? 'pass' : 'fail');
+      document.getElementById('result-msg').textContent = pct >= 65
+        ? 'Passing is ~65%. You\'re on track!'
+        : 'Aim for 65%+ on the real exam. Review the pattern guide and try again.';
+      document.getElementById('copy-toast').classList.add('hidden');
+    }
+
+    function getResultsMarkdown() {
+      const total = sessionQuestions.length;
+      const pct = Math.round((score / total) * 100);
+      const missed = sessionQuestions.map((q, i) => ({ q, i })).filter(x => answered[x.i] !== undefined && answered[x.i] !== x.q.correct);
+      const topicCounts = {};
+      missed.forEach(x => {
+        const t = x.q.topic || 'Other';
+        topicCounts[t] = (topicCounts[t] || 0) + 1;
+      });
+      let md = '# OCI Foundations Quiz Results\n\n';
+      md += '**Date:** ' + new Date().toISOString().slice(0, 10) + '\n';
+      md += '**Mode:** ' + (selectedMode === 'comparison' ? 'Comparison (OCI↔AWS)' : selectedMode === 'exam' ? 'Exam' : 'Mixed') + '\n';
+      md += '**Score:** ' + score + '/' + total + ' (' + pct + '%)\n';
+      md += '**Pass:** ' + (pct >= 65 ? 'Yes' : 'No') + '\n\n';
+      md += '---\n\n';
+      md += '## Instructions for AI Refactoring\n\n';
+      md += 'Paste this entire block into a Cursor chat and say:\n';
+      md += '> "Refactor the OCI quiz based on my mistakes. Add more questions on my weak topics and create a focused retake quiz."\n\n';
+      if (Object.keys(topicCounts).length > 0) {
+        md += '## Misses by Topic\n\n';
+        Object.entries(topicCounts).sort((a, b) => b[1] - a[1]).forEach(([t, n]) => {
+          md += '- **' + t + ':** ' + n + ' missed\n';
+        });
+        md += '\n';
+      }
+      if (missed.length > 0) {
+        md += '## Missed Questions (for AI refactoring)\n\n';
+        missed.forEach((x, i) => {
+          const q = x.q;
+          const yourAns = q.options[answered[x.i]];
+          const correctAns = q.options[q.correct];
+          md += '### ' + (i + 1) + '. [' + (q.topic || 'General') + ']\n';
+          md += '**Q:** ' + q.q + '\n';
+          md += '**Your answer:** ' + yourAns + '\n';
+          md += '**Correct answer:** ' + correctAns + '\n';
+          md += '**Explanation:** ' + q.explain + '\n\n';
+        });
+      }
+      return md;
+    }
+
+    function downloadResults() {
+      const blob = new Blob([getResultsMarkdown()], { type: 'text/markdown' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'oci_quiz_results_' + new Date().toISOString().slice(0, 10) + '.md';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function copyResultsToClipboard() {
+      navigator.clipboard.writeText(getResultsMarkdown()).then(() => {
+        document.getElementById('copy-toast').classList.remove('hidden');
+        setTimeout(() => document.getElementById('copy-toast').classList.add('hidden'), 2500);
+      });
+    }
+
+    function parseImportedResults(mdText) {
+      const lines = mdText.split('\n');
+      const firstLine = (lines[0] || '').toLowerCase();
+      if (QUIZ_ID !== 'oci' && firstLine.includes('oci foundations')) return { ok: false, error: 'This file is for OCI quiz. Open the OCI quiz to import it.' };
+      if (QUIZ_ID !== 'gcp' && firstLine.includes('gcp cloud digital leader')) return { ok: false, error: 'This file is for GCP quiz. Open the GCP quiz to import it.' };
+      if (QUIZ_ID !== 'az900' && (firstLine.includes('az-900') || firstLine.includes('azure'))) return { ok: false, error: 'This file is for AZ-900 quiz. Open the AZ-900 quiz to import it.' };
+      if (QUIZ_ID === 'oci' && !firstLine.includes('oci')) return { ok: false, error: 'Not an OCI results file.' };
+      let inSection = false;
+      const topicMisses = {};
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.indexOf('## Misses by Topic') !== -1) {
+          inSection = true;
+          continue;
+        }
+        if (inSection && line.startsWith('## ')) break;
+        if (inSection && line.match(/^\s*-\s*\*\*(.+?)\*\*:\s*(\d+)\s+missed/)) {
+          const m = line.match(/^\s*-\s*\*\*(.+?)\*\*:\s*(\d+)\s+missed/);
+          const topic = m[1].trim();
+          const n = parseInt(m[2], 10);
+          topicMisses[topic] = (topicMisses[topic] || 0) + n;
+        }
+      }
+      if (Object.keys(topicMisses).length === 0) return { ok: false, error: 'No "Misses by Topic" section found.' };
+      return { ok: true, topicMisses };
+    }
+
+    function importResults() {
+      const ta = document.getElementById('import-results');
+      const mdText = (ta && ta.value || '').trim();
+      if (!mdText) {
+        showImportToast('Paste results markdown first, or choose a file.', true);
+        return;
+      }
+      const result = parseImportedResults(mdText);
+      if (!result.ok) {
+        showImportToast(result.error || 'Could not parse results.', true);
+        return;
+      }
+      const profile = getProfile();
+      if (!profile.topicMissesFromImports) profile.topicMissesFromImports = {};
+      Object.entries(result.topicMisses).forEach(([topic, n]) => {
+        profile.topicMissesFromImports[topic] = (profile.topicMissesFromImports[topic] || 0) + n;
+      });
+      saveProfile(profile);
+      const top = Object.entries(result.topicMisses).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]);
+      showImportToast('Imported. We\'ll focus more on: ' + top.join(', ') + '.', false);
+      if (ta) ta.value = '';
+    }
+
+    function onImportFile(ev) {
+      const f = ev.target.files && ev.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = function () {
+        const ta = document.getElementById('import-results');
+        if (ta) ta.value = r.result || '';
+        importResults();
+      };
+      r.readAsText(f);
+      ev.target.value = '';
+    }
+
+    function showImportToast(msg, isError) {
+      const el = document.getElementById('import-toast');
+      if (!el) return;
+      el.textContent = msg;
+      el.className = 'import-toast ' + (isError ? 'err' : 'success');
+      el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 4000);
+    }
+
+    (function initFocusHint() {
+      const profile = getProfile();
+      const weak = getWeakTopics(profile, 3);
+      const hintEl = document.getElementById('focus-hint');
+      if (hintEl && weak.length > 0) {
+        hintEl.textContent = "We'll focus more on: " + weak.join(', ') + '.';
+        hintEl.classList.remove('hidden');
+      }
+    })();
+  </script>
+</body>
+</html>

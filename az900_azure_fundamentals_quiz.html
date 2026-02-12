@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AZ-900 Azure Fundamentals Practice Quiz</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --accent: #0078d4;
+      --accent-dim: #106ebe;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --correct: #22c55e;
+      --wrong: #ef4444;
+      --font: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    .container { max-width: 720px; margin: 0 auto; }
+    h1 {
+      font-size: 1.5rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem; }
+    .stats {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .stats span { color: var(--accent); font-weight: 600; }
+    .question-card {
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border-left: 3px solid var(--accent);
+    }
+    .question-text {
+      font-size: 1.05rem;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+    .options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .option {
+      padding: 0.75rem 1rem;
+      background: var(--bg);
+      border: 2px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .option:hover:not(.disabled) {
+      border-color: var(--accent-dim);
+      background: #151d2b;
+    }
+    .option.selected { border-color: var(--accent); background: #151d2b; }
+    .option.correct { border-color: var(--correct); background: rgba(34,197,94,0.1); }
+    .option.wrong { border-color: var(--wrong); background: rgba(239,68,68,0.1); }
+    .option.disabled { cursor: not-allowed; opacity: 0.7; }
+    .feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+    .feedback.correct-msg { background: rgba(34,197,94,0.15); border-left: 4px solid var(--correct); }
+    .feedback.wrong-msg { background: rgba(239,68,68,0.15); border-left: 4px solid var(--wrong); }
+    .feedback .explanation { margin-top: 0.5rem; color: var(--text-muted); }
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.5rem;
+    }
+    button {
+      padding: 0.6rem 1.2rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: var(--accent-dim); }
+    button.secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+    }
+    button.secondary:hover { background: rgba(0,120,212,0.1); }
+    .results {
+      text-align: center;
+      padding: 2rem;
+    }
+    .results h2 { color: var(--accent); margin-bottom: 1rem; }
+    .score { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .results-actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
+    .results-actions button.secondary { margin: 0; }
+    .copy-toast { font-size: 0.85rem; color: var(--correct); margin-top: 0.5rem; }
+    .score.pass { color: var(--correct); }
+    .score.fail { color: var(--wrong); }
+    .start-screen { text-align: center; padding: 3rem 0; }
+    .start-screen p { margin-bottom: 1.5rem; color: var(--text-muted); }
+    .mode-selector { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; max-width: 360px; margin-left: auto; margin-right: auto; }
+    .mode-btn {
+      padding: 1rem 1.5rem;
+      text-align: left;
+      background: var(--surface);
+      border: 2px solid transparent;
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .mode-btn:hover { border-color: var(--accent-dim); background: #151d2b; }
+    .mode-btn.selected { border-color: var(--accent); background: rgba(0,120,212,0.1); }
+    .mode-btn .label { font-weight: 600; display: block; }
+    .mode-btn .desc { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .profile-hint { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.75rem; }
+    .import-area { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--surface); text-align: left; }
+    .import-area label { display: block; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--text-muted); }
+    .import-area textarea { width: 100%; min-height: 80px; padding: 0.5rem; background: var(--surface); border: 1px solid var(--accent-dim); border-radius: 6px; color: var(--text); font-family: inherit; font-size: 0.85rem; resize: vertical; }
+    .import-toast { font-size: 0.85rem; margin-top: 0.5rem; }
+    .import-toast.success { color: var(--correct); }
+    .import-toast.err { color: var(--wrong); }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>AZ-900 Azure Fundamentals Practice Quiz</h1>
+    <p class="subtitle">Microsoft Certified: Azure Fundamentals • Based on az900_azure_fundamentals_pattern_guide.md</p>
+
+    <div id="start-screen" class="start-screen">
+      <p>40 questions per session, drawn from a pool of 55+. Randomized each run. Choose your mode:</p>
+      <p id="focus-hint" class="profile-hint hidden"></p>
+      <div class="mode-selector">
+        <button type="button" class="mode-btn" data-mode="comparison" onclick="selectMode('comparison')">
+          <span class="label">Comparison (Azure ↔ AWS)</span>
+          <span class="desc">Map Azure services to AWS equivalents. Leverage your SAA/CCP knowledge.</span>
+        </button>
+        <button type="button" class="mode-btn" data-mode="exam" onclick="selectMode('exam')">
+          <span class="label">Exam (Scenario-based)</span>
+          <span class="desc">Cloud concepts, Azure architecture, identity, governance—exam-style questions.</span>
+        </button>
+        <button type="button" class="mode-btn selected" data-mode="mixed" onclick="selectMode('mixed')">
+          <span class="label">Mixed</span>
+          <span class="desc">Both comparison and exam-style. Simulates full exam.</span>
+        </button>
+      </div>
+      <button id="start-btn" onclick="startQuiz()">Start Quiz</button>
+      <div class="import-area">
+        <label for="import-results">Import past results (paste .md or choose file) to focus on weak topics:</label>
+        <textarea id="import-results" placeholder="Paste quiz results markdown here..."></textarea>
+        <button type="button" class="secondary" style="margin-top: 0.5rem;" onclick="importResults()">Import results</button>
+        <input type="file" id="import-file" accept=".md,text/markdown" style="display: none;" onchange="onImportFile(event)">
+        <button type="button" class="secondary" style="margin-top: 0.5rem; margin-left: 0.5rem;" onclick="document.getElementById('import-file').click()">Choose file</button>
+        <p id="import-toast" class="import-toast hidden"></p>
+      </div>
+    </div>
+
+    <div id="quiz-area" class="hidden">
+      <div class="stats">
+        <span>Question <span id="q-num">1</span> of <span id="q-total">40</span></span>
+        <span>Correct: <span id="score-display">0</span></span>
+      </div>
+      <div class="question-card">
+        <div class="question-text" id="question-text"></div>
+        <div class="options" id="options"></div>
+        <div id="feedback" class="feedback hidden"></div>
+      </div>
+      <div class="nav-row">
+        <button id="prev-btn" class="secondary" onclick="prevQuestion()">← Previous</button>
+        <button id="next-btn" onclick="nextQuestion()">Next →</button>
+      </div>
+    </div>
+
+    <div id="results-screen" class="results hidden">
+      <h2>Quiz Complete</h2>
+      <div class="score" id="final-score"></div>
+      <p id="result-msg" style="margin-bottom: 1.5rem; color: var(--text-muted);"></p>
+      <div class="results-actions">
+        <button onclick="startQuiz()">Try Again</button>
+        <button class="secondary" onclick="downloadResults()">Download Results</button>
+        <button class="secondary" onclick="copyResultsToClipboard()">Copy to Clipboard</button>
+      </div>
+      <p id="copy-toast" class="copy-toast hidden">Copied! Paste into Cursor chat for AI refactoring.</p>
+    </div>
+  </div>
+
+  <script>
+    const QUIZ_ID = 'az900';
+    const PROFILE_KEY = 'study_sessions_profile_' + QUIZ_ID;
+
+    const questionBank = [
+      // === COMPARISON (Azure ↔ AWS) ===
+      { mode: "comparison", topic: "Compute",
+        q: "What is the Azure equivalent of AWS EC2?",
+        options: ["Azure App Service", "Azure Virtual Machines", "Azure Functions", "Azure Container Apps"],
+        correct: 1,
+        explain: "Azure Virtual Machines (VMs) = EC2. IaaS compute; you manage OS and above."
+      },
+      { mode: "comparison", topic: "Storage",
+        q: "What is the Azure equivalent of Amazon S3?",
+        options: ["Azure Files", "Azure Blob Storage", "Azure Queue Storage", "Azure Table Storage"],
+        correct: 1,
+        explain: "Azure Blob Storage = S3. Object storage with Hot, Cool, and Archive tiers."
+      },
+      { mode: "comparison", topic: "Identity",
+        q: "Azure identity and access (users, groups, SSO) is provided by which service?",
+        options: ["Azure RBAC only", "Microsoft Entra ID (Azure AD)", "Azure Key Vault", "Azure Policy"],
+        correct: 1,
+        explain: "Microsoft Entra ID (Azure AD) = cloud identity; users, groups, SSO, MFA. Like IAM identity layer."
+      },
+      { mode: "comparison", topic: "Networking",
+        q: "What is the Azure equivalent of AWS VPC?",
+        options: ["Azure DNS", "Azure Virtual Network (VNet)", "Azure VPN Gateway", "ExpressRoute"],
+        correct: 1,
+        explain: "Azure Virtual Network (VNet) = VPC. Logically isolated network with subnets."
+      },
+      { mode: "comparison", topic: "Compute",
+        q: "What is the Azure equivalent of AWS Lambda?",
+        options: ["Azure VMs", "Azure App Service", "Azure Functions", "Azure Container Apps"],
+        correct: 2,
+        explain: "Azure Functions = Lambda. Serverless, event-driven; pay per execution."
+      },
+      { mode: "comparison", topic: "Monitoring",
+        q: "What is the Azure equivalent of Amazon CloudWatch?",
+        options: ["Azure Advisor", "Azure Service Health", "Azure Monitor", "Microsoft Defender for Cloud"],
+        correct: 2,
+        explain: "Azure Monitor = metrics, logs, alerts. Like CloudWatch."
+      },
+      { mode: "comparison", topic: "Security",
+        q: "What is the Azure equivalent of AWS GuardDuty and security posture?",
+        options: ["Azure Policy", "Microsoft Defender for Cloud", "Azure Key Vault", "Microsoft Purview"],
+        correct: 1,
+        explain: "Microsoft Defender for Cloud = security posture (CSPM) + threat detection. Like GuardDuty + Security Hub."
+      },
+      { mode: "comparison", topic: "Security",
+        q: "What is the Azure equivalent of AWS KMS for key and secret management?",
+        options: ["Azure Policy", "Microsoft Entra ID", "Azure Key Vault", "Microsoft Purview"],
+        correct: 2,
+        explain: "Azure Key Vault = keys and secrets. Like KMS + Secrets Manager."
+      },
+      { mode: "comparison", topic: "Networking",
+        q: "What is the Azure equivalent of AWS Direct Connect?",
+        options: ["Azure VPN Gateway", "Azure DNS", "ExpressRoute", "Azure Front Door"],
+        correct: 2,
+        explain: "ExpressRoute = dedicated private connection from on-prem to Azure. No internet."
+      },
+      { mode: "comparison", topic: "Governance",
+        q: "What is the Azure equivalent of AWS Cost Explorer?",
+        options: ["Azure Advisor", "Cost Management + Billing", "Azure Policy", "Microsoft Purview"],
+        correct: 1,
+        explain: "Cost Management + Billing = cost analysis, budgets, reports. Like Cost Explorer."
+      },
+      { mode: "comparison", topic: "Governance",
+        q: "What is the Azure equivalent of AWS Organizations for hierarchy?",
+        options: ["Resource groups only", "Subscriptions only", "Management groups + Subscriptions", "Tags only"],
+        correct: 2,
+        explain: "Management groups organize subscriptions; apply governance at scale. Like Organizations."
+      },
+      { mode: "comparison", topic: "Governance",
+        q: "What is the Azure equivalent of AWS Config / Org policy for enforcing rules?",
+        options: ["Microsoft Purview", "Azure Advisor", "Azure Policy", "Resource locks"],
+        correct: 2,
+        explain: "Azure Policy = enforce rules (e.g., allowed regions, required tags). Like Config rules."
+      },
+      { mode: "comparison", topic: "Networking",
+        q: "AWS WAF and Shield protect at application and network layers. Azure's network-level DDoS protection is built into:",
+        options: ["Azure Firewall only", "Azure VPN Gateway", "Azure Virtual Network (always on)", "ExpressRoute only"],
+        correct: 2,
+        explain: "Azure DDoS Protection is available for VNet; basic tier is always on. WAF equivalent is Azure Web Application Firewall."
+      },
+      { mode: "comparison", topic: "Storage",
+        q: "Azure Managed Disks are equivalent to which AWS service?",
+        options: ["S3", "EBS", "EFS", "Glacier"],
+        correct: 1,
+        explain: "Azure Managed Disks = EBS. Block storage for VMs."
+      },
+      { mode: "comparison", topic: "Compute",
+        q: "Azure Container Apps and AKS are equivalent to which AWS services?",
+        options: ["EC2 only", "Lambda only", "ECS/EKS (containers and Kubernetes)", "RDS"],
+        correct: 2,
+        explain: "Container Apps = serverless containers; AKS = managed Kubernetes. Like ECS/EKS."
+      },
+      { mode: "comparison", topic: "Governance",
+        q: "Azure Reservations are equivalent to which AWS offering?",
+        options: ["Spot Instances", "Reserved Instances / Savings Plans", "On-Demand only", "Free tier"],
+        correct: 1,
+        explain: "Azure Reservations = commit 1–3 years for discount. Like Reserved Instances."
+      },
+      // === EXAM - Cloud Concepts ===
+      { mode: "exam", topic: "Cloud Concepts",
+        q: "In the shared responsibility model, who is responsible for patching the OS on an Azure Virtual Machine?",
+        options: ["Microsoft only", "Customer only", "Shared equally", "Third-party only"],
+        correct: 1,
+        explain: "IaaS (VMs): customer manages OS, apps, data. Microsoft manages physical, network, hypervisor."
+      },
+      { mode: "exam", topic: "Cloud Concepts",
+        q: "Which cloud service type allows you to deploy code without managing the OS or runtime?",
+        options: ["IaaS", "PaaS", "SaaS", "FaaS only"],
+        correct: 1,
+        explain: "PaaS (e.g., Azure App Service, Functions): you manage apps and data; provider manages runtime and infrastructure."
+      },
+      { mode: "exam", topic: "Cloud Concepts",
+        q: "A company needs strict compliance and wants dedicated infrastructure. Which cloud model is most appropriate?",
+        options: ["Public cloud only", "Private cloud", "Hybrid cloud", "Multicloud only"],
+        correct: 1,
+        explain: "Private cloud = dedicated to one org; on-prem or hosted; strict compliance and control."
+      },
+      { mode: "exam", topic: "Cloud Concepts",
+        q: "What does the consumption-based model mean?",
+        options: ["Pay a fixed monthly fee", "Pay only for what you use", "Pay only for storage", "CapEx only"],
+        correct: 1,
+        explain: "Consumption-based = pay only for what you use; no upfront CapEx; OpEx."
+      },
+      { mode: "exam", topic: "Cloud Concepts",
+        q: "Which term describes running code without managing servers, with automatic scale and pay per execution?",
+        options: ["IaaS", "Serverless", "Hybrid", "Reserved capacity"],
+        correct: 1,
+        explain: "Serverless = e.g., Azure Functions; no server management, scale automatically, pay per execution."
+      },
+      // === EXAM - Architecture ===
+      { mode: "exam", topic: "Architecture",
+        q: "What is the correct Azure hierarchy from top to bottom?",
+        options: ["Resource → Resource group → Subscription → Management group", "Management group → Subscription → Resource group → Resource", "Subscription → Management group → Resource group", "Resource group → Subscription → Management group"],
+        correct: 1,
+        explain: "Management group (governance) → Subscription (billing) → Resource group → Resources."
+      },
+      { mode: "exam", topic: "Architecture",
+        q: "Which Azure concept is used to organize subscriptions and apply governance (e.g., policy) at scale?",
+        options: ["Resource groups only", "Tags only", "Management groups", "Availability Zones"],
+        correct: 2,
+        explain: "Management groups = hierarchy above subscriptions; apply policy to many subscriptions."
+      },
+      { mode: "exam", topic: "Architecture",
+        q: "Availability Zones in Azure provide protection against what?",
+        options: ["Region failure only", "Datacenter failure within a region", "Only network failure", "Only storage failure"],
+        correct: 1,
+        explain: "Availability Zones = physically separate datacenters within a region; survive datacenter failure, not region failure."
+      },
+      { mode: "exam", topic: "Architecture",
+        q: "Region pairs in Azure are used primarily for what?",
+        options: ["Lower latency", "Disaster recovery and replication within a geography", "Cost reduction only", "Compliance only"],
+        correct: 1,
+        explain: "Region pairs = same geography (e.g., West US ↔ East US); used for DR and replication."
+      },
+      { mode: "exam", topic: "Architecture",
+        q: "A resource in Azure can belong to how many resource groups?",
+        options: ["Multiple resource groups", "One resource group only", "No resource groups", "Only subscriptions"],
+        correct: 1,
+        explain: "Each resource belongs to exactly one resource group at a time (can be moved)."
+      },
+      // === EXAM - Compute ===
+      { mode: "exam", topic: "Compute",
+        q: "A team wants to run event-driven code without managing servers. Which Azure service?",
+        options: ["Azure VMs", "Azure Virtual Machine Scale Sets", "Azure Functions", "Azure Kubernetes Service"],
+        correct: 2,
+        explain: "Azure Functions = serverless, event-driven; no server management."
+      },
+      { mode: "exam", topic: "Compute",
+        q: "What is the purpose of Azure Virtual Machine Scale Sets?",
+        options: ["Single VM backup", "Create and manage a set of identical, auto-scaling VMs", "Replace Availability Sets", "Replace resource groups"],
+        correct: 1,
+        explain: "Scale Sets = identical VMs; auto scale in/out; load balanced."
+      },
+      { mode: "exam", topic: "Compute",
+        q: "Which Azure service is a PaaS option for hosting web applications?",
+        options: ["Azure VMs only", "Azure App Service", "Azure Functions only", "Azure DNS"],
+        correct: 1,
+        explain: "Azure App Service = PaaS for web apps, APIs; deploy code without managing VMs."
+      },
+      // === EXAM - Storage ===
+      { mode: "exam", topic: "Storage",
+        q: "For Blob storage that is rarely accessed and has the lowest cost, which tier?",
+        options: ["Hot", "Cool", "Archive", "Premium"],
+        correct: 2,
+        explain: "Archive = rarely accessed, lowest cost; retrieval delay. Cool = 30+ days; Hot = frequent access."
+      },
+      { mode: "exam", topic: "Storage",
+        q: "Which redundancy option replicates data to a secondary region for disaster recovery?",
+        options: ["LRS only", "ZRS only", "GRS or GZRS", "LRS and ZRS only"],
+        correct: 2,
+        explain: "GRS (Geo-Redundant) and GZRS replicate to a secondary region. LRS = one datacenter; ZRS = across zones."
+      },
+      { mode: "exam", topic: "Storage",
+        q: "A company needs to migrate terabytes of data to Azure with minimal network use. Which option?",
+        options: ["AzCopy only", "Azure Data Box", "Azure File Sync only", "Storage Explorer only"],
+        correct: 1,
+        explain: "Azure Data Box = physical device for large offline data transfer. Like AWS Snowball."
+      },
+      { mode: "exam", topic: "Storage",
+        q: "Which Azure storage service provides SMB/NFS file shares in the cloud?",
+        options: ["Blob Storage", "Azure Files", "Queue Storage", "Table Storage"],
+        correct: 1,
+        explain: "Azure Files = managed file shares (SMB/NFS). Like EFS for file shares."
+      },
+      // === EXAM - Networking ===
+      { mode: "exam", topic: "Networking",
+        q: "What allows a resource in your VNet to access an Azure PaaS service (e.g., storage) without using the public internet?",
+        options: ["VPN Gateway", "Public endpoint only", "Private endpoint (Azure Private Link)", "ExpressRoute only"],
+        correct: 2,
+        explain: "Private endpoint = private IP in your VNet; traffic stays on Microsoft network. No public internet."
+      },
+      { mode: "exam", topic: "Networking",
+        q: "A company needs a dedicated private connection from on-premises to Azure. Which service?",
+        options: ["Azure VPN Gateway (over internet)", "ExpressRoute", "Azure DNS", "Azure Front Door"],
+        correct: 1,
+        explain: "ExpressRoute = dedicated private connection. VPN Gateway = encrypted over internet."
+      },
+      { mode: "exam", topic: "Networking",
+        q: "VNet peering connects what?",
+        options: ["Subnets only", "Two virtual networks (same or different regions)", "Only on-prem to Azure", "Only Azure to internet"],
+        correct: 1,
+        explain: "VNet peering = connect two VNets; same region (regional) or different regions (global peering)."
+      },
+      // === EXAM - Identity & Security ===
+      { mode: "exam", topic: "Identity",
+        q: "Who can be assigned an Azure RBAC role?",
+        options: ["Only users", "Users, groups, and service principals", "Only groups", "Only resources"],
+        correct: 1,
+        explain: "RBAC roles can be assigned to users, groups, and service principals (e.g., apps)."
+      },
+      { mode: "exam", topic: "Identity",
+        q: "Which Azure feature allows you to require MFA or block sign-in based on location or device?",
+        options: ["RBAC only", "Microsoft Entra Conditional Access", "Resource locks", "Azure Policy"],
+        correct: 1,
+        explain: "Conditional Access = policies that allow/block or require (e.g., MFA) based on user, location, device."
+      },
+      { mode: "exam", topic: "Identity",
+        q: "What is Zero Trust in security?",
+        options: ["Trust only the perimeter", "Verify explicitly, least privilege, assume breach", "Trust all internal traffic", "Encryption only"],
+        correct: 1,
+        explain: "Zero Trust = verify explicitly, least privilege, assume breach; never trust by location alone."
+      },
+      { mode: "exam", topic: "Security",
+        q: "Which Azure service provides security recommendations and threat detection for your resources?",
+        options: ["Azure Advisor only", "Azure Service Health", "Microsoft Defender for Cloud", "Azure Policy only"],
+        correct: 2,
+        explain: "Microsoft Defender for Cloud = security posture (CSPM) + threat detection; recommendations and alerts."
+      },
+      // === EXAM - Management & Governance ===
+      { mode: "exam", topic: "Governance",
+        q: "What is the purpose of Azure Policy?",
+        options: ["Monitor metrics only", "Enforce rules on resources (e.g., allowed regions, required tags)", "Store secrets only", "Manage identity only"],
+        correct: 1,
+        explain: "Azure Policy = enforce governance rules; evaluate and remediate non-compliant resources."
+      },
+      { mode: "exam", topic: "Governance",
+        q: "How do you prevent accidental deletion of a critical resource?",
+        options: ["Tags only", "Resource lock (CanNotDelete or ReadOnly)", "Azure Policy only", "Delete the resource group"],
+        correct: 1,
+        explain: "Resource locks = CanNotDelete or ReadOnly; prevent accidental delete or changes."
+      },
+      { mode: "exam", topic: "Governance",
+        q: "Which Azure tool provides personalized recommendations for cost, security, reliability, and performance?",
+        options: ["Azure Service Health", "Azure Monitor", "Azure Advisor", "Microsoft Purview"],
+        correct: 2,
+        explain: "Azure Advisor = free recommendations across cost, security, reliability, performance, operational excellence."
+      },
+      { mode: "exam", topic: "Governance",
+        q: "You want to know if an Azure service outage is affecting your resources. Which service?",
+        options: ["Azure Advisor", "Azure Monitor", "Azure Service Health", "Microsoft Defender for Cloud"],
+        correct: 2,
+        explain: "Azure Service Health = view outages, planned maintenance, health of Azure services affecting your resources."
+      },
+      { mode: "exam", topic: "Governance",
+        q: "Which Azure capability helps you organize and track costs by department or project?",
+        options: ["Resource groups only", "Tags", "Resource locks only", "Azure Policy only"],
+        correct: 1,
+        explain: "Tags = key-value on resources; use with Cost Management for allocation by department/project."
+      },
+      { mode: "exam", topic: "Governance",
+        q: "What is Microsoft Purview used for?",
+        options: ["VM management only", "Data governance, catalog, and compliance", "Networking only", "Compute only"],
+        correct: 1,
+        explain: "Microsoft Purview = data governance, catalog, lineage, compliance across Azure and on-prem."
+      },
+      { mode: "exam", topic: "Governance",
+        q: "Which tool would you use to deploy Azure infrastructure from a JSON template?",
+        options: ["Azure Advisor", "ARM templates (Azure Resource Manager)", "Azure Service Health", "Microsoft Purview"],
+        correct: 1,
+        explain: "ARM templates (or Bicep) = Infrastructure as Code; declarative JSON (or Bicep) for deployment."
+      },
+      { mode: "exam", topic: "Governance",
+        q: "Azure Arc is used to do what?",
+        options: ["Only manage Azure VMs", "Extend Azure management to on-premises and multicloud resources", "Replace Azure Policy", "Replace Entra ID"],
+        correct: 1,
+        explain: "Azure Arc = manage and govern servers/workloads outside Azure (on-prem, other clouds, edge)."
+      },
+      { mode: "exam", topic: "Governance",
+        q: "To estimate cost before deploying resources, which tool?",
+        options: ["Azure Advisor", "Azure Pricing Calculator", "Azure Service Health", "Resource locks"],
+        correct: 1,
+        explain: "Azure Pricing Calculator = estimate cost for services before deployment."
+      },
+      { mode: "exam", topic: "Monitoring",
+        q: "Which Azure service provides application performance monitoring (APM) and tracing for your apps?",
+        options: ["Azure Advisor only", "Azure Service Health", "Application Insights (part of Azure Monitor)", "Azure Policy"],
+        correct: 2,
+        explain: "Application Insights = APM; performance, traces, logs for applications. Part of Azure Monitor."
+      },
+      { mode: "exam", topic: "Monitoring",
+        q: "Azure Advisor recommends; Azure Service Health shows Azure status. What does Azure Monitor do?",
+        options: ["Only recommendations", "Collect metrics, logs, and alerts from your resources and apps", "Only Azure outage status", "Only identity"],
+        correct: 1,
+        explain: "Azure Monitor = your metrics, logs, alerts; Log Analytics, Application Insights. Your observability."
+      },
+      // === More comparison ===
+      { mode: "comparison", topic: "Identity",
+        q: "Azure RBAC is most similar to which AWS capability?",
+        options: ["S3 only", "IAM policies and roles (authorization)", "CloudTrail", "Config"],
+        correct: 1,
+        explain: "RBAC = assign roles (Owner, Contributor, Reader) at scope. Like IAM roles and policies."
+      },
+      { mode: "comparison", topic: "Networking",
+        q: "Azure VPN Gateway is equivalent to which AWS offering?",
+        options: ["Direct Connect", "Site-to-Site VPN / Client VPN", "Route 53", "CloudFront"],
+        correct: 1,
+        explain: "VPN Gateway = site-to-site or point-to-site VPN over internet. Like AWS VPN."
+      },
+      { mode: "comparison", topic: "Governance",
+        q: "AWS CloudTrail (API call auditing) is most similar to which Azure capability?",
+        options: ["Azure Policy", "Azure Activity Log and Entra ID sign-in logs", "Azure Advisor", "Resource locks"],
+        correct: 1,
+        explain: "Activity Log = management plane operations. Entra ID sign-in logs = sign-ins. Like CloudTrail for actions."
+      },
+      { mode: "comparison", topic: "Storage",
+        q: "Azure Blob Hot tier is most similar to which AWS storage?",
+        options: ["S3 Glacier", "S3 Standard (frequently accessed)", "EBS", "EFS"],
+        correct: 1,
+        explain: "Blob Hot = frequently accessed, higher cost. Like S3 Standard."
+      },
+      { mode: "comparison", topic: "Architecture",
+        q: "An Azure subscription is most like which AWS concept?",
+        options: ["VPC", "AWS account / billing boundary", "Region", "Availability Zone"],
+        correct: 1,
+        explain: "Subscription = billing and access boundary. Like an AWS account for billing."
+      },
+      { mode: "exam", topic: "Cloud Concepts",
+        q: "Vertical scaling means what?",
+        options: ["Adding more instances", "Increasing the size of an existing resource (e.g., bigger VM)", "Moving to another region", "Adding more subnets"],
+        correct: 1,
+        explain: "Vertical = scale up/down (bigger/smaller VM). Horizontal = scale out/in (more/fewer instances)."
+      },
+      { mode: "exam", topic: "Identity",
+        q: "Microsoft Entra Domain Services is used when you need what?",
+        options: ["Only cloud SSO", "Domain-join VMs and run legacy apps that need traditional AD", "Only RBAC", "Only MFA"],
+        correct: 1,
+        explain: "Entra Domain Services = managed AD Domain Services in Azure; domain-join, Kerberos, legacy apps."
+      },
+      { mode: "exam", topic: "Storage",
+        q: "Which redundancy provides protection against a single datacenter failure within a region?",
+        options: ["LRS", "ZRS", "GRS", "All of these"],
+        correct: 1,
+        explain: "ZRS = zone-redundant; replicates across Availability Zones. LRS = single datacenter. GRS = secondary region."
+      },
+      { mode: "exam", topic: "Governance",
+        q: "Where can you run Azure CLI and PowerShell without installing them locally?",
+        options: ["Only on a VM", "Azure Cloud Shell (browser-based)", "Only in Azure Policy", "Only in Purview"],
+        correct: 1,
+        explain: "Azure Cloud Shell = browser-based Azure CLI and PowerShell; no local install."
+      },
+    ];
+
+    const QUESTIONS_PER_QUIZ = 40;
+    let currentIndex = 0;
+    let score = 0;
+    let answered = [];
+    let sessionQuestions = [];
+    let selectedMode = 'mixed';
+
+    function getProfile() {
+      try {
+        const raw = localStorage.getItem(PROFILE_KEY);
+        if (!raw) return { quizId: QUIZ_ID, topicStats: {}, topicMissesFromImports: {} };
+        const p = JSON.parse(raw);
+        return {
+          quizId: p.quizId || QUIZ_ID,
+          topicStats: p.topicStats || {},
+          topicMissesFromImports: p.topicMissesFromImports || {}
+        };
+      } catch (e) {
+        return { quizId: QUIZ_ID, topicStats: {}, topicMissesFromImports: {} };
+      }
+    }
+
+    function saveProfile(profile) {
+      try {
+        localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+      } catch (e) {}
+    }
+
+    function getTopicWeight(profile, topic) {
+      const t = topic || 'Other';
+      let missRate = 0;
+      if (profile.topicStats[t] && profile.topicStats[t].total > 0) {
+        missRate = 1 - (profile.topicStats[t].correct / profile.topicStats[t].total);
+      }
+      const importMisses = (profile.topicMissesFromImports[t] || 0) * 0.2;
+      return 1 + Math.min(missRate + importMisses, 2);
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function weightedSample(arr, n, profile) {
+      const hasData = profile && (Object.keys(profile.topicStats).length > 0 || Object.keys(profile.topicMissesFromImports).length > 0);
+      if (!hasData) {
+        const shuffled = shuffle(arr);
+        return shuffled.slice(0, Math.min(n, shuffled.length));
+      }
+      const withKeys = arr.map(q => {
+        const w = getTopicWeight(profile, q.topic);
+        return { q, key: Math.pow(Math.random(), 1 / w) };
+      });
+      withKeys.sort((a, b) => b.key - a.key);
+      return withKeys.slice(0, Math.min(n, withKeys.length)).map(x => x.q);
+    }
+
+    function getWeakTopics(profile, topN) {
+      const scores = [];
+      const topics = new Set([
+        ...Object.keys(profile.topicStats || {}),
+        ...Object.keys(profile.topicMissesFromImports || {})
+      ]);
+      topics.forEach(t => {
+        let weakness = 0;
+        if (profile.topicStats[t] && profile.topicStats[t].total > 0) {
+          weakness = 1 - (profile.topicStats[t].correct / profile.topicStats[t].total);
+        }
+        weakness += (profile.topicMissesFromImports[t] || 0) * 0.15;
+        scores.push({ topic: t, weakness });
+      });
+      scores.sort((a, b) => b.weakness - a.weakness);
+      return scores.slice(0, topN).filter(x => x.weakness > 0.1).map(x => x.topic);
+    }
+
+    function selectMode(mode) {
+      selectedMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
+      document.querySelector('[data-mode="' + mode + '"]').classList.add('selected');
+    }
+
+    function startQuiz() {
+      const filtered = questionBank.filter(q => {
+        if (selectedMode === 'comparison') return q.mode === 'comparison';
+        if (selectedMode === 'exam') return q.mode === 'exam';
+        return true;
+      });
+      const profile = getProfile();
+      sessionQuestions = weightedSample(filtered, QUESTIONS_PER_QUIZ, profile);
+      currentIndex = 0;
+      score = 0;
+      answered = [];
+      const hintEl = document.getElementById('focus-hint');
+      const weak = getWeakTopics(profile, 3);
+      if (weak.length > 0) {
+        hintEl.textContent = "We'll focus more on: " + weak.join(', ') + '.';
+        hintEl.classList.remove('hidden');
+      } else {
+        hintEl.classList.add('hidden');
+      }
+      document.getElementById('start-screen').classList.add('hidden');
+      document.getElementById('results-screen').classList.add('hidden');
+      document.getElementById('quiz-area').classList.remove('hidden');
+      document.getElementById('q-total').textContent = sessionQuestions.length;
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = sessionQuestions[currentIndex];
+      document.getElementById('q-num').textContent = currentIndex + 1;
+      document.getElementById('score-display').textContent = score;
+      document.getElementById('question-text').textContent = q.q;
+      const opts = document.getElementById('options');
+      opts.innerHTML = '';
+      const fb = document.getElementById('feedback');
+      fb.classList.add('hidden');
+      fb.className = 'feedback hidden';
+
+      q.options.forEach((opt, i) => {
+        const div = document.createElement('div');
+        div.className = 'option';
+        div.textContent = opt;
+        div.dataset.index = i;
+        if (answered[currentIndex] !== undefined) {
+          div.classList.add('disabled');
+          if (i === q.correct) div.classList.add('correct');
+          else if (i === answered[currentIndex]) div.classList.add('wrong');
+        } else {
+          div.onclick = () => selectOption(currentIndex, i, q);
+        }
+        opts.appendChild(div);
+      });
+
+      if (answered[currentIndex] !== undefined) {
+        fb.classList.remove('hidden');
+        fb.className = 'feedback ' + (answered[currentIndex] === q.correct ? 'correct-msg' : 'wrong-msg');
+        fb.innerHTML = (answered[currentIndex] === q.correct ? '✓ Correct. ' : '✗ Incorrect. ') + '<span class="explanation">' + q.explain + '</span>';
+      }
+
+      document.getElementById('prev-btn').disabled = currentIndex === 0;
+    }
+
+    function selectOption(pos, optIdx, q) {
+      if (answered[pos] !== undefined) return;
+      answered[pos] = optIdx;
+      if (optIdx === q.correct) score++;
+
+      document.querySelectorAll('#options .option').forEach(o => {
+        o.classList.add('disabled');
+        o.onclick = null;
+        if (parseInt(o.dataset.index) === q.correct) o.classList.add('correct');
+        else if (parseInt(o.dataset.index) === optIdx) o.classList.add('wrong');
+      });
+
+      const fb = document.getElementById('feedback');
+      fb.classList.remove('hidden');
+      fb.innerHTML = (optIdx === q.correct ? '✓ Correct. ' : '✗ Incorrect. ') + '<span class="explanation">' + q.explain + '</span>';
+      fb.className = 'feedback ' + (optIdx === q.correct ? 'correct-msg' : 'wrong-msg');
+      document.getElementById('score-display').textContent = score;
+    }
+
+    function nextQuestion() {
+      if (currentIndex < sessionQuestions.length - 1) {
+        currentIndex++;
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderQuestion();
+      }
+    }
+
+    function saveSessionToProfile() {
+      const profile = getProfile();
+      sessionQuestions.forEach((q, i) => {
+        const t = q.topic || 'Other';
+        if (!profile.topicStats[t]) profile.topicStats[t] = { correct: 0, total: 0 };
+        profile.topicStats[t].total++;
+        if (answered[i] !== undefined && answered[i] === q.correct) {
+          profile.topicStats[t].correct++;
+        }
+      });
+      saveProfile(profile);
+    }
+
+    function showResults() {
+      saveSessionToProfile();
+      document.getElementById('quiz-area').classList.add('hidden');
+      const r = document.getElementById('results-screen');
+      r.classList.remove('hidden');
+      const total = sessionQuestions.length;
+      const pct = Math.round((score / total) * 100);
+      document.getElementById('final-score').textContent = score + ' / ' + total + ' (' + pct + '%)';
+      document.getElementById('final-score').className = 'score ' + (pct >= 70 ? 'pass' : 'fail');
+      document.getElementById('result-msg').textContent = pct >= 70
+        ? 'AZ-900 requires 700+ (roughly 70%+). You\'re on track!'
+        : 'Aim for 70%+ on the real exam. Review the pattern guide and try again.';
+      document.getElementById('copy-toast').classList.add('hidden');
+    }
+
+    function getResultsMarkdown() {
+      const total = sessionQuestions.length;
+      const pct = Math.round((score / total) * 100);
+      const missed = sessionQuestions.map((q, i) => ({ q, i })).filter(x => answered[x.i] !== undefined && answered[x.i] !== x.q.correct);
+      const topicCounts = {};
+      missed.forEach(x => {
+        const t = x.q.topic || 'Other';
+        topicCounts[t] = (topicCounts[t] || 0) + 1;
+      });
+      let md = '# AZ-900 Azure Fundamentals Quiz Results\n\n';
+      md += '**Date:** ' + new Date().toISOString().slice(0, 10) + '\n';
+      md += '**Mode:** ' + (selectedMode === 'comparison' ? 'Comparison (Azure↔AWS)' : selectedMode === 'exam' ? 'Exam' : 'Mixed') + '\n';
+      md += '**Score:** ' + score + '/' + total + ' (' + pct + '%)\n';
+      md += '**Pass (70%+):** ' + (pct >= 70 ? 'Yes' : 'No') + '\n\n';
+      md += '---\n\n';
+      md += '## Instructions for AI Refactoring\n\n';
+      md += 'Paste this entire block into a Cursor chat and say:\n';
+      md += '> "Refactor the AZ-900 quiz based on my mistakes. Add more questions on my weak topics and create a focused retake quiz."\n\n';
+      if (Object.keys(topicCounts).length > 0) {
+        md += '## Misses by Topic\n\n';
+        Object.entries(topicCounts).sort((a, b) => b[1] - a[1]).forEach(([t, n]) => {
+          md += '- **' + t + ':** ' + n + ' missed\n';
+        });
+        md += '\n';
+      }
+      if (missed.length > 0) {
+        md += '## Missed Questions (for AI refactoring)\n\n';
+        missed.forEach((x, i) => {
+          const q = x.q;
+          const yourAns = q.options[answered[x.i]];
+          const correctAns = q.options[q.correct];
+          md += '### ' + (i + 1) + '. [' + (q.topic || 'General') + ']\n';
+          md += '**Q:** ' + q.q + '\n';
+          md += '**Your answer:** ' + yourAns + '\n';
+          md += '**Correct answer:** ' + correctAns + '\n';
+          md += '**Explanation:** ' + q.explain + '\n\n';
+        });
+      }
+      return md;
+    }
+
+    function downloadResults() {
+      const blob = new Blob([getResultsMarkdown()], { type: 'text/markdown' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'az900_quiz_results_' + new Date().toISOString().slice(0, 10) + '.md';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function copyResultsToClipboard() {
+      navigator.clipboard.writeText(getResultsMarkdown()).then(() => {
+        document.getElementById('copy-toast').classList.remove('hidden');
+        setTimeout(() => document.getElementById('copy-toast').classList.add('hidden'), 2500);
+      });
+    }
+
+    function parseImportedResults(mdText) {
+      const lines = mdText.split('\n');
+      const firstLine = (lines[0] || '').toLowerCase();
+      if (QUIZ_ID !== 'oci' && firstLine.includes('oci foundations')) return { ok: false, error: 'This file is for OCI quiz. Open the OCI quiz to import it.' };
+      if (QUIZ_ID !== 'gcp' && firstLine.includes('gcp cloud digital leader')) return { ok: false, error: 'This file is for GCP quiz. Open the GCP quiz to import it.' };
+      if (QUIZ_ID !== 'az900' && (firstLine.includes('az-900') || firstLine.includes('azure'))) return { ok: false, error: 'This file is for AZ-900 quiz. Open the AZ-900 quiz to import it.' };
+      if (QUIZ_ID === 'az900' && !firstLine.includes('az-900') && !firstLine.includes('azure')) return { ok: false, error: 'Not an AZ-900 results file.' };
+      let inSection = false;
+      const topicMisses = {};
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.indexOf('## Misses by Topic') !== -1) {
+          inSection = true;
+          continue;
+        }
+        if (inSection && line.startsWith('## ')) break;
+        if (inSection && line.match(/^\s*-\s*\*\*(.+?)\*\*:\s*(\d+)\s+missed/)) {
+          const m = line.match(/^\s*-\s*\*\*(.+?)\*\*:\s*(\d+)\s+missed/);
+          const topic = m[1].trim();
+          const n = parseInt(m[2], 10);
+          topicMisses[topic] = (topicMisses[topic] || 0) + n;
+        }
+      }
+      if (Object.keys(topicMisses).length === 0) return { ok: false, error: 'No "Misses by Topic" section found.' };
+      return { ok: true, topicMisses };
+    }
+
+    function importResults() {
+      const ta = document.getElementById('import-results');
+      const mdText = (ta && ta.value || '').trim();
+      if (!mdText) {
+        showImportToast('Paste results markdown first, or choose a file.', true);
+        return;
+      }
+      const result = parseImportedResults(mdText);
+      if (!result.ok) {
+        showImportToast(result.error || 'Could not parse results.', true);
+        return;
+      }
+      const profile = getProfile();
+      if (!profile.topicMissesFromImports) profile.topicMissesFromImports = {};
+      Object.entries(result.topicMisses).forEach(([topic, n]) => {
+        profile.topicMissesFromImports[topic] = (profile.topicMissesFromImports[topic] || 0) + n;
+      });
+      saveProfile(profile);
+      const top = Object.entries(result.topicMisses).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]);
+      showImportToast('Imported. We\'ll focus more on: ' + top.join(', ') + '.', false);
+      if (ta) ta.value = '';
+    }
+
+    function onImportFile(ev) {
+      const f = ev.target.files && ev.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = function () {
+        const ta = document.getElementById('import-results');
+        if (ta) ta.value = r.result || '';
+        importResults();
+      };
+      r.readAsText(f);
+      ev.target.value = '';
+    }
+
+    function showImportToast(msg, isError) {
+      const el = document.getElementById('import-toast');
+      if (!el) return;
+      el.textContent = msg;
+      el.className = 'import-toast ' + (isError ? 'err' : 'success');
+      el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 4000);
+    }
+
+    (function initFocusHint() {
+      const profile = getProfile();
+      const weak = getWeakTopics(profile, 3);
+      const hintEl = document.getElementById('focus-hint');
+      if (hintEl && weak.length > 0) {
+        hintEl.textContent = "We'll focus more on: " + weak.join(', ') + '.';
+        hintEl.classList.remove('hidden');
+      }
+    })();
+  </script>
+</body>
+</html>
