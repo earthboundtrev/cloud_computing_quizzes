@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CISSP Practice Quiz</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --accent: #0066cc;
+      --accent-dim: #0052a3;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --correct: #22c55e;
+      --wrong: #ef4444;
+      --font: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    .container { max-width: 720px; margin: 0 auto; }
+    h1 {
+      font-size: 1.5rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem; }
+    .stats {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .stats span { color: var(--accent); font-weight: 600; }
+    .question-card {
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border-left: 3px solid var(--accent);
+    }
+    .question-text {
+      font-size: 1.05rem;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+    .options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .option {
+      padding: 0.75rem 1rem;
+      background: var(--bg);
+      border: 2px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .option:hover:not(.disabled) {
+      border-color: var(--accent-dim);
+      background: #151d2b;
+    }
+    .option.selected { border-color: var(--accent); background: #151d2b; }
+    .option.correct { border-color: var(--correct); background: rgba(34,197,94,0.1); }
+    .option.wrong { border-color: var(--wrong); background: rgba(239,68,68,0.1); }
+    .option.disabled { cursor: not-allowed; opacity: 0.7; }
+    .feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+    .feedback.correct-msg { background: rgba(34,197,94,0.15); border-left: 4px solid var(--correct); }
+    .feedback.wrong-msg { background: rgba(239,68,68,0.15); border-left: 4px solid var(--wrong); }
+    .feedback .explanation { margin-top: 0.5rem; color: var(--text-muted); }
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.5rem;
+    }
+    button {
+      padding: 0.6rem 1.2rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: var(--accent-dim); }
+    button.secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+    }
+    button.secondary:hover { background: rgba(0,102,204,0.1); }
+    .results {
+      text-align: center;
+      padding: 2rem;
+    }
+    .results h2 { color: var(--accent); margin-bottom: 1rem; }
+    .score { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .results-actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
+    .results-actions button.secondary { margin: 0; }
+    .copy-toast { font-size: 0.85rem; color: var(--correct); margin-top: 0.5rem; }
+    .score.pass { color: var(--correct); }
+    .score.fail { color: var(--wrong); }
+    .start-screen { text-align: center; padding: 3rem 0; }
+    .start-screen p { margin-bottom: 1.5rem; color: var(--text-muted); }
+    .mode-selector { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; max-width: 360px; margin-left: auto; margin-right: auto; }
+    .mode-btn {
+      padding: 1rem 1.5rem;
+      text-align: left;
+      background: var(--surface);
+      border: 2px solid transparent;
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .mode-btn:hover { border-color: var(--accent-dim); background: #151d2b; }
+    .mode-btn.selected { border-color: var(--accent); background: rgba(0,102,204,0.1); }
+    .mode-btn .label { font-weight: 600; display: block; }
+    .mode-btn .desc { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .profile-hint { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.75rem; }
+    .import-area { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--surface); text-align: left; }
+    .import-area label { display: block; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--text-muted); }
+    .import-area textarea { width: 100%; min-height: 80px; padding: 0.5rem; background: var(--surface); border: 1px solid var(--accent-dim); border-radius: 6px; color: var(--text); font-family: inherit; font-size: 0.85rem; resize: vertical; }
+    .import-toast { font-size: 0.85rem; margin-top: 0.5rem; }
+    .import-toast.success { color: var(--correct); }
+    .import-toast.err { color: var(--wrong); }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CISSP Practice Quiz</h1>
+    <p class="subtitle">8 domains • Security and Risk Management through Software Development Security</p>
+
+    <div id="start-screen" class="start-screen">
+      <p>40 questions per session, drawn from a pool of 55+. Randomized each run. Choose your mode:</p>
+      <p id="focus-hint" class="profile-hint hidden"></p>
+      <div class="mode-selector">
+        <button type="button" class="mode-btn" data-mode="comparison" onclick="selectMode('comparison')">
+          <span class="label">Domain Focus</span>
+          <span class="desc">Pick a domain: Security &amp; Risk, Asset, Architecture, Network, IAM, Assessment, Ops, Dev.</span>
+        </button>
+        <button type="button" class="mode-btn" data-mode="exam" onclick="selectMode('exam')">
+          <span class="label">Exam (Scenario-based)</span>
+          <span class="desc">Scenario questions across all domains—CISSP exam style.</span>
+        </button>
+        <button type="button" class="mode-btn selected" data-mode="mixed" onclick="selectMode('mixed')">
+          <span class="label">Mixed</span>
+          <span class="desc">Both domain focus and exam-style. Simulates full exam.</span>
+        </button>
+      </div>
+      <button id="start-btn" onclick="startQuiz()">Start Quiz</button>
+      <div class="import-area">
+        <label for="import-results">Import past results (paste .md or choose file) to focus on weak topics:</label>
+        <textarea id="import-results" placeholder="Paste quiz results markdown here..."></textarea>
+        <button type="button" class="secondary" style="margin-top: 0.5rem;" onclick="importResults()">Import results</button>
+        <input type="file" id="import-file" accept=".md,text/markdown" style="display: none;" onchange="onImportFile(event)">
+        <button type="button" class="secondary" style="margin-top: 0.5rem; margin-left: 0.5rem;" onclick="document.getElementById('import-file').click()">Choose file</button>
+        <p id="import-toast" class="import-toast hidden"></p>
+      </div>
+    </div>
+
+    <div id="quiz-area" class="hidden">
+      <div class="stats">
+        <span>Question <span id="q-num">1</span> of <span id="q-total">40</span></span>
+        <span>Correct: <span id="score-display">0</span></span>
+      </div>
+      <div class="question-card">
+        <div class="question-text" id="question-text"></div>
+        <div class="options" id="options"></div>
+        <div id="feedback" class="feedback hidden"></div>
+      </div>
+      <div class="nav-row">
+        <button id="prev-btn" class="secondary" onclick="prevQuestion()">← Previous</button>
+        <button id="next-btn" onclick="nextQuestion()">Next →</button>
+      </div>
+    </div>
+
+    <div id="results-screen" class="results hidden">
+      <h2>Quiz Complete</h2>
+      <div class="score" id="final-score"></div>
+      <p id="result-msg" style="margin-bottom: 1.5rem; color: var(--text-muted);"></p>
+      <div class="results-actions">
+        <button onclick="startQuiz()">Try Again</button>
+        <button class="secondary" onclick="downloadResults()">Download Results</button>
+        <button class="secondary" onclick="copyResultsToClipboard()">Copy to Clipboard</button>
+      </div>
+      <p id="copy-toast" class="copy-toast hidden">Copied! Paste into Cursor chat for AI refactoring.</p>
+    </div>
+  </div>
+
+  <script>
+    const QUIZ_ID = 'cissp';
+    const PROFILE_KEY = 'study_sessions_profile_' + QUIZ_ID;
+
+    const questionBank = [
+      // === DOMAIN 1: SECURITY AND RISK MANAGEMENT (16%) ===
+      { mode: "comparison", topic: "Security and Risk Management",
+        q: "Which of the CIA triad components ensures that information is accessible only to authorized users?",
+        options: ["Integrity", "Confidentiality", "Availability", "Non-repudiation"],
+        correct: 1,
+        explain: "Confidentiality = restrict access; access controls, encryption. Integrity = no unauthorized changes. Availability = authorized access when needed."
+      },
+      { mode: "comparison", topic: "Security and Risk Management",
+        q: "Risk is typically calculated as:",
+        options: ["Threat only", "Threat × Vulnerability", "Vulnerability only", "Asset × Control"],
+        correct: 1,
+        explain: "Risk = Threat × Vulnerability. Asset value and likelihood also factor into risk assessment."
+      },
+      { mode: "exam", topic: "Security and Risk Management",
+        q: "Who is typically responsible for determining data classification levels?",
+        options: ["CISO only", "Business owners/data owners", "IT staff", "Auditors"],
+        correct: 1,
+        explain: "Data/business owners classify data based on business impact. CISO advises; IT implements controls."
+      },
+      { mode: "exam", topic: "Security and Risk Management",
+        q: "Which document provides mandatory, specific requirements for achieving a standard?",
+        options: ["Guideline", "Procedure", "Baseline", "Policy"],
+        correct: 1,
+        explain: "Procedure = step-by-step how to meet requirements. Policy = high-level; Standard = mandatory requirements; Guideline = recommended; Baseline = minimum config."
+      },
+      { mode: "comparison", topic: "Security and Risk Management",
+        q: "Defense in depth refers to:",
+        options: ["Single strong control", "Multiple layers of security controls", "Perimeter-only security", "Physical security only"],
+        correct: 1,
+        explain: "Defense in depth = multiple controls at different layers; if one fails, others provide protection."
+      },
+      // === DOMAIN 2: ASSET SECURITY (10%) ===
+      { mode: "comparison", topic: "Asset Security",
+        q: "Which phase of the asset lifecycle involves ensuring proper disposal of data?",
+        options: ["Acquisition", "Handling", "Destruction", "Classification only"],
+        correct: 2,
+        explain: "Destruction phase = secure disposal (shredding, degaussing, wiping) to prevent data recovery."
+      },
+      { mode: "exam", topic: "Asset Security",
+        q: "Data remanence refers to:",
+        options: ["Data in transit", "Residual data left on storage after deletion", "Data classification", "Data encryption"],
+        correct: 1,
+        explain: "Data remanence = residual data after delete; mitigated by overwriting, degaussing, or physical destruction."
+      },
+      // === DOMAIN 3: SECURITY ARCHITECTURE AND ENGINEERING (13%) ===
+      { mode: "comparison", topic: "Security Architecture",
+        q: "The Bell-LaPadula model enforces which security property?",
+        options: ["Availability", "Integrity (Biba)", "Confidentiality (no read up, no write down)", "All of the above"],
+        correct: 2,
+        explain: "Bell-LaPadula = confidentiality; no read up (simple), no write down (confinement). Biba = integrity."
+      },
+      { mode: "exam", topic: "Security Architecture",
+        q: "A security kernel must be:",
+        options: ["Large and complex", "Small, tamperproof, and verifiable", "User-space only", "Network-facing"],
+        correct: 1,
+        explain: "Security kernel = small, tamperproof, verifiable; implements reference monitor; mediates all access."
+      },
+      { mode: "comparison", topic: "Security Architecture",
+        q: "Which encryption algorithm is asymmetric?",
+        options: ["AES", "RSA", "3DES", "RC4"],
+        correct: 1,
+        explain: "RSA = asymmetric (public/private key). AES, 3DES, RC4 = symmetric."
+      },
+      // === DOMAIN 4: COMMUNICATION AND NETWORK SECURITY (13%) ===
+      { mode: "comparison", topic: "Network Security",
+        q: "Which layer of the OSI model does IP operate at?",
+        options: ["Layer 2", "Layer 3 (Network)", "Layer 4", "Layer 7"],
+        correct: 1,
+        explain: "IP = Layer 3 (Network). TCP/UDP = Layer 4. Ethernet = Layer 2. HTTP = Layer 7."
+      },
+      { mode: "exam", topic: "Network Security",
+        q: "A DMZ is typically used to:",
+        options: ["Store backups", "Host public-facing services with controlled access", "Encrypt data", "Run antivirus"],
+        correct: 1,
+        explain: "DMZ = screened subnet; hosts public services (web, mail); isolated from internal network; bastion hosts."
+      },
+      { mode: "comparison", topic: "Network Security",
+        q: "Which protocol provides secure remote login?",
+        options: ["Telnet", "FTP", "SSH", "HTTP"],
+        correct: 2,
+        explain: "SSH = encrypted remote login, file transfer. Telnet/FTP = cleartext, insecure."
+      },
+      // === DOMAIN 5: IDENTITY AND ACCESS MANAGEMENT (13%) ===
+      { mode: "comparison", topic: "IAM",
+        q: "Authentication verifies:",
+        options: ["What you can do", "Who you are", "Where you are", "When you access"],
+        correct: 1,
+        explain: "Authentication = identity (who). Authorization = permissions (what). Accounting = audit (what was done)."
+      },
+      { mode: "exam", topic: "IAM",
+        q: "Role-Based Access Control (RBAC) assigns permissions based on:",
+        options: ["User identity only", "Job function/role", "Resource sensitivity only", "Time of day only"],
+        correct: 1,
+        explain: "RBAC = permissions by role (job function). ABAC = attributes. DAC = owner. MAC = labels."
+      },
+      { mode: "comparison", topic: "IAM",
+        q: "Multi-factor authentication requires:",
+        options: ["Two passwords", "Something you know + something you have or are", "Only biometrics", "Only smart cards"],
+        correct: 1,
+        explain: "MFA = two or more factors: knowledge (password), possession (token), inherence (biometric)."
+      },
+      // === DOMAIN 6: SECURITY ASSESSMENT AND TESTING (12%) ===
+      { mode: "comparison", topic: "Security Assessment",
+        q: "A penetration test differs from a vulnerability scan in that:",
+        options: ["Pen test is automated only", "Pen test exploits vulnerabilities to demonstrate impact", "Vuln scan exploits systems", "They are identical"],
+        correct: 1,
+        explain: "Pen test = exploit vulns, simulate attacker. Vuln scan = identify vulns, typically non-invasive."
+      },
+      { mode: "exam", topic: "Security Assessment",
+        q: "Which assessment type is performed by insiders with full knowledge?",
+        options: ["Black box", "White box", "Gray box only", "External only"],
+        correct: 1,
+        explain: "White box = full knowledge (insider). Black box = no knowledge. Gray box = partial."
+      },
+      { mode: "comparison", topic: "Security Assessment",
+        q: "Code review is an example of:",
+        options: ["Dynamic testing", "Static testing", "Penetration testing", "Vulnerability scanning"],
+        correct: 1,
+        explain: "Static testing = analyze code without executing (SAST, code review). Dynamic = run code (DAST)."
+      },
+      // === DOMAIN 7: SECURITY OPERATIONS (13%) ===
+      { mode: "comparison", topic: "Security Operations",
+        q: "The first phase of incident response is typically:",
+        options: ["Containment", "Preparation", "Eradication", "Recovery"],
+        correct: 1,
+        explain: "NIST IR: Preparation, Detection & Analysis, Containment, Eradication, Recovery, Post-Incident."
+      },
+      { mode: "exam", topic: "Security Operations",
+        q: "Separation of duties helps prevent:",
+        options: ["Natural disasters", "Fraud (single person cannot complete critical task alone)", "Network outages", "Hardware failure"],
+        correct: 1,
+        explain: "SoD = split critical tasks; no single person can commit fraud. Also: job rotation, least privilege."
+      },
+      { mode: "comparison", topic: "Security Operations",
+        q: "A BCP addresses:",
+        options: ["Only technical recovery", "Business continuity during disruption", "Penetration testing only", "Code review only"],
+        correct: 1,
+        explain: "BCP = maintain business during disruption. DRP = restore IT. BIA = impact analysis."
+      },
+      // === DOMAIN 8: SOFTWARE DEVELOPMENT SECURITY (10%) ===
+      { mode: "comparison", topic: "Software Development Security",
+        q: "Integrating security early in the SDLC is known as:",
+        options: ["Security by obscurity", "Secure by design / Shift left", "Penetration testing only", "Post-release patching"],
+        correct: 1,
+        explain: "Shift left = security early in SDLC; cheaper than fixing later. Secure by design."
+      },
+      { mode: "exam", topic: "Software Development Security",
+        q: "SQL injection is an example of:",
+        options: ["Physical attack", "Injection attack (improper input validation)", "DoS only", "Social engineering only"],
+        correct: 1,
+        explain: "SQL injection = inject malicious SQL via input; improper validation. OWASP Top 10."
+      },
+      { mode: "comparison", topic: "Software Development Security",
+        q: "Which SDLC model involves iterative development with short cycles?",
+        options: ["Waterfall only", "Agile", "Big Bang", "Spiral only"],
+        correct: 1,
+        explain: "Agile = iterative, short sprints. Waterfall = sequential. Spiral = risk-driven iterations."
+      },
+      // === MORE DOMAIN 1 ===
+      { mode: "exam", topic: "Security and Risk Management",
+        q: "Quantitative risk assessment uses:",
+        options: ["Only subjective judgment", "Numerical values (ALE, SLE, ARO)", "No formulas", "Qualitative only"],
+        correct: 1,
+        explain: "Quantitative = SLE × ARO = ALE; dollar values. Qualitative = High/Med/Low."
+      },
+      { mode: "exam", topic: "Security and Risk Management",
+        q: "Residual risk is:",
+        options: ["Total risk before controls", "Risk remaining after controls", "Inherent risk only", "Threat only"],
+        correct: 1,
+        explain: "Residual risk = risk left after controls. Accept, transfer, mitigate, or avoid."
+      },
+      { mode: "comparison", topic: "Security and Risk Management",
+        q: "Due care vs due diligence: Due diligence is:",
+        options: ["One-time action", "Ongoing activities to maintain security", "Only legal", "Only technical"],
+        correct: 1,
+        explain: "Due care = reasonable action. Due diligence = ongoing maintenance, verification, monitoring."
+      },
+      // === MORE DOMAINS ===
+      { mode: "exam", topic: "Asset Security",
+        q: "Chain of custody is important for:",
+        options: ["Backup only", "Evidence integrity in forensics", "Encryption only", "Access control only"],
+        correct: 1,
+        explain: "Chain of custody = document handling of evidence; admissibility in court; who, when, where."
+      },
+      { mode: "exam", topic: "Security Architecture",
+        q: "Fail secure means:",
+        options: ["System fails open", "System defaults to secure state on failure", "No failure possible", "Manual override only"],
+        correct: 1,
+        explain: "Fail secure = on failure, deny access (secure default). Fail open = allow on failure (availability)."
+      },
+      { mode: "exam", topic: "Network Security",
+        q: "802.1X provides:",
+        options: ["Only encryption", "Port-based network access control (NAC)", "Antivirus", "IDS only"],
+        correct: 1,
+        explain: "802.1X = NAC; authenticate before granting network access; EAP, RADIUS."
+      },
+      { mode: "exam", topic: "IAM",
+        q: "Kerberos uses which of the following?",
+        options: ["Only passwords in cleartext", "Tickets and TGS for SSO", "Only symmetric crypto", "No encryption"],
+        correct: 1,
+        explain: "Kerberos = ticket-based SSO; KDC, TGT, TGS; timestamps prevent replay."
+      },
+      { mode: "exam", topic: "Security Assessment",
+        q: "A false positive in a vulnerability scan means:",
+        options: ["Real vulnerability missed", "Vulnerability reported but does not exist", "No scan performed", "Scan failed"],
+        correct: 1,
+        explain: "False positive = reported but not real. False negative = real vuln missed."
+      },
+      { mode: "exam", topic: "Security Operations",
+        q: "Tabletop exercises are used for:",
+        options: ["Physical drills only", "Discussing response procedures (no live systems)", "Penetration testing", "Code deployment"],
+        correct: 1,
+        explain: "Tabletop = walk through scenarios; discuss roles, procedures; no live systems."
+      },
+      { mode: "exam", topic: "Software Development Security",
+        q: "OWASP Top 10 focuses on:",
+        options: ["Hardware only", "Web application security risks", "Physical security", "Encryption algorithms"],
+        correct: 1,
+        explain: "OWASP Top 10 = web app risks; injection, XSS, broken auth, etc."
+      },
+      // === ADDITIONAL ===
+      { mode: "comparison", topic: "Security and Risk Management",
+        q: "A policy is:",
+        options: ["Step-by-step procedure", "High-level management directive", "Technical baseline", "Guideline only"],
+        correct: 1,
+        explain: "Policy = high-level, mandatory. Standard = specific requirements. Procedure = how-to. Guideline = recommended."
+      },
+      { mode: "comparison", topic: "Security Architecture",
+        q: "Symmetric encryption uses:",
+        options: ["Two different keys", "Same key for encrypt and decrypt", "Public key only", "No key"],
+        correct: 1,
+        explain: "Symmetric = one shared key (AES). Asymmetric = public + private (RSA)."
+      },
+      { mode: "comparison", topic: "Network Security",
+        q: "A honeypot is used to:",
+        options: ["Store production data", "Decoy to attract and study attackers", "Encrypt traffic", "Load balance"],
+        correct: 1,
+        explain: "Honeypot = decoy system; detect, study attackers; not production."
+      },
+      { mode: "exam", topic: "IAM",
+        q: "Least privilege means:",
+        options: ["Maximum access for all", "Minimum access necessary to perform job", "No access control", "Admin for everyone"],
+        correct: 1,
+        explain: "Least privilege = grant only needed permissions; reduces blast radius."
+      },
+      { mode: "exam", topic: "Security Operations",
+        q: "MTTR stands for:",
+        options: ["Maximum Time To Recover", "Mean Time To Repair/Recover", "Minimum Time To Respond", "Mean Time To Reboot"],
+        correct: 1,
+        explain: "MTTR = Mean Time To Repair/Recover. MTTF = fail. MTBF = between failures."
+      },
+      { mode: "comparison", topic: "Software Development Security",
+        q: "Input validation helps prevent:",
+        options: ["Hardware failure", "Injection attacks (XSS, SQLi)", "Power outage", "Physical theft"],
+        correct: 1,
+        explain: "Input validation = sanitize/validate input; prevent injection, XSS."
+      },
+      { mode: "exam", topic: "Security and Risk Management",
+        q: "A BIA identifies:",
+        options: ["Only technical systems", "Critical business functions and impact of disruption", "Threat actors only", "Encryption keys only"],
+        correct: 1,
+        explain: "BIA = Business Impact Analysis; critical functions, RTO, RPO, impact."
+      },
+      { mode: "exam", topic: "Asset Security",
+        q: "Data masking is used to:",
+        options: ["Encrypt all data", "Protect sensitive data in non-prod (e.g., PII)", "Delete data", "Backup only"],
+        correct: 1,
+        explain: "Data masking = obscure PII/sensitive in dev/test; retain format, not real values."
+      },
+      { mode: "exam", topic: "Security Architecture",
+        q: "Defense in depth and diversity means:",
+        options: ["Single vendor for all", "Layered controls from different types/vendors", "No redundancy", "Physical only"],
+        correct: 1,
+        explain: "Diversity = avoid single point of failure; different control types/vendors."
+      },
+      { mode: "exam", topic: "Network Security",
+        q: "DNSSEC provides:",
+        options: ["Encryption of DNS traffic", "Authentication and integrity of DNS responses", "Faster DNS only", "No security"],
+        correct: 1,
+        explain: "DNSSEC = signed responses; authentication, integrity. Does not encrypt (DNS over TLS/HTTPS does)."
+      },
+      { mode: "exam", topic: "Security Assessment",
+        q: "Regression testing ensures:",
+        options: ["Only new features", "Changes do not break existing functionality", "No testing", "Pen test only"],
+        correct: 1,
+        explain: "Regression testing = verify changes don't break existing; retest previous functionality."
+      },
+      { mode: "exam", topic: "Security Operations",
+        q: "Recovery Time Objective (RTO) is:",
+        options: ["Maximum acceptable downtime (time to restore)", "Maximum data loss", "Backup frequency", "Encryption strength"],
+        correct: 0,
+        explain: "RTO = max acceptable downtime. RPO = max acceptable data loss. MTD = max tolerable downtime (similar)."
+      },
+      { mode: "exam", topic: "Software Development Security",
+        q: "A software escrow agreement:",
+        options: ["Encrypts source code", "Stores source code with third party for contingency", "Deletes code", "Publishes code"],
+        correct: 1,
+        explain: "Escrow = vendor deposits source with neutral party; released if vendor fails; continuity."
+      },
+      { mode: "comparison", topic: "Security and Risk Management",
+        q: "Certification vs Accreditation: Accreditation is:",
+        options: ["Technical evaluation only", "Management approval to operate (authorization)", "Pen test only", "Audit only"],
+        correct: 1,
+        explain: "Certification = technical eval (security posture). Accreditation = management authorization to operate."
+      },
+      { mode: "exam", topic: "IAM",
+        q: "Federation allows:",
+        options: ["Single org only", "Cross-domain SSO (trust between orgs)", "No SSO", "Only local auth"],
+        correct: 1,
+        explain: "Federation = trust between orgs; SSO across domains; SAML, OAuth, OpenID Connect."
+      },
+      { mode: "exam", topic: "Security Operations",
+        q: "A security baseline is:",
+        options: ["Maximum configuration", "Minimum secure configuration standard", "Optional guideline", "Policy only"],
+        correct: 1,
+        explain: "Baseline = minimum secure config; hardening standard; compliance starting point."
+      },
+      // === FROM CISSP NOTES ===
+      { mode: "comparison", topic: "Security and Risk Management",
+        q: "CAAIN (what a cryptosystem delivers) includes Non-Repudiation. Digital signatures provide:",
+        options: ["Only confidentiality", "Integrity + Authentication + Non-Repudiation", "Only availability", "Only authorization"],
+        correct: 1,
+        explain: "Digital Signature = integrity + authentication + non-repudiation. Encrypt hash with private key."
+      },
+      { mode: "comparison", topic: "Security and Risk Management",
+        q: "AAA stands for:",
+        options: ["Access, Audit, Asset", "Authentication, Authorization, Accountability", "Availability, Accuracy, Assurance", "Assessment, Approval, Audit"],
+        correct: 1,
+        explain: "Authentication = who you are. Authorization = what you can do. Accountability = proving what you did."
+      },
+      { mode: "exam", topic: "Security and Risk Management",
+        q: "In quantitative risk: ALE = ?",
+        options: ["EF × AV only", "SLE × ARO (or ARO × EF × AV)", "AV only", "ARO only"],
+        correct: 1,
+        explain: "ALE = Annual Loss Expectancy = SLE × ARO. SLE = EF × AV. ARO = Annual Rate of Occurrence."
+      },
+      { mode: "exam", topic: "Security and Risk Management",
+        q: "Single Loss Expectancy (SLE) is calculated as:",
+        options: ["ARO × EF", "EF × AV (Exposure Factor × Asset Value)", "ALE / ARO", "AV only"],
+        correct: 1,
+        explain: "SLE = EF × AV. How much one hit costs. ALE = SLE × ARO."
+      },
+      { mode: "exam", topic: "Security and Risk Management",
+        q: "The four approaches to managing risk (in order) are:",
+        options: ["Accept, Transfer, Mitigate, Avoid", "Mitigate, Transfer, Accept, Avoid", "Avoid only", "Ignore (risk rejection)"],
+        correct: 1,
+        explain: "1) Mitigate (controls), 2) Transfer (insurance), 3) Accept (residual risk), 4) Avoid (don't engage). Ignore is unacceptable."
+      },
+      { mode: "exam", topic: "IAM",
+        q: "FRR (False Reject Rate) in biometrics is also known as:",
+        options: ["Type 2 error", "Type 1 error - system fails to accept authorized user", "CER", "FAR"],
+        correct: 1,
+        explain: "FRR = Type 1 = reject authorized user. FAR = Type 2 = accept unauthorized (more dangerous). CER = Crossover Error Rate."
+      },
+      { mode: "exam", topic: "IAM",
+        q: "OAuth does NOT authenticate the user. OAuth is used for:",
+        options: ["Authentication only", "Delegated authorization (authorize app to access resources on your behalf)", "Encryption only", "Hashing only"],
+        correct: 1,
+        explain: "OAuth = delegated authorization. IdP (e.g., Google) authenticates you; OAuth lets app access your resources. OpenID Connect adds authentication."
+      },
+      { mode: "comparison", topic: "Security Architecture",
+        q: "Which block cipher mode is the worst (same plaintext → same ciphertext, reveals patterns)?",
+        options: ["CBC", "CTR", "ECB - Electronic Codebook", "GCM"],
+        correct: 2,
+        explain: "ECB = worst; no IV, patterns visible. CBC, CTR, GCM use IV/nonce. GCM adds authentication."
+      },
+      { mode: "comparison", topic: "Security Architecture",
+        q: "HMAC provides:",
+        options: ["Only confidentiality", "Authentication and integrity (hash over message + shared secret)", "Only encryption", "Non-repudiation only"],
+        correct: 1,
+        explain: "HMAC = Hash(message + shared secret). Authentication + integrity. No confidentiality by itself."
+      },
+      { mode: "exam", topic: "Security Architecture",
+        q: "OCSP responders return which status results?",
+        options: ["Only Revoked", "Good, Revoked, or Unknown", "Only Good", "Only Unknown"],
+        correct: 1,
+        explain: "OCSP = Online Certificate Status Protocol. Responder returns: Good, Revoked, or Unknown."
+      },
+      { mode: "exam", topic: "Security and Risk Management",
+        q: "In NIST RMF: Scoping allows a control to be marked N/A when:",
+        options: ["It does not enhance your security posture", "You don't like it", "It costs too much", "It's optional"],
+        correct: 1,
+        explain: "Scoping = limit controls to those applicable. Tailoring = customize controls. Overlay = specialty system controls (e.g., SCADA)."
+      },
+      { mode: "exam", topic: "Security Operations",
+        q: "Per ITIL: A Problem is:",
+        options: ["The same as an Incident", "The underlying root cause of an incident or potential incident", "Only a minor issue", "Always resolved immediately"],
+        correct: 1,
+        explain: "ITIL: Problem = root cause. Incident = unplanned loss or unacceptable degradation of service."
+      },
+      { mode: "exam", topic: "Asset Security",
+        q: "eHold (vs Legal Hold): eHold can be placed:",
+        options: ["Only after court order", "Before a case is filed—to preserve potential evidence", "Only by judge", "Only by attorney"],
+        correct: 1,
+        explain: "eHold = proactive preservation when litigation may be forthcoming. Legal Hold = court-ordered retention."
+      },
+      { mode: "exam", topic: "Asset Security",
+        q: "Order of Volatility (for evidence collection) means:",
+        options: ["Collect everything at once", "Gather evidence that will degrade first (e.g., RAM before disk)", "Ignore volatility", "Collect disk first"],
+        correct: 1,
+        explain: "Order of Volatility = collect most volatile first: RAM, cache, swap, disk, backup. Also consider probative value and ease of collection."
+      },
+      { mode: "exam", topic: "Asset Security",
+        q: "Purging vs Clearing: Purging means:",
+        options: ["Data cannot be recovered by any known technique", "Data cleared but may be recovered by forensic equipment", "Same as deletion", "Same as overwrite"],
+        correct: 1,
+        explain: "Clearing = common techniques can't recover. Purging = no known technique can recover. Destruction = physical destruction."
+      },
+      { mode: "exam", topic: "Security Architecture",
+        q: "Biba model (integrity): Simple Integrity Axiom states:",
+        options: ["Read up allowed", "No read down (subject must not read lower integrity data)", "Write down allowed", "Same as Bell-LaPadula"],
+        correct: 1,
+        explain: "Biba: No read down (don't trust lower integrity). *-property: No write up. Bell-LaPadula = confidentiality."
+      },
+      { mode: "exam", topic: "Security Operations",
+        q: "BCP vs DRP: DRP addresses:",
+        options: ["Continuing service during outage", "How we restore operations back to normal after disaster", "Same as BCP", "Only backups"],
+        correct: 1,
+        explain: "BCP = continue operations during disruption. DRP = restore after disaster. COOP = limited period (12hr–30 days)."
+      },
+      { mode: "exam", topic: "Security Operations",
+        q: "RPO (Recovery Point Objective) is:",
+        options: ["Max time to restore", "Maximum acceptable data loss", "Max downtime", "Backup frequency only"],
+        correct: 1,
+        explain: "RPO = max acceptable data loss (how far back to recover). RTO = max acceptable downtime."
+      },
+      { mode: "exam", topic: "Security Operations",
+        q: "A Hot Site provides:",
+        options: ["Empty space to rebuild", "Everything synced live; ready for immediate failover", "Scheduled sync only", "Cold start only"],
+        correct: 1,
+        explain: "Hot = live sync, immediate. Warm = scheduled sync. Cold = rebuild from backup."
+      },
+      { mode: "exam", topic: "Security Architecture",
+        q: "RAID 5 provides:",
+        options: ["Only striping", "Striping with parity; single disk failure tolerated", "Mirroring only", "No redundancy"],
+        correct: 1,
+        explain: "RAID 5 = striping + parity. One disk failure OK; degraded until rebuilt. Min 3 disks."
+      },
+      { mode: "exam", topic: "Physical Security",
+        q: "Fire extinguisher Type C is for:",
+        options: ["Ordinary combustibles", "Flammable liquids", "Electrical fires", "Combustible metals"],
+        correct: 2,
+        explain: "CLEM-K: C=Electrical, L=Liquid, E=Electrical, M=Metal, K=Kitchen. Type A=Ordinary, B=Liquid, C=Electrical, D=Metal, K=Kitchen."
+      },
+      { mode: "exam", topic: "Security and Risk Management",
+        q: "CMMI Level 1 (Initial) is also called:",
+        options: ["Optimizing", "Defined", "Ad-hoc", "Quantitatively Managed"],
+        correct: 2,
+        explain: "CMMI: 1=Initial (Ad-hoc), 2=Repeatable, 3=Defined, 4=Managed (Quantitatively), 5=Optimizing."
+      },
+      { mode: "exam", topic: "Asset Security",
+        q: "Data Classification vs Data Categorization: Classification is:",
+        options: ["The process", "The system we use to label data by impact of CIA loss", "Same as categorization", "Only for DoD"],
+        correct: 1,
+        explain: "Classification = system/labels (Top Secret, Confidential, etc.). Categorization = process of sorting data."
+      },
+      { mode: "exam", topic: "IAM",
+        q: "MAC (Mandatory Access Control) uses:",
+        options: ["Owner-defined permissions only", "Classification, clearance, labels, need-to-know", "Roles only", "Attributes only"],
+        correct: 1,
+        explain: "MAC = labels, clearance, need-to-know. DAC = owner sets permissions. RBAC = roles. ABAC = attributes."
+      },
+      { mode: "exam", topic: "Security Architecture",
+        q: "Salt (in password hashing) helps defeat:",
+        options: ["Encryption", "Rainbow tables by exponentially increasing work factor", "Brute force only", "Dictionary attacks only"],
+        correct: 1,
+        explain: "Salt = random bits added before hashing. Defeats rainbow tables; each password needs unique table."
+      },
+      { mode: "exam", topic: "Network Security",
+        q: "802.1X provides:",
+        options: ["Only encryption", "Port-based Network Access Control (NAC)", "Antivirus", "IDS only"],
+        correct: 1,
+        explain: "802.1X = NAC; authenticate before granting network access; EAP, RADIUS."
+      },
+      { mode: "exam", topic: "Security Operations",
+        q: "Pre-action sprinkler systems:",
+        options: ["Always discharge on heat", "Delay discharge until verification of true positive (e.g., two detectors)", "Same as deluge", "No verification"],
+        correct: 1,
+        explain: "Pre-action = delay until verification (e.g., smoke + heat). Used in data centers, museums."
+      },
+      { mode: "exam", topic: "Software Development Security",
+        q: "Prepared statements (parameterized queries) are the #1 defense against:",
+        options: ["XSS only", "SQL injection", "Buffer overflow", "DoS"],
+        correct: 1,
+        explain: "Prepared statements = bind parameters; SQL can't be injected. Better than input sanitization alone."
+      },
+      { mode: "exam", topic: "Security Operations",
+        q: "Mandatory vacation helps detect:",
+        options: ["Hardware failures", "Fraud (investigate while person is away)", "Network issues", "Encryption problems"],
+        correct: 1,
+        explain: "Mandatory vacation = suspend to investigate fraud/tampering; person can't cover tracks."
+      },
+      { mode: "comparison", topic: "Security and Risk Management",
+        q: "Due Care vs Due Diligence: Due Diligence is:",
+        options: ["Managerial planning only", "Validation/verification that due care actions were undertaken", "Same as due care", "Optional"],
+        correct: 1,
+        explain: "Due Care = reasonable steps to prevent harm (planning, custodial actions). Due Diligence = verify those steps were done (verification, metrics)."
+      },
+      { mode: "exam", topic: "IAM",
+        q: "Kerberos: A TGT (Ticket Granting Ticket) is issued by:",
+        options: ["The service", "The Authentication Service (AS) / KDC", "The client", "LDAP"],
+        correct: 1,
+        explain: "TGT = issued by AS (part of KDC) after user authenticates. Used to request Session Tickets from TGS."
+      },
+      { mode: "exam", topic: "Security Architecture",
+        q: "IPSec ESP (Encapsulating Security Payload) provides:",
+        options: ["Only integrity", "Confidentiality, integrity, replay protection, authentication", "Only authentication", "No encryption"],
+        correct: 1,
+        explain: "ESP = encryption + HMAC (auth/integrity) + replay (nonce). AH = integrity only, no encryption."
+      },
+      { mode: "exam", topic: "Asset Security",
+        q: "GDPR breach notification must occur within:",
+        options: ["30 days", "72 hours", "1 year", "No requirement"],
+        correct: 1,
+        explain: "GDPR: breaches must be reported within 72 hours. Fines up to €20M or 4% global revenue."
+      },
+      { mode: "exam", topic: "Security Architecture",
+        q: "DHE (Diffie-Hellman Exchange) is susceptible to:",
+        options: ["Only brute force", "Man-in-the-Middle (MitM) - needs authentication", "Nothing", "Replay only"],
+        correct: 1,
+        explain: "DHE = key exchange; no auth by itself. MitM possible. Use with certs/PSK for authentication."
+      },
+      { mode: "exam", topic: "IAM",
+        q: "IAL3 (Identity Assurance Level 3) requires:",
+        options: ["Self-attestation only", "In-person registration AND identification verified by 3rd party CSP", "Optional in-person", "Form only"],
+        correct: 1,
+        explain: "IAL1 = self-attestation. IAL2 = ID verification. IAL3 = in-person + 3rd party CSP verification."
+      },
+      { mode: "exam", topic: "Security and Risk Management",
+        q: "Administrative controls are:",
+        options: ["Firewalls and IDS", "Directives (policy, training, SOPs, banners)", "Guards and locks", "Encryption"],
+        correct: 1,
+        explain: "Administrative = policy, training, procedures. Logical = firewall, IDS. Physical = guards, locks."
+      },
+      { mode: "exam", topic: "Security Architecture",
+        q: "FIPS 140 Level 3 adds (vs Level 2):",
+        options: ["Basic security only", "Tamper evident + role-based auth", "Tamper resistant + identity-based auth (attempting break destroys data)", "Environmental protections"],
+        correct: 2,
+        explain: "Level 1 = basic. Level 2 = tamper evident, role-based. Level 3 = tamper resistant, identity-based. Level 4 = environmental."
+      },
+    ];
+
+    const QUESTIONS_PER_QUIZ = 40;
+    let currentIndex = 0;
+    let score = 0;
+    let answered = [];
+    let sessionQuestions = [];
+    let selectedMode = 'mixed';
+
+    function getProfile() {
+      try {
+        const raw = localStorage.getItem(PROFILE_KEY);
+        if (!raw) return { quizId: QUIZ_ID, topicStats: {}, topicMissesFromImports: {} };
+        const p = JSON.parse(raw);
+        return {
+          quizId: p.quizId || QUIZ_ID,
+          topicStats: p.topicStats || {},
+          topicMissesFromImports: p.topicMissesFromImports || {}
+        };
+      } catch (e) {
+        return { quizId: QUIZ_ID, topicStats: {}, topicMissesFromImports: {} };
+      }
+    }
+
+    function saveProfile(profile) {
+      try {
+        localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+      } catch (e) {}
+    }
+
+    function getTopicWeight(profile, topic) {
+      const t = topic || 'Other';
+      let missRate = 0;
+      if (profile.topicStats[t] && profile.topicStats[t].total > 0) {
+        missRate = 1 - (profile.topicStats[t].correct / profile.topicStats[t].total);
+      }
+      const importMisses = (profile.topicMissesFromImports[t] || 0) * 0.2;
+      return 1 + Math.min(missRate + importMisses, 2);
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function weightedSample(arr, n, profile) {
+      const hasData = profile && (Object.keys(profile.topicStats).length > 0 || Object.keys(profile.topicMissesFromImports).length > 0);
+      if (!hasData) {
+        const shuffled = shuffle(arr);
+        return shuffled.slice(0, Math.min(n, shuffled.length));
+      }
+      const withKeys = arr.map(q => {
+        const w = getTopicWeight(profile, q.topic);
+        return { q, key: Math.pow(Math.random(), 1 / w) };
+      });
+      withKeys.sort((a, b) => b.key - a.key);
+      return withKeys.slice(0, Math.min(n, withKeys.length)).map(x => x.q);
+    }
+
+    function getWeakTopics(profile, topN) {
+      const scores = [];
+      const topics = new Set([
+        ...Object.keys(profile.topicStats || {}),
+        ...Object.keys(profile.topicMissesFromImports || {})
+      ]);
+      topics.forEach(t => {
+        let weakness = 0;
+        if (profile.topicStats[t] && profile.topicStats[t].total > 0) {
+          weakness = 1 - (profile.topicStats[t].correct / profile.topicStats[t].total);
+        }
+        weakness += (profile.topicMissesFromImports[t] || 0) * 0.15;
+        scores.push({ topic: t, weakness });
+      });
+      scores.sort((a, b) => b.weakness - a.weakness);
+      return scores.slice(0, topN).filter(x => x.weakness > 0.1).map(x => x.topic);
+    }
+
+    function selectMode(mode) {
+      selectedMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
+      document.querySelector('[data-mode="' + mode + '"]').classList.add('selected');
+    }
+
+    function startQuiz() {
+      const filtered = questionBank.filter(q => {
+        if (selectedMode === 'comparison') return q.mode === 'comparison';
+        if (selectedMode === 'exam') return q.mode === 'exam';
+        return true;
+      });
+      const profile = getProfile();
+      sessionQuestions = weightedSample(filtered, QUESTIONS_PER_QUIZ, profile);
+      currentIndex = 0;
+      score = 0;
+      answered = [];
+      const hintEl = document.getElementById('focus-hint');
+      const weak = getWeakTopics(profile, 3);
+      if (weak.length > 0) {
+        hintEl.textContent = "We'll focus more on: " + weak.join(', ') + '.';
+        hintEl.classList.remove('hidden');
+      } else {
+        hintEl.classList.add('hidden');
+      }
+      document.getElementById('start-screen').classList.add('hidden');
+      document.getElementById('results-screen').classList.add('hidden');
+      document.getElementById('quiz-area').classList.remove('hidden');
+      document.getElementById('q-total').textContent = sessionQuestions.length;
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = sessionQuestions[currentIndex];
+      document.getElementById('q-num').textContent = currentIndex + 1;
+      document.getElementById('score-display').textContent = score;
+      document.getElementById('question-text').textContent = q.q;
+      const opts = document.getElementById('options');
+      opts.innerHTML = '';
+      const fb = document.getElementById('feedback');
+      fb.classList.add('hidden');
+      fb.className = 'feedback hidden';
+
+      q.options.forEach((opt, i) => {
+        const div = document.createElement('div');
+        div.className = 'option';
+        div.textContent = opt;
+        div.dataset.index = i;
+        if (answered[currentIndex] !== undefined) {
+          div.classList.add('disabled');
+          if (i === q.correct) div.classList.add('correct');
+          else if (i === answered[currentIndex]) div.classList.add('wrong');
+        } else {
+          div.onclick = () => selectOption(currentIndex, i, q);
+        }
+        opts.appendChild(div);
+      });
+
+      if (answered[currentIndex] !== undefined) {
+        fb.classList.remove('hidden');
+        fb.className = 'feedback ' + (answered[currentIndex] === q.correct ? 'correct-msg' : 'wrong-msg');
+        fb.innerHTML = (answered[currentIndex] === q.correct ? '✓ Correct. ' : '✗ Incorrect. ') + '<span class="explanation">' + q.explain + '</span>';
+      }
+
+      document.getElementById('prev-btn').disabled = currentIndex === 0;
+    }
+
+    function selectOption(pos, optIdx, q) {
+      if (answered[pos] !== undefined) return;
+      answered[pos] = optIdx;
+      if (optIdx === q.correct) score++;
+
+      document.querySelectorAll('#options .option').forEach(o => {
+        o.classList.add('disabled');
+        o.onclick = null;
+        if (parseInt(o.dataset.index) === q.correct) o.classList.add('correct');
+        else if (parseInt(o.dataset.index) === optIdx) o.classList.add('wrong');
+      });
+
+      const fb = document.getElementById('feedback');
+      fb.classList.remove('hidden');
+      fb.innerHTML = (optIdx === q.correct ? '✓ Correct. ' : '✗ Incorrect. ') + '<span class="explanation">' + q.explain + '</span>';
+      fb.className = 'feedback ' + (optIdx === q.correct ? 'correct-msg' : 'wrong-msg');
+      document.getElementById('score-display').textContent = score;
+    }
+
+    function nextQuestion() {
+      if (currentIndex < sessionQuestions.length - 1) {
+        currentIndex++;
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderQuestion();
+      }
+    }
+
+    function saveSessionToProfile() {
+      const profile = getProfile();
+      sessionQuestions.forEach((q, i) => {
+        const t = q.topic || 'Other';
+        if (!profile.topicStats[t]) profile.topicStats[t] = { correct: 0, total: 0 };
+        profile.topicStats[t].total++;
+        if (answered[i] !== undefined && answered[i] === q.correct) {
+          profile.topicStats[t].correct++;
+        }
+      });
+      saveProfile(profile);
+    }
+
+    function showResults() {
+      saveSessionToProfile();
+      document.getElementById('quiz-area').classList.add('hidden');
+      const r = document.getElementById('results-screen');
+      r.classList.remove('hidden');
+      const total = sessionQuestions.length;
+      const pct = Math.round((score / total) * 100);
+      document.getElementById('final-score').textContent = score + ' / ' + total + ' (' + pct + '%)';
+      document.getElementById('final-score').className = 'score ' + (pct >= 70 ? 'pass' : 'fail');
+      document.getElementById('result-msg').textContent = pct >= 70
+        ? 'Passing is 700/1000 (~70%). You\'re on track!'
+        : 'Aim for 700+ (70%) on the real exam. Review and try again.';
+      document.getElementById('copy-toast').classList.add('hidden');
+    }
+
+    function getResultsMarkdown() {
+      const total = sessionQuestions.length;
+      const pct = Math.round((score / total) * 100);
+      const missed = sessionQuestions.map((q, i) => ({ q, i })).filter(x => answered[x.i] !== undefined && answered[x.i] !== x.q.correct);
+      const topicCounts = {};
+      missed.forEach(x => {
+        const t = x.q.topic || 'Other';
+        topicCounts[t] = (topicCounts[t] || 0) + 1;
+      });
+      let md = '# CISSP Quiz Results\n\n';
+      md += '**Date:** ' + new Date().toISOString().slice(0, 10) + '\n';
+      md += '**Mode:** ' + (selectedMode === 'comparison' ? 'Domain Focus' : selectedMode === 'exam' ? 'Exam' : 'Mixed') + '\n';
+      md += '**Score:** ' + score + '/' + total + ' (' + pct + '%)\n';
+      md += '**Pass (70%):** ' + (pct >= 70 ? 'Yes' : 'No') + '\n\n';
+      md += '---\n\n';
+      md += '## Instructions for AI Refactoring\n\n';
+      md += 'Paste this entire block into a Cursor chat and say:\n';
+      md += '> "Refactor the CISSP quiz based on my mistakes. Add more questions on my weak topics."\n\n';
+      if (Object.keys(topicCounts).length > 0) {
+        md += '## Misses by Topic\n\n';
+        Object.entries(topicCounts).sort((a, b) => b[1] - a[1]).forEach(([t, n]) => {
+          md += '- **' + t + ':** ' + n + ' missed\n';
+        });
+        md += '\n';
+      }
+      if (missed.length > 0) {
+        md += '## Missed Questions (for AI refactoring)\n\n';
+        missed.forEach((x, i) => {
+          const q = x.q;
+          const yourAns = q.options[answered[x.i]];
+          const correctAns = q.options[q.correct];
+          md += '### ' + (i + 1) + '. [' + (q.topic || 'General') + ']\n';
+          md += '**Q:** ' + q.q + '\n';
+          md += '**Your answer:** ' + yourAns + '\n';
+          md += '**Correct answer:** ' + correctAns + '\n';
+          md += '**Explanation:** ' + q.explain + '\n\n';
+        });
+      }
+      return md;
+    }
+
+    function downloadResults() {
+      const blob = new Blob([getResultsMarkdown()], { type: 'text/markdown' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'cissp_quiz_results_' + new Date().toISOString().slice(0, 10) + '.md';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function copyResultsToClipboard() {
+      navigator.clipboard.writeText(getResultsMarkdown()).then(() => {
+        document.getElementById('copy-toast').classList.remove('hidden');
+        setTimeout(() => document.getElementById('copy-toast').classList.add('hidden'), 2500);
+      });
+    }
+
+    function parseImportedResults(mdText) {
+      const lines = mdText.split('\n');
+      const firstLine = (lines[0] || '').toLowerCase();
+      if (QUIZ_ID !== 'cissp' && firstLine.includes('cissp')) return { ok: false, error: 'This file is for CISSP quiz.' };
+      let inSection = false;
+      const topicMisses = {};
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.indexOf('## Misses by Topic') !== -1) {
+          inSection = true;
+          continue;
+        }
+        if (inSection && line.startsWith('## ')) break;
+        if (inSection && line.match(/^\s*-\s*\*\*(.+?)\*\*:\s*(\d+)\s+missed/)) {
+          const m = line.match(/^\s*-\s*\*\*(.+?)\*\*:\s*(\d+)\s+missed/);
+          const topic = m[1].trim();
+          const n = parseInt(m[2], 10);
+          topicMisses[topic] = (topicMisses[topic] || 0) + n;
+        }
+      }
+      if (Object.keys(topicMisses).length === 0) return { ok: false, error: 'No "Misses by Topic" section found.' };
+      return { ok: true, topicMisses };
+    }
+
+    function importResults() {
+      const ta = document.getElementById('import-results');
+      const mdText = (ta && ta.value || '').trim();
+      if (!mdText) {
+        showImportToast('Paste results markdown first, or choose a file.', true);
+        return;
+      }
+      const result = parseImportedResults(mdText);
+      if (!result.ok) {
+        showImportToast(result.error || 'Could not parse results.', true);
+        return;
+      }
+      const profile = getProfile();
+      if (!profile.topicMissesFromImports) profile.topicMissesFromImports = {};
+      Object.entries(result.topicMisses).forEach(([topic, n]) => {
+        profile.topicMissesFromImports[topic] = (profile.topicMissesFromImports[topic] || 0) + n;
+      });
+      saveProfile(profile);
+      const top = Object.entries(result.topicMisses).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]);
+      showImportToast('Imported. We\'ll focus more on: ' + top.join(', ') + '.', false);
+      if (ta) ta.value = '';
+    }
+
+    function onImportFile(ev) {
+      const f = ev.target.files && ev.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = function () {
+        const ta = document.getElementById('import-results');
+        if (ta) ta.value = r.result || '';
+        importResults();
+      };
+      r.readAsText(f);
+      ev.target.value = '';
+    }
+
+    function showImportToast(msg, isError) {
+      const el = document.getElementById('import-toast');
+      if (!el) return;
+      el.textContent = msg;
+      el.className = 'import-toast ' + (isError ? 'err' : 'success');
+      el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 4000);
+    }
+
+    (function initFocusHint() {
+      const profile = getProfile();
+      const weak = getWeakTopics(profile, 3);
+      const hintEl = document.getElementById('focus-hint');
+      if (hintEl && weak.length > 0) {
+        hintEl.textContent = "We'll focus more on: " + weak.join(', ') + '.';
+        hintEl.classList.remove('hidden');
+      }
+    })();
+  </script>
+</body>
+</html>

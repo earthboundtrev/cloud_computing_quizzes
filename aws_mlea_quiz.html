@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AWS ML Engineer Associate Practice Quiz</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --accent: #ff9900;
+      --accent-dim: #ec7211;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --correct: #22c55e;
+      --wrong: #ef4444;
+      --font: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    .container { max-width: 720px; margin: 0 auto; }
+    h1 {
+      font-size: 1.5rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem; }
+    .stats {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .stats span { color: var(--accent); font-weight: 600; }
+    .question-card {
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border-left: 3px solid var(--accent);
+    }
+    .question-text {
+      font-size: 1.05rem;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+    .options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .option {
+      padding: 0.75rem 1rem;
+      background: var(--bg);
+      border: 2px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .option:hover:not(.disabled) {
+      border-color: var(--accent-dim);
+      background: #151d2b;
+    }
+    .option.selected { border-color: var(--accent); background: #151d2b; }
+    .option.correct { border-color: var(--correct); background: rgba(34,197,94,0.1); }
+    .option.wrong { border-color: var(--wrong); background: rgba(239,68,68,0.1); }
+    .option.disabled { cursor: not-allowed; opacity: 0.7; }
+    .feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+    .feedback.correct-msg { background: rgba(34,197,94,0.15); border-left: 4px solid var(--correct); }
+    .feedback.wrong-msg { background: rgba(239,68,68,0.15); border-left: 4px solid var(--wrong); }
+    .feedback .explanation { margin-top: 0.5rem; color: var(--text-muted); }
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.5rem;
+    }
+    button {
+      padding: 0.6rem 1.2rem;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: var(--accent-dim); }
+    button.secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+    }
+    button.secondary:hover { background: rgba(255,153,0,0.1); }
+    .results {
+      text-align: center;
+      padding: 2rem;
+    }
+    .results h2 { color: var(--accent); margin-bottom: 1rem; }
+    .score { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .results-actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
+    .results-actions button.secondary { margin: 0; }
+    .copy-toast { font-size: 0.85rem; color: var(--correct); margin-top: 0.5rem; }
+    .score.pass { color: var(--correct); }
+    .score.fail { color: var(--wrong); }
+    .start-screen { text-align: center; padding: 3rem 0; }
+    .start-screen p { margin-bottom: 1.5rem; color: var(--text-muted); }
+    .mode-selector { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; max-width: 360px; margin-left: auto; margin-right: auto; }
+    .mode-btn {
+      padding: 1rem 1.5rem;
+      text-align: left;
+      background: var(--surface);
+      border: 2px solid transparent;
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .mode-btn:hover { border-color: var(--accent-dim); background: #151d2b; }
+    .mode-btn.selected { border-color: var(--accent); background: rgba(255,153,0,0.1); }
+    .mode-btn .label { font-weight: 600; display: block; }
+    .mode-btn .desc { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .profile-hint { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.75rem; }
+    .import-area { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--surface); text-align: left; }
+    .import-area label { display: block; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--text-muted); }
+    .import-area textarea { width: 100%; min-height: 80px; padding: 0.5rem; background: var(--surface); border: 1px solid var(--accent-dim); border-radius: 6px; color: var(--text); font-family: inherit; font-size: 0.85rem; resize: vertical; }
+    .import-toast { font-size: 0.85rem; margin-top: 0.5rem; }
+    .import-toast.success { color: var(--correct); }
+    .import-toast.err { color: var(--wrong); }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>AWS ML Engineer Associate Practice Quiz</h1>
+    <p class="subtitle">MLA-C01 • Data prep, model dev, deployment, monitoring</p>
+
+    <div id="start-screen" class="start-screen">
+      <p>40 questions per session, drawn from a pool of 55+. Randomized each run. Choose your mode:</p>
+      <p id="focus-hint" class="profile-hint hidden"></p>
+      <div class="mode-selector">
+        <button type="button" class="mode-btn" data-mode="comparison" onclick="selectMode('comparison')">
+          <span class="label">Service Selection</span>
+          <span class="desc">Map use cases to SageMaker and AWS ML services.</span>
+        </button>
+        <button type="button" class="mode-btn" data-mode="exam" onclick="selectMode('exam')">
+          <span class="label">Exam (Scenario-based)</span>
+          <span class="desc">ML pipelines, deployment, monitoring, security—exam-style.</span>
+        </button>
+        <button type="button" class="mode-btn selected" data-mode="mixed" onclick="selectMode('mixed')">
+          <span class="label">Mixed</span>
+          <span class="desc">Both service selection and exam-style. Simulates full exam.</span>
+        </button>
+      </div>
+      <button id="start-btn" onclick="startQuiz()">Start Quiz</button>
+      <div class="import-area">
+        <label for="import-results">Import past results (paste .md or choose file) to focus on weak topics:</label>
+        <textarea id="import-results" placeholder="Paste quiz results markdown here..."></textarea>
+        <button type="button" class="secondary" style="margin-top: 0.5rem;" onclick="importResults()">Import results</button>
+        <input type="file" id="import-file" accept=".md,text/markdown" style="display: none;" onchange="onImportFile(event)">
+        <button type="button" class="secondary" style="margin-top: 0.5rem; margin-left: 0.5rem;" onclick="document.getElementById('import-file').click()">Choose file</button>
+        <p id="import-toast" class="import-toast hidden"></p>
+      </div>
+    </div>
+
+    <div id="quiz-area" class="hidden">
+      <div class="stats">
+        <span>Question <span id="q-num">1</span> of <span id="q-total">40</span></span>
+        <span>Correct: <span id="score-display">0</span></span>
+      </div>
+      <div class="question-card">
+        <div class="question-text" id="question-text"></div>
+        <div class="options" id="options"></div>
+        <div id="feedback" class="feedback hidden"></div>
+      </div>
+      <div class="nav-row">
+        <button id="prev-btn" class="secondary" onclick="prevQuestion()">← Previous</button>
+        <button id="next-btn" onclick="nextQuestion()">Next →</button>
+      </div>
+    </div>
+
+    <div id="results-screen" class="results hidden">
+      <h2>Quiz Complete</h2>
+      <div class="score" id="final-score"></div>
+      <p id="result-msg" style="margin-bottom: 1.5rem; color: var(--text-muted);"></p>
+      <div class="results-actions">
+        <button onclick="startQuiz()">Try Again</button>
+        <button class="secondary" onclick="downloadResults()">Download Results</button>
+        <button class="secondary" onclick="copyResultsToClipboard()">Copy to Clipboard</button>
+      </div>
+      <p id="copy-toast" class="copy-toast hidden">Copied! Paste into Cursor chat for AI refactoring.</p>
+    </div>
+  </div>
+
+  <script>
+    const QUIZ_ID = 'aws_mlea';
+    const PROFILE_KEY = 'study_sessions_profile_' + QUIZ_ID;
+
+    const questionBank = [
+      // === DATA PREPARATION ===
+      { mode: "comparison", topic: "Data Preparation",
+        q: "Which SageMaker component helps with data cleaning, transformation, and feature engineering in a visual interface?",
+        options: ["SageMaker Ground Truth", "SageMaker Data Wrangler", "SageMaker Feature Store", "SageMaker Pipelines"],
+        correct: 1,
+        explain: "SageMaker Data Wrangler = visual data prep; connect to S3/Athena/Redshift, clean, transform, feature engineer."
+      },
+      { mode: "comparison", topic: "Data Preparation",
+        q: "For storing and serving ML features at low latency for training and inference, which service?",
+        options: ["S3 only", "SageMaker Feature Store", "DynamoDB only", "Redshift"],
+        correct: 1,
+        explain: "SageMaker Feature Store = centralized feature repo; online (low-latency inference) and offline (training) stores."
+      },
+      { mode: "comparison", topic: "Data Preparation",
+        q: "Which data format is commonly used for ML training data due to columnar storage and schema preservation?",
+        options: ["CSV only", "JSON only", "Parquet", "Plain text"],
+        correct: 2,
+        explain: "Parquet = columnar, compressed, schema-preserving; efficient for ML. Also: ORC, Avro."
+      },
+      { mode: "comparison", topic: "Data Preparation",
+        q: "For ingesting real-time streaming data into an ML pipeline, which AWS service?",
+        options: ["S3 only", "Amazon Kinesis Data Streams", "Redshift", "Athena"],
+        correct: 1,
+        explain: "Kinesis Data Streams = real-time streaming; Kinesis Data Firehose for delivery to S3/Redshift."
+      },
+      { mode: "exam", topic: "Data Preparation",
+        q: "A team stores training data in S3 as CSV. For SageMaker training, what is a best practice?",
+        options: ["Use CSV as-is for all workloads", "Convert to Parquet or RecordIO for efficiency", "Store only in RDS", "Use EBS volumes only"],
+        correct: 1,
+        explain: "Parquet or RecordIO (Protobuf) improves I/O and compression. CSV works but is less efficient at scale."
+      },
+      { mode: "exam", topic: "Data Preparation",
+        q: "SageMaker Data Wrangler can export data preparation steps as what?",
+        options: ["Only manual notebooks", "SageMaker Pipelines flow (or Python script)", "Lambda functions only", "Step Functions only"],
+        correct: 1,
+        explain: "Data Wrangler exports to Pipelines or Python for automation in production."
+      },
+      // === MODEL DEVELOPMENT ===
+      { mode: "comparison", topic: "Model Development",
+        q: "Which SageMaker feature automates model building with minimal code for tabular, vision, and NLP?",
+        options: ["SageMaker Training Jobs only", "SageMaker Autopilot", "SageMaker Inference", "SageMaker Pipelines only"],
+        correct: 1,
+        explain: "SageMaker Autopilot = automated ML; data prep, algorithm selection, hyperparameter tuning, deploy."
+      },
+      { mode: "comparison", topic: "Model Development",
+        q: "For hyperparameter tuning across many training jobs in parallel, which SageMaker capability?",
+        options: ["Single training job", "SageMaker Hyperparameter Tuning Jobs", "Manual scripting only", "Lambda"],
+        correct: 1,
+        explain: "Hyperparameter Tuning Jobs = run many training jobs in parallel; Bayesian or random search."
+      },
+      { mode: "comparison", topic: "Model Development",
+        q: "Where do you register and version ML models for deployment and lineage?",
+        options: ["S3 buckets only", "SageMaker Model Registry", "DynamoDB", "RDS"],
+        correct: 1,
+        explain: "SageMaker Model Registry = catalog models, version, approve for deployment, lineage."
+      },
+      { mode: "exam", topic: "Model Development",
+        q: "SageMaker distributed training can use which strategies?",
+        options: ["Single node only", "Data parallel and model parallel", "Only model parallel", "Only data parallel"],
+        correct: 1,
+        explain: "Data parallel = split data across GPUs. Model parallel = split large model across devices (e.g., DDP, SMP)."
+      },
+      { mode: "exam", topic: "Model Development",
+        q: "What is the purpose of SageMaker Experiments?",
+        options: ["Only deploy models", "Track runs, parameters, metrics, and compare trials", "Store raw data only", "Manage IAM only"],
+        correct: 1,
+        explain: "Experiments = track training runs, hyperparameters, metrics; compare and reproduce."
+      },
+      { mode: "comparison", topic: "Model Development",
+        q: "Which SageMaker capability provides a hosted Jupyter environment for ML development?",
+        options: ["EC2 only", "SageMaker Studio", "Lambda", "ECS"],
+        correct: 1,
+        explain: "SageMaker Studio = integrated IDE; notebooks, experiments, pipelines, model registry."
+      },
+      // === DEPLOYMENT ===
+      { mode: "comparison", topic: "Deployment",
+        q: "For low-latency, real-time inference with auto scaling, which deployment option?",
+        options: ["Batch Transform only", "SageMaker real-time inference endpoint", "S3 only", "Athena"],
+        correct: 1,
+        explain: "Real-time inference endpoint = single-digit ms latency; auto scaling; synchronous requests."
+      },
+      { mode: "comparison", topic: "Deployment",
+        q: "For processing large datasets in batch without a persistent endpoint, which SageMaker option?",
+        options: ["Real-time endpoint only", "SageMaker Batch Transform", "Lambda only", "API Gateway"],
+        correct: 1,
+        explain: "Batch Transform = run inference on large datasets; no endpoint; asynchronous, cost-effective."
+      },
+      { mode: "comparison", topic: "Deployment",
+        q: "For serverless inference with automatic scaling to zero when idle, which option?",
+        options: ["Real-time endpoint only", "SageMaker Serverless Inference", "EC2 only", "Fargate only"],
+        correct: 1,
+        explain: "SageMaker Serverless Inference = scale to zero; pay per inference; good for spiky workloads."
+      },
+      { mode: "exam", topic: "Deployment",
+        q: "A/B testing different model versions can be done with which SageMaker feature?",
+        options: ["Only separate endpoints", "Production variants with traffic splitting", "Batch Transform only", "S3 versioning"],
+        correct: 1,
+        explain: "Production variants = multiple models behind one endpoint; split traffic (e.g., 90/10) for A/B tests."
+      },
+      { mode: "exam", topic: "Deployment",
+        q: "For CI/CD automation of ML model builds and deployments, which services are commonly used?",
+        options: ["Manual only", "CodePipeline, CodeBuild, SageMaker Pipelines", "S3 only", "CloudWatch only"],
+        correct: 1,
+        explain: "CodePipeline + CodeBuild + SageMaker Pipelines = automate build, test, deploy ML workflows."
+      },
+      { mode: "comparison", topic: "Deployment",
+        q: "Which service orchestrates multi-step ML workflows (data prep, train, evaluate, deploy)?",
+        options: ["Lambda only", "SageMaker Pipelines", "Step Functions only", "S3 Events"],
+        correct: 1,
+        explain: "SageMaker Pipelines = orchestrate ML workflow; DAG of steps; integrate with CI/CD."
+      },
+      // === MONITORING & SECURITY ===
+      { mode: "comparison", topic: "Monitoring",
+        q: "Which SageMaker feature detects data drift and model quality degradation in production?",
+        options: ["CloudWatch only", "SageMaker Model Monitor", "SageMaker Ground Truth", "S3 Events"],
+        correct: 1,
+        explain: "Model Monitor = data drift, model quality (bias, accuracy); schedule monitoring jobs."
+      },
+      { mode: "comparison", topic: "Monitoring",
+        q: "For detecting bias and explaining model predictions, which SageMaker capability?",
+        options: ["Model Monitor only", "SageMaker Clarify", "CloudWatch Logs only", "X-Ray"],
+        correct: 1,
+        explain: "SageMaker Clarify = bias metrics, feature attributions (SHAP), explainability reports."
+      },
+      { mode: "exam", topic: "Monitoring",
+        q: "What does SageMaker Model Monitor track for data drift?",
+        options: ["Only model accuracy", "Distribution of inputs vs baseline (training data)", "Cost only", "Latency only"],
+        correct: 1,
+        explain: "Model Monitor compares production input distribution to baseline; alerts on drift."
+      },
+      { mode: "exam", topic: "Security",
+        q: "For securing SageMaker notebooks and training jobs, which practices apply?",
+        options: ["Store credentials in code", "Use IAM roles, VPC, encryption at rest/transit", "No encryption", "Public S3 buckets"],
+        correct: 1,
+        explain: "IAM roles (no keys in code), VPC for network isolation, KMS for encryption, HTTPS for transit."
+      },
+      { mode: "exam", topic: "Security",
+        q: "How can you restrict SageMaker training jobs to access only specific S3 buckets?",
+        options: ["Hardcode paths in code", "IAM policies on the SageMaker execution role", "Security groups only", "NACLs only"],
+        correct: 1,
+        explain: "IAM execution role = least privilege; restrict s3:GetObject to needed buckets/prefixes."
+      },
+      // === MORE ===
+      { mode: "comparison", topic: "Data Preparation",
+        q: "For labeling training data at scale with human annotators, which AWS service?",
+        options: ["SageMaker Data Wrangler", "SageMaker Ground Truth", "Mechanical Turk only", "Lambda"],
+        correct: 1,
+        explain: "SageMaker Ground Truth = built-in and custom workflows; human labeling; consolidation."
+      },
+      { mode: "comparison", topic: "Model Development",
+        q: "For bringing your own Docker container to SageMaker training or inference, which feature?",
+        options: ["Only built-in algorithms", "Bring Your Own Container (BYOC)", "Lambda only", "ECS only"],
+        correct: 1,
+        explain: "BYOC = use custom Docker images for training or inference; full control."
+      },
+      { mode: "exam", topic: "Data Preparation",
+        q: "EFS and FSx are suitable for SageMaker when you need:",
+        options: ["Only S3", "Shared file system for multi-node training", "Object storage only", "Streaming only"],
+        correct: 1,
+        explain: "EFS/FSx = shared POSIX file system; useful for distributed training sharing data."
+      },
+      { mode: "exam", topic: "Deployment",
+        q: "SageMaker Asynchronous Inference is best for:",
+        options: ["Real-time sub-second latency", "Large payloads, long-running inference, queued requests", "Batch only", "Streaming only"],
+        correct: 1,
+        explain: "Asynchronous Inference = queue-based; large payloads, 60s+ inference; cost-effective."
+      },
+      { mode: "exam", topic: "Model Development",
+        q: "What does SageMaker Managed Spot Training provide?",
+        options: ["Only on-demand", "Use Spot instances for up to 90% savings; checkpointing required", "No savings", "Only for inference"],
+        correct: 1,
+        explain: "Managed Spot Training = use Spot for training; checkpoint to S3; resume if interrupted."
+      },
+      { mode: "comparison", topic: "Monitoring",
+        q: "For centralized logging of SageMaker endpoints and training jobs, which service?",
+        options: ["S3 only", "CloudWatch Logs", "DynamoDB", "Athena"],
+        correct: 1,
+        explain: "CloudWatch Logs = centralized logs for endpoints, training; integrate with alarms."
+      },
+      { mode: "exam", topic: "Deployment",
+        q: "SageMaker multi-model endpoints (MME) allow:",
+        options: ["One model per endpoint only", "Multiple models behind one endpoint; load dynamically", "Only Batch Transform", "No scaling"],
+        correct: 1,
+        explain: "MME = one endpoint, multiple models; load models on demand; reduce cost for many models."
+      },
+      { mode: "exam", topic: "Model Development",
+        q: "SageMaker built-in algorithms are best when:",
+        options: ["You need full custom code", "Standard algorithms (XGBoost, BlazingText, etc.) fit your use case", "Only custom containers", "No algorithms exist"],
+        correct: 1,
+        explain: "Built-in algorithms = pre-optimized; faster iteration; use when they fit. Otherwise BYOC or script mode."
+      },
+      { mode: "comparison", topic: "Data Preparation",
+        q: "For querying data in S3 with SQL before feeding to SageMaker, which service?",
+        options: ["Redshift only", "Amazon Athena", "RDS", "DynamoDB"],
+        correct: 1,
+        explain: "Athena = serverless SQL on S3; prepare/aggregate data for ML."
+      },
+      { mode: "exam", topic: "Monitoring",
+        q: "SageMaker Model Monitor can send alerts to:",
+        options: ["Only CloudWatch", "CloudWatch + SNS (email, Lambda, etc.)", "S3 only", "No alerts"],
+        correct: 1,
+        explain: "Model Monitor writes to CloudWatch; create alarms → SNS for notifications."
+      },
+      { mode: "comparison", topic: "Deployment",
+        q: "For deploying a custom ML model packaged as a Docker image without SageMaker SDK, you can use:",
+        options: ["SageMaker only", "ECS/EKS or Lambda (with container support)", "S3 only", "Athena"],
+        correct: 1,
+        explain: "ECS, EKS, Lambda (container) = alternative deployment; SageMaker preferred for integrated ML tooling."
+      },
+      { mode: "exam", topic: "Data Preparation",
+        q: "When using SageMaker Processing jobs for data preparation, what runs the processing script?",
+        options: ["Lambda", "Managed SageMaker containers (or custom)", "API Gateway", "Step Functions only"],
+        correct: 1,
+        explain: "Processing jobs = run custom or built-in containers for data prep; managed, scalable."
+      },
+      { mode: "exam", topic: "Security",
+        q: "SageMaker Studio supports which network isolation option?",
+        options: ["Public only", "VPC mode for private subnet deployment", "No VPC", "NAT only"],
+        correct: 1,
+        explain: "Studio can run in VPC = no direct internet; access S3/data via VPC endpoints."
+      },
+      { mode: "comparison", topic: "Model Development",
+        q: "For reinforcement learning on AWS, which service is typically used?",
+        options: ["SageMaker Autopilot only", "SageMaker RL (with coach, Ray, etc.)", "Lambda", "Athena"],
+        correct: 1,
+        explain: "SageMaker RL = RL toolkits (e.g., Coach, Ray); train and deploy RL models."
+      },
+      { mode: "exam", topic: "Deployment",
+        q: "SageMaker endpoint auto scaling is configured via:",
+        options: ["Manual instance count only", "Application Auto Scaling (target tracking or custom)", "No scaling", "S3 only"],
+        correct: 1,
+        explain: "Application Auto Scaling = scale SageMaker endpoints by invocation count or custom metric."
+      },
+      { mode: "comparison", topic: "Data Preparation",
+        q: "For migrating ML data from on-premises to S3, which AWS service helps?",
+        options: ["Lambda only", "DataSync or Snowball", "Athena", "Redshift"],
+        correct: 1,
+        explain: "DataSync = network transfer; Snowball = offline for large datasets."
+      },
+      { mode: "exam", topic: "Model Development",
+        q: "SageMaker Debugger helps with:",
+        options: ["Only deployment", "Profiling training (bottlenecks, utilization) and debugging (gradients, vanishing)", "Cost only", "Security only"],
+        correct: 1,
+        explain: "Debugger = profile training jobs; detect vanishing gradients, overfitting; optimize."
+      },
+      { mode: "exam", topic: "Monitoring",
+        q: "What is the purpose of capturing inference data for Model Monitor?",
+        options: ["Only for billing", "Establish baseline and compare production inputs/predictions to detect drift", "Backup only", "Compliance only"],
+        correct: 1,
+        explain: "Capture inference data → create baseline → compare production to detect data/model drift."
+      },
+      { mode: "comparison", topic: "Deployment",
+        q: "For running inference on IoT edge devices, which SageMaker option?",
+        options: ["Real-time endpoint only", "SageMaker Edge Manager (or Neo-compiled models)", "Batch Transform only", "Lambda only"],
+        correct: 1,
+        explain: "SageMaker Edge Manager = deploy to edge; Neo compiles models for edge hardware."
+      },
+      { mode: "exam", topic: "Data Preparation",
+        q: "RecordIO-Protobuf format in SageMaker is used for:",
+        options: ["Only JSON", "Efficient streaming training with Pipe mode", "CSV only", "Database storage"],
+        correct: 1,
+        explain: "RecordIO-Protobuf = efficient for Pipe mode; streaming from S3 to training; faster I/O."
+      },
+      { mode: "exam", topic: "Security",
+        q: "SageMaker supports encryption of which components?",
+        options: ["Only notebooks", "Notebooks, training data (S3), model artifacts, endpoints (EBS)", "No encryption", "Only endpoints"],
+        correct: 1,
+        explain: "Encryption: S3 (SSE-S3, SSE-KMS), EBS for endpoints, notebooks; KMS for keys."
+      },
+      { mode: "comparison", topic: "Model Development",
+        q: "For scalable, distributed training with TensorFlow or PyTorch, which SageMaker option?",
+        options: ["Single instance only", "SageMaker distributed training (SDT) with supported frameworks", "Lambda", "Athena"],
+        correct: 1,
+        explain: "SageMaker supports distributed training for TF, PyTorch; data and model parallel."
+      },
+      { mode: "exam", topic: "Deployment",
+        q: "Blue/green deployment for SageMaker endpoints is achieved by:",
+        options: ["Redeploying in place", "New endpoint variant + traffic shift + old variant removal", "Batch only", "No automation"],
+        correct: 1,
+        explain: "Blue/green = deploy new variant, shift traffic, then remove old; minimal downtime."
+      },
+    ];
+
+    const QUESTIONS_PER_QUIZ = 40;
+    let currentIndex = 0;
+    let score = 0;
+    let answered = [];
+    let sessionQuestions = [];
+    let selectedMode = 'mixed';
+
+    function getProfile() {
+      try {
+        const raw = localStorage.getItem(PROFILE_KEY);
+        if (!raw) return { quizId: QUIZ_ID, topicStats: {}, topicMissesFromImports: {} };
+        const p = JSON.parse(raw);
+        return {
+          quizId: p.quizId || QUIZ_ID,
+          topicStats: p.topicStats || {},
+          topicMissesFromImports: p.topicMissesFromImports || {}
+        };
+      } catch (e) {
+        return { quizId: QUIZ_ID, topicStats: {}, topicMissesFromImports: {} };
+      }
+    }
+
+    function saveProfile(profile) {
+      try {
+        localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+      } catch (e) {}
+    }
+
+    function getTopicWeight(profile, topic) {
+      const t = topic || 'Other';
+      let missRate = 0;
+      if (profile.topicStats[t] && profile.topicStats[t].total > 0) {
+        missRate = 1 - (profile.topicStats[t].correct / profile.topicStats[t].total);
+      }
+      const importMisses = (profile.topicMissesFromImports[t] || 0) * 0.2;
+      return 1 + Math.min(missRate + importMisses, 2);
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function weightedSample(arr, n, profile) {
+      const hasData = profile && (Object.keys(profile.topicStats).length > 0 || Object.keys(profile.topicMissesFromImports).length > 0);
+      if (!hasData) {
+        const shuffled = shuffle(arr);
+        return shuffled.slice(0, Math.min(n, shuffled.length));
+      }
+      const withKeys = arr.map(q => {
+        const w = getTopicWeight(profile, q.topic);
+        return { q, key: Math.pow(Math.random(), 1 / w) };
+      });
+      withKeys.sort((a, b) => b.key - a.key);
+      return withKeys.slice(0, Math.min(n, withKeys.length)).map(x => x.q);
+    }
+
+    function getWeakTopics(profile, topN) {
+      const scores = [];
+      const topics = new Set([
+        ...Object.keys(profile.topicStats || {}),
+        ...Object.keys(profile.topicMissesFromImports || {})
+      ]);
+      topics.forEach(t => {
+        let weakness = 0;
+        if (profile.topicStats[t] && profile.topicStats[t].total > 0) {
+          weakness = 1 - (profile.topicStats[t].correct / profile.topicStats[t].total);
+        }
+        weakness += (profile.topicMissesFromImports[t] || 0) * 0.15;
+        scores.push({ topic: t, weakness });
+      });
+      scores.sort((a, b) => b.weakness - a.weakness);
+      return scores.slice(0, topN).filter(x => x.weakness > 0.1).map(x => x.topic);
+    }
+
+    function selectMode(mode) {
+      selectedMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
+      document.querySelector('[data-mode="' + mode + '"]').classList.add('selected');
+    }
+
+    function startQuiz() {
+      const filtered = questionBank.filter(q => {
+        if (selectedMode === 'comparison') return q.mode === 'comparison';
+        if (selectedMode === 'exam') return q.mode === 'exam';
+        return true;
+      });
+      const profile = getProfile();
+      sessionQuestions = weightedSample(filtered, QUESTIONS_PER_QUIZ, profile);
+      currentIndex = 0;
+      score = 0;
+      answered = [];
+      const hintEl = document.getElementById('focus-hint');
+      const weak = getWeakTopics(profile, 3);
+      if (weak.length > 0) {
+        hintEl.textContent = "We'll focus more on: " + weak.join(', ') + '.';
+        hintEl.classList.remove('hidden');
+      } else {
+        hintEl.classList.add('hidden');
+      }
+      document.getElementById('start-screen').classList.add('hidden');
+      document.getElementById('results-screen').classList.add('hidden');
+      document.getElementById('quiz-area').classList.remove('hidden');
+      document.getElementById('q-total').textContent = sessionQuestions.length;
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = sessionQuestions[currentIndex];
+      document.getElementById('q-num').textContent = currentIndex + 1;
+      document.getElementById('score-display').textContent = score;
+      document.getElementById('question-text').textContent = q.q;
+      const opts = document.getElementById('options');
+      opts.innerHTML = '';
+      const fb = document.getElementById('feedback');
+      fb.classList.add('hidden');
+      fb.className = 'feedback hidden';
+
+      q.options.forEach((opt, i) => {
+        const div = document.createElement('div');
+        div.className = 'option';
+        div.textContent = opt;
+        div.dataset.index = i;
+        if (answered[currentIndex] !== undefined) {
+          div.classList.add('disabled');
+          if (i === q.correct) div.classList.add('correct');
+          else if (i === answered[currentIndex]) div.classList.add('wrong');
+        } else {
+          div.onclick = () => selectOption(currentIndex, i, q);
+        }
+        opts.appendChild(div);
+      });
+
+      if (answered[currentIndex] !== undefined) {
+        fb.classList.remove('hidden');
+        fb.className = 'feedback ' + (answered[currentIndex] === q.correct ? 'correct-msg' : 'wrong-msg');
+        fb.innerHTML = (answered[currentIndex] === q.correct ? '✓ Correct. ' : '✗ Incorrect. ') + '<span class="explanation">' + q.explain + '</span>';
+      }
+
+      document.getElementById('prev-btn').disabled = currentIndex === 0;
+    }
+
+    function selectOption(pos, optIdx, q) {
+      if (answered[pos] !== undefined) return;
+      answered[pos] = optIdx;
+      if (optIdx === q.correct) score++;
+
+      document.querySelectorAll('#options .option').forEach(o => {
+        o.classList.add('disabled');
+        o.onclick = null;
+        if (parseInt(o.dataset.index) === q.correct) o.classList.add('correct');
+        else if (parseInt(o.dataset.index) === optIdx) o.classList.add('wrong');
+      });
+
+      const fb = document.getElementById('feedback');
+      fb.classList.remove('hidden');
+      fb.innerHTML = (optIdx === q.correct ? '✓ Correct. ' : '✗ Incorrect. ') + '<span class="explanation">' + q.explain + '</span>';
+      fb.className = 'feedback ' + (optIdx === q.correct ? 'correct-msg' : 'wrong-msg');
+      document.getElementById('score-display').textContent = score;
+    }
+
+    function nextQuestion() {
+      if (currentIndex < sessionQuestions.length - 1) {
+        currentIndex++;
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderQuestion();
+      }
+    }
+
+    function saveSessionToProfile() {
+      const profile = getProfile();
+      sessionQuestions.forEach((q, i) => {
+        const t = q.topic || 'Other';
+        if (!profile.topicStats[t]) profile.topicStats[t] = { correct: 0, total: 0 };
+        profile.topicStats[t].total++;
+        if (answered[i] !== undefined && answered[i] === q.correct) {
+          profile.topicStats[t].correct++;
+        }
+      });
+      saveProfile(profile);
+    }
+
+    function showResults() {
+      saveSessionToProfile();
+      document.getElementById('quiz-area').classList.add('hidden');
+      const r = document.getElementById('results-screen');
+      r.classList.remove('hidden');
+      const total = sessionQuestions.length;
+      const pct = Math.round((score / total) * 100);
+      document.getElementById('final-score').textContent = score + ' / ' + total + ' (' + pct + '%)';
+      document.getElementById('final-score').className = 'score ' + (pct >= 72 ? 'pass' : 'fail');
+      document.getElementById('result-msg').textContent = pct >= 72
+        ? 'Passing is 720/1000 (~72%). You\'re on track!'
+        : 'Aim for 720+ (72%) on the real exam. Review and try again.';
+      document.getElementById('copy-toast').classList.add('hidden');
+    }
+
+    function getResultsMarkdown() {
+      const total = sessionQuestions.length;
+      const pct = Math.round((score / total) * 100);
+      const missed = sessionQuestions.map((q, i) => ({ q, i })).filter(x => answered[x.i] !== undefined && answered[x.i] !== x.q.correct);
+      const topicCounts = {};
+      missed.forEach(x => {
+        const t = x.q.topic || 'Other';
+        topicCounts[t] = (topicCounts[t] || 0) + 1;
+      });
+      let md = '# AWS ML Engineer Associate (MLEA) Quiz Results\n\n';
+      md += '**Date:** ' + new Date().toISOString().slice(0, 10) + '\n';
+      md += '**Mode:** ' + (selectedMode === 'comparison' ? 'Service Selection' : selectedMode === 'exam' ? 'Exam' : 'Mixed') + '\n';
+      md += '**Score:** ' + score + '/' + total + ' (' + pct + '%)\n';
+      md += '**Pass (72%):** ' + (pct >= 72 ? 'Yes' : 'No') + '\n\n';
+      md += '---\n\n';
+      md += '## Instructions for AI Refactoring\n\n';
+      md += 'Paste this entire block into a Cursor chat and say:\n';
+      md += '> "Refactor the AWS MLEA quiz based on my mistakes. Add more questions on my weak topics."\n\n';
+      if (Object.keys(topicCounts).length > 0) {
+        md += '## Misses by Topic\n\n';
+        Object.entries(topicCounts).sort((a, b) => b[1] - a[1]).forEach(([t, n]) => {
+          md += '- **' + t + ':** ' + n + ' missed\n';
+        });
+        md += '\n';
+      }
+      if (missed.length > 0) {
+        md += '## Missed Questions (for AI refactoring)\n\n';
+        missed.forEach((x, i) => {
+          const q = x.q;
+          const yourAns = q.options[answered[x.i]];
+          const correctAns = q.options[q.correct];
+          md += '### ' + (i + 1) + '. [' + (q.topic || 'General') + ']\n';
+          md += '**Q:** ' + q.q + '\n';
+          md += '**Your answer:** ' + yourAns + '\n';
+          md += '**Correct answer:** ' + correctAns + '\n';
+          md += '**Explanation:** ' + q.explain + '\n\n';
+        });
+      }
+      return md;
+    }
+
+    function downloadResults() {
+      const blob = new Blob([getResultsMarkdown()], { type: 'text/markdown' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'aws_mlea_quiz_results_' + new Date().toISOString().slice(0, 10) + '.md';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function copyResultsToClipboard() {
+      navigator.clipboard.writeText(getResultsMarkdown()).then(() => {
+        document.getElementById('copy-toast').classList.remove('hidden');
+        setTimeout(() => document.getElementById('copy-toast').classList.add('hidden'), 2500);
+      });
+    }
+
+    function parseImportedResults(mdText) {
+      const lines = mdText.split('\n');
+      const firstLine = (lines[0] || '').toLowerCase();
+      if (QUIZ_ID !== 'oci' && firstLine.includes('oci foundations')) return { ok: false, error: 'This file is for OCI quiz.' };
+      if (QUIZ_ID !== 'gcp' && firstLine.includes('gcp cloud digital leader')) return { ok: false, error: 'This file is for GCP quiz.' };
+      if (QUIZ_ID !== 'az900' && (firstLine.includes('az-900') || firstLine.includes('azure'))) return { ok: false, error: 'This file is for AZ-900 quiz.' };
+      if (QUIZ_ID !== 'aws_mlea' && (firstLine.includes('mlea') || firstLine.includes('ml engineer'))) return { ok: false, error: 'This file is for AWS MLEA quiz.' };
+      if (QUIZ_ID !== 'aws_dea' && (firstLine.includes('data engineer') || firstLine.includes('dea'))) return { ok: false, error: 'This file is for AWS Data Engineer quiz.' };
+      if (QUIZ_ID === 'aws_mlea' && !firstLine.includes('mlea') && !firstLine.includes('ml engineer')) return { ok: false, error: 'Not an AWS MLEA results file.' };
+      let inSection = false;
+      const topicMisses = {};
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.indexOf('## Misses by Topic') !== -1) {
+          inSection = true;
+          continue;
+        }
+        if (inSection && line.startsWith('## ')) break;
+        if (inSection && line.match(/^\s*-\s*\*\*(.+?)\*\*:\s*(\d+)\s+missed/)) {
+          const m = line.match(/^\s*-\s*\*\*(.+?)\*\*:\s*(\d+)\s+missed/);
+          const topic = m[1].trim();
+          const n = parseInt(m[2], 10);
+          topicMisses[topic] = (topicMisses[topic] || 0) + n;
+        }
+      }
+      if (Object.keys(topicMisses).length === 0) return { ok: false, error: 'No "Misses by Topic" section found.' };
+      return { ok: true, topicMisses };
+    }
+
+    function importResults() {
+      const ta = document.getElementById('import-results');
+      const mdText = (ta && ta.value || '').trim();
+      if (!mdText) {
+        showImportToast('Paste results markdown first, or choose a file.', true);
+        return;
+      }
+      const result = parseImportedResults(mdText);
+      if (!result.ok) {
+        showImportToast(result.error || 'Could not parse results.', true);
+        return;
+      }
+      const profile = getProfile();
+      if (!profile.topicMissesFromImports) profile.topicMissesFromImports = {};
+      Object.entries(result.topicMisses).forEach(([topic, n]) => {
+        profile.topicMissesFromImports[topic] = (profile.topicMissesFromImports[topic] || 0) + n;
+      });
+      saveProfile(profile);
+      const top = Object.entries(result.topicMisses).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]);
+      showImportToast('Imported. We\'ll focus more on: ' + top.join(', ') + '.', false);
+      if (ta) ta.value = '';
+    }
+
+    function onImportFile(ev) {
+      const f = ev.target.files && ev.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = function () {
+        const ta = document.getElementById('import-results');
+        if (ta) ta.value = r.result || '';
+        importResults();
+      };
+      r.readAsText(f);
+      ev.target.value = '';
+    }
+
+    function showImportToast(msg, isError) {
+      const el = document.getElementById('import-toast');
+      if (!el) return;
+      el.textContent = msg;
+      el.className = 'import-toast ' + (isError ? 'err' : 'success');
+      el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 4000);
+    }
+
+    (function initFocusHint() {
+      const profile = getProfile();
+      const weak = getWeakTopics(profile, 3);
+      const hintEl = document.getElementById('focus-hint');
+      if (hintEl && weak.length > 0) {
+        hintEl.textContent = "We'll focus more on: " + weak.join(', ') + '.';
+        hintEl.classList.remove('hidden');
+      }
+    })();
+  </script>
+</body>
+</html>

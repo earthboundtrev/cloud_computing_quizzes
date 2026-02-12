@@ -15,6 +15,9 @@
       --oci: #f97316;
       --gcp: #4285f4;
       --azure: #0078d4;
+      --aws: #ff9900;
+      --cissp: #0066cc;
+      --redhat: #ee0000;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -50,6 +53,7 @@
     a.quiz-card.oci { border-left-color: var(--oci); }
     a.quiz-card.gcp { border-left-color: var(--gcp); }
     a.quiz-card.azure { border-left-color: var(--azure); }
+    a.quiz-card.aws { border-left-color: var(--aws); }
     .quiz-card .name { font-weight: 600; font-size: 1.05rem; margin-bottom: 0.25rem; }
     .quiz-card .desc { font-size: 0.9rem; color: var(--text-muted); }
   </style>
@@ -70,6 +74,26 @@
       <a href="az900_azure_fundamentals_quiz.html" class="quiz-card azure">
         <span class="name">AZ-900 Azure Fundamentals</span>
         <span class="desc">Microsoft Certified: Azure Fundamentals • Azure ↔ AWS &amp; exam-style</span>
+      </a>
+      <a href="aws_mlea_quiz.html" class="quiz-card aws">
+        <span class="name">AWS ML Engineer Associate</span>
+        <span class="desc">MLA-C01 • SageMaker, data prep, model dev, deployment, monitoring</span>
+      </a>
+      <a href="aws_data_engineering_quiz.html" class="quiz-card aws">
+        <span class="name">AWS Data Engineer Associate</span>
+        <span class="desc">DEA-C01 • Glue, EMR, Kinesis, Redshift, Athena &amp; exam-style</span>
+      </a>
+      <a href="cissp_quiz.html" class="quiz-card cissp">
+        <span class="name">CISSP</span>
+        <span class="desc">8 domains • Security &amp; Risk through Software Development Security</span>
+      </a>
+      <a href="rhcsa9_quiz.html" class="quiz-card redhat">
+        <span class="name">RHCSA 9</span>
+        <span class="desc">EX200 • RHEL 9 vs RHEL 7 &amp; exam-style (if you passed RHCSA 7)</span>
+      </a>
+      <a href="rhce_quiz.html" class="quiz-card redhat">
+        <span class="name">RHCE</span>
+        <span class="desc">EX294 • Ansible playbooks for system administration</span>
       </a>
     </nav>
   </div>

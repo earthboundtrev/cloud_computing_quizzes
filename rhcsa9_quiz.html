@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RHCSA 9 Practice Quiz</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --accent: #ee0000;
+      --accent-dim: #cc0000;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --correct: #22c55e;
+      --wrong: #ef4444;
+      --font: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    .container { max-width: 720px; margin: 0 auto; }
+    h1 {
+      font-size: 1.5rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem; }
+    .stats {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .stats span { color: var(--accent); font-weight: 600; }
+    .question-card {
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border-left: 3px solid var(--accent);
+    }
+    .question-text {
+      font-size: 1.05rem;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+    .options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .option {
+      padding: 0.75rem 1rem;
+      background: var(--bg);
+      border: 2px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .option:hover:not(.disabled) {
+      border-color: var(--accent-dim);
+      background: #151d2b;
+    }
+    .option.selected { border-color: var(--accent); background: #151d2b; }
+    .option.correct { border-color: var(--correct); background: rgba(34,197,94,0.1); }
+    .option.wrong { border-color: var(--wrong); background: rgba(239,68,68,0.1); }
+    .option.disabled { cursor: not-allowed; opacity: 0.7; }
+    .feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+    .feedback.correct-msg { background: rgba(34,197,94,0.15); border-left: 4px solid var(--correct); }
+    .feedback.wrong-msg { background: rgba(239,68,68,0.15); border-left: 4px solid var(--wrong); }
+    .feedback .explanation { margin-top: 0.5rem; color: var(--text-muted); }
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.5rem;
+    }
+    button {
+      padding: 0.6rem 1.2rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: var(--accent-dim); }
+    button.secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+    }
+    button.secondary:hover { background: rgba(238,0,0,0.1); }
+    .results {
+      text-align: center;
+      padding: 2rem;
+    }
+    .results h2 { color: var(--accent); margin-bottom: 1rem; }
+    .score { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .results-actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
+    .results-actions button.secondary { margin: 0; }
+    .copy-toast { font-size: 0.85rem; color: var(--correct); margin-top: 0.5rem; }
+    .score.pass { color: var(--correct); }
+    .score.fail { color: var(--wrong); }
+    .start-screen { text-align: center; padding: 3rem 0; }
+    .start-screen p { margin-bottom: 1.5rem; color: var(--text-muted); }
+    .mode-selector { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; max-width: 360px; margin-left: auto; margin-right: auto; }
+    .mode-btn {
+      padding: 1rem 1.5rem;
+      text-align: left;
+      background: var(--surface);
+      border: 2px solid transparent;
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .mode-btn:hover { border-color: var(--accent-dim); background: #151d2b; }
+    .mode-btn.selected { border-color: var(--accent); background: rgba(238,0,0,0.1); }
+    .mode-btn .label { font-weight: 600; display: block; }
+    .mode-btn .desc { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .profile-hint { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.75rem; }
+    .import-area { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--surface); text-align: left; }
+    .import-area label { display: block; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--text-muted); }
+    .import-area textarea { width: 100%; min-height: 80px; padding: 0.5rem; background: var(--surface); border: 1px solid var(--accent-dim); border-radius: 6px; color: var(--text); font-family: inherit; font-size: 0.85rem; resize: vertical; }
+    .import-toast { font-size: 0.85rem; margin-top: 0.5rem; }
+    .import-toast.success { color: var(--correct); }
+    .import-toast.err { color: var(--wrong); }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>RHCSA 9 Practice Quiz</h1>
+    <p class="subtitle">EX200 • RHEL 9 • Leverage your RHCSA 7 knowledge</p>
+
+    <div id="start-screen" class="start-screen">
+      <p>40 questions per session, drawn from a pool of 55+. Randomized each run. Choose your mode:</p>
+      <p id="focus-hint" class="profile-hint hidden"></p>
+      <div class="mode-selector">
+        <button type="button" class="mode-btn" data-mode="comparison" onclick="selectMode('comparison')">
+          <span class="label">RHEL 9 vs RHEL 7</span>
+          <span class="desc">What changed? Map RHEL 7 concepts to RHEL 9 equivalents.</span>
+        </button>
+        <button type="button" class="mode-btn" data-mode="exam" onclick="selectMode('exam')">
+          <span class="label">Exam (RHEL 9–specific)</span>
+          <span class="desc">Storage, systemd, firewalld, users, SELinux—RHEL 9 exam objectives.</span>
+        </button>
+        <button type="button" class="mode-btn selected" data-mode="mixed" onclick="selectMode('mixed')">
+          <span class="label">Mixed</span>
+          <span class="desc">Both RHEL 9 vs 7 and exam-style. Simulates full exam.</span>
+        </button>
+      </div>
+      <button id="start-btn" onclick="startQuiz()">Start Quiz</button>
+      <div class="import-area">
+        <label for="import-results">Import past results (paste .md or choose file) to focus on weak topics:</label>
+        <textarea id="import-results" placeholder="Paste quiz results markdown here..."></textarea>
+        <button type="button" class="secondary" style="margin-top: 0.5rem;" onclick="importResults()">Import results</button>
+        <input type="file" id="import-file" accept=".md,text/markdown" style="display: none;" onchange="onImportFile(event)">
+        <button type="button" class="secondary" style="margin-top: 0.5rem; margin-left: 0.5rem;" onclick="document.getElementById('import-file').click()">Choose file</button>
+        <p id="import-toast" class="import-toast hidden"></p>
+      </div>
+    </div>
+
+    <div id="quiz-area" class="hidden">
+      <div class="stats">
+        <span>Question <span id="q-num">1</span> of <span id="q-total">40</span></span>
+        <span>Correct: <span id="score-display">0</span></span>
+      </div>
+      <div class="question-card">
+        <div class="question-text" id="question-text"></div>
+        <div class="options" id="options"></div>
+        <div id="feedback" class="feedback hidden"></div>
+      </div>
+      <div class="nav-row">
+        <button id="prev-btn" class="secondary" onclick="prevQuestion()">← Previous</button>
+        <button id="next-btn" onclick="nextQuestion()">Next →</button>
+      </div>
+    </div>
+
+    <div id="results-screen" class="results hidden">
+      <h2>Quiz Complete</h2>
+      <div class="score" id="final-score"></div>
+      <p id="result-msg" style="margin-bottom: 1.5rem; color: var(--text-muted);"></p>
+      <div class="results-actions">
+        <button onclick="startQuiz()">Try Again</button>
+        <button class="secondary" onclick="downloadResults()">Download Results</button>
+        <button class="secondary" onclick="copyResultsToClipboard()">Copy to Clipboard</button>
+      </div>
+      <p id="copy-toast" class="copy-toast hidden">Copied! Paste into Cursor chat for AI refactoring.</p>
+    </div>
+  </div>
+
+  <script>
+    const QUIZ_ID = 'rhcsa9';
+    const PROFILE_KEY = 'study_sessions_profile_' + QUIZ_ID;
+
+    const questionBank = [
+      // === RHEL 9 vs RHEL 7 ===
+      { mode: "comparison", topic: "RHEL 9 vs 7",
+        q: "RHEL 9 uses which init system? (Same as RHEL 7)",
+        options: ["SysV init", "systemd", "Upstart", "Launchd"],
+        correct: 1,
+        explain: "Both RHEL 7 and 9 use systemd. RHEL 6 used Upstart; RHEL 5 used SysV."
+      },
+      { mode: "comparison", topic: "RHEL 9 vs 7",
+        q: "In RHEL 9, what replaced iptables as the default firewall?",
+        options: ["iptables still default", "nftables / firewalld (firewalld uses nft backend in RHEL 9)", "ufw", "No firewall"],
+        correct: 1,
+        explain: "RHEL 9: firewalld uses nftables backend (iptables deprecated). RHEL 7 used iptables."
+      },
+      { mode: "comparison", topic: "RHEL 9 vs 7",
+        q: "RHEL 9 default file system for new installations is:",
+        options: ["ext3", "ext4", "XFS", "btrfs"],
+        correct: 2,
+        explain: "RHEL 9 and 7 default to XFS for root. ext4 also supported."
+      },
+      { mode: "comparison", topic: "RHEL 9 vs 7",
+        q: "RHEL 9 uses which version of OpenSSL?",
+        options: ["OpenSSL 1.0", "OpenSSL 1.1", "OpenSSL 3.0", "OpenSSL 2.0"],
+        correct: 2,
+        explain: "RHEL 9 = OpenSSL 3.x (provider concept, new protocols). RHEL 7 = OpenSSL 1.0."
+      },
+      { mode: "comparison", topic: "RHEL 9 vs 7",
+        q: "RHEL 9 uses cgroup:",
+        options: ["cgroup v1 only", "cgroup v2 (unified)", "No cgroups", "Both v1 and v2 equally"],
+        correct: 1,
+        explain: "RHEL 9 = cgroup v2 unified. RHEL 7 = cgroup v1. Better resource constraints in v2."
+      },
+      { mode: "comparison", topic: "RHEL 9 vs 7",
+        q: "In RHEL 9, DNF is the default package manager. What was it in RHEL 7?",
+        options: ["apt", "yum only (DNF available in RHEL 8+)", "zypper", "rpm only"],
+        correct: 1,
+        explain: "RHEL 7 = yum. RHEL 8/9 = DNF (yum is symlink to dnf)."
+      },
+      { mode: "comparison", topic: "RHEL 9 vs 7",
+        q: "RHEL 9 kernel is based on:",
+        options: ["Kernel 3.x", "Kernel 4.x", "Kernel 5.14+", "Kernel 2.6"],
+        correct: 2,
+        explain: "RHEL 9 = kernel 5.14+. RHEL 7 = 3.10. RHEL 8 = 4.18."
+      },
+      { mode: "comparison", topic: "RHEL 9 vs 7",
+        q: "RHEL 9 uses which Python version by default?",
+        options: ["Python 2", "Python 3.6", "Python 3.9", "No Python"],
+        correct: 2,
+        explain: "RHEL 9 = Python 3.9 default. RHEL 7 had Python 2.7; RHEL 8 moved to Python 3.6."
+      },
+      { mode: "exam", topic: "Storage",
+        q: "To create an XFS file system on /dev/sdb1, which command?",
+        options: ["mkfs.ext4 /dev/sdb1", "mkfs.xfs /dev/sdb1", "mkswap /dev/sdb1", "fdisk /dev/sdb1"],
+        correct: 1,
+        explain: "mkfs.xfs /dev/sdb1 creates XFS. mkfs.ext4 for ext4."
+      },
+      { mode: "exam", topic: "Storage",
+        q: "To extend an XFS file system after expanding the underlying partition, you:",
+        options: ["Cannot extend XFS", "Use xfs_growfs (XFS grows online)", "Must umount first", "Recreate the filesystem"],
+        correct: 1,
+        explain: "xfs_growfs mounts /path - XFS grows online. Cannot shrink. ext4: resize2fs."
+      },
+      { mode: "exam", topic: "systemd",
+        q: "To enable a service to start at boot, which command?",
+        options: ["chkconfig service on", "systemctl enable service", "service service enable", "initctl enable service"],
+        correct: 1,
+        explain: "systemctl enable <unit> - start at boot. systemctl start - start now."
+      },
+      { mode: "exam", topic: "systemd",
+        q: "To view logs for a specific systemd service:",
+        options: ["tail /var/log/messages", "journalctl -u service", "cat /var/log/service", "dmesg"],
+        correct: 1,
+        explain: "journalctl -u <unit> - logs for that unit. journalctl -xe for recent."
+      },
+      { mode: "exam", topic: "Firewall",
+        q: "To allow HTTP through firewalld persistently:",
+        options: ["iptables -A INPUT -p tcp --dport 80", "firewall-cmd --permanent --add-service=http && firewall-cmd --reload", "ufw allow 80", "setenforce 0"],
+        correct: 1,
+        explain: "firewall-cmd --permanent --add-service=http; --reload to apply."
+      },
+      { mode: "exam", topic: "Users/Groups",
+        q: "To create a user with a specific UID and primary group:",
+        options: ["adduser -u 1001 -g mygroup myuser", "useradd -u 1001 -g mygroup myuser", "usercreate myuser", "newuser myuser"],
+        correct: 1,
+        explain: "useradd -u UID -g GID username. -G for supplementary groups."
+      },
+      { mode: "exam", topic: "SELinux",
+        q: "To check SELinux status:",
+        options: ["cat /etc/selinux/config", "getenforce", "selinux --status", "chcon"],
+        correct: 1,
+        explain: "getenforce shows Enforcing/Permissive/Disabled. sestatus for details."
+      },
+      { mode: "exam", topic: "SELinux",
+        q: "To temporarily set SELinux to permissive mode:",
+        options: ["edit /etc/selinux/config", "setenforce 0", "chcon -t", "restorecon"],
+        correct: 1,
+        explain: "setenforce 0 = permissive. setenforce 1 = enforcing. Does not persist across reboot."
+      },
+      { mode: "exam", topic: "Storage",
+        q: "LVM physical volumes are created with:",
+        options: ["pvcreate", "vgcreate", "lvcreate", "fdisk only"],
+        correct: 1,
+        explain: "pvcreate /dev/sdX - create PV. vgcreate - VG. lvcreate - LV."
+      },
+      { mode: "exam", topic: "Storage",
+        q: "To add a new disk to an existing LVM volume group:",
+        options: ["vgextend VGname /dev/sdX (after pvcreate)", "lvextend only", "Cannot add", "vgcreate again"],
+        correct: 1,
+        explain: "pvcreate /dev/sdX; vgextend VGname /dev/sdX. Then lvextend to grow LV."
+      },
+      { mode: "exam", topic: "Scheduling",
+        q: "To schedule a recurring job for a user, which is used?",
+        options: ["at", "cron (crontab -e)", "systemd timer only", "anacron only"],
+        correct: 1,
+        explain: "crontab -e for user cron. /etc/crontab for system. at for one-time."
+      },
+      { mode: "comparison", topic: "RHEL 9 vs 7",
+        q: "RHEL 9 includes support for:",
+        options: ["Only legacy hardware", "eBPF, improved SELinux performance", "No security enhancements", "Same as RHEL 7"],
+        correct: 1,
+        explain: "RHEL 9: eBPF, better SELinux, OpenSSL 3, container signing, NTS for NTP."
+      },
+      { mode: "comparison", topic: "RHEL 9 vs 7",
+        q: "In RHEL 9, Stratis is available for:",
+        options: ["Network config only", "Simplified local storage management", "Package management", "Firewall"],
+        correct: 1,
+        explain: "Stratis = simplified storage (thin provisioning, snapshots). Alternative to manual LVM."
+      },
+      { mode: "exam", topic: "Networking",
+        q: "To configure a static IP using nmcli:",
+        options: ["ifconfig eth0 192.168.1.10", "nmcli con mod \"connection\" ipv4.addresses 192.168.1.10/24", "route add", "netstat"],
+        correct: 1,
+        explain: "nmcli con mod \"conn\" ipv4.addresses 192.168.1.10/24 ipv4.method manual"
+      },
+      { mode: "exam", topic: "Networking",
+        q: "To see active NetworkManager connections:",
+        options: ["ifconfig", "nmcli con show", "netstat -i", "ip link"],
+        correct: 1,
+        explain: "nmcli con show - connections. nmcli con show --active for active."
+      },
+      { mode: "exam", topic: "Users/Groups",
+        q: "To set a password policy (e.g., max days) for users:",
+        options: ["passwd -n 90", "chage -M 90 user", "usermod -e", "edit /etc/passwd"],
+        correct: 1,
+        explain: "chage -M 90 = max days between password changes. chage -l to list."
+      },
+      { mode: "exam", topic: "Filesystems",
+        q: "To persistently mount a filesystem by UUID, you add an entry to:",
+        options: ["/etc/fstab", "/etc/mtab", "/proc/mounts", "fdisk"],
+        correct: 1,
+        explain: "/etc/fstab = persistent mounts. Use UUID=... for stability (UUID=xxx /mount xfs defaults 0 0)."
+      },
+      { mode: "exam", topic: "Filesystems",
+        q: "To find files by name:",
+        options: ["grep", "find / -name filename", "locate (if updatedb run)", "Both B and C"],
+        correct: 3,
+        explain: "find / -name 'file' - searches. locate uses database (faster, run updatedb)."
+      },
+      { mode: "exam", topic: "Permissions",
+        q: "To set setuid on a binary so it runs as owner:",
+        options: ["chmod 4777 file", "chmod u+s file", "chown root file", "Both A and B"],
+        correct: 3,
+        explain: "chmod u+s or chmod 4755 - setuid. Runs with owner's privileges."
+      },
+      { mode: "exam", topic: "systemd",
+        q: "To mask a service so it cannot be started:",
+        options: ["systemctl disable service", "systemctl mask service", "systemctl stop service", "rm /usr/lib/systemd/system/service"],
+        correct: 1,
+        explain: "systemctl mask - prevents start (symlink to /dev/null). disable only stops auto-start."
+      },
+      { mode: "comparison", topic: "RHEL 9 vs 7",
+        q: "RHEL 9 uses which default web server package?",
+        options: ["Apache 2.2", "Apache 2.4", "nginx 1.20", "No default"],
+        correct: 2,
+        explain: "RHEL 9 = nginx 1.20, Apache 2.4. RHEL 7 = Apache 2.4."
+      },
+      { mode: "exam", topic: "Storage",
+        q: "Swap space can be created with:",
+        options: ["mkswap /dev/sdX; swapon /dev/sdX", "mkfs.swap", "lvextend only", "xfs_growfs"],
+        correct: 1,
+        explain: "mkswap /dev/sdX; swapon /dev/sdX. Add to fstab for persistence."
+      },
+      { mode: "exam", topic: "SELinux",
+        q: "restorecon is used to:",
+        options: ["Disable SELinux", "Restore default SELinux context on files", "Change mode", "Reload policy"],
+        correct: 1,
+        explain: "restorecon -Rv /path - restore default context. Fixes labeling issues."
+      },
+      { mode: "exam", topic: "Packages",
+        q: "To install a package from a repository in RHEL 9:",
+        options: ["rpm -i package.rpm", "dnf install package", "yum install package (symlink to dnf)", "Both B and C"],
+        correct: 3,
+        explain: "dnf install package. yum is symlink to dnf in RHEL 8/9."
+      },
+      { mode: "exam", topic: "Packages",
+        q: "To list installed packages:",
+        options: ["rpm -qa", "dnf list installed", "Both", "apt list"],
+        correct: 2,
+        explain: "rpm -qa or dnf list installed. dnf repolist for repositories."
+      },
+      { mode: "comparison", topic: "RHEL 9 vs 7",
+        q: "RHEL 9 Application Streams provide:",
+        options: ["Only base packages", "Newer versions of software (e.g., PHP 8, Python 3.9) without upgrading OS", "No additional packages", "Kernel modules only"],
+        correct: 1,
+        explain: "App Streams = newer app versions; separate from base OS. Introduced in RHEL 8."
+      },
+      { mode: "exam", topic: "Boot",
+        q: "To set default boot target (e.g., multi-user):",
+        options: ["edit /etc/inittab", "systemctl set-default multi-user.target", "chkconfig 3", "init 3"],
+        correct: 1,
+        explain: "systemctl set-default multi-user.target. graphical.target for GUI."
+      },
+      { mode: "exam", topic: "SELinux",
+        q: "chcon is used to:",
+        options: ["Disable SELinux", "Temporarily change SELinux context", "Reload policy", "Set enforcing"],
+        correct: 1,
+        explain: "chcon -t type file - change context. Temporary; restorecon can revert. semanage for persistent."
+      },
+      { mode: "exam", topic: "Storage",
+        q: "To create a swap file (not partition):",
+        options: ["Cannot use file for swap", "dd + mkswap + chmod 600 + swapon", "mkfs.swap file", "swapoff only"],
+        correct: 1,
+        explain: "dd if=/dev/zero of=swapfile bs=1M count=1024; mkswap swapfile; chmod 600; swapon swapfile."
+      },
+      { mode: "exam", topic: "Users/Groups",
+        q: "To give a user sudo access without password:",
+        options: ["Add to wheel group (may need NOPASSWD in sudoers)", "chmod 4755 /usr/bin/sudo", "Remove password", "usermod -aG root"],
+        correct: 1,
+        explain: "Add to wheel; or sudoers: user ALL=(ALL) NOPASSWD: ALL. visudo to edit safely."
+      },
+      { mode: "exam", topic: "Firewall",
+        q: "To list all firewalld zones:",
+        options: ["iptables -L", "firewall-cmd --get-zones", "ufw status", "nft list ruleset"],
+        correct: 1,
+        explain: "firewall-cmd --get-zones. --get-default-zone, --list-all for zone details."
+      },
+      { mode: "comparison", topic: "RHEL 9 vs 7",
+        q: "RHEL 9 supports rootless containers with:",
+        options: ["Docker only", "Podman with native overlayfs", "No containers", "LXC only"],
+        correct: 1,
+        explain: "RHEL 9: Podman, rootless, native OverlayFS. Docker deprecated on RHEL."
+      },
+      { mode: "exam", topic: "Storage",
+        q: "To display disk usage by directory:",
+        options: ["ls -la", "du -sh /path", "df -h", "fdisk -l"],
+        correct: 1,
+        explain: "du -sh /path - disk usage. df -h - filesystem usage."
+      },
+      { mode: "exam", topic: "Networking",
+        q: "To add a host entry for name resolution:",
+        options: ["edit /etc/hosts", "edit /etc/resolv.conf", "nmcli only", "systemd-resolve"],
+        correct: 1,
+        explain: "/etc/hosts - static entries. /etc/resolv.conf - DNS servers."
+      },
+      { mode: "exam", topic: "systemd",
+        q: "To reload a service's configuration without full restart:",
+        options: ["systemctl reload service (if supported)", "Always restart", "kill -HUP", "initctl reload"],
+        correct: 1,
+        explain: "systemctl reload - reload config (e.g., sshd). Not all services support it."
+      },
+      { mode: "exam", topic: "Filesystems",
+        q: "To create an ext4 filesystem:",
+        options: ["mkfs.ext4 /dev/sdX", "mkfs.xfs /dev/sdX", "mke2fs -t ext4", "Both A and C"],
+        correct: 3,
+        explain: "mkfs.ext4 or mke2fs -t ext4. XFS for mkfs.xfs."
+      },
+      { mode: "comparison", topic: "RHEL 9 vs 7",
+        q: "RHEL 9 uses which GCC version as system compiler?",
+        options: ["GCC 4.8", "GCC 8", "GCC 11", "GCC 13"],
+        correct: 2,
+        explain: "RHEL 9 = GCC 11. RHEL 7 = 4.8. RHEL 8 = 8."
+      },
+    ];
+
+    const QUESTIONS_PER_QUIZ = 40;
+    let currentIndex = 0;
+    let score = 0;
+    let answered = [];
+    let sessionQuestions = [];
+    let selectedMode = 'mixed';
+
+    function getProfile() {
+      try {
+        const raw = localStorage.getItem(PROFILE_KEY);
+        if (!raw) return { quizId: QUIZ_ID, topicStats: {}, topicMissesFromImports: {} };
+        const p = JSON.parse(raw);
+        return {
+          quizId: p.quizId || QUIZ_ID,
+          topicStats: p.topicStats || {},
+          topicMissesFromImports: p.topicMissesFromImports || {}
+        };
+      } catch (e) {
+        return { quizId: QUIZ_ID, topicStats: {}, topicMissesFromImports: {} };
+      }
+    }
+
+    function saveProfile(profile) {
+      try {
+        localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+      } catch (e) {}
+    }
+
+    function getTopicWeight(profile, topic) {
+      const t = topic || 'Other';
+      let missRate = 0;
+      if (profile.topicStats[t] && profile.topicStats[t].total > 0) {
+        missRate = 1 - (profile.topicStats[t].correct / profile.topicStats[t].total);
+      }
+      const importMisses = (profile.topicMissesFromImports[t] || 0) * 0.2;
+      return 1 + Math.min(missRate + importMisses, 2);
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function weightedSample(arr, n, profile) {
+      const hasData = profile && (Object.keys(profile.topicStats).length > 0 || Object.keys(profile.topicMissesFromImports).length > 0);
+      if (!hasData) {
+        const shuffled = shuffle(arr);
+        return shuffled.slice(0, Math.min(n, shuffled.length));
+      }
+      const withKeys = arr.map(q => {
+        const w = getTopicWeight(profile, q.topic);
+        return { q, key: Math.pow(Math.random(), 1 / w) };
+      });
+      withKeys.sort((a, b) => b.key - a.key);
+      return withKeys.slice(0, Math.min(n, withKeys.length)).map(x => x.q);
+    }
+
+    function getWeakTopics(profile, topN) {
+      const scores = [];
+      const topics = new Set([
+        ...Object.keys(profile.topicStats || {}),
+        ...Object.keys(profile.topicMissesFromImports || {})
+      ]);
+      topics.forEach(t => {
+        let weakness = 0;
+        if (profile.topicStats[t] && profile.topicStats[t].total > 0) {
+          weakness = 1 - (profile.topicStats[t].correct / profile.topicStats[t].total);
+        }
+        weakness += (profile.topicMissesFromImports[t] || 0) * 0.15;
+        scores.push({ topic: t, weakness });
+      });
+      scores.sort((a, b) => b.weakness - a.weakness);
+      return scores.slice(0, topN).filter(x => x.weakness > 0.1).map(x => x.topic);
+    }
+
+    function selectMode(mode) {
+      selectedMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
+      document.querySelector('[data-mode="' + mode + '"]').classList.add('selected');
+    }
+
+    function startQuiz() {
+      const filtered = questionBank.filter(q => {
+        if (selectedMode === 'comparison') return q.mode === 'comparison';
+        if (selectedMode === 'exam') return q.mode === 'exam';
+        return true;
+      });
+      const profile = getProfile();
+      sessionQuestions = weightedSample(filtered, QUESTIONS_PER_QUIZ, profile);
+      currentIndex = 0;
+      score = 0;
+      answered = [];
+      const hintEl = document.getElementById('focus-hint');
+      const weak = getWeakTopics(profile, 3);
+      if (weak.length > 0) {
+        hintEl.textContent = "We'll focus more on: " + weak.join(', ') + '.';
+        hintEl.classList.remove('hidden');
+      } else {
+        hintEl.classList.add('hidden');
+      }
+      document.getElementById('start-screen').classList.add('hidden');
+      document.getElementById('results-screen').classList.add('hidden');
+      document.getElementById('quiz-area').classList.remove('hidden');
+      document.getElementById('q-total').textContent = sessionQuestions.length;
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = sessionQuestions[currentIndex];
+      document.getElementById('q-num').textContent = currentIndex + 1;
+      document.getElementById('score-display').textContent = score;
+      document.getElementById('question-text').textContent = q.q;
+      const opts = document.getElementById('options');
+      opts.innerHTML = '';
+      const fb = document.getElementById('feedback');
+      fb.classList.add('hidden');
+      fb.className = 'feedback hidden';
+
+      q.options.forEach((opt, i) => {
+        const div = document.createElement('div');
+        div.className = 'option';
+        div.textContent = opt;
+        div.dataset.index = i;
+        if (answered[currentIndex] !== undefined) {
+          div.classList.add('disabled');
+          if (i === q.correct) div.classList.add('correct');
+          else if (i === answered[currentIndex]) div.classList.add('wrong');
+        } else {
+          div.onclick = () => selectOption(currentIndex, i, q);
+        }
+        opts.appendChild(div);
+      });
+
+      if (answered[currentIndex] !== undefined) {
+        fb.classList.remove('hidden');
+        fb.className = 'feedback ' + (answered[currentIndex] === q.correct ? 'correct-msg' : 'wrong-msg');
+        fb.innerHTML = (answered[currentIndex] === q.correct ? '✓ Correct. ' : '✗ Incorrect. ') + '<span class="explanation">' + q.explain + '</span>';
+      }
+
+      document.getElementById('prev-btn').disabled = currentIndex === 0;
+    }
+
+    function selectOption(pos, optIdx, q) {
+      if (answered[pos] !== undefined) return;
+      answered[pos] = optIdx;
+      if (optIdx === q.correct) score++;
+
+      document.querySelectorAll('#options .option').forEach(o => {
+        o.classList.add('disabled');
+        o.onclick = null;
+        if (parseInt(o.dataset.index) === q.correct) o.classList.add('correct');
+        else if (parseInt(o.dataset.index) === optIdx) o.classList.add('wrong');
+      });
+
+      const fb = document.getElementById('feedback');
+      fb.classList.remove('hidden');
+      fb.innerHTML = (optIdx === q.correct ? '✓ Correct. ' : '✗ Incorrect. ') + '<span class="explanation">' + q.explain + '</span>';
+      fb.className = 'feedback ' + (optIdx === q.correct ? 'correct-msg' : 'wrong-msg');
+      document.getElementById('score-display').textContent = score;
+    }
+
+    function nextQuestion() {
+      if (currentIndex < sessionQuestions.length - 1) {
+        currentIndex++;
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderQuestion();
+      }
+    }
+
+    function saveSessionToProfile() {
+      const profile = getProfile();
+      sessionQuestions.forEach((q, i) => {
+        const t = q.topic || 'Other';
+        if (!profile.topicStats[t]) profile.topicStats[t] = { correct: 0, total: 0 };
+        profile.topicStats[t].total++;
+        if (answered[i] !== undefined && answered[i] === q.correct) {
+          profile.topicStats[t].correct++;
+        }
+      });
+      saveProfile(profile);
+    }
+
+    function showResults() {
+      saveSessionToProfile();
+      document.getElementById('quiz-area').classList.add('hidden');
+      const r = document.getElementById('results-screen');
+      r.classList.remove('hidden');
+      const total = sessionQuestions.length;
+      const pct = Math.round((score / total) * 100);
+      document.getElementById('final-score').textContent = score + ' / ' + total + ' (' + pct + '%)';
+      document.getElementById('final-score').className = 'score ' + (pct >= 70 ? 'pass' : 'fail');
+      document.getElementById('result-msg').textContent = pct >= 70
+        ? 'Red Hat uses 70% passing. You\'re on track!'
+        : 'Aim for 70%+ on the real exam. Review and try again.';
+      document.getElementById('copy-toast').classList.add('hidden');
+    }
+
+    function getResultsMarkdown() {
+      const total = sessionQuestions.length;
+      const pct = Math.round((score / total) * 100);
+      const missed = sessionQuestions.map((q, i) => ({ q, i })).filter(x => answered[x.i] !== undefined && answered[x.i] !== x.q.correct);
+      const topicCounts = {};
+      missed.forEach(x => {
+        const t = x.q.topic || 'Other';
+        topicCounts[t] = (topicCounts[t] || 0) + 1;
+      });
+      let md = '# RHCSA 9 Quiz Results\n\n';
+      md += '**Date:** ' + new Date().toISOString().slice(0, 10) + '\n';
+      md += '**Mode:** ' + (selectedMode === 'comparison' ? 'RHEL 9 vs 7' : selectedMode === 'exam' ? 'Exam' : 'Mixed') + '\n';
+      md += '**Score:** ' + score + '/' + total + ' (' + pct + '%)\n';
+      md += '**Pass (70%):** ' + (pct >= 70 ? 'Yes' : 'No') + '\n\n';
+      md += '---\n\n';
+      md += '## Instructions for AI Refactoring\n\n';
+      md += 'Paste this entire block into a Cursor chat and say:\n';
+      md += '> "Refactor the RHCSA 9 quiz based on my mistakes. Add more questions on my weak topics."\n\n';
+      if (Object.keys(topicCounts).length > 0) {
+        md += '## Misses by Topic\n\n';
+        Object.entries(topicCounts).sort((a, b) => b[1] - a[1]).forEach(([t, n]) => {
+          md += '- **' + t + ':** ' + n + ' missed\n';
+        });
+        md += '\n';
+      }
+      if (missed.length > 0) {
+        md += '## Missed Questions (for AI refactoring)\n\n';
+        missed.forEach((x, i) => {
+          const q = x.q;
+          const yourAns = q.options[answered[x.i]];
+          const correctAns = q.options[q.correct];
+          md += '### ' + (i + 1) + '. [' + (q.topic || 'General') + ']\n';
+          md += '**Q:** ' + q.q + '\n';
+          md += '**Your answer:** ' + yourAns + '\n';
+          md += '**Correct answer:** ' + correctAns + '\n';
+          md += '**Explanation:** ' + q.explain + '\n\n';
+        });
+      }
+      return md;
+    }
+
+    function downloadResults() {
+      const blob = new Blob([getResultsMarkdown()], { type: 'text/markdown' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'rhcsa9_quiz_results_' + new Date().toISOString().slice(0, 10) + '.md';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function copyResultsToClipboard() {
+      navigator.clipboard.writeText(getResultsMarkdown()).then(() => {
+        document.getElementById('copy-toast').classList.remove('hidden');
+        setTimeout(() => document.getElementById('copy-toast').classList.add('hidden'), 2500);
+      });
+    }
+
+    function parseImportedResults(mdText) {
+      const lines = mdText.split('\n');
+      const firstLine = (lines[0] || '').toLowerCase();
+      if (QUIZ_ID === 'rhcsa9' && !firstLine.includes('rhcsa')) return { ok: false, error: 'Not an RHCSA 9 results file.' };
+      let inSection = false;
+      const topicMisses = {};
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.indexOf('## Misses by Topic') !== -1) {
+          inSection = true;
+          continue;
+        }
+        if (inSection && line.startsWith('## ')) break;
+        if (inSection && line.match(/^\s*-\s*\*\*(.+?)\*\*:\s*(\d+)\s+missed/)) {
+          const m = line.match(/^\s*-\s*\*\*(.+?)\*\*:\s*(\d+)\s+missed/);
+          const topic = m[1].trim();
+          const n = parseInt(m[2], 10);
+          topicMisses[topic] = (topicMisses[topic] || 0) + n;
+        }
+      }
+      if (Object.keys(topicMisses).length === 0) return { ok: false, error: 'No "Misses by Topic" section found.' };
+      return { ok: true, topicMisses };
+    }
+
+    function importResults() {
+      const ta = document.getElementById('import-results');
+      const mdText = (ta && ta.value || '').trim();
+      if (!mdText) {
+        showImportToast('Paste results markdown first, or choose a file.', true);
+        return;
+      }
+      const result = parseImportedResults(mdText);
+      if (!result.ok) {
+        showImportToast(result.error || 'Could not parse results.', true);
+        return;
+      }
+      const profile = getProfile();
+      if (!profile.topicMissesFromImports) profile.topicMissesFromImports = {};
+      Object.entries(result.topicMisses).forEach(([topic, n]) => {
+        profile.topicMissesFromImports[topic] = (profile.topicMissesFromImports[topic] || 0) + n;
+      });
+      saveProfile(profile);
+      const top = Object.entries(result.topicMisses).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]);
+      showImportToast('Imported. We\'ll focus more on: ' + top.join(', ') + '.', false);
+      if (ta) ta.value = '';
+    }
+
+    function onImportFile(ev) {
+      const f = ev.target.files && ev.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = function () {
+        const ta = document.getElementById('import-results');
+        if (ta) ta.value = r.result || '';
+        importResults();
+      };
+      r.readAsText(f);
+      ev.target.value = '';
+    }
+
+    function showImportToast(msg, isError) {
+      const el = document.getElementById('import-toast');
+      if (!el) return;
+      el.textContent = msg;
+      el.className = 'import-toast ' + (isError ? 'err' : 'success');
+      el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 4000);
+    }
+
+    (function initFocusHint() {
+      const profile = getProfile();
+      const weak = getWeakTopics(profile, 3);
+      const hintEl = document.getElementById('focus-hint');
+      if (hintEl && weak.length > 0) {
+        hintEl.textContent = "We'll focus more on: " + weak.join(', ') + '.';
+        hintEl.classList.remove('hidden');
+      }
+    })();
+  </script>
+</body>
+</html>

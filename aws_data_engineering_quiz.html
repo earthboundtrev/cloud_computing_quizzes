@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AWS Data Engineer Associate Practice Quiz</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --accent: #ff9900;
+      --accent-dim: #ec7211;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --correct: #22c55e;
+      --wrong: #ef4444;
+      --font: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    .container { max-width: 720px; margin: 0 auto; }
+    h1 {
+      font-size: 1.5rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem; }
+    .stats {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .stats span { color: var(--accent); font-weight: 600; }
+    .question-card {
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border-left: 3px solid var(--accent);
+    }
+    .question-text {
+      font-size: 1.05rem;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+    .options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .option {
+      padding: 0.75rem 1rem;
+      background: var(--bg);
+      border: 2px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .option:hover:not(.disabled) {
+      border-color: var(--accent-dim);
+      background: #151d2b;
+    }
+    .option.selected { border-color: var(--accent); background: #151d2b; }
+    .option.correct { border-color: var(--correct); background: rgba(34,197,94,0.1); }
+    .option.wrong { border-color: var(--wrong); background: rgba(239,68,68,0.1); }
+    .option.disabled { cursor: not-allowed; opacity: 0.7; }
+    .feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+    .feedback.correct-msg { background: rgba(34,197,94,0.15); border-left: 4px solid var(--correct); }
+    .feedback.wrong-msg { background: rgba(239,68,68,0.15); border-left: 4px solid var(--wrong); }
+    .feedback .explanation { margin-top: 0.5rem; color: var(--text-muted); }
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.5rem;
+    }
+    button {
+      padding: 0.6rem 1.2rem;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: var(--accent-dim); }
+    button.secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+    }
+    button.secondary:hover { background: rgba(255,153,0,0.1); }
+    .results {
+      text-align: center;
+      padding: 2rem;
+    }
+    .results h2 { color: var(--accent); margin-bottom: 1rem; }
+    .score { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .results-actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
+    .results-actions button.secondary { margin: 0; }
+    .copy-toast { font-size: 0.85rem; color: var(--correct); margin-top: 0.5rem; }
+    .score.pass { color: var(--correct); }
+    .score.fail { color: var(--wrong); }
+    .start-screen { text-align: center; padding: 3rem 0; }
+    .start-screen p { margin-bottom: 1.5rem; color: var(--text-muted); }
+    .mode-selector { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; max-width: 360px; margin-left: auto; margin-right: auto; }
+    .mode-btn {
+      padding: 1rem 1.5rem;
+      text-align: left;
+      background: var(--surface);
+      border: 2px solid transparent;
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .mode-btn:hover { border-color: var(--accent-dim); background: #151d2b; }
+    .mode-btn.selected { border-color: var(--accent); background: rgba(255,153,0,0.1); }
+    .mode-btn .label { font-weight: 600; display: block; }
+    .mode-btn .desc { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .profile-hint { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.75rem; }
+    .import-area { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--surface); text-align: left; }
+    .import-area label { display: block; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--text-muted); }
+    .import-area textarea { width: 100%; min-height: 80px; padding: 0.5rem; background: var(--surface); border: 1px solid var(--accent-dim); border-radius: 6px; color: var(--text); font-family: inherit; font-size: 0.85rem; resize: vertical; }
+    .import-toast { font-size: 0.85rem; margin-top: 0.5rem; }
+    .import-toast.success { color: var(--correct); }
+    .import-toast.err { color: var(--wrong); }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>AWS Data Engineer Associate Practice Quiz</h1>
+    <p class="subtitle">DEA-C01 • Ingestion, transformation, data stores, operations, security</p>
+
+    <div id="start-screen" class="start-screen">
+      <p>40 questions per session, drawn from a pool of 55+. Randomized each run. Choose your mode:</p>
+      <p id="focus-hint" class="profile-hint hidden"></p>
+      <div class="mode-selector">
+        <button type="button" class="mode-btn" data-mode="comparison" onclick="selectMode('comparison')">
+          <span class="label">Service Selection</span>
+          <span class="desc">Map use cases to Glue, EMR, Kinesis, Redshift, Athena, and more.</span>
+        </button>
+        <button type="button" class="mode-btn" data-mode="exam" onclick="selectMode('exam')">
+          <span class="label">Exam (Scenario-based)</span>
+          <span class="desc">Data pipelines, governance, security—exam-style questions.</span>
+        </button>
+        <button type="button" class="mode-btn selected" data-mode="mixed" onclick="selectMode('mixed')">
+          <span class="label">Mixed</span>
+          <span class="desc">Both service selection and exam-style. Simulates full exam.</span>
+        </button>
+      </div>
+      <button id="start-btn" onclick="startQuiz()">Start Quiz</button>
+      <div class="import-area">
+        <label for="import-results">Import past results (paste .md or choose file) to focus on weak topics:</label>
+        <textarea id="import-results" placeholder="Paste quiz results markdown here..."></textarea>
+        <button type="button" class="secondary" style="margin-top: 0.5rem;" onclick="importResults()">Import results</button>
+        <input type="file" id="import-file" accept=".md,text/markdown" style="display: none;" onchange="onImportFile(event)">
+        <button type="button" class="secondary" style="margin-top: 0.5rem; margin-left: 0.5rem;" onclick="document.getElementById('import-file').click()">Choose file</button>
+        <p id="import-toast" class="import-toast hidden"></p>
+      </div>
+    </div>
+
+    <div id="quiz-area" class="hidden">
+      <div class="stats">
+        <span>Question <span id="q-num">1</span> of <span id="q-total">40</span></span>
+        <span>Correct: <span id="score-display">0</span></span>
+      </div>
+      <div class="question-card">
+        <div class="question-text" id="question-text"></div>
+        <div class="options" id="options"></div>
+        <div id="feedback" class="feedback hidden"></div>
+      </div>
+      <div class="nav-row">
+        <button id="prev-btn" class="secondary" onclick="prevQuestion()">← Previous</button>
+        <button id="next-btn" onclick="nextQuestion()">Next →</button>
+      </div>
+    </div>
+
+    <div id="results-screen" class="results hidden">
+      <h2>Quiz Complete</h2>
+      <div class="score" id="final-score"></div>
+      <p id="result-msg" style="margin-bottom: 1.5rem; color: var(--text-muted);"></p>
+      <div class="results-actions">
+        <button onclick="startQuiz()">Try Again</button>
+        <button class="secondary" onclick="downloadResults()">Download Results</button>
+        <button class="secondary" onclick="copyResultsToClipboard()">Copy to Clipboard</button>
+      </div>
+      <p id="copy-toast" class="copy-toast hidden">Copied! Paste into Cursor chat for AI refactoring.</p>
+    </div>
+  </div>
+
+  <script>
+    const QUIZ_ID = 'aws_dea';
+    const PROFILE_KEY = 'study_sessions_profile_' + QUIZ_ID;
+
+    const questionBank = [
+      // === DATA INGESTION & TRANSFORMATION ===
+      { mode: "comparison", topic: "Ingestion",
+        q: "For serverless ETL to extract, transform, and load data from various sources into S3 or databases, which service?",
+        options: ["EC2 only", "AWS Glue", "Lambda only", "API Gateway"],
+        correct: 1,
+        explain: "AWS Glue = serverless ETL; crawlers, jobs, Data Catalog; Spark-based."
+      },
+      { mode: "comparison", topic: "Ingestion",
+        q: "For real-time streaming data ingestion (e.g., logs, clickstreams), which AWS service?",
+        options: ["S3 only", "Amazon Kinesis Data Streams or Kinesis Data Firehose", "Redshift", "RDS"],
+        correct: 1,
+        explain: "Kinesis Data Streams = real-time streaming. Kinesis Data Firehose = load into S3/Redshift/OpenSearch."
+      },
+      { mode: "comparison", topic: "Ingestion",
+        q: "For migrating data from on-premises databases to AWS with minimal downtime, which service?",
+        options: ["Glue only", "AWS DMS (Database Migration Service)", "Lambda", "Athena"],
+        correct: 1,
+        explain: "DMS = homogenous and heterogenous DB migration; CDC for ongoing replication."
+      },
+      { mode: "comparison", topic: "Transformation",
+        q: "For running large-scale Spark, Hive, or Presto workloads on a managed cluster, which service?",
+        options: ["Glue only", "Amazon EMR", "Lambda", "Athena"],
+        correct: 1,
+        explain: "EMR = managed Hadoop/Spark/Hive/Presto; big data processing at scale."
+      },
+      { mode: "exam", topic: "Ingestion",
+        q: "What is the difference between Kinesis Data Streams and Kinesis Data Firehose?",
+        options: ["They are identical", "Streams = real-time processing with consumers; Firehose = load directly to S3/Redshift etc.", "Firehose only", "Streams only"],
+        correct: 1,
+        explain: "Streams = real-time, consumers process. Firehose = fully managed, load to destinations; no custom consumers."
+      },
+      { mode: "exam", topic: "Transformation",
+        q: "AWS Glue jobs can be authored in:",
+        options: ["SQL only", "Python or Spark (PySpark/Spark SQL)", "Java only", "No code"],
+        correct: 1,
+        explain: "Glue jobs = Python (PySpark) or Spark SQL; generated or custom scripts."
+      },
+      { mode: "comparison", topic: "Transformation",
+        q: "For orchestrating complex, multi-step data pipelines (Glue, EMR, Lambda, etc.), which service?",
+        options: ["S3 Events only", "AWS Step Functions or EventBridge", "CloudWatch only", "SNS only"],
+        correct: 1,
+        explain: "Step Functions = workflow orchestration. EventBridge = event-driven; schedule Glue jobs."
+      },
+      { mode: "exam", topic: "Ingestion",
+        q: "Glue crawlers populate the Glue Data Catalog by:",
+        options: ["Manual entry only", "Scanning data sources and inferring schema", "Copying data", "No catalog"],
+        correct: 1,
+        explain: "Crawlers scan S3, JDBC, etc.; infer schema; create/update tables in Data Catalog."
+      },
+      // === DATA STORE MANAGEMENT ===
+      { mode: "comparison", topic: "Data Stores",
+        q: "For a data lake, which storage is typically the primary repository for raw and processed data?",
+        options: ["RDS", "Amazon S3", "DynamoDB", "ElastiCache"],
+        correct: 1,
+        explain: "S3 = data lake foundation; scalable, durable; store raw + processed data."
+      },
+      { mode: "comparison", topic: "Data Stores",
+        q: "For interactive SQL queries on data in S3 without loading it into a database, which service?",
+        options: ["Redshift only", "Amazon Athena", "RDS", "DynamoDB"],
+        correct: 1,
+        explain: "Athena = serverless SQL on S3; Pay per query; uses Glue Data Catalog or Hive metastore."
+      },
+      { mode: "comparison", topic: "Data Stores",
+        q: "For a petabyte-scale cloud data warehouse with columnar storage and SQL analytics, which service?",
+        options: ["RDS", "Amazon Redshift", "DynamoDB", "Athena"],
+        correct: 1,
+        explain: "Redshift = data warehouse; columnar; Massively Parallel Processing (MPP); SQL."
+      },
+      { mode: "comparison", topic: "Data Stores",
+        q: "For centralized metadata and schema catalog across S3, Redshift, and Athena, which service?",
+        options: ["RDS", "AWS Glue Data Catalog", "DynamoDB", "CloudWatch"],
+        correct: 1,
+        explain: "Glue Data Catalog = Hive-compatible metastore; tables, schemas; used by Glue, Athena, EMR."
+      },
+      { mode: "exam", topic: "Data Stores",
+        q: "Lake Formation helps with:",
+        options: ["Only compute", "Data lake governance: access control, data catalog, encryption, audit", "Networking only", "Cost management only"],
+        correct: 1,
+        explain: "Lake Formation = secure data lakes; fine-grained access, catalog, encryption, audit trail."
+      },
+      { mode: "exam", topic: "Data Stores",
+        q: "Redshift Serverless provides:",
+        options: ["Only provisioned clusters", "Automatically scaled data warehouse; no cluster management", "No SQL", "Only DynamoDB"],
+        correct: 1,
+        explain: "Redshift Serverless = auto-provision; pay per RPU; no cluster sizing."
+      },
+      { mode: "comparison", topic: "Data Stores",
+        q: "For low-latency key-value and document workloads at scale, which service?",
+        options: ["Redshift", "Amazon DynamoDB", "RDS", "Athena"],
+        correct: 1,
+        explain: "DynamoDB = managed NoSQL; key-value and document; single-digit ms; serverless option."
+      },
+      { mode: "exam", topic: "Data Stores",
+        q: "S3 Intelligent-Tiering moves objects between access tiers based on:",
+        options: ["Manual only", "Access patterns; no retrieval fees when moving", "No movement", "Only to Glacier"],
+        correct: 1,
+        explain: "Intelligent-Tiering = auto-move between tiers based on access; no retrieval fee."
+      },
+      // === DATA OPERATIONS ===
+      { mode: "exam", topic: "Operations",
+        q: "Glue job bookmarks help with:",
+        options: ["Only cost", "Incremental processing; track what data has been processed", "Security only", "Networking"],
+        correct: 1,
+        explain: "Job bookmarks = avoid reprocessing; track processed data; idempotent incremental loads."
+      },
+      { mode: "exam", topic: "Operations",
+        q: "For monitoring Glue job runs, failures, and data quality, which services?",
+        options: ["S3 only", "CloudWatch metrics, Glue console, Glue Data Quality", "Lambda only", "No monitoring"],
+        correct: 1,
+        explain: "CloudWatch = metrics/alarms. Glue Data Quality = rules, statistics, monitor quality."
+      },
+      { mode: "comparison", topic: "Operations",
+        q: "For validating and improving data quality in Glue, which capability?",
+        options: ["Crawlers only", "Glue Data Quality (rules, evaluations)", "Step Functions only", "SNS only"],
+        correct: 1,
+        explain: "Glue Data Quality = define rules; evaluate; integrate with ETL jobs."
+      },
+      { mode: "exam", topic: "Operations",
+        q: "EMR cluster placement groups can improve:",
+        options: ["Only cost", "Network performance (low latency between nodes)", "Storage only", "Security only"],
+        correct: 1,
+        explain: "Placement groups = collocate instances; lower latency for shuffle-heavy Spark jobs."
+      },
+      { mode: "exam", topic: "Operations",
+        q: "For scheduling Glue jobs to run on a cron expression, which service is commonly used?",
+        options: ["Lambda only", "EventBridge Scheduler or Glue Triggers", "S3 Events", "Step Functions only"],
+        correct: 1,
+        explain: "EventBridge Scheduler or Glue Triggers = schedule Glue jobs (cron, event-based)."
+      },
+      // === SECURITY & GOVERNANCE ===
+      { mode: "exam", topic: "Security",
+        q: "For encrypting S3 data at rest, which options are available?",
+        options: ["No encryption", "SSE-S3, SSE-KMS, SSE-C (customer-provided keys)", "Only SSE-S3", "Only TLS"],
+        correct: 1,
+        explain: "SSE-S3 (AWS-managed), SSE-KMS, SSE-C (customer keys). Plus bucket policies for access."
+      },
+      { mode: "exam", topic: "Security",
+        q: "Lake Formation uses which mechanism for fine-grained table and column access?",
+        options: ["Only IAM", "IAM + LF-Tags and named resources (tables, columns)", "Security groups only", "NACLs only"],
+        correct: 1,
+        explain: "Lake Formation = LF-Tags, table/column grants; fine-grained access beyond IAM."
+      },
+      { mode: "exam", topic: "Security",
+        q: "For auditing access to S3 buckets and Glue resources, which service?",
+        options: ["S3 only", "CloudTrail (API calls) + S3 access logs", "Lambda only", "No audit"],
+        correct: 1,
+        explain: "CloudTrail = API auditing. S3 access logs = object-level access. Glue = CloudTrail."
+      },
+      { mode: "comparison", topic: "Security",
+        q: "For secure connectivity from Glue to a VPC-resident database, which configuration?",
+        options: ["Public endpoint only", "Glue connection with VPC, subnet, security group", "No VPC", "Internet only"],
+        correct: 1,
+        explain: "Glue connection = VPC, subnet, security group; access RDS, Redshift in VPC."
+      },
+      // === MORE ===
+      { mode: "comparison", topic: "Ingestion",
+        q: "For high-throughput file and object transfer from on-premises to S3 or EFS, which service?",
+        options: ["DMS only", "AWS DataSync", "Lambda", "Athena"],
+        correct: 1,
+        explain: "DataSync = automated, accelerated transfer; S3, EFS, FSx; replication, scheduling."
+      },
+      { mode: "comparison", topic: "Transformation",
+        q: "For serverless, event-driven transformation when new objects land in S3, which pattern?",
+        options: ["EMR only", "S3 Event Notifications → Lambda or Glue", "Manual only", "Redshift only"],
+        correct: 1,
+        explain: "S3 events → Lambda (light) or Glue (heavy ETL); event-driven pipelines."
+      },
+      { mode: "exam", topic: "Data Stores",
+        q: "Redshift Spectrum allows:",
+        options: ["Only Redshift cluster storage", "Query data directly in S3 without loading into Redshift", "No S3", "DynamoDB only"],
+        correct: 1,
+        explain: "Redshift Spectrum = query S3 with Redshift SQL; external tables; no load needed."
+      },
+      { mode: "exam", topic: "Ingestion",
+        q: "Kinesis Data Firehose can deliver to:",
+        options: ["S3 only", "S3, Redshift, OpenSearch, Splunk, HTTP, Datadog, etc.", "DynamoDB only", "RDS only"],
+        correct: 1,
+        explain: "Firehose = S3, Redshift, OpenSearch, Splunk, custom HTTP; buffering, transforms."
+      },
+      { mode: "comparison", topic: "Data Stores",
+        q: "For a fully managed, serverless SQL endpoint over S3 data lake with automatic scaling, which option?",
+        options: ["Redshift provisioned only", "Athena or Redshift Serverless", "RDS", "DynamoDB"],
+        correct: 1,
+        explain: "Athena = serverless SQL on S3. Redshift Serverless = serverless warehouse."
+      },
+      { mode: "exam", topic: "Operations",
+        q: "Glue Dynamic Frames vs Spark DataFrames:",
+        options: ["Identical", "Dynamic Frames handle schema flexibility; can convert to/from DataFrames", "No conversion", "Only Dynamic Frames"],
+        correct: 1,
+        explain: "Dynamic Frames = schema-on-read; flexible; resolve choice types; convert to Spark DataFrames."
+      },
+      { mode: "exam", topic: "Transformation",
+        q: "EMR Serverless is suitable when:",
+        options: ["Only long-lived clusters", "Spiky or variable Spark workloads; no cluster to manage", "No Spark", "Only Glue"],
+        correct: 1,
+        explain: "EMR Serverless = run Spark without clusters; pay per vCPU/memory; variable workloads."
+      },
+      { mode: "exam", topic: "Security",
+        q: "For cross-account access to S3 data in a data lake, which approach?",
+        options: ["Share access keys", "S3 Bucket policies + IAM roles (AssumeRole) or Lake Formation", "No cross-account", "Security groups only"],
+        correct: 1,
+        explain: "Bucket policy + IAM AssumeRole; or Lake Formation for fine-grained cross-account sharing."
+      },
+      { mode: "comparison", topic: "Ingestion",
+        q: "For change data capture (CDC) from a source database to a data lake or warehouse, which service?",
+        options: ["Glue crawlers only", "DMS (with ongoing replication / CDC)", "Lambda only", "Athena"],
+        correct: 1,
+        explain: "DMS = CDC; continuous replication of changes; homogenous or heterogenous."
+      },
+      { mode: "exam", topic: "Data Stores",
+        q: "Athena uses which metadata catalog by default?",
+        options: ["Redshift", "AWS Glue Data Catalog (or Hive metastore)", "DynamoDB", "RDS"],
+        correct: 1,
+        explain: "Athena uses Glue Data Catalog by default; or external Hive metastore."
+      },
+      { mode: "exam", topic: "Operations",
+        q: "For idempotent Glue ETL jobs that reprocess data safely, which practices help?",
+        options: ["No idempotency", "Job bookmarks, overwrite by partition, deduplication logic", "Manual delete only", "No overwrite"],
+        correct: 1,
+        explain: "Job bookmarks + partition overwrites + dedupe = idempotent; safe reruns."
+      },
+      { mode: "comparison", topic: "Data Stores",
+        q: "For a transactional data store with ACID and SQL, which AWS service?",
+        options: ["S3 only", "Amazon RDS or Aurora", "DynamoDB for all cases", "Athena"],
+        correct: 1,
+        explain: "RDS/Aurora = relational, ACID, SQL; OLTP workloads."
+      },
+      { mode: "exam", topic: "Ingestion",
+        q: "Kinesis Data Streams shards determine:",
+        options: ["Only cost", "Throughput (records/sec, data/sec) and consumer parallelism", "Storage only", "Security only"],
+        correct: 1,
+        explain: "Shards = capacity units; 1000 records/sec, 1MB/sec per shard; scale by adding shards."
+      },
+      { mode: "exam", topic: "Security",
+        q: "For encrypting Glue connection credentials (e.g., JDBC passwords), which service?",
+        options: ["Plain text in Glue", "AWS Secrets Manager or Glue secure connection", "S3 bucket", "CloudWatch"],
+        correct: 1,
+        explain: "Secrets Manager or Glue secure connection = store credentials; no plain text."
+      },
+      { mode: "comparison", topic: "Transformation",
+        q: "For real-time stream processing (e.g., aggregations, windowing) on Kinesis streams, which option?",
+        options: ["Lambda only", "Kinesis Data Analytics (Flink or SQL)", "Glue only", "Athena"],
+        correct: 1,
+        explain: "Kinesis Data Analytics = real-time analytics; Flink or SQL; windowing, aggregations."
+      },
+      { mode: "exam", topic: "Data Stores",
+        q: "S3 lifecycle policies can:",
+        options: ["Only delete", "Transition to IA/Glacier and expire (delete) objects", "Only transition", "Only encrypt"],
+        correct: 1,
+        explain: "Lifecycle = transition (Standard → IA → Glacier) and expiration (delete)."
+      },
+      { mode: "exam", topic: "Operations",
+        q: "Glue workflow is used for:",
+        options: ["Single job only", "Orchestrating multiple crawlers and jobs in a DAG", "No orchestration", "Lambda only"],
+        correct: 1,
+        explain: "Glue Workflows = DAG of crawlers and jobs; dependencies; triggers."
+      },
+      { mode: "comparison", topic: "Ingestion",
+        q: "For ingesting data from SaaS applications (e.g., Salesforce, Marketo) into S3, which service?",
+        options: ["DMS only", "AWS AppFlow", "Lambda only", "Glue only"],
+        correct: 1,
+        explain: "AppFlow = SaaS-to-AWS data flows; connectors for Salesforce, etc.; no code."
+      },
+      { mode: "exam", topic: "Transformation",
+        q: "EMR vs Glue for ETL: Glue is preferred when:",
+        options: ["Always use EMR", "Serverless, no cluster to manage; lighter workloads; integrated with Data Catalog", "No Glue", "Heavy custom Spark only"],
+        correct: 1,
+        explain: "Glue = serverless, managed; good for standard ETL. EMR = custom Spark, heavy compute, full control."
+      },
+      { mode: "exam", topic: "Security",
+        q: "VPC endpoints for S3 and Glue help with:",
+        options: ["Cost only", "Keeping traffic within AWS network; no public internet", "Latency only", "No benefit"],
+        correct: 1,
+        explain: "VPC endpoints = private connectivity to S3/Glue; no internet; better security, compliance."
+      },
+      { mode: "comparison", topic: "Data Stores",
+        q: "For a search and analytics workload on semi-structured JSON logs, which service?",
+        options: ["Redshift only", "Amazon OpenSearch Service", "DynamoDB for analytics", "RDS"],
+        correct: 1,
+        explain: "OpenSearch = search, log analytics; Elasticsearch-compatible; full-text, aggregations."
+      },
+      { mode: "exam", topic: "Operations",
+        q: "For incremental data load from a JDBC source in Glue, which approach?",
+        options: ["Full load only", "Job bookmarks + predicate pushdown (e.g., WHERE updated_at > last_run)", "No incremental", "Manual only"],
+        correct: 1,
+        explain: "Job bookmarks + predicate = incremental; avoid full scans; efficient."
+      },
+      { mode: "exam", topic: "Data Stores",
+        q: "Redshift materialized views help with:",
+        options: ["Only storage", "Pre-computed aggregates; faster repeated queries", "No views", "DynamoDB only"],
+        correct: 1,
+        explain: "Materialized views = stored results; refresh on schedule or manually; faster analytics."
+      },
+      { mode: "comparison", topic: "Ingestion",
+        q: "For one-time large data migration (PB scale) with high latency tolerance, which option?",
+        options: ["DataSync only", "AWS Snowball or Snowmobile", "DMS", "Glue"],
+        correct: 1,
+        explain: "Snowball/Snowmobile = offline transfer; ship device; for very large datasets."
+      },
+      { mode: "exam", topic: "Security",
+        q: "Lake Formation LF-Tags are used for:",
+        options: ["Only cost allocation", "Tag-based access control; grant access by tag", "No access control", "Encryption only"],
+        correct: 1,
+        explain: "LF-Tags = tag resources; grant permissions based on tags; attribute-based access."
+      },
+    ];
+
+    const QUESTIONS_PER_QUIZ = 40;
+    let currentIndex = 0;
+    let score = 0;
+    let answered = [];
+    let sessionQuestions = [];
+    let selectedMode = 'mixed';
+
+    function getProfile() {
+      try {
+        const raw = localStorage.getItem(PROFILE_KEY);
+        if (!raw) return { quizId: QUIZ_ID, topicStats: {}, topicMissesFromImports: {} };
+        const p = JSON.parse(raw);
+        return {
+          quizId: p.quizId || QUIZ_ID,
+          topicStats: p.topicStats || {},
+          topicMissesFromImports: p.topicMissesFromImports || {}
+        };
+      } catch (e) {
+        return { quizId: QUIZ_ID, topicStats: {}, topicMissesFromImports: {} };
+      }
+    }
+
+    function saveProfile(profile) {
+      try {
+        localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+      } catch (e) {}
+    }
+
+    function getTopicWeight(profile, topic) {
+      const t = topic || 'Other';
+      let missRate = 0;
+      if (profile.topicStats[t] && profile.topicStats[t].total > 0) {
+        missRate = 1 - (profile.topicStats[t].correct / profile.topicStats[t].total);
+      }
+      const importMisses = (profile.topicMissesFromImports[t] || 0) * 0.2;
+      return 1 + Math.min(missRate + importMisses, 2);
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function weightedSample(arr, n, profile) {
+      const hasData = profile && (Object.keys(profile.topicStats).length > 0 || Object.keys(profile.topicMissesFromImports).length > 0);
+      if (!hasData) {
+        const shuffled = shuffle(arr);
+        return shuffled.slice(0, Math.min(n, shuffled.length));
+      }
+      const withKeys = arr.map(q => {
+        const w = getTopicWeight(profile, q.topic);
+        return { q, key: Math.pow(Math.random(), 1 / w) };
+      });
+      withKeys.sort((a, b) => b.key - a.key);
+      return withKeys.slice(0, Math.min(n, withKeys.length)).map(x => x.q);
+    }
+
+    function getWeakTopics(profile, topN) {
+      const scores = [];
+      const topics = new Set([
+        ...Object.keys(profile.topicStats || {}),
+        ...Object.keys(profile.topicMissesFromImports || {})
+      ]);
+      topics.forEach(t => {
+        let weakness = 0;
+        if (profile.topicStats[t] && profile.topicStats[t].total > 0) {
+          weakness = 1 - (profile.topicStats[t].correct / profile.topicStats[t].total);
+        }
+        weakness += (profile.topicMissesFromImports[t] || 0) * 0.15;
+        scores.push({ topic: t, weakness });
+      });
+      scores.sort((a, b) => b.weakness - a.weakness);
+      return scores.slice(0, topN).filter(x => x.weakness > 0.1).map(x => x.topic);
+    }
+
+    function selectMode(mode) {
+      selectedMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
+      document.querySelector('[data-mode="' + mode + '"]').classList.add('selected');
+    }
+
+    function startQuiz() {
+      const filtered = questionBank.filter(q => {
+        if (selectedMode === 'comparison') return q.mode === 'comparison';
+        if (selectedMode === 'exam') return q.mode === 'exam';
+        return true;
+      });
+      const profile = getProfile();
+      sessionQuestions = weightedSample(filtered, QUESTIONS_PER_QUIZ, profile);
+      currentIndex = 0;
+      score = 0;
+      answered = [];
+      const hintEl = document.getElementById('focus-hint');
+      const weak = getWeakTopics(profile, 3);
+      if (weak.length > 0) {
+        hintEl.textContent = "We'll focus more on: " + weak.join(', ') + '.';
+        hintEl.classList.remove('hidden');
+      } else {
+        hintEl.classList.add('hidden');
+      }
+      document.getElementById('start-screen').classList.add('hidden');
+      document.getElementById('results-screen').classList.add('hidden');
+      document.getElementById('quiz-area').classList.remove('hidden');
+      document.getElementById('q-total').textContent = sessionQuestions.length;
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = sessionQuestions[currentIndex];
+      document.getElementById('q-num').textContent = currentIndex + 1;
+      document.getElementById('score-display').textContent = score;
+      document.getElementById('question-text').textContent = q.q;
+      const opts = document.getElementById('options');
+      opts.innerHTML = '';
+      const fb = document.getElementById('feedback');
+      fb.classList.add('hidden');
+      fb.className = 'feedback hidden';
+
+      q.options.forEach((opt, i) => {
+        const div = document.createElement('div');
+        div.className = 'option';
+        div.textContent = opt;
+        div.dataset.index = i;
+        if (answered[currentIndex] !== undefined) {
+          div.classList.add('disabled');
+          if (i === q.correct) div.classList.add('correct');
+          else if (i === answered[currentIndex]) div.classList.add('wrong');
+        } else {
+          div.onclick = () => selectOption(currentIndex, i, q);
+        }
+        opts.appendChild(div);
+      });
+
+      if (answered[currentIndex] !== undefined) {
+        fb.classList.remove('hidden');
+        fb.className = 'feedback ' + (answered[currentIndex] === q.correct ? 'correct-msg' : 'wrong-msg');
+        fb.innerHTML = (answered[currentIndex] === q.correct ? '✓ Correct. ' : '✗ Incorrect. ') + '<span class="explanation">' + q.explain + '</span>';
+      }
+
+      document.getElementById('prev-btn').disabled = currentIndex === 0;
+    }
+
+    function selectOption(pos, optIdx, q) {
+      if (answered[pos] !== undefined) return;
+      answered[pos] = optIdx;
+      if (optIdx === q.correct) score++;
+
+      document.querySelectorAll('#options .option').forEach(o => {
+        o.classList.add('disabled');
+        o.onclick = null;
+        if (parseInt(o.dataset.index) === q.correct) o.classList.add('correct');
+        else if (parseInt(o.dataset.index) === optIdx) o.classList.add('wrong');
+      });
+
+      const fb = document.getElementById('feedback');
+      fb.classList.remove('hidden');
+      fb.innerHTML = (optIdx === q.correct ? '✓ Correct. ' : '✗ Incorrect. ') + '<span class="explanation">' + q.explain + '</span>';
+      fb.className = 'feedback ' + (optIdx === q.correct ? 'correct-msg' : 'wrong-msg');
+      document.getElementById('score-display').textContent = score;
+    }
+
+    function nextQuestion() {
+      if (currentIndex < sessionQuestions.length - 1) {
+        currentIndex++;
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderQuestion();
+      }
+    }
+
+    function saveSessionToProfile() {
+      const profile = getProfile();
+      sessionQuestions.forEach((q, i) => {
+        const t = q.topic || 'Other';
+        if (!profile.topicStats[t]) profile.topicStats[t] = { correct: 0, total: 0 };
+        profile.topicStats[t].total++;
+        if (answered[i] !== undefined && answered[i] === q.correct) {
+          profile.topicStats[t].correct++;
+        }
+      });
+      saveProfile(profile);
+    }
+
+    function showResults() {
+      saveSessionToProfile();
+      document.getElementById('quiz-area').classList.add('hidden');
+      const r = document.getElementById('results-screen');
+      r.classList.remove('hidden');
+      const total = sessionQuestions.length;
+      const pct = Math.round((score / total) * 100);
+      document.getElementById('final-score').textContent = score + ' / ' + total + ' (' + pct + '%)';
+      document.getElementById('final-score').className = 'score ' + (pct >= 72 ? 'pass' : 'fail');
+      document.getElementById('result-msg').textContent = pct >= 72
+        ? 'Passing is 720/1000 (~72%). You\'re on track!'
+        : 'Aim for 720+ (72%) on the real exam. Review and try again.';
+      document.getElementById('copy-toast').classList.add('hidden');
+    }
+
+    function getResultsMarkdown() {
+      const total = sessionQuestions.length;
+      const pct = Math.round((score / total) * 100);
+      const missed = sessionQuestions.map((q, i) => ({ q, i })).filter(x => answered[x.i] !== undefined && answered[x.i] !== x.q.correct);
+      const topicCounts = {};
+      missed.forEach(x => {
+        const t = x.q.topic || 'Other';
+        topicCounts[t] = (topicCounts[t] || 0) + 1;
+      });
+      let md = '# AWS Data Engineer Associate (DEA) Quiz Results\n\n';
+      md += '**Date:** ' + new Date().toISOString().slice(0, 10) + '\n';
+      md += '**Mode:** ' + (selectedMode === 'comparison' ? 'Service Selection' : selectedMode === 'exam' ? 'Exam' : 'Mixed') + '\n';
+      md += '**Score:** ' + score + '/' + total + ' (' + pct + '%)\n';
+      md += '**Pass (72%):** ' + (pct >= 72 ? 'Yes' : 'No') + '\n\n';
+      md += '---\n\n';
+      md += '## Instructions for AI Refactoring\n\n';
+      md += 'Paste this entire block into a Cursor chat and say:\n';
+      md += '> "Refactor the AWS Data Engineer quiz based on my mistakes. Add more questions on my weak topics."\n\n';
+      if (Object.keys(topicCounts).length > 0) {
+        md += '## Misses by Topic\n\n';
+        Object.entries(topicCounts).sort((a, b) => b[1] - a[1]).forEach(([t, n]) => {
+          md += '- **' + t + ':** ' + n + ' missed\n';
+        });
+        md += '\n';
+      }
+      if (missed.length > 0) {
+        md += '## Missed Questions (for AI refactoring)\n\n';
+        missed.forEach((x, i) => {
+          const q = x.q;
+          const yourAns = q.options[answered[x.i]];
+          const correctAns = q.options[q.correct];
+          md += '### ' + (i + 1) + '. [' + (q.topic || 'General') + ']\n';
+          md += '**Q:** ' + q.q + '\n';
+          md += '**Your answer:** ' + yourAns + '\n';
+          md += '**Correct answer:** ' + correctAns + '\n';
+          md += '**Explanation:** ' + q.explain + '\n\n';
+        });
+      }
+      return md;
+    }
+
+    function downloadResults() {
+      const blob = new Blob([getResultsMarkdown()], { type: 'text/markdown' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'aws_data_engineering_quiz_results_' + new Date().toISOString().slice(0, 10) + '.md';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function copyResultsToClipboard() {
+      navigator.clipboard.writeText(getResultsMarkdown()).then(() => {
+        document.getElementById('copy-toast').classList.remove('hidden');
+        setTimeout(() => document.getElementById('copy-toast').classList.add('hidden'), 2500);
+      });
+    }
+
+    function parseImportedResults(mdText) {
+      const lines = mdText.split('\n');
+      const firstLine = (lines[0] || '').toLowerCase();
+      if (QUIZ_ID !== 'oci' && firstLine.includes('oci foundations')) return { ok: false, error: 'This file is for OCI quiz.' };
+      if (QUIZ_ID !== 'gcp' && firstLine.includes('gcp cloud digital leader')) return { ok: false, error: 'This file is for GCP quiz.' };
+      if (QUIZ_ID !== 'az900' && (firstLine.includes('az-900') || firstLine.includes('azure'))) return { ok: false, error: 'This file is for AZ-900 quiz.' };
+      if (QUIZ_ID !== 'aws_mlea' && (firstLine.includes('mlea') || firstLine.includes('ml engineer'))) return { ok: false, error: 'This file is for AWS MLEA quiz.' };
+      if (QUIZ_ID !== 'aws_dea' && (firstLine.includes('data engineer') || firstLine.includes('dea'))) return { ok: false, error: 'This file is for AWS Data Engineer quiz.' };
+      if (QUIZ_ID === 'aws_dea' && !firstLine.includes('data engineer') && !firstLine.includes('dea')) return { ok: false, error: 'Not an AWS Data Engineer results file.' };
+      let inSection = false;
+      const topicMisses = {};
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.indexOf('## Misses by Topic') !== -1) {
+          inSection = true;
+          continue;
+        }
+        if (inSection && line.startsWith('## ')) break;
+        if (inSection && line.match(/^\s*-\s*\*\*(.+?)\*\*:\s*(\d+)\s+missed/)) {
+          const m = line.match(/^\s*-\s*\*\*(.+?)\*\*:\s*(\d+)\s+missed/);
+          const topic = m[1].trim();
+          const n = parseInt(m[2], 10);
+          topicMisses[topic] = (topicMisses[topic] || 0) + n;
+        }
+      }
+      if (Object.keys(topicMisses).length === 0) return { ok: false, error: 'No "Misses by Topic" section found.' };
+      return { ok: true, topicMisses };
+    }
+
+    function importResults() {
+      const ta = document.getElementById('import-results');
+      const mdText = (ta && ta.value || '').trim();
+      if (!mdText) {
+        showImportToast('Paste results markdown first, or choose a file.', true);
+        return;
+      }
+      const result = parseImportedResults(mdText);
+      if (!result.ok) {
+        showImportToast(result.error || 'Could not parse results.', true);
+        return;
+      }
+      const profile = getProfile();
+      if (!profile.topicMissesFromImports) profile.topicMissesFromImports = {};
+      Object.entries(result.topicMisses).forEach(([topic, n]) => {
+        profile.topicMissesFromImports[topic] = (profile.topicMissesFromImports[topic] || 0) + n;
+      });
+      saveProfile(profile);
+      const top = Object.entries(result.topicMisses).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]);
+      showImportToast('Imported. We\'ll focus more on: ' + top.join(', ') + '.', false);
+      if (ta) ta.value = '';
+    }
+
+    function onImportFile(ev) {
+      const f = ev.target.files && ev.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = function () {
+        const ta = document.getElementById('import-results');
+        if (ta) ta.value = r.result || '';
+        importResults();
+      };
+      r.readAsText(f);
+      ev.target.value = '';
+    }
+
+    function showImportToast(msg, isError) {
+      const el = document.getElementById('import-toast');
+      if (!el) return;
+      el.textContent = msg;
+      el.className = 'import-toast ' + (isError ? 'err' : 'success');
+      el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 4000);
+    }
+
+    (function initFocusHint() {
+      const profile = getProfile();
+      const weak = getWeakTopics(profile, 3);
+      const hintEl = document.getElementById('focus-hint');
+      if (hintEl && weak.length > 0) {
+        hintEl.textContent = "We'll focus more on: " + weak.join(', ') + '.';
+        hintEl.classList.remove('hidden');
+      }
+    })();
+  </script>
+</body>
+</html>

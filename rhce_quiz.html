@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RHCE Practice Quiz</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --accent: #ee0000;
+      --accent-dim: #cc0000;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --correct: #22c55e;
+      --wrong: #ef4444;
+      --font: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    .container { max-width: 720px; margin: 0 auto; }
+    h1 {
+      font-size: 1.5rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem; }
+    .stats {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .stats span { color: var(--accent); font-weight: 600; }
+    .question-card {
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border-left: 3px solid var(--accent);
+    }
+    .question-text {
+      font-size: 1.05rem;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+    .options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .option {
+      padding: 0.75rem 1rem;
+      background: var(--bg);
+      border: 2px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .option:hover:not(.disabled) {
+      border-color: var(--accent-dim);
+      background: #151d2b;
+    }
+    .option.selected { border-color: var(--accent); background: #151d2b; }
+    .option.correct { border-color: var(--correct); background: rgba(34,197,94,0.1); }
+    .option.wrong { border-color: var(--wrong); background: rgba(239,68,68,0.1); }
+    .option.disabled { cursor: not-allowed; opacity: 0.7; }
+    .feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+    .feedback.correct-msg { background: rgba(34,197,94,0.15); border-left: 4px solid var(--correct); }
+    .feedback.wrong-msg { background: rgba(239,68,68,0.15); border-left: 4px solid var(--wrong); }
+    .feedback .explanation { margin-top: 0.5rem; color: var(--text-muted); }
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.5rem;
+    }
+    button {
+      padding: 0.6rem 1.2rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: var(--accent-dim); }
+    button.secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+    }
+    button.secondary:hover { background: rgba(238,0,0,0.1); }
+    .results {
+      text-align: center;
+      padding: 2rem;
+    }
+    .results h2 { color: var(--accent); margin-bottom: 1rem; }
+    .score { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .results-actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
+    .results-actions button.secondary { margin: 0; }
+    .copy-toast { font-size: 0.85rem; color: var(--correct); margin-top: 0.5rem; }
+    .score.pass { color: var(--correct); }
+    .score.fail { color: var(--wrong); }
+    .start-screen { text-align: center; padding: 3rem 0; }
+    .start-screen p { margin-bottom: 1.5rem; color: var(--text-muted); }
+    .mode-selector { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; max-width: 360px; margin-left: auto; margin-right: auto; }
+    .mode-btn {
+      padding: 1rem 1.5rem;
+      text-align: left;
+      background: var(--surface);
+      border: 2px solid transparent;
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .mode-btn:hover { border-color: var(--accent-dim); background: #151d2b; }
+    .mode-btn.selected { border-color: var(--accent); background: rgba(238,0,0,0.1); }
+    .mode-btn .label { font-weight: 600; display: block; }
+    .mode-btn .desc { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .profile-hint { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.75rem; }
+    .import-area { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--surface); text-align: left; }
+    .import-area label { display: block; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--text-muted); }
+    .import-area textarea { width: 100%; min-height: 80px; padding: 0.5rem; background: var(--surface); border: 1px solid var(--accent-dim); border-radius: 6px; color: var(--text); font-family: inherit; font-size: 0.85rem; resize: vertical; }
+    .import-toast { font-size: 0.85rem; margin-top: 0.5rem; }
+    .import-toast.success { color: var(--correct); }
+    .import-toast.err { color: var(--wrong); }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>RHCE Practice Quiz</h1>
+    <p class="subtitle">EX294 • Ansible playbooks for system administration</p>
+
+    <div id="start-screen" class="start-screen">
+      <p>40 questions per session, drawn from a pool of 55+. Randomized each run. Choose your mode:</p>
+      <p id="focus-hint" class="profile-hint hidden"></p>
+      <div class="mode-selector">
+        <button type="button" class="mode-btn" data-mode="comparison" onclick="selectMode('comparison')">
+          <span class="label">Domain Focus</span>
+          <span class="desc">Inventories, modules, roles, vault, playbooks—pick a focus area.</span>
+        </button>
+        <button type="button" class="mode-btn" data-mode="exam" onclick="selectMode('exam')">
+          <span class="label">Exam (Scenario-based)</span>
+          <span class="desc">Playbook design, RHCSA tasks via Ansible—exam-style.</span>
+        </button>
+        <button type="button" class="mode-btn selected" data-mode="mixed" onclick="selectMode('mixed')">
+          <span class="label">Mixed</span>
+          <span class="desc">Both domain focus and exam-style. Simulates full exam.</span>
+        </button>
+      </div>
+      <button id="start-btn" onclick="startQuiz()">Start Quiz</button>
+      <div class="import-area">
+        <label for="import-results">Import past results (paste .md or choose file) to focus on weak topics:</label>
+        <textarea id="import-results" placeholder="Paste quiz results markdown here..."></textarea>
+        <button type="button" class="secondary" style="margin-top: 0.5rem;" onclick="importResults()">Import results</button>
+        <input type="file" id="import-file" accept=".md,text/markdown" style="display: none;" onchange="onImportFile(event)">
+        <button type="button" class="secondary" style="margin-top: 0.5rem; margin-left: 0.5rem;" onclick="document.getElementById('import-file').click()">Choose file</button>
+        <p id="import-toast" class="import-toast hidden"></p>
+      </div>
+    </div>
+
+    <div id="quiz-area" class="hidden">
+      <div class="stats">
+        <span>Question <span id="q-num">1</span> of <span id="q-total">40</span></span>
+        <span>Correct: <span id="score-display">0</span></span>
+      </div>
+      <div class="question-card">
+        <div class="question-text" id="question-text"></div>
+        <div class="options" id="options"></div>
+        <div id="feedback" class="feedback hidden"></div>
+      </div>
+      <div class="nav-row">
+        <button id="prev-btn" class="secondary" onclick="prevQuestion()">← Previous</button>
+        <button id="next-btn" onclick="nextQuestion()">Next →</button>
+      </div>
+    </div>
+
+    <div id="results-screen" class="results hidden">
+      <h2>Quiz Complete</h2>
+      <div class="score" id="final-score"></div>
+      <p id="result-msg" style="margin-bottom: 1.5rem; color: var(--text-muted);"></p>
+      <div class="results-actions">
+        <button onclick="startQuiz()">Try Again</button>
+        <button class="secondary" onclick="downloadResults()">Download Results</button>
+        <button class="secondary" onclick="copyResultsToClipboard()">Copy to Clipboard</button>
+      </div>
+      <p id="copy-toast" class="copy-toast hidden">Copied! Paste into Cursor chat for AI refactoring.</p>
+    </div>
+  </div>
+
+  <script>
+    const QUIZ_ID = 'rhce';
+    const PROFILE_KEY = 'study_sessions_profile_' + QUIZ_ID;
+
+    const questionBank = [
+      // === INVENTORIES ===
+      { mode: "comparison", topic: "Inventories",
+        q: "An Ansible inventory file defines:",
+        options: ["Only variables", "Hosts and groups of hosts to manage", "Playbooks only", "Roles only"],
+        correct: 1,
+        explain: "Inventory = list of hosts and groups; where playbooks run. Static or dynamic."
+      },
+      { mode: "exam", topic: "Inventories",
+        q: "To define a group of hosts in a static inventory, you use:",
+        options: ["[groupname] section header", "group: hosts syntax", "Only YAML lists", "JSON only"],
+        correct: 1,
+        explain: "[webservers] or [webservers:children] for nested. host1 ansible_host=192.168.1.10"
+      },
+      // === MODULES ===
+      { mode: "comparison", topic: "Modules",
+        q: "To install a package on managed nodes, which module?",
+        options: ["command", "shell", "dnf or yum", "copy"],
+        correct: 2,
+        explain: "dnf (RHEL 8/9) or yum (RHEL 7). command/shell avoid idempotency."
+      },
+      { mode: "comparison", topic: "Modules",
+        q: "To ensure a service is started and enabled at boot:",
+        options: ["command: systemctl start service", "service or systemd module", "shell only", "cron"],
+        correct: 1,
+        explain: "ansible.builtin.service or ansible.posix.systemd - name, state: started, enabled: yes"
+      },
+      { mode: "comparison", topic: "Modules",
+        q: "To configure firewall rules with firewalld:",
+        options: ["command: firewall-cmd", "ansible.posix.firewalld module", "copy only", "lineinfile only"],
+        correct: 1,
+        explain: "ansible.posix.firewalld - service, port, zone. Idempotent."
+      },
+      { mode: "comparison", topic: "Modules",
+        q: "To deploy a file from control node to managed nodes:",
+        options: ["template only", "copy or template module", "fetch", "get_url"],
+        correct: 1,
+        explain: "copy = static file. template = Jinja2 templated file. fetch = pull from remote."
+      },
+      { mode: "comparison", topic: "Modules",
+        q: "To manage users and groups:",
+        options: ["command: useradd", "user and group modules", "shell only", "copy only"],
+        correct: 1,
+        explain: "ansible.builtin.user, ansible.builtin.group - idempotent, state present/absent"
+      },
+      { mode: "comparison", topic: "Modules",
+        q: "To create an archive (tar, zip):",
+        options: ["command: tar", "archive module", "unarchive only", "copy only"],
+        correct: 1,
+        explain: "ansible.builtin.archive - create. unarchive - extract."
+      },
+      { mode: "comparison", topic: "Modules",
+        q: "To schedule a cron job:",
+        options: ["command: crontab -e", "cron module", "at module only", "lineinfile only"],
+        correct: 1,
+        explain: "ansible.builtin.cron - name, minute, hour, job. Idempotent."
+      },
+      { mode: "comparison", topic: "Modules",
+        q: "To set SELinux context on a file:",
+        options: ["command: chcon", "sefcontext + file module or sefcontext", "selinux module (policy)", "copy only"],
+        correct: 1,
+        explain: "sefcontext for persistent. file module with setype. Or selinux module for policy."
+      },
+      // === VARIABLES & FACTS ===
+      { mode: "comparison", topic: "Variables",
+        q: "Ansible facts are:",
+        options: ["Only custom variables", "Gathered automatically (hostvars, ansible_distribution, etc.)", "Manual only", "No facts"],
+        correct: 1,
+        explain: "Facts = gather_facts: yes; ansible_* vars (hostname, IP, distro). setup module."
+      },
+      { mode: "exam", topic: "Variables",
+        q: "To capture command output into a variable:",
+        options: ["set_fact with command module and register", "Only register", "vars: only", "include_vars only"],
+        correct: 1,
+        explain: "- command: cmd\n  register: result\n- set_fact: myvar: \"{{ result.stdout }}\""
+      },
+      { mode: "exam", topic: "Variables",
+        q: "Conditional execution uses:",
+        options: ["only if/else in YAML", "when: condition", "always", "never"],
+        correct: 1,
+        explain: "when: ansible_os_family == 'RedHat' - run task only if true. when: variable is defined"
+      },
+      // === ROLES & COLLECTIONS ===
+      { mode: "comparison", topic: "Roles",
+        q: "Ansible roles provide:",
+        options: ["Only variables", "Reusable structure (tasks, handlers, vars, templates)", "No structure", "Playbooks only"],
+        correct: 1,
+        explain: "Role = tasks/, handlers/, vars/, defaults/, templates/, files/ - reusable."
+      },
+      { mode: "exam", topic: "Roles",
+        q: "To use a role in a playbook:",
+        options: ["include: role", "roles: - role_name or role: role_name", "import_role only", "No roles"],
+        correct: 1,
+        explain: "roles: - myrole. Or role: myrole. Pre_tasks, roles, post_tasks."
+      },
+      { mode: "comparison", topic: "Roles",
+        q: "Ansible Content Collections provide:",
+        options: ["Only playbooks", "Modules, roles, plugins (namespaced, e.g., ansible.posix)", "No modules", "Only inventory"],
+        correct: 1,
+        explain: "Collections = ansible.posix, ansible.utils; modules, roles. ansible-galaxy collection install"
+      },
+      // === VAULT ===
+      { mode: "comparison", topic: "Vault",
+        q: "Ansible Vault is used to:",
+        options: ["Store playbooks only", "Encrypt sensitive data (vars, files)", "No encryption", "Only inventory"],
+        correct: 1,
+        explain: "ansible-vault encrypt file. --ask-vault-pass or vault password file. Encrypt vars, files."
+      },
+      { mode: "exam", topic: "Vault",
+        q: "To run a playbook with vault-encrypted vars, you need:",
+        options: ["No password", "--ask-vault-pass or ANSIBLE_VAULT_PASSWORD_FILE", "Only -e", "No vault"],
+        correct: 1,
+        explain: "ansible-playbook -i inv play.yml --ask-vault-pass. Or env/file for automation."
+      },
+      // === PLAYBOOKS ===
+      { mode: "exam", topic: "Playbooks",
+        q: "A play in Ansible contains:",
+        options: ["Only hosts", "hosts, tasks, and optionally vars, roles", "Only tasks", "Only roles"],
+        correct: 1,
+        explain: "Play = hosts: webservers, tasks: [...], vars: {...}, roles: [...]"
+      },
+      { mode: "exam", topic: "Playbooks",
+        q: "To handle task failure (e.g., ignore or fail):",
+        options: ["No handling", "ignore_errors: yes or failed_when", "always", "never"],
+        correct: 1,
+        explain: "ignore_errors: yes - continue. failed_when: condition - fail if true. rescue for blocks."
+      },
+      { mode: "exam", topic: "Playbooks",
+        q: "To run a playbook with ansible-navigator:",
+        options: ["ansible-playbook only", "ansible-navigator run play.yml", "ansible only", "No navigator"],
+        correct: 1,
+        explain: "ansible-navigator run play.yml. Uses execution environment (container)."
+      },
+      // === CONFIGURATION ===
+      { mode: "comparison", topic: "Configuration",
+        q: "ansible.cfg configures:",
+        options: ["Only inventory path", "inventory, remote_user, become, etc.", "No config", "Only roles path"],
+        correct: 1,
+        explain: "[defaults] inventory, remote_user, become, host_key_checking. [privilege_escalation]"
+      },
+      { mode: "exam", topic: "Configuration",
+        q: "To run tasks as root on managed nodes:",
+        options: ["remote_user: root only", "become: yes (privilege escalation)", "No escalation", "su only"],
+        correct: 1,
+        explain: "become: yes, become_user: root. Uses sudo by default. become_method: su if needed."
+      },
+      // === TEMPLATES ===
+      { mode: "comparison", topic: "Templates",
+        q: "The template module uses:",
+        options: ["Plain text only", "Jinja2 templating ({{ var }}, {% for %})", "No variables", "JSON only"],
+        correct: 1,
+        explain: "template module - src .j2, dest. Jinja2: {{ var }}, {% for %}, {% if %}"
+      },
+      // === MORE ===
+      { mode: "exam", topic: "Modules",
+        q: "To modify a specific line in a file:",
+        options: ["copy only", "lineinfile or blockinfile module", "template only", "replace only"],
+        correct: 1,
+        explain: "lineinfile - one line. blockinfile - block. replace - regex. Idempotent."
+      },
+      { mode: "exam", topic: "Modules",
+        q: "To create a directory with specific permissions:",
+        options: ["command: mkdir", "file module with state: directory", "copy only", "template only"],
+        correct: 1,
+        explain: "file: path: /path, state: directory, mode: '0755'. Idempotent."
+      },
+      { mode: "exam", topic: "Modules",
+        q: "To manage LVM logical volumes with Ansible:",
+        options: ["command: lvcreate only", "community.general.lvol or lvg modules", "No LVM", "copy only"],
+        correct: 1,
+        explain: "community.general.lvol, community.general.lvg. Or command/shell for custom."
+      },
+      { mode: "exam", topic: "Playbooks",
+        q: "Loops in Ansible use:",
+        options: ["for loop in YAML only", "loop: or with_items", "No loops", "Only include"],
+        correct: 1,
+        explain: "loop: [a, b, c] or with_items. loop: \"{{ list }}\". item in loop."
+      },
+      { mode: "exam", topic: "Playbooks",
+        q: "Handlers are used to:",
+        options: ["Run before tasks", "Run once at end of play when notified", "Run always", "No handlers"],
+        correct: 1,
+        explain: "handlers: - name: restart httpd, notify: restart httpd. Run when notified, once per play."
+      },
+      { mode: "comparison", topic: "Configuration",
+        q: "To configure managed nodes for Ansible, you typically:",
+        options: ["Store passwords in playbook", "Use SSH keys + optionally privilege escalation", "Telnet only", "No SSH"],
+        correct: 1,
+        explain: "SSH key-based auth. ansible_user, ansible_ssh_private_key_file. become for sudo."
+      },
+      { mode: "exam", topic: "Inventories",
+        q: "To define host-specific variables in inventory:",
+        options: ["Only in playbook", "hostvars or inline: host ansible_user=root", "No host vars", "Only in roles"],
+        correct: 1,
+        explain: "host ansible_user=admin ansible_host=10.0.0.1. Or host_vars/hostname.yml"
+      },
+      { mode: "exam", topic: "Modules",
+        q: "To partition a disk and create a filesystem with Ansible:",
+        options: ["command: fdisk only", "community.general.parted + filesystem modules", "No disk management", "copy only"],
+        correct: 1,
+        explain: "community.general.parted for partitions. filesystem module for mkfs. Or command for custom."
+      },
+      { mode: "exam", topic: "Playbooks",
+        q: "To run tasks only on RHEL hosts:",
+        options: ["No condition", "when: ansible_os_family == 'RedHat'", "always", "Never"],
+        correct: 1,
+        explain: "when: ansible_os_family == 'RedHat'. Or ansible_distribution_major_version == '9'"
+      },
+      { mode: "comparison", topic: "Roles",
+        q: "Role default variables are in:",
+        options: ["tasks/main.yml", "defaults/main.yml", "vars/main.yml only", "handlers only"],
+        correct: 1,
+        explain: "defaults/main.yml - lowest precedence; overridable. vars/main.yml - higher."
+      },
+      { mode: "exam", topic: "Templates",
+        q: "In a Jinja2 template, to iterate over a list:",
+        options: ["No iteration", "{% for item in list %}...{% endfor %}", "{{ for }}", "only if"],
+        correct: 1,
+        explain: "{% for item in list %} {{ item }} {% endfor %}. Also {% if %}, {{ var }}"
+      },
+      { mode: "exam", topic: "Modules",
+        q: "The parted module (community.general) can:",
+        options: ["Only read", "Create partitions, set partition type", "No partitioning", "Format only"],
+        correct: 1,
+        explain: "community.general.parted - device, number, state, part_type. Creates/manages partitions."
+      },
+      { mode: "exam", topic: "Playbooks",
+        q: "To ensure a playbook is idempotent:",
+        options: ["Use command/shell for all tasks", "Use declarative modules (dnf, file, service) instead of command when possible", "No idempotency", "Always run twice"],
+        correct: 1,
+        explain: "Declarative modules = state present/absent; idempotent. command/shell often not."
+      },
+      { mode: "comparison", topic: "Configuration",
+        q: "ansible-navigator.yml configures:",
+        options: ["Only inventory", "Execution environment, ansible config, inventory", "No config", "Only roles"],
+        correct: 1,
+        explain: "ansible-navigator.yml - EE image, ansible.cfg path, inventory. For ansible-navigator."
+      },
+      { mode: "exam", topic: "Modules",
+        q: "To set file ownership and permissions:",
+        options: ["command: chown", "file module: owner, group, mode", "copy only", "template only"],
+        correct: 1,
+        explain: "file: path, owner, group, mode. Or copy/template with ownership params."
+      },
+      { mode: "exam", topic: "Playbooks",
+        q: "To include another playbook:",
+        options: ["No include", "import_playbook or include_role", "copy only", "template only"],
+        correct: 1,
+        explain: "import_playbook: other.yml - static. include_role - dynamic. Pre-task vs post-task."
+      },
+      { mode: "exam", topic: "Modules",
+        q: "To ensure a package is absent (removed):",
+        options: ["dnf remove only via command", "dnf: name: pkg, state: absent", "No removal", "yum only"],
+        correct: 1,
+        explain: "dnf: name: package, state: absent. Idempotent."
+      },
+      { mode: "exam", topic: "Handlers",
+        q: "When are handlers executed?",
+        options: ["Immediately when notified", "At end of play, once per handler, only if notified", "Never", "At start"],
+        correct: 1,
+        explain: "Handlers run at end of play; only if notified; once per handler even if notified multiple times."
+      },
+      { mode: "comparison", topic: "Modules",
+        q: "To create a logical volume in LVM:",
+        options: ["command: lvcreate only", "community.general.lvol module", "No LVM", "parted only"],
+        correct: 1,
+        explain: "community.general.lvol - vg, lv, size. Or command module."
+      },
+      { mode: "exam", topic: "Variables",
+        q: "Host variables can be defined in:",
+        options: ["Playbook only", "Inventory, host_vars/ directory, or group_vars/", "No host vars", "Roles only"],
+        correct: 1,
+        explain: "host_vars/hostname.yml, group_vars/groupname.yml, or inline in inventory."
+      },
+      { mode: "exam", topic: "Roles",
+        q: "To install a role from Ansible Galaxy:",
+        options: ["copy role manually", "ansible-galaxy role install namespace.role", "No Galaxy", "git clone only"],
+        correct: 1,
+        explain: "ansible-galaxy role install namespace.role. -r requirements.yml for list."
+      },
+      { mode: "exam", topic: "Vault",
+        q: "To edit a vault-encrypted file:",
+        options: ["Decrypt manually first", "ansible-vault edit file", "No edit", "vi only"],
+        correct: 1,
+        explain: "ansible-vault edit file - decrypts, opens editor, re-encrypts."
+      },
+      { mode: "exam", topic: "Modules",
+        q: "To add a line to a file only if it does not exist:",
+        options: ["copy only", "lineinfile: line, create: yes", "template only", "blockinfile only"],
+        correct: 1,
+        explain: "lineinfile: path, line, create: yes. State present. Idempotent."
+      },
+      { mode: "exam", topic: "Playbooks",
+        q: "To run a task on a single host in a group:",
+        options: ["Cannot do this", "Use run_once: yes or limit: host", "Always all hosts", "No limit"],
+        correct: 1,
+        explain: "run_once: yes - run on first host. ansible-playbook --limit host - limit inventory."
+      },
+      { mode: "comparison", topic: "Modules",
+        q: "The fetch module is used to:",
+        options: ["Copy from control to remote", "Copy files from remote to control node", "Template only", "No fetch"],
+        correct: 1,
+        explain: "fetch - pull files from managed nodes to control node. copy = push."
+      },
+      { mode: "exam", topic: "Configuration",
+        q: "To disable host key checking (e.g., for lab):",
+        options: ["No option", "host_key_checking = False in ansible.cfg", "Only SSH config", "No SSH"],
+        correct: 1,
+        explain: "[defaults] host_key_checking = False. Or env ANSIBLE_HOST_KEY_CHECKING=False. Lab only!"
+      },
+      { mode: "exam", topic: "Playbooks",
+        q: "A block with rescue runs rescue tasks when:",
+        options: ["Always", "When any task in the block fails", "Never", "At end only"],
+        correct: 1,
+        explain: "block: - task1, rescue: - task2. If task1 fails, task2 runs. always: runs regardless."
+      },
+    ];
+
+    const QUESTIONS_PER_QUIZ = 40;
+    let currentIndex = 0;
+    let score = 0;
+    let answered = [];
+    let sessionQuestions = [];
+    let selectedMode = 'mixed';
+
+    function getProfile() {
+      try {
+        const raw = localStorage.getItem(PROFILE_KEY);
+        if (!raw) return { quizId: QUIZ_ID, topicStats: {}, topicMissesFromImports: {} };
+        const p = JSON.parse(raw);
+        return {
+          quizId: p.quizId || QUIZ_ID,
+          topicStats: p.topicStats || {},
+          topicMissesFromImports: p.topicMissesFromImports || {}
+        };
+      } catch (e) {
+        return { quizId: QUIZ_ID, topicStats: {}, topicMissesFromImports: {} };
+      }
+    }
+
+    function saveProfile(profile) {
+      try {
+        localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+      } catch (e) {}
+    }
+
+    function getTopicWeight(profile, topic) {
+      const t = topic || 'Other';
+      let missRate = 0;
+      if (profile.topicStats[t] && profile.topicStats[t].total > 0) {
+        missRate = 1 - (profile.topicStats[t].correct / profile.topicStats[t].total);
+      }
+      const importMisses = (profile.topicMissesFromImports[t] || 0) * 0.2;
+      return 1 + Math.min(missRate + importMisses, 2);
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function weightedSample(arr, n, profile) {
+      const hasData = profile && (Object.keys(profile.topicStats).length > 0 || Object.keys(profile.topicMissesFromImports).length > 0);
+      if (!hasData) {
+        const shuffled = shuffle(arr);
+        return shuffled.slice(0, Math.min(n, shuffled.length));
+      }
+      const withKeys = arr.map(q => {
+        const w = getTopicWeight(profile, q.topic);
+        return { q, key: Math.pow(Math.random(), 1 / w) };
+      });
+      withKeys.sort((a, b) => b.key - a.key);
+      return withKeys.slice(0, Math.min(n, withKeys.length)).map(x => x.q);
+    }
+
+    function getWeakTopics(profile, topN) {
+      const scores = [];
+      const topics = new Set([
+        ...Object.keys(profile.topicStats || {}),
+        ...Object.keys(profile.topicMissesFromImports || {})
+      ]);
+      topics.forEach(t => {
+        let weakness = 0;
+        if (profile.topicStats[t] && profile.topicStats[t].total > 0) {
+          weakness = 1 - (profile.topicStats[t].correct / profile.topicStats[t].total);
+        }
+        weakness += (profile.topicMissesFromImports[t] || 0) * 0.15;
+        scores.push({ topic: t, weakness });
+      });
+      scores.sort((a, b) => b.weakness - a.weakness);
+      return scores.slice(0, topN).filter(x => x.weakness > 0.1).map(x => x.topic);
+    }
+
+    function selectMode(mode) {
+      selectedMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
+      document.querySelector('[data-mode="' + mode + '"]').classList.add('selected');
+    }
+
+    function startQuiz() {
+      const filtered = questionBank.filter(q => {
+        if (selectedMode === 'comparison') return q.mode === 'comparison';
+        if (selectedMode === 'exam') return q.mode === 'exam';
+        return true;
+      });
+      const profile = getProfile();
+      sessionQuestions = weightedSample(filtered, QUESTIONS_PER_QUIZ, profile);
+      currentIndex = 0;
+      score = 0;
+      answered = [];
+      const hintEl = document.getElementById('focus-hint');
+      const weak = getWeakTopics(profile, 3);
+      if (weak.length > 0) {
+        hintEl.textContent = "We'll focus more on: " + weak.join(', ') + '.';
+        hintEl.classList.remove('hidden');
+      } else {
+        hintEl.classList.add('hidden');
+      }
+      document.getElementById('start-screen').classList.add('hidden');
+      document.getElementById('results-screen').classList.add('hidden');
+      document.getElementById('quiz-area').classList.remove('hidden');
+      document.getElementById('q-total').textContent = sessionQuestions.length;
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = sessionQuestions[currentIndex];
+      document.getElementById('q-num').textContent = currentIndex + 1;
+      document.getElementById('score-display').textContent = score;
+      document.getElementById('question-text').textContent = q.q;
+      const opts = document.getElementById('options');
+      opts.innerHTML = '';
+      const fb = document.getElementById('feedback');
+      fb.classList.add('hidden');
+      fb.className = 'feedback hidden';
+
+      q.options.forEach((opt, i) => {
+        const div = document.createElement('div');
+        div.className = 'option';
+        div.textContent = opt;
+        div.dataset.index = i;
+        if (answered[currentIndex] !== undefined) {
+          div.classList.add('disabled');
+          if (i === q.correct) div.classList.add('correct');
+          else if (i === answered[currentIndex]) div.classList.add('wrong');
+        } else {
+          div.onclick = () => selectOption(currentIndex, i, q);
+        }
+        opts.appendChild(div);
+      });
+
+      if (answered[currentIndex] !== undefined) {
+        fb.classList.remove('hidden');
+        fb.className = 'feedback ' + (answered[currentIndex] === q.correct ? 'correct-msg' : 'wrong-msg');
+        fb.innerHTML = (answered[currentIndex] === q.correct ? '✓ Correct. ' : '✗ Incorrect. ') + '<span class="explanation">' + q.explain + '</span>';
+      }
+
+      document.getElementById('prev-btn').disabled = currentIndex === 0;
+    }
+
+    function selectOption(pos, optIdx, q) {
+      if (answered[pos] !== undefined) return;
+      answered[pos] = optIdx;
+      if (optIdx === q.correct) score++;
+
+      document.querySelectorAll('#options .option').forEach(o => {
+        o.classList.add('disabled');
+        o.onclick = null;
+        if (parseInt(o.dataset.index) === q.correct) o.classList.add('correct');
+        else if (parseInt(o.dataset.index) === optIdx) o.classList.add('wrong');
+      });
+
+      const fb = document.getElementById('feedback');
+      fb.classList.remove('hidden');
+      fb.innerHTML = (optIdx === q.correct ? '✓ Correct. ' : '✗ Incorrect. ') + '<span class="explanation">' + q.explain + '</span>';
+      fb.className = 'feedback ' + (optIdx === q.correct ? 'correct-msg' : 'wrong-msg');
+      document.getElementById('score-display').textContent = score;
+    }
+
+    function nextQuestion() {
+      if (currentIndex < sessionQuestions.length - 1) {
+        currentIndex++;
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderQuestion();
+      }
+    }
+
+    function saveSessionToProfile() {
+      const profile = getProfile();
+      sessionQuestions.forEach((q, i) => {
+        const t = q.topic || 'Other';
+        if (!profile.topicStats[t]) profile.topicStats[t] = { correct: 0, total: 0 };
+        profile.topicStats[t].total++;
+        if (answered[i] !== undefined && answered[i] === q.correct) {
+          profile.topicStats[t].correct++;
+        }
+      });
+      saveProfile(profile);
+    }
+
+    function showResults() {
+      saveSessionToProfile();
+      document.getElementById('quiz-area').classList.add('hidden');
+      const r = document.getElementById('results-screen');
+      r.classList.remove('hidden');
+      const total = sessionQuestions.length;
+      const pct = Math.round((score / total) * 100);
+      document.getElementById('final-score').textContent = score + ' / ' + total + ' (' + pct + '%)';
+      document.getElementById('final-score').className = 'score ' + (pct >= 70 ? 'pass' : 'fail');
+      document.getElementById('result-msg').textContent = pct >= 70
+        ? 'Red Hat uses 70% passing. You\'re on track!'
+        : 'Aim for 70%+ on the real exam. Review and try again.';
+      document.getElementById('copy-toast').classList.add('hidden');
+    }
+
+    function getResultsMarkdown() {
+      const total = sessionQuestions.length;
+      const pct = Math.round((score / total) * 100);
+      const missed = sessionQuestions.map((q, i) => ({ q, i })).filter(x => answered[x.i] !== undefined && answered[x.i] !== x.q.correct);
+      const topicCounts = {};
+      missed.forEach(x => {
+        const t = x.q.topic || 'Other';
+        topicCounts[t] = (topicCounts[t] || 0) + 1;
+      });
+      let md = '# RHCE Quiz Results\n\n';
+      md += '**Date:** ' + new Date().toISOString().slice(0, 10) + '\n';
+      md += '**Mode:** ' + (selectedMode === 'comparison' ? 'Domain Focus' : selectedMode === 'exam' ? 'Exam' : 'Mixed') + '\n';
+      md += '**Score:** ' + score + '/' + total + ' (' + pct + '%)\n';
+      md += '**Pass (70%):** ' + (pct >= 70 ? 'Yes' : 'No') + '\n\n';
+      md += '---\n\n';
+      md += '## Instructions for AI Refactoring\n\n';
+      md += 'Paste this entire block into a Cursor chat and say:\n';
+      md += '> "Refactor the RHCE quiz based on my mistakes. Add more questions on my weak topics."\n\n';
+      if (Object.keys(topicCounts).length > 0) {
+        md += '## Misses by Topic\n\n';
+        Object.entries(topicCounts).sort((a, b) => b[1] - a[1]).forEach(([t, n]) => {
+          md += '- **' + t + ':** ' + n + ' missed\n';
+        });
+        md += '\n';
+      }
+      if (missed.length > 0) {
+        md += '## Missed Questions (for AI refactoring)\n\n';
+        missed.forEach((x, i) => {
+          const q = x.q;
+          const yourAns = q.options[answered[x.i]];
+          const correctAns = q.options[q.correct];
+          md += '### ' + (i + 1) + '. [' + (q.topic || 'General') + ']\n';
+          md += '**Q:** ' + q.q + '\n';
+          md += '**Your answer:** ' + yourAns + '\n';
+          md += '**Correct answer:** ' + correctAns + '\n';
+          md += '**Explanation:** ' + q.explain + '\n\n';
+        });
+      }
+      return md;
+    }
+
+    function downloadResults() {
+      const blob = new Blob([getResultsMarkdown()], { type: 'text/markdown' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'rhce_quiz_results_' + new Date().toISOString().slice(0, 10) + '.md';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function copyResultsToClipboard() {
+      navigator.clipboard.writeText(getResultsMarkdown()).then(() => {
+        document.getElementById('copy-toast').classList.remove('hidden');
+        setTimeout(() => document.getElementById('copy-toast').classList.add('hidden'), 2500);
+      });
+    }
+
+    function parseImportedResults(mdText) {
+      const lines = mdText.split('\n');
+      const firstLine = (lines[0] || '').toLowerCase();
+      if (QUIZ_ID === 'rhce' && !firstLine.includes('rhce')) return { ok: false, error: 'Not an RHCE results file.' };
+      let inSection = false;
+      const topicMisses = {};
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.indexOf('## Misses by Topic') !== -1) {
+          inSection = true;
+          continue;
+        }
+        if (inSection && line.startsWith('## ')) break;
+        if (inSection && line.match(/^\s*-\s*\*\*(.+?)\*\*:\s*(\d+)\s+missed/)) {
+          const m = line.match(/^\s*-\s*\*\*(.+?)\*\*:\s*(\d+)\s+missed/);
+          const topic = m[1].trim();
+          const n = parseInt(m[2], 10);
+          topicMisses[topic] = (topicMisses[topic] || 0) + n;
+        }
+      }
+      if (Object.keys(topicMisses).length === 0) return { ok: false, error: 'No "Misses by Topic" section found.' };
+      return { ok: true, topicMisses };
+    }
+
+    function importResults() {
+      const ta = document.getElementById('import-results');
+      const mdText = (ta && ta.value || '').trim();
+      if (!mdText) {
+        showImportToast('Paste results markdown first, or choose a file.', true);
+        return;
+      }
+      const result = parseImportedResults(mdText);
+      if (!result.ok) {
+        showImportToast(result.error || 'Could not parse results.', true);
+        return;
+      }
+      const profile = getProfile();
+      if (!profile.topicMissesFromImports) profile.topicMissesFromImports = {};
+      Object.entries(result.topicMisses).forEach(([topic, n]) => {
+        profile.topicMissesFromImports[topic] = (profile.topicMissesFromImports[topic] || 0) + n;
+      });
+      saveProfile(profile);
+      const top = Object.entries(result.topicMisses).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]);
+      showImportToast('Imported. We\'ll focus more on: ' + top.join(', ') + '.', false);
+      if (ta) ta.value = '';
+    }
+
+    function onImportFile(ev) {
+      const f = ev.target.files && ev.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = function () {
+        const ta = document.getElementById('import-results');
+        if (ta) ta.value = r.result || '';
+        importResults();
+      };
+      r.readAsText(f);
+      ev.target.value = '';
+    }
+
+    function showImportToast(msg, isError) {
+      const el = document.getElementById('import-toast');
+      if (!el) return;
+      el.textContent = msg;
+      el.className = 'import-toast ' + (isError ? 'err' : 'success');
+      el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 4000);
+    }
+
+    (function initFocusHint() {
+      const profile = getProfile();
+      const weak = getWeakTopics(profile, 3);
+      const hintEl = document.getElementById('focus-hint');
+      if (hintEl && weak.length > 0) {
+        hintEl.textContent = "We'll focus more on: " + weak.join(', ') + '.';
+        hintEl.classList.remove('hidden');
+      }
+    })();
+  </script>
+</body>
+</html>
