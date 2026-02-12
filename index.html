@@ -56,9 +56,44 @@
     a.quiz-card.aws { border-left-color: var(--aws); }
     .quiz-card .name { font-weight: 600; font-size: 1.05rem; margin-bottom: 0.25rem; }
     .quiz-card .desc { font-size: 0.9rem; color: var(--text-muted); }
+    .site-nav {
+      font-family: var(--font);
+      background: var(--surface);
+      border-bottom: 1px solid rgba(148,163,184,0.2);
+      padding: 0.75rem 1.5rem;
+      margin: -2rem -2rem 2rem -2rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+    }
+    .nav-brand { font-weight: 700; color: var(--text); text-decoration: none; margin-right: 0.5rem; }
+    .nav-brand:hover { color: var(--accent); }
+    .nav-links { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .back-home { display: inline-block; margin-bottom: 1rem; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
+    .back-home:hover { color: var(--accent); }
   </style>
 </head>
 <body>
+  <header class="site-nav">
+    <a href="index.html" class="nav-brand">Study Sessions</a>
+    <nav class="nav-links">
+      <a href="oci_foundations_quiz.html">OCI</a>
+      <a href="gcp_cloud_digital_leader_quiz.html">GCP</a>
+      <a href="az900_azure_fundamentals_quiz.html">Azure</a>
+      <a href="aws_mlea_quiz.html">AWS MLA</a>
+      <a href="aws_data_engineering_quiz.html">AWS DEA</a>
+      <a href="cissp_quiz.html">CISSP</a>
+      <a href="rhcsa9_quiz.html">RHCSA 9</a>
+      <a href="rhce_quiz.html">RHCE</a>
+    </nav>
+  </header>
   <div class="container">
     <h1>Study Sessions</h1>
     <p class="subtitle">Choose a practice quiz</p>

@@ -139,14 +139,46 @@
     .import-toast.success { color: var(--correct); }
     .import-toast.err { color: var(--wrong); }
     .hidden { display: none !important; }
+    .site-nav {
+      font-family: var(--font);
+      background: var(--surface);
+      border-bottom: 1px solid rgba(148,163,184,0.2);
+      padding: 0.75rem 1.5rem;
+      margin: -2rem -2rem 2rem -2rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+    }
+    .nav-brand { font-weight: 700; color: var(--text); text-decoration: none; margin-right: 0.5rem; }
+    .nav-brand:hover { color: var(--accent); }
+    .nav-links { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
+    .nav-links a:hover { color: var(--accent); }
+    .back-home { display: inline-block; margin-bottom: 1rem; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
+    .back-home:hover { color: var(--accent); }
   </style>
 </head>
 <body>
+  <header class="site-nav">
+    <a href="index.html" class="nav-brand">Study Sessions</a>
+    <nav class="nav-links">
+      <a href="oci_foundations_quiz.html">OCI</a>
+      <a href="gcp_cloud_digital_leader_quiz.html">GCP</a>
+      <a href="az900_azure_fundamentals_quiz.html">Azure</a>
+      <a href="aws_mlea_quiz.html">AWS MLA</a>
+      <a href="aws_data_engineering_quiz.html">AWS DEA</a>
+      <a href="cissp_quiz.html">CISSP</a>
+      <a href="rhcsa9_quiz.html">RHCSA 9</a>
+      <a href="rhce_quiz.html">RHCE</a>
+    </nav>
+  </header>
   <div class="container">
     <h1>AWS ML Engineer Associate Practice Quiz</h1>
     <p class="subtitle">MLA-C01 • Data prep, model dev, deployment, monitoring</p>
 
     <div id="start-screen" class="start-screen">
+      <a href="index.html" class="back-home">← Back to home</a>
       <p>40 questions per session, drawn from a pool of 55+. Randomized each run. Choose your mode:</p>
       <p id="focus-hint" class="profile-hint hidden"></p>
       <div class="mode-selector">
@@ -196,6 +228,7 @@
       <p id="result-msg" style="margin-bottom: 1.5rem; color: var(--text-muted);"></p>
       <div class="results-actions">
         <button onclick="startQuiz()">Try Again</button>
+        <a href="index.html" class="btn-link">Back to home</a>
         <button class="secondary" onclick="downloadResults()">Download Results</button>
         <button class="secondary" onclick="copyResultsToClipboard()">Copy to Clipboard</button>
       </div>
