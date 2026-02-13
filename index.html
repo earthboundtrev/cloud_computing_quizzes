@@ -54,6 +54,12 @@
     }
     .drag-handle:active { cursor: grabbing; }
     .quiz-card-item .quiz-card { flex: 1; min-width: 0; }
+    .quiz-complete-label {
+      flex-shrink: 0; display: flex; align-items: center; gap: 0.35rem;
+      cursor: pointer; color: var(--text-muted); font-size: 0.85rem; user-select: none;
+    }
+    .quiz-complete-label:hover { color: var(--text); }
+    .quiz-complete-checkbox { cursor: pointer; }
     .quiz-card-item-ghost { opacity: 0.4; }
     .quiz-card-item-drag { opacity: 0.9; }
   </style>

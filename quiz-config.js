@@ -16,6 +16,26 @@ window.QUIZ_CONFIG = [
   { id: 'rhce', navLabel: 'RHCE', name: 'RHCE', href: 'rhce_quiz.html', desc: 'EX294 • Ansible playbooks for system administration', cardClass: 'redhat', closed: false },
 ];
 
+var QUIZ_COMPLETED_KEY = 'quizCompleted';
+
+/** Returns set of quiz ids the user has marked complete (from index checkbox). */
+window.getQuizCompletedIds = function () {
+  try {
+    var raw = localStorage.getItem(QUIZ_COMPLETED_KEY);
+    var arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) { return []; }
+};
+
+/** Set one quiz as complete or not; updates localStorage. */
+window.setQuizCompleted = function (id, completed) {
+  var ids = window.getQuizCompletedIds();
+  var i = ids.indexOf(id);
+  if (completed && i === -1) ids.push(id);
+  else if (!completed && i !== -1) ids.splice(i, 1);
+  try { localStorage.setItem(QUIZ_COMPLETED_KEY, JSON.stringify(ids)); } catch (e) {}
+};
+
 /** Returns QUIZ_CONFIG in display order (saved order from localStorage, or default). */
 window.getQuizOrderedConfig = function () {
   var config = window.QUIZ_CONFIG;
