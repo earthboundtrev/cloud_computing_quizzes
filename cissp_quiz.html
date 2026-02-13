@@ -882,6 +882,11 @@
       });
       const profile = getProfile();
       sessionQuestions = weightedSample(filtered, QUESTIONS_PER_QUIZ, profile);
+      sessionQuestions.forEach(q => {
+        const shuffled = shuffle([...q.options]);
+        q._shuffledOptions = shuffled;
+        q._correctDisplayIndex = shuffled.indexOf(q.options[q.correct]);
+      });
       currentIndex = 0;
       score = 0;
       answered = [];
@@ -911,14 +916,16 @@
       fb.classList.add('hidden');
       fb.className = 'feedback hidden';
 
-      q.options.forEach((opt, i) => {
+      const optsList = q._shuffledOptions || q.options;
+      const correctIdx = q._correctDisplayIndex !== undefined ? q._correctDisplayIndex : q.correct;
+      optsList.forEach((opt, i) => {
         const div = document.createElement('div');
         div.className = 'option';
         div.textContent = opt;
         div.dataset.index = i;
         if (answered[currentIndex] !== undefined) {
           div.classList.add('disabled');
-          if (i === q.correct) div.classList.add('correct');
+          if (i === correctIdx) div.classList.add('correct');
           else if (i === answered[currentIndex]) div.classList.add('wrong');
         } else {
           div.onclick = () => selectOption(currentIndex, i, q);
@@ -928,8 +935,8 @@
 
       if (answered[currentIndex] !== undefined) {
         fb.classList.remove('hidden');
-        fb.className = 'feedback ' + (answered[currentIndex] === q.correct ? 'correct-msg' : 'wrong-msg');
-        fb.innerHTML = (answered[currentIndex] === q.correct ? '✓ Correct. ' : '✗ Incorrect. ') + '<span class="explanation">' + q.explain + '</span>';
+        fb.className = 'feedback ' + (answered[currentIndex] === correctIdx ? 'correct-msg' : 'wrong-msg');
+        fb.innerHTML = (answered[currentIndex] === correctIdx ? '✓ Correct. ' : '✗ Incorrect. ') + '<span class="explanation">' + q.explain + '</span>';
       }
 
       document.getElementById('prev-btn').disabled = currentIndex === 0;
@@ -937,20 +944,21 @@
 
     function selectOption(pos, optIdx, q) {
       if (answered[pos] !== undefined) return;
+      const correctIdx = q._correctDisplayIndex !== undefined ? q._correctDisplayIndex : q.correct;
       answered[pos] = optIdx;
-      if (optIdx === q.correct) score++;
+      if (optIdx === correctIdx) score++;
 
       document.querySelectorAll('#options .option').forEach(o => {
         o.classList.add('disabled');
         o.onclick = null;
-        if (parseInt(o.dataset.index) === q.correct) o.classList.add('correct');
+        if (parseInt(o.dataset.index) === correctIdx) o.classList.add('correct');
         else if (parseInt(o.dataset.index) === optIdx) o.classList.add('wrong');
       });
 
       const fb = document.getElementById('feedback');
       fb.classList.remove('hidden');
-      fb.innerHTML = (optIdx === q.correct ? '✓ Correct. ' : '✗ Incorrect. ') + '<span class="explanation">' + q.explain + '</span>';
-      fb.className = 'feedback ' + (optIdx === q.correct ? 'correct-msg' : 'wrong-msg');
+      fb.innerHTML = (optIdx === correctIdx ? '✓ Correct. ' : '✗ Incorrect. ') + '<span class="explanation">' + q.explain + '</span>';
+      fb.className = 'feedback ' + (optIdx === correctIdx ? 'correct-msg' : 'wrong-msg');
       document.getElementById('score-display').textContent = score;
     }
 
@@ -974,9 +982,10 @@
       const profile = getProfile();
       sessionQuestions.forEach((q, i) => {
         const t = q.topic || 'Other';
+        const correctIdx = q._correctDisplayIndex !== undefined ? q._correctDisplayIndex : q.correct;
         if (!profile.topicStats[t]) profile.topicStats[t] = { correct: 0, total: 0 };
         profile.topicStats[t].total++;
-        if (answered[i] !== undefined && answered[i] === q.correct) {
+        if (answered[i] !== undefined && answered[i] === correctIdx) {
           profile.topicStats[t].correct++;
         }
       });
