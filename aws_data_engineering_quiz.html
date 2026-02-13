@@ -11,6 +11,7 @@
   <title>AWS Data Engineer Associate Practice Quiz</title>
   <link rel="stylesheet" href="css/quiz-common.css">
   <style>:root { --accent: #ff9900; --accent-dim: #ec7211; }</style>
+  <script src="quiz-config.js"></script>
   <script src="sw-register.js"></script>
   <script src="brain-dump.js"></script>
   <script src="motivation.js"></script>
@@ -18,20 +19,13 @@
   <script src="quiz-engine.js"></script>
   <script src="data/aws-data-engineering-questions.js"></script>
   <script src="quiz-init-aws-data-engineering.js"></script>
+  <script src="quiz-nav.js"></script>
 </head>
 <body>
   <header class="site-nav">
     <a href="index.html" class="nav-brand">Study Sessions</a>
     <nav class="nav-links">
-      <a href="oci_foundations_quiz.html">OCI</a>
-      <a href="gcp_cloud_digital_leader_quiz.html">GCP</a>
-      <a href="az900_azure_fundamentals_quiz.html">Azure</a>
-      <a href="aws_mlea_quiz.html">AWS MLA</a>
-      <a href="aws_data_engineering_quiz.html">AWS DEA</a>
-      <a href="terraform_associate_quiz.html">Terraform</a>
-      <a href="cissp_quiz.html">CISSP</a>
-      <a href="rhcsa9_quiz.html">RHCSA 9</a>
-      <a href="rhce_quiz.html">RHCE</a>
+      <span id="quiz-nav-links"></span>
       <button type="button" class="nav-dumps-btn" id="review-dumps-btn">Review Dumps</button>
     </nav>
   </header>

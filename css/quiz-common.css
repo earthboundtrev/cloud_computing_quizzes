@@ -153,8 +153,10 @@ button.secondary:hover { background: rgba(100,116,139,0.1); }
 .nav-brand { font-weight: 700; color: var(--text); text-decoration: none; margin-right: 0.5rem; }
 .nav-brand:hover { color: var(--accent); }
 .nav-links { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; }
+#quiz-nav-links { display: contents; }
 .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
 .nav-links a:hover { color: var(--accent); }
+.nav-links a.current { color: var(--accent); font-weight: 600; }
 .back-home { display: inline-block; margin-bottom: 1rem; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
 .back-home:hover { color: var(--accent); }
 .brain-dump-wrap { margin: 1rem 0; padding: 0.75rem 0; border-top: 1px solid rgba(148,163,184,0.2); }

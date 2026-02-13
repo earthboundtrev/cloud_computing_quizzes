@@ -42,9 +42,23 @@
     a.quiz-card.terraform { border-left-color: var(--terraform); }
     a.quiz-card.cissp { border-left-color: var(--cissp); }
     a.quiz-card.redhat { border-left-color: var(--redhat); }
-    .quiz-card .name { font-weight: 600; font-size: 1.05rem; margin-bottom: 0.25rem; }
-    .quiz-card .desc { font-size: 0.9rem; color: var(--text-muted); }
+    .quiz-card .name { display: block; font-weight: 600; font-size: 1.05rem; margin-bottom: 0.35rem; }
+    .quiz-card .desc { display: block; font-size: 0.9rem; color: var(--text-muted); }
+    .quiz-card.completed { opacity: 0.85; }
+    .quiz-card .completed-badge { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem; }
+    .quiz-card-item { display: flex; align-items: stretch; gap: 0.5rem; }
+    .drag-handle {
+      flex-shrink: 0; display: flex; align-items: center; padding: 0 0.5rem;
+      color: var(--text-muted); cursor: grab; touch-action: none; user-select: none;
+      font-size: 1rem; line-height: 1;
+    }
+    .drag-handle:active { cursor: grabbing; }
+    .quiz-card-item .quiz-card { flex: 1; min-width: 0; }
+    .quiz-card-item-ghost { opacity: 0.4; }
+    .quiz-card-item-drag { opacity: 0.9; }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+  <script src="quiz-config.js"></script>
   <script src="sw-register.js"></script>
   <script src="brain-dump.js"></script>
   <script src="motivation.js"></script>
@@ -54,65 +68,16 @@
   <header class="site-nav">
     <a href="index.html" class="nav-brand">Study Sessions</a>
     <nav class="nav-links">
-      <a href="oci_foundations_quiz.html">OCI</a>
-      <a href="gcp_cloud_digital_leader_quiz.html">GCP</a>
-      <a href="az900_azure_fundamentals_quiz.html">Azure</a>
-      <a href="aws_mlea_quiz.html">AWS MLA</a>
-      <a href="aws_data_engineering_quiz.html">AWS DEA</a>
-      <a href="terraform_associate_quiz.html">Terraform</a>
-      <a href="aws_genai_quiz.html">AWS GenAI</a>
-      <a href="cissp_quiz.html">CISSP</a>
-      <a href="rhcsa9_quiz.html">RHCSA 9</a>
-      <a href="rhce_quiz.html">RHCE</a>
+      <span id="quiz-nav-links"></span>
       <button type="button" class="nav-dumps-btn" id="review-dumps-btn">Review Dumps</button>
     </nav>
   </header>
   <div class="container">
     <h1>Study Sessions</h1>
     <p class="subtitle">Choose a practice quiz</p>
-    <nav class="quiz-list">
-      <a href="oci_foundations_quiz.html" class="quiz-card oci">
-        <span class="name">OCI Foundations Associate</span>
-        <span class="desc">1Z0-1085-25 • OCI ↔ AWS comparison &amp; exam-style</span>
-      </a>
-      <a href="gcp_cloud_digital_leader_quiz.html" class="quiz-card gcp">
-        <span class="name">GCP Cloud Digital Leader</span>
-        <span class="desc">GCP ↔ AWS comparison &amp; exam-style</span>
-      </a>
-      <a href="az900_azure_fundamentals_quiz.html" class="quiz-card azure">
-        <span class="name">AZ-900 Azure Fundamentals</span>
-        <span class="desc">Microsoft Certified: Azure Fundamentals • Azure ↔ AWS &amp; exam-style</span>
-      </a>
-      <a href="aws_mlea_quiz.html" class="quiz-card aws">
-        <span class="name">AWS ML Engineer Associate</span>
-        <span class="desc">MLA-C01 • SageMaker, data prep, model dev, deployment, monitoring</span>
-      </a>
-      <a href="aws_data_engineering_quiz.html" class="quiz-card aws">
-        <span class="name">AWS Data Engineer Associate</span>
-        <span class="desc">DEA-C01 • Glue, EMR, Kinesis, Redshift, Athena &amp; exam-style</span>
-      </a>
-      <a href="terraform_associate_quiz.html" class="quiz-card terraform">
-        <span class="name">HashiCorp Certified: Terraform Associate</span>
-        <span class="desc">TA-002-P • IaC, workflow, state, modules, providers</span>
-      </a>
-      <a href="aws_genai_quiz.html" class="quiz-card aws">
-        <span class="name">AWS Certified Generative AI Developer – Professional</span>
-        <span class="desc">Bedrock, RAG, agents, guardrails, production GenAI • Beta: 85 q, 205 min</span>
-      </a>
-      <a href="cissp_quiz.html" class="quiz-card cissp">
-        <span class="name">CISSP</span>
-        <span class="desc">8 domains • Security &amp; Risk through Software Development Security</span>
-      </a>
-      <a href="rhcsa9_quiz.html" class="quiz-card redhat">
-        <span class="name">RHCSA 9</span>
-        <span class="desc">EX200 • RHEL 9 vs RHEL 7 &amp; exam-style (if you passed RHCSA 7)</span>
-      </a>
-      <a href="rhce_quiz.html" class="quiz-card redhat">
-        <span class="name">RHCE</span>
-        <span class="desc">EX294 • Ansible playbooks for system administration</span>
-      </a>
-    </nav>
+    <div id="quiz-list-container"></div>
   </div>
+  <script src="quiz-nav.js"></script>
   <script src="index-init.js"></script>
 </body>
 </html>

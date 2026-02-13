@@ -39,6 +39,8 @@ const PRECACHE_PATHS = [
   '/quiz-init-cissp.js',
   '/quiz-init-rhcsa9.js',
   '/quiz-init-rhce.js',
+  '/quiz-config.js',
+  '/quiz-nav.js',
   '/brain-dump.js',
   '/motivation.js',
   '/session-streak.js',
