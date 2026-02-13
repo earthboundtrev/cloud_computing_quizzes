@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AWS Certified Generative AI Developer - Professional Practice Quiz</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --accent: #ff9900;
+      --accent-dim: #ec7211;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --correct: #22c55e;
+      --wrong: #ef4444;
+      --font: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    .container { max-width: 720px; margin: 0 auto; }
+    h1 { font-size: 1.5rem; color: var(--accent); margin-bottom: 0.5rem; }
+    .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem; }
+    .stats { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; font-size: 0.85rem; color: var(--text-muted); }
+    .stats span { color: var(--accent); font-weight: 600; }
+    .question-card {
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border-left: 3px solid var(--accent);
+    }
+    .question-text { font-size: 1.05rem; margin-bottom: 1rem; font-weight: 500; }
+    .options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .option {
+      padding: 0.75rem 1rem;
+      background: var(--bg);
+      border: 2px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .option:hover:not(.disabled) { border-color: var(--accent-dim); background: #151d2b; }
+    .option.selected { border-color: var(--accent); background: #151d2b; }
+    .option.correct { border-color: var(--correct); background: rgba(34,197,94,0.1); }
+    .option.wrong { border-color: var(--wrong); background: rgba(239,68,68,0.1); }
+    .option.disabled { cursor: not-allowed; opacity: 0.7; }
+    .feedback { margin-top: 1rem; padding: 1rem; border-radius: 6px; font-size: 0.9rem; }
+    .feedback.correct-msg { background: rgba(34,197,94,0.15); border-left: 4px solid var(--correct); }
+    .feedback.wrong-msg { background: rgba(239,68,68,0.15); border-left: 4px solid var(--wrong); }
+    .feedback .explanation { margin-top: 0.5rem; color: var(--text-muted); }
+    .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; }
+    button {
+      padding: 0.6rem 1.2rem;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: var(--accent-dim); }
+    button.secondary { background: transparent; color: var(--accent); border: 2px solid var(--accent); }
+    button.secondary:hover { background: rgba(255,153,0,0.1); }
+    .results { text-align: center; padding: 2rem; }
+    .results h2 { color: var(--accent); margin-bottom: 1rem; }
+    .score { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .results-actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
+    .results-actions button.secondary { margin: 0; }
+    .results-actions a.btn-link {
+      display: inline-flex; align-items: center; padding: 0.6rem 1.2rem;
+      background: transparent; color: var(--accent); border: 2px solid var(--accent);
+      border-radius: 6px; font-family: inherit; font-weight: 600; text-decoration: none; cursor: pointer;
+    }
+    .results-actions a.btn-link:hover { background: rgba(255,153,0,0.1); }
+    .copy-toast { font-size: 0.85rem; color: var(--correct); margin-top: 0.5rem; }
+    .score.pass { color: var(--correct); }
+    .score.fail { color: var(--wrong); }
+    .start-screen { text-align: center; padding: 3rem 0; }
+    .start-screen p { margin-bottom: 1.5rem; color: var(--text-muted); }
+    .mode-selector { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; max-width: 360px; margin-left: auto; margin-right: auto; }
+    .mode-btn {
+      padding: 1rem 1.5rem;
+      text-align: left;
+      background: var(--surface);
+      border: 2px solid transparent;
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .mode-btn:hover { border-color: var(--accent-dim); background: #151d2b; }
+    .mode-btn.selected { border-color: var(--accent); background: rgba(255,153,0,0.1); }
+    .mode-btn .label { font-weight: 600; display: block; }
+    .mode-btn .desc { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .profile-hint { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.75rem; }
+    .import-area { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--surface); text-align: left; }
+    .import-area label { display: block; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--text-muted); }
+    .import-area textarea { width: 100%; min-height: 80px; padding: 0.5rem; background: var(--surface); border: 1px solid var(--accent-dim); border-radius: 6px; color: var(--text); font-family: inherit; font-size: 0.85rem; resize: vertical; }
+    .import-toast { font-size: 0.85rem; margin-top: 0.5rem; }
+    .import-toast.success { color: var(--correct); }
+    .import-toast.err { color: var(--wrong); }
+    .hidden { display: none !important; }
+    .site-nav {
+      font-family: var(--font);
+      background: var(--surface);
+      border-bottom: 1px solid rgba(148,163,184,0.2);
+      padding: 0.75rem 1.5rem;
+      margin: -2rem -2rem 2rem -2rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+    }
+    .nav-brand { font-weight: 700; color: var(--text); text-decoration: none; margin-right: 0.5rem; }
+    .nav-brand:hover { color: var(--accent); }
+    .nav-links { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
+    .nav-links a:hover { color: var(--accent); }
+    .back-home { display: inline-block; margin-bottom: 1rem; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
+    .back-home:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <header class="site-nav">
+    <a href="index.html" class="nav-brand">Study Sessions</a>
+    <nav class="nav-links">
+      <a href="oci_foundations_quiz.html">OCI</a>
+      <a href="gcp_cloud_digital_leader_quiz.html">GCP</a>
+      <a href="az900_azure_fundamentals_quiz.html">Azure</a>
+      <a href="aws_mlea_quiz.html">AWS MLA</a>
+      <a href="aws_data_engineering_quiz.html">AWS DEA</a>
+      <a href="aws_genai_quiz.html">AWS GenAI</a>
+      <a href="cissp_quiz.html">CISSP</a>
+      <a href="rhcsa9_quiz.html">RHCSA 9</a>
+      <a href="rhce_quiz.html">RHCE</a>
+    </nav>
+  </header>
+  <div class="container">
+    <h1>AWS Certified Generative AI Developer – Professional</h1>
+    <p class="subtitle">Production-ready GenAI with Amazon Bedrock • Beta: 85 questions, 205 min</p>
+
+    <div id="start-screen" class="start-screen">
+      <a href="index.html" class="back-home">← Back to home</a>
+      <p>40 questions per session, drawn from a pool of 165+. Randomized each run. Choose your mode:</p>
+      <p id="focus-hint" class="profile-hint hidden"></p>
+      <div class="mode-selector">
+        <button type="button" class="mode-btn" data-mode="comparison" onclick="selectMode('comparison')">
+          <span class="label">Domain Focus</span>
+          <span class="desc">Bedrock, RAG, agents, guardrails, security, deployment—pick a focus.</span>
+        </button>
+        <button type="button" class="mode-btn" data-mode="exam" onclick="selectMode('exam')">
+          <span class="label">Exam (Scenario-based)</span>
+          <span class="desc">Production GenAI scenarios, security, cost—exam-style.</span>
+        </button>
+        <button type="button" class="mode-btn selected" data-mode="mixed" onclick="selectMode('mixed')">
+          <span class="label">Mixed</span>
+          <span class="desc">Both domain focus and exam-style. Simulates full exam.</span>
+        </button>
+      </div>
+      <button id="start-btn" onclick="startQuiz()">Start Quiz</button>
+      <div class="import-area">
+        <label for="import-results">Import past results (paste .md or choose file) to focus on weak topics:</label>
+        <textarea id="import-results" placeholder="Paste quiz results markdown here..."></textarea>
+        <button type="button" class="secondary" style="margin-top: 0.5rem;" onclick="importResults()">Import results</button>
+        <input type="file" id="import-file" accept=".md,text/markdown" style="display: none;" onchange="onImportFile(event)">
+        <button type="button" class="secondary" style="margin-top: 0.5rem; margin-left: 0.5rem;" onclick="document.getElementById('import-file').click()">Choose file</button>
+        <p id="import-toast" class="import-toast hidden"></p>
+      </div>
+    </div>
+
+    <div id="quiz-area" class="hidden">
+      <div class="stats">
+        <span>Question <span id="q-num">1</span> of <span id="q-total">40</span></span>
+        <span>Correct: <span id="score-display">0</span></span>
+      </div>
+      <div class="question-card">
+        <div class="question-text" id="question-text"></div>
+        <div class="options" id="options"></div>
+        <div id="feedback" class="feedback hidden"></div>
+      </div>
+      <div class="nav-row">
+        <button id="prev-btn" class="secondary" onclick="prevQuestion()">← Previous</button>
+        <button id="next-btn" onclick="nextQuestion()">Next →</button>
+      </div>
+    </div>
+
+    <div id="results-screen" class="results hidden">
+      <h2>Quiz Complete</h2>
+      <div class="score" id="final-score"></div>
+      <p id="result-msg" style="margin-bottom: 1.5rem; color: var(--text-muted);"></p>
+      <div class="results-actions">
+        <button onclick="startQuiz()">Try Again</button>
+        <a href="index.html" class="btn-link">Back to home</a>
+        <button class="secondary" onclick="downloadResults()">Download Results</button>
+        <button class="secondary" onclick="copyResultsToClipboard()">Copy to Clipboard</button>
+      </div>
+      <p id="copy-toast" class="copy-toast hidden">Copied! Paste into Cursor chat for AI refactoring.</p>
+    </div>
+  </div>
+
+  <script>
+    const QUIZ_ID = 'aws_genai';
+    const PROFILE_KEY = 'study_sessions_profile_' + QUIZ_ID;
+
+    const questionBank = [
+      // === BEDROCK BASICS ===
+      { mode: "comparison", topic: "Bedrock",
+        q: "Amazon Bedrock provides access to foundation models (FMs) through which model delivery option?",
+        options: ["Only bring-your-own model", "API access to FMs from Amazon and third parties (no infrastructure to manage)", "Only Amazon Titan", "Only open-source models"],
+        correct: 1,
+        explain: "Bedrock = fully managed; access FMs from Amazon and third-party providers via API; no servers to manage."
+      },
+      { mode: "exam", topic: "Bedrock",
+        q: "To use a foundation model in Bedrock for the first time, you must:",
+        options: ["Deploy the model to EC2", "Enable model access in the Bedrock console (Model Access in the left menu)", "Use only default models", "Request a custom fine-tune"],
+        correct: 1,
+        explain: "Model access must be enabled per model (and per region) before you can invoke it."
+      },
+      { mode: "exam", topic: "Bedrock",
+        q: "Bedrock Inference supports which invocation patterns?",
+        options: ["Synchronous only", "Synchronous (InvokeModel) and asynchronous (InvokeModelWithResponseStream)", "Batch only", "Only streaming"],
+        correct: 1,
+        explain: "InvokeModel = sync; InvokeModelWithResponseStream = stream tokens; async for long-running inference."
+      },
+      { mode: "comparison", topic: "Bedrock",
+        q: "Amazon Bedrock Serverless Inference is best for:",
+        options: ["Only high-throughput batch", "Variable or unpredictable traffic; pay per request", "Only reserved capacity", "Only real-time always-on"],
+        correct: 1,
+        explain: "Serverless = no capacity to manage; pay per request; good for variable traffic."
+      },
+      { mode: "exam", topic: "Bedrock",
+        q: "Provisioned Throughput in Bedrock is used when you need:",
+        options: ["Only serverless", "Predictable capacity and guaranteed throughput (dedicated model units)", "Only on-demand", "Only batch"],
+        correct: 1,
+        explain: "Provisioned Throughput = reserve model units for predictable performance; commit to capacity."
+      },
+      // === RAG & KNOWLEDGE BASES ===
+      { mode: "comparison", topic: "RAG",
+        q: "A RAG (Retrieval-Augmented Generation) solution on AWS typically uses Bedrock with:",
+        options: ["Only the base model", "Bedrock Knowledge Bases (retrieve from your data, then generate)", "Only Lambda", "Only S3 without retrieval"],
+        correct: 1,
+        explain: "Knowledge Bases = ingest your data (S3, etc.), create embeddings, retrieve relevant chunks for context in prompts."
+      },
+      { mode: "exam", topic: "RAG",
+        q: "Bedrock Knowledge Bases can use which vector store?",
+        options: ["Only OpenSearch", "Amazon OpenSearch Serverless, Pinecone, or Redis Enterprise Cloud", "Only DynamoDB", "Only RDS"],
+        correct: 1,
+        explain: "Knowledge Bases support OpenSearch Serverless, Pinecone, Redis Enterprise as vector stores."
+      },
+      { mode: "exam", topic: "RAG",
+        q: "When building RAG, embedding models in Bedrock are used to:",
+        options: ["Only generate text", "Convert text to vector embeddings for retrieval", "Only summarize", "Only translate"],
+        correct: 1,
+        explain: "Embedding models (e.g., Titan Embeddings) convert text to vectors for similarity search in the vector store."
+      },
+      { mode: "exam", topic: "RAG",
+        q: "Chunking strategy in RAG affects:",
+        options: ["Only cost", "Retrieval quality and relevance (size, overlap, semantics)", "Only latency", "Only model choice"],
+        correct: 1,
+        explain: "Chunk size and overlap affect what gets retrieved; too large or too small can hurt answer quality."
+      },
+      // === AGENTS ===
+      { mode: "comparison", topic: "Agents",
+        q: "Bedrock Agents are used to:",
+        options: ["Only run batch jobs", "Orchestrate multi-step tasks with tools and knowledge bases", "Only invoke a single model", "Only store embeddings"],
+        correct: 1,
+        explain: "Agents = orchestrate FMs with action groups (APIs, Lambda) and optional knowledge bases; multi-step reasoning."
+      },
+      { mode: "exam", topic: "Agents",
+        q: "An action group in a Bedrock Agent typically:",
+        options: ["Only returns static text", "Defines APIs or Lambda functions the agent can call to perform actions", "Only retrieves from Knowledge Base", "Only streams tokens"],
+        correct: 1,
+        explain: "Action groups = define tools (OpenAPI schema + Lambda or API) the agent can invoke."
+      },
+      { mode: "exam", topic: "Agents",
+        q: "To keep agent behavior consistent and controllable, you should:",
+        options: ["Only use the default system prompt", "Configure instructions (system prompt) and guardrails", "Only use one action group", "Only use streaming"],
+        correct: 1,
+        explain: "Instructions and guardrails shape agent behavior; use them for consistency and safety."
+      },
+      // === GUARDRAILS & SAFETY ===
+      { mode: "comparison", topic: "Guardrails",
+        q: "Bedrock Guardrails help with:",
+        options: ["Only cost control", "Content filtering and safety (deny harmful or off-topic content)", "Only scaling", "Only logging"],
+        correct: 1,
+        explain: "Guardrails = apply content filters (hate, violence, PII, etc.) and topic policies on input/output."
+      },
+      { mode: "exam", topic: "Guardrails",
+        q: "Guardrails can be applied at:",
+        options: ["Model level only", "Input (prompt) and/or output (response) stages", "Only output", "Only in Knowledge Base"],
+        correct: 1,
+        explain: "Guardrails evaluate and block/filter at input and/or output; configurable per stage."
+      },
+      { mode: "exam", topic: "Security",
+        q: "To run Bedrock inference inside your VPC without internet, you would use:",
+        options: ["Only public Bedrock endpoints", "VPC endpoints for Bedrock (and optionally PrivateLink)", "Only NAT Gateway", "Only VPN"],
+        correct: 1,
+        explain: "Use VPC endpoints (interface endpoints) for Bedrock so traffic stays on the AWS network; optional PrivateLink for private access."
+      },
+      { mode: "exam", topic: "Security",
+        q: "Bedrock supports encryption of model data:",
+        options: ["Only in transit", "At rest (AWS managed or customer-managed keys in KMS) and in transit", "Only at rest", "No encryption"],
+        correct: 1,
+        explain: "Encryption at rest with KMS (default or CMK); TLS in transit."
+      },
+      // === DEPLOYMENT & PRODUCTION ===
+      { mode: "exam", topic: "Deployment",
+        q: "For a production GenAI app that must scale with traffic, a common pattern is:",
+        options: ["Single EC2 instance only", "API Gateway + Lambda (or container) invoking Bedrock", "Only SageMaker real-time", "Only batch"],
+        correct: 1,
+        explain: "API Gateway + Lambda/container calling Bedrock = serverless, scalable; add caching and throttling as needed."
+      },
+      { mode: "exam", topic: "Deployment",
+        q: "Amazon SageMaker JumpStart can be used for GenAI to:",
+        options: ["Only Bedrock", "Deploy and fine-tune open-source FMs (e.g., Llama) on SageMaker", "Only Knowledge Bases", "Only agents"],
+        correct: 1,
+        explain: "JumpStart = deploy pre-built models (including LLMs) and fine-tune; alternative to Bedrock for bring-your-own."
+      },
+      { mode: "exam", topic: "Cost",
+        q: "To optimize cost when using Bedrock with variable traffic, you should consider:",
+        options: ["Only Provisioned Throughput", "On-Demand or Serverless for variable load; Provisioned Throughput for steady high load", "Only On-Demand", "Only custom models"],
+        correct: 1,
+        explain: "On-Demand/Serverless = pay per use; Provisioned = commit for predictable, high throughput; match to traffic pattern."
+      },
+      { mode: "exam", topic: "Cost",
+        q: "Bedrock pricing is typically based on:",
+        options: ["Only API calls", "Input and output tokens (and optionally model units for Provisioned Throughput)", "Only storage", "Only requests"],
+        correct: 1,
+        explain: "Pay per input token and output token (varies by model); Provisioned Throughput adds model unit pricing."
+      },
+      // === MORE EXAM-STYLE ===
+      { mode: "exam", topic: "Bedrock",
+        q: "Which Bedrock feature allows you to fine-tune a model on your own data?",
+        options: ["Only base model invocation", "Bedrock Custom Model (fine-tune supported models with your dataset)", "Only Knowledge Base", "Only Guardrails"],
+        correct: 1,
+        explain: "Custom Model = fine-tune supported FMs (e.g., Cohere, Amazon Titan) with your data in S3."
+      },
+      { mode: "exam", topic: "RAG",
+        q: "In RAG, the purpose of the retrieval step is to:",
+        options: ["Replace the model", "Fetch relevant context from your data to add to the prompt", "Only cache responses", "Only validate output"],
+        correct: 1,
+        explain: "Retrieve relevant documents/chunks; concatenate with user prompt so the FM has context to answer accurately."
+      },
+      { mode: "exam", topic: "Agents",
+        q: "When a Bedrock Agent uses a Knowledge Base, it:",
+        options: ["Only calls action groups", "Can retrieve from the Knowledge Base and optionally call action groups", "Only streams", "Only uses one model"],
+        correct: 1,
+        explain: "Agent can use both Knowledge Base (retrieval) and action groups (tools); configured in the agent."
+      },
+      { mode: "exam", topic: "Guardrails",
+        q: "A guardrail topic policy is used to:",
+        options: ["Only filter PII", "Restrict conversation to approved topics or deny prohibited topics", "Only filter violence", "Only log requests"],
+        correct: 1,
+        explain: "Topic policies = allow list or deny list of topics; keep the model on-topic."
+      },
+      { mode: "exam", topic: "Security",
+        q: "To allow only specific IAM principals to call Bedrock, you should:",
+        options: ["Only use VPC", "Use IAM policies (and optionally resource policies) on the Bedrock resources", "Only use Guardrails", "Only use encryption"],
+        correct: 1,
+        explain: "IAM policies control who can invoke models; use least privilege; resource policies for cross-account if needed."
+      },
+      { mode: "exam", topic: "Deployment",
+        q: "For low-latency inference at high scale, a suitable option is:",
+        options: ["Only Lambda with no concurrency", "Provisioned Throughput (dedicated capacity) or SageMaker real-time endpoint", "Only on-demand with no cache", "Only batch"],
+        correct: 1,
+        explain: "Provisioned Throughput = dedicated capacity, predictable latency; SageMaker = custom models with dedicated instances."
+      },
+      { mode: "exam", topic: "Monitoring",
+        q: "To trace and debug Bedrock invocations in production, you can use:",
+        options: ["Only CloudWatch Logs", "AWS X-Ray (and CloudWatch) for tracing and metrics", "Only Guardrails", "Only Knowledge Base logs"],
+        correct: 1,
+        explain: "X-Ray = trace requests across services; CloudWatch = logs and metrics; use both for observability."
+      },
+      { mode: "exam", topic: "Bedrock",
+        q: "InvokeModelWithResponseStream returns:",
+        options: ["Only a single block of text", "A stream of response chunks (e.g., for real-time UX)", "Only metadata", "Only embeddings"],
+        correct: 1,
+        explain: "Streaming API = receive chunks as the model generates; better UX for chat and long responses."
+      },
+      { mode: "exam", topic: "RAG",
+        q: "Hybrid search in a RAG context typically combines:",
+        options: ["Only two embedding models", "Keyword (e.g., BM25) and semantic (vector) search", "Only vector search", "Only keyword search"],
+        correct: 1,
+        explain: "Hybrid = keyword + vector; improves retrieval when exact terms or semantics matter."
+      },
+      { mode: "exam", topic: "Agents",
+        q: "Agent memory (session state) in Bedrock Agents is used to:",
+        options: ["Only store embeddings", "Persist conversation context across turns", "Only cache model output", "Only log actions"],
+        correct: 1,
+        explain: "Session state = store conversation history and context so the agent has memory across turns."
+      },
+      { mode: "exam", topic: "Guardrails",
+        q: "PII filter in Guardrails can:",
+        options: ["Only log PII", "Detect and redact or block PII in input/output", "Only block all text", "Only allow PII"],
+        correct: 1,
+        explain: "PII filters = detect and redact or block (e.g., SSN, names) to meet compliance."
+      },
+      { mode: "exam", topic: "Security",
+        q: "Cross-account access to Bedrock can be granted via:",
+        options: ["Only same-account IAM", "Resource-based policies (e.g., on Bedrock) and IAM in the other account", "Only VPC peering", "Only Guardrails"],
+        correct: 1,
+        explain: "Use resource policy on the Bedrock resource to allow another account; other account needs IAM to call."
+      },
+      { mode: "exam", topic: "Cost",
+        q: "Caching Bedrock model responses is useful when:",
+        options: ["Traffic is always unique", "Similar prompts repeat (reduce cost and latency)", "Only for batch", "Only for streaming"],
+        correct: 1,
+        explain: "Cache repeated or similar prompts (e.g., prompt cache in Bedrock or application-level cache) to save tokens and latency."
+      },
+      { mode: "exam", topic: "Deployment",
+        q: "AWS Lambda is a good fit for Bedrock invocation when:",
+        options: ["Only long-running batch", "Event-driven, variable load, and invocation fits within Lambda timeout", "Only real-time 24/7", "Only Provisioned Throughput"],
+        correct: 1,
+        explain: "Lambda = event-driven, scales automatically; ensure inference fits within 15 min timeout and memory limits."
+      },
+      { mode: "exam", topic: "Bedrock",
+        q: "Model ID in Bedrock (e.g., anthropic.claude-3-sonnet) identifies:",
+        options: ["Only the region", "The specific foundation model and variant to invoke", "Only the account", "Only the endpoint"],
+        correct: 1,
+        explain: "Model ID = provider.model-name (e.g., amazon.titan-text-express); required for InvokeModel."
+      },
+      { mode: "exam", topic: "RAG",
+        q: "Metadata filtering in a Knowledge Base query allows you to:",
+        options: ["Only filter by date", "Restrict retrieval to documents matching metadata (e.g., department, locale)", "Only filter by size", "Only filter by model"],
+        correct: 1,
+        explain: "Metadata filters = narrow retrieval to chunks that match key-value filters; improves relevance."
+      },
+      { mode: "exam", topic: "Agents",
+        q: "Prepared prompts (prompt templates) in Bedrock Agents help with:",
+        options: ["Only logging", "Consistent, reusable prompt structure and variables", "Only streaming", "Only action groups"],
+        correct: 1,
+        explain: "Prepared prompts = templates with placeholders; standardize and reuse prompt structure."
+      },
+      { mode: "exam", topic: "Guardrails",
+        q: "Word filters in Guardrails can:",
+        options: ["Only allow all words", "Block or replace specific words/phrases (e.g., profanity, competitors)", "Only log words", "Only for PII"],
+        correct: 1,
+        explain: "Word filters = block list or replace list for specific terms; configurable."
+      },
+      { mode: "exam", topic: "Monitoring",
+        q: "CloudWatch metrics for Bedrock can include:",
+        options: ["Only cost", "Invocation count, latency, errors (by model, account)", "Only tokens", "Only streaming"],
+        correct: 1,
+        explain: "Bedrock emits metrics (Invocations, InvocationLatency, etc.); use for monitoring and alarms."
+      },
+      { mode: "exam", topic: "Bedrock",
+        q: "Bedrock supports which type of models for text generation?",
+        options: ["Only Amazon models", "Amazon (Titan, etc.) and third-party (Anthropic, Cohere, Meta, etc.)", "Only open-source", "Only custom"],
+        correct: 1,
+        explain: "Bedrock = multi-provider; Amazon Titan, Anthropic Claude, Cohere, Meta Llama, etc.; enable per model."
+      },
+      { mode: "exam", topic: "RAG",
+        q: "When ingestion runs for a Bedrock Knowledge Base, it:",
+        options: ["Only deletes data", "Syncs data source (e.g., S3), chunks, generates embeddings, writes to vector store", "Only invokes the model", "Only updates Guardrails"],
+        correct: 1,
+        explain: "Ingestion = read from data source, chunk, embed, store in vector store; run on schedule or on-demand."
+      },
+      { mode: "exam", topic: "Agents",
+        q: "Agent validation in Bedrock helps:",
+        options: ["Only with cost", "Test the agent (e.g., test cases) before deployment", "Only with streaming", "Only with action groups"],
+        correct: 1,
+        explain: "Validation = run test cases against the agent; ensure it behaves as expected before release."
+      },
+      { mode: "exam", topic: "Security",
+        q: "To meet compliance, you should for Bedrock:",
+        options: ["Only use default settings", "Use encryption (KMS), VPC, IAM least privilege, and Guardrails as appropriate", "Only use Guardrails", "Only use public endpoints"],
+        correct: 1,
+        explain: "Encryption, network isolation (VPC), least privilege IAM, and content controls (Guardrails) support compliance."
+      },
+      { mode: "exam", topic: "Deployment",
+        q: "Blue/green or canary deployment for a GenAI API is useful to:",
+        options: ["Only reduce cost", "Roll out model or prompt changes with reduced risk", "Only increase latency", "Only for batch"],
+        correct: 1,
+        explain: "Blue/green or canary = release new version to a subset; validate before full rollout."
+      },
+      { mode: "exam", topic: "Cost",
+        q: "Choosing a smaller or more efficient model in Bedrock can:",
+        options: ["Only increase latency", "Reduce cost and often latency for suitable tasks", "Only reduce accuracy", "Only increase tokens"],
+        correct: 1,
+        explain: "Smaller models (e.g., Titan Text Express vs. Claude) can be cheaper and faster for simpler tasks."
+      },
+      { mode: "exam", topic: "Bedrock",
+        q: "Converse API in Bedrock provides:",
+        options: ["Only single-turn invoke", "Unified chat interface (messages, tool use, streaming) for supported models", "Only embeddings", "Only batch"],
+        correct: 1,
+        explain: "Converse API = multi-turn chat; send message history, optional tool config; simpler than raw InvokeModel for chat."
+      },
+      { mode: "exam", topic: "RAG",
+        q: "Re-ranking retrieved chunks before adding to the prompt can:",
+        options: ["Only increase cost", "Improve relevance by scoring and selecting the best chunks", "Only decrease latency", "Only reduce tokens"],
+        correct: 1,
+        explain: "Re-ranking = score retrieved chunks (e.g., with a cross-encoder) and keep top-k; better context for the FM."
+      },
+      { mode: "exam", topic: "Agents",
+        q: "Orchestration in a Bedrock Agent refers to:",
+        options: ["Only streaming", "Coordinating model calls, retrieval, and tool use in a loop", "Only one action", "Only logging"],
+        correct: 1,
+        explain: "Orchestration = agent loop: reason, retrieve (if KB), call tools, reason again until final response."
+      },
+      { mode: "exam", topic: "Guardrails",
+        q: "Sensitive content filters in Guardrails typically cover:",
+        options: ["Only topics", "Hate, violence, sexual content, insults, etc. (configurable)", "Only PII", "Only words"],
+        correct: 1,
+        explain: "Content filters = hate, violence, sexual, insults, etc.; set threshold (none, low, medium, high) or block."
+      },
+      { mode: "exam", topic: "Monitoring",
+        q: "Evaluating a GenAI application in production should include:",
+        options: ["Only latency", "Relevance, safety, and user feedback (and latency/cost)", "Only cost", "Only token count"],
+        correct: 1,
+        explain: "Evaluate quality (relevance, correctness), safety (guardrails), and operational metrics (latency, cost)."
+      },
+      { mode: "exam", topic: "Bedrock",
+        q: "Batch inference in Bedrock is suited for:",
+        options: ["Only real-time chat", "Large volumes of non-urgent requests (e.g., overnight processing)", "Only streaming", "Only single request"],
+        correct: 1,
+        explain: "Batch = process many inputs asynchronously; lower priority, cost-effective for bulk workloads."
+      },
+      { mode: "exam", topic: "RAG",
+        q: "Source attribution in RAG responses helps with:",
+        options: ["Only cost", "Showing which documents supported the answer (trust, compliance)", "Only latency", "Only embedding"],
+        correct: 1,
+        explain: "Source attribution = cite retrieved chunks; improves trust and allows users to verify."
+      },
+      { mode: "exam", topic: "Security",
+        q: "Data sent to Bedrock for inference:",
+        options: ["Is always stored by AWS for training", "Is not used to train AWS models (by default; check data governance)", "Is only in CloudWatch", "Is only in Guardrails"],
+        correct: 1,
+        explain: "AWS does not use your inference data to train foundation models; review data governance and compliance docs."
+      },
+      { mode: "exam", topic: "Deployment",
+        q: "Containerizing a GenAI app that calls Bedrock allows:",
+        options: ["Only Lambda", "Consistent runtime and deployment (e.g., ECS, EKS, SageMaker)", "Only EC2", "Only serverless"],
+        correct: 1,
+        explain: "Containers = portable; run on ECS, EKS, SageMaker, or Lambda (container support) for consistent deployment."
+      },
+      { mode: "exam", topic: "Cost",
+        q: "Prompt caching (e.g., for repeated system prompts) in Bedrock can reduce:",
+        options: ["Only latency", "Input token cost and latency for repeated prefix", "Only output tokens", "Only storage"],
+        correct: 1,
+        explain: "Caching repeated prompt prefix = fewer input tokens billed and faster inference for the cached part."
+      },
+      // === TRIPLED BANK: BEDROCK ===
+      { mode: "comparison", topic: "Bedrock",
+        q: "Which Bedrock API is used for embedding text into vectors?",
+        options: ["InvokeModel with a text FM", "InvokeModel with an embedding model (e.g., Titan Embeddings)", "Only Converse API", "Only batch API"],
+        correct: 1,
+        explain: "Embedding models are invoked via InvokeModel; they take text input and return a vector array."
+      },
+      { mode: "exam", topic: "Bedrock",
+        q: "Region availability for Bedrock models means:",
+        options: ["All models are in all regions", "You must enable and use models in each region where they are offered", "Only us-east-1 has models", "Region does not matter"],
+        correct: 1,
+        explain: "Model availability varies by region; enable and invoke in the region where the model is available."
+      },
+      { mode: "exam", topic: "Bedrock",
+        q: "What is the main benefit of using the Converse API instead of raw InvokeModel for chat?",
+        options: ["Lower cost", "Simpler message format and built-in support for multi-turn, tools, and streaming", "Faster only", "Only for batch"],
+        correct: 1,
+        explain: "Converse API uses a unified message format and handles history, tools, and streaming more easily."
+      },
+      { mode: "comparison", topic: "Bedrock",
+        q: "Bedrock On-Demand Inference differs from Provisioned Throughput in that:",
+        options: ["On-Demand requires a contract", "On-Demand has no capacity to reserve; you pay per token", "On-Demand is only for batch", "There is no difference"],
+        correct: 1,
+        explain: "On-Demand = pay per use, no commitment; Provisioned = reserve capacity for predictable throughput."
+      },
+      { mode: "exam", topic: "Bedrock",
+        q: "When invoking a model with streaming, the client should:",
+        options: ["Wait for the full response", "Process response chunks as they arrive for lower perceived latency", "Only use for batch", "Disable Guardrails"],
+        correct: 1,
+        explain: "Streaming = process chunks as they arrive; improves perceived latency and UX for long answers."
+      },
+      { mode: "exam", topic: "Bedrock",
+        q: "A model alias in Bedrock allows you to:",
+        options: ["Only change region", "Point to a specific model version and swap without changing client code", "Only for custom models", "Only for embeddings"],
+        correct: 1,
+        explain: "Aliases let you pin to a version and update the backing model without changing application code."
+      },
+      { mode: "exam", topic: "Bedrock",
+        q: "Which parameter typically controls randomness in Bedrock text generation?",
+        options: ["Only model ID", "Temperature (and optionally top_p, top_k) in inference config", "Only region", "Only timeout"],
+        correct: 1,
+        explain: "Temperature (and top_p/top_k) control sampling; higher = more random, lower = more deterministic."
+      },
+      { mode: "exam", topic: "Bedrock",
+        q: "Bedrock asynchronous inference is best for:",
+        options: ["Single quick requests", "Large or long-running jobs (e.g., summarization of long docs) without blocking", "Only streaming", "Only embeddings"],
+        correct: 1,
+        explain: "Async = submit job, get result later; good for large inputs or batch-style workloads."
+      },
+      { mode: "comparison", topic: "Bedrock",
+        q: "Amazon Titan Multimodal Embeddings can embed:",
+        options: ["Only text", "Text and images (multimodal)", "Only images", "Only audio"],
+        correct: 1,
+        explain: "Titan Multimodal Embeddings = embed both text and images for multimodal RAG or search."
+      },
+      { mode: "exam", topic: "Bedrock",
+        q: "To reduce latency for repeated prompts, you can use:",
+        options: ["Only larger models", "Prompt caching (cache common prefix) where supported", "Only batch", "Only async"],
+        correct: 1,
+        explain: "Prompt caching stores a repeated prefix; subsequent requests reuse it for lower latency and cost."
+      },
+      // === TRIPLED: RAG ===
+      { mode: "exam", topic: "RAG",
+        q: "A Knowledge Base data source can be:",
+        options: ["Only DynamoDB", "S3, or other supported connectors (e.g., web crawler)", "Only RDS", "Only Lambda"],
+        correct: 1,
+        explain: "Knowledge Bases support S3 and other data sources; sync and chunk during ingestion."
+      },
+      { mode: "exam", topic: "RAG",
+        q: "Number of documents retrieved (top-k) in RAG affects:",
+        options: ["Only cost", "Relevance and context size (too few = missing context; too many = noise)", "Only latency", "Only embedding model"],
+        correct: 1,
+        explain: "Top-k = how many chunks to pass to the model; tune for relevance vs. context window and noise."
+      },
+      { mode: "comparison", topic: "RAG",
+        q: "Semantic chunking vs. fixed-size chunking:",
+        options: ["Only fixed-size is supported", "Semantic respects boundaries (e.g., paragraphs); fixed-size is simpler", "Only semantic", "They are the same"],
+        correct: 1,
+        explain: "Semantic = split by meaning/paragraphs; fixed-size = by character/token count; both have tradeoffs."
+      },
+      { mode: "exam", topic: "RAG",
+        q: "To improve RAG answer quality when retrieval returns irrelevant chunks, you should:",
+        options: ["Only use a larger model", "Improve chunking, embeddings, or add re-ranking/metadata filters", "Only increase top-k", "Only use one chunk"],
+        correct: 1,
+        explain: "Better chunking, better embeddings, re-ranking, and metadata filters improve retrieval quality."
+      },
+      { mode: "exam", topic: "RAG",
+        q: "Knowledge Base sync (ingestion) can be triggered:",
+        options: ["Only manually once", "On a schedule or on-demand (e.g., when S3 data changes)", "Only at deploy time", "Only by Lambda"],
+        correct: 1,
+        explain: "Ingestion can run on schedule or on-demand; some connectors support event-driven sync."
+      },
+      { mode: "exam", topic: "RAG",
+        q: "Vector similarity search returns chunks that:",
+        options: ["Match keywords only", "Are closest in embedding space to the query embedding", "Are random", "Are largest"],
+        correct: 1,
+        explain: "Similarity search = compare query embedding to stored vectors; return nearest neighbors."
+      },
+      { mode: "exam", topic: "RAG",
+        q: "Using the same embedding model at ingest and query time is important because:",
+        options: ["It reduces cost only", "Embeddings must be in the same space for meaningful similarity", "Only for speed", "Only for Guardrails"],
+        correct: 1,
+        explain: "Query and document embeddings must come from the same (or compatible) model for correct similarity."
+      },
+      { mode: "exam", topic: "RAG",
+        q: "RAG hallucination can be reduced by:",
+        options: ["Only using a larger model", "Retrieving relevant context and asking the model to cite sources", "Only increasing temperature", "Only using one document"],
+        correct: 1,
+        explain: "Strong retrieval + source attribution and “answer only from context” prompts reduce hallucination."
+      },
+      { mode: "comparison", topic: "RAG",
+        q: "OpenSearch Serverless as a vector store for Knowledge Bases provides:",
+        options: ["Only keyword search", "Vector search and optionally hybrid (keyword + vector)", "Only logging", "Only caching"],
+        correct: 1,
+        explain: "OpenSearch Serverless supports vector and hybrid search for RAG."
+      },
+      { mode: "exam", topic: "RAG",
+        q: "A RAG pipeline typically sends to the FM:",
+        options: ["Only the user question", "User question plus retrieved context (e.g., in system or user message)", "Only embeddings", "Only metadata"],
+        correct: 1,
+        explain: "Prompt = user question + retrieved text as context so the model can ground its answer."
+      },
+      // === TRIPLED: AGENTS ===
+      { mode: "exam", topic: "Agents",
+        q: "An agent's action group is linked to:",
+        options: ["Only the Knowledge Base", "An OpenAPI schema and a Lambda or API endpoint", "Only streaming", "Only one model"],
+        correct: 1,
+        explain: "Action group = OpenAPI schema (parameters, paths) + Lambda or API backend for the agent to call."
+      },
+      { mode: "exam", topic: "Agents",
+        q: "When the agent decides to call a tool, it:",
+        options: ["Ignores the result", "Sends the tool result back to the model for the next reasoning step", "Only logs it", "Only streams it"],
+        correct: 1,
+        explain: "Tool output is fed back into the model so it can reason and optionally call more tools or respond."
+      },
+      { mode: "comparison", topic: "Agents",
+        q: "Bedrock Agent vs. single InvokeModel call:",
+        options: ["No difference", "Agent can do multi-step reasoning, retrieval, and tool use", "Only Agent streams", "Only InvokeModel supports tools"],
+        correct: 1,
+        explain: "Agents orchestrate multiple steps (reason, retrieve, call tools); single invoke is one call."
+      },
+      { mode: "exam", topic: "Agents",
+        q: "Agent versioning and aliases help with:",
+        options: ["Only cost", "Promoting a tested agent version (e.g., DRAFT to LIVE) without code change", "Only logging", "Only streaming"],
+        correct: 1,
+        explain: "Version and alias let you test in DRAFT then point LIVE to the new version for safe rollout."
+      },
+      { mode: "exam", topic: "Agents",
+        q: "If an action group Lambda throws an error, the agent typically:",
+        options: ["Ignores it", "Receives the error and can reason or retry or inform the user", "Only stops", "Only logs"],
+        correct: 1,
+        explain: "Tool errors are returned to the model; it can adapt the response or try another action."
+      },
+      { mode: "exam", topic: "Agents",
+        q: "Agent instructions (system prompt) should include:",
+        options: ["Only the model name", "Role, constraints, and how to use tools and knowledge", "Only action group names", "Only region"],
+        correct: 1,
+        explain: "Instructions define the agent's role, rules, and how to use tools/KB for consistent behavior."
+      },
+      { mode: "exam", topic: "Agents",
+        q: "Prepared data sources for an agent refer to:",
+        options: ["Only Lambda", "Knowledge Bases (or other data sources) the agent can query", "Only S3", "Only APIs"],
+        correct: 1,
+        explain: "Prepared data sources = Knowledge Bases (or similar) attached to the agent for retrieval."
+      },
+      { mode: "exam", topic: "Agents",
+        q: "To limit what an agent can do, you should:",
+        options: ["Only use one model", "Restrict action groups and use Guardrails + instructions", "Only use streaming", "Only use one Knowledge Base"],
+        correct: 1,
+        explain: "Limit tools (action groups), scope instructions, and apply Guardrails to keep agent in bounds."
+      },
+      { mode: "comparison", topic: "Agents",
+        q: "Agentic workflow means:",
+        options: ["Only one API call", "The agent autonomously plans and uses tools/KB over multiple steps", "Only batch", "Only streaming"],
+        correct: 1,
+        explain: "Agentic = agent decides when to retrieve, call tools, and respond over multiple turns."
+      },
+      // === TRIPLED: GUARDRAILS ===
+      { mode: "exam", topic: "Guardrails",
+        q: "Applying a guardrail at both input and output:",
+        options: ["Only at output is allowed", "Filters prompt and response (e.g., block harmful input and output)", "Only at input", "Only for PII"],
+        correct: 1,
+        explain: "You can apply guardrails to input only, output only, or both for full coverage."
+      },
+      { mode: "exam", topic: "Guardrails",
+        q: "Guardrail content filter thresholds (e.g., for violence) let you:",
+        options: ["Only block everything", "Set none/low/medium/high to tune sensitivity", "Only allow everything", "Only for topics"],
+        correct: 1,
+        explain: "Thresholds control how sensitive the filter is; higher = more strict."
+      },
+      { mode: "comparison", topic: "Guardrails",
+        q: "Denied topics in a guardrail:",
+        options: ["Only log", "Cause the guardrail to block or filter content about those topics", "Only at input", "Only for PII"],
+        correct: 1,
+        explain: "Denied topics = content matching those topics can be blocked or filtered."
+      },
+      { mode: "exam", topic: "Guardrails",
+        q: "To redact PII in model output before showing the user, you use:",
+        options: ["Only encryption", "Guardrails PII filter with redact action", "Only IAM", "Only VPC"],
+        correct: 1,
+        explain: "Guardrails PII filter can detect and redact (e.g., mask) PII in input/output."
+      },
+      { mode: "exam", topic: "Guardrails",
+        q: "Guardrails can be attached to:",
+        options: ["Only one model", "Bedrock model invocations and/or agents (configurable per use case)", "Only agents", "Only Knowledge Base"],
+        correct: 1,
+        explain: "Guardrails are applied when invoking models or when using agents; attach per flow."
+      },
+      { mode: "exam", topic: "Guardrails",
+        q: "Blocked word lists in Guardrails:",
+        options: ["Only log", "Block input or output containing those phrases", "Only for topics", "Only at ingest"],
+        correct: 1,
+        explain: "Word filters = block (or replace) specific words/phrases in content."
+      },
+      { mode: "exam", topic: "Guardrails",
+        q: "Allowed topics in a guardrail:",
+        options: ["Only log", "Restrict conversation to only those topics; other content can be blocked", "Only for PII", "Only at output"],
+        correct: 1,
+        explain: "Allowed topics = allowlist; content outside can be blocked to keep the model on-topic."
+      },
+      { mode: "comparison", topic: "Guardrails",
+        q: "Using multiple guardrails (e.g., one for PII, one for content):",
+        options: ["Not supported", "Supported; you can chain or apply multiple guardrails", "Only one guardrail per account", "Only for agents"],
+        correct: 1,
+        explain: "You can use multiple guardrails for different concerns (PII, content, topics)."
+      },
+      { mode: "exam", topic: "Guardrails",
+        q: "Guardrail versioning allows:",
+        options: ["Only one version", "Test changes (e.g., new version) before promoting to production", "Only for word filters", "Only for topics"],
+        correct: 1,
+        explain: "Create new versions of a guardrail, test, then point invocations to the new version."
+      },
+      // === TRIPLED: SECURITY ===
+      { mode: "exam", topic: "Security",
+        q: "To ensure Bedrock traffic does not go over the public internet, use:",
+        options: ["Only IAM", "VPC endpoint for Bedrock (private DNS) so traffic stays in AWS", "Only Guardrails", "Only KMS"],
+        correct: 1,
+        explain: "VPC endpoint + private DNS = Bedrock calls stay on the AWS network, not internet."
+      },
+      { mode: "exam", topic: "Security",
+        q: "Customer-managed keys (CMK) for Bedrock encryption:",
+        options: ["Not supported", "Allow you to control key lifecycle and access in KMS", "Only for S3", "Only for agents"],
+        correct: 1,
+        explain: "You can use a CMK in KMS for Bedrock encryption at rest; you manage key policy."
+      },
+      { mode: "exam", topic: "Security",
+        q: "Least privilege for Bedrock usually means:",
+        options: ["Grant bedrock:* to all", "IAM policies that allow only needed actions (e.g., InvokeModel for specific models)", "Only VPC", "Only Guardrails"],
+        correct: 1,
+        explain: "Limit IAM to specific models and actions (e.g., invoke only required model IDs)."
+      },
+      { mode: "comparison", topic: "Security",
+        q: "PrivateLink for Bedrock enables:",
+        options: ["Only public access", "Private connectivity from your VPC to Bedrock without internet", "Only cross-account", "Only logging"],
+        correct: 1,
+        explain: "PrivateLink = private endpoint in your VPC; traffic stays within AWS network."
+      },
+      { mode: "exam", topic: "Security",
+        q: "To audit who invoked which Bedrock model, use:",
+        options: ["Only Guardrails", "CloudTrail (Bedrock API calls are logged)", "Only X-Ray", "Only CloudWatch"],
+        correct: 1,
+        explain: "CloudTrail logs API calls (who, what, when) for audit and compliance."
+      },
+      { mode: "exam", topic: "Security",
+        q: "Data residency for Bedrock inference:",
+        options: ["Data always leaves the region", "Data stays in the region where you invoke (by design)", "Only in us-east-1", "Only with CMK"],
+        correct: 1,
+        explain: "Invoke in the region where you need residency; data is processed in that region."
+      },
+      { mode: "exam", topic: "Security",
+        q: "Service control policies (SCPs) can restrict Bedrock:",
+        options: ["Only in one account", "Across an OU (e.g., deny Bedrock in certain accounts)", "Only for IAM", "Only for VPC"],
+        correct: 1,
+        explain: "SCPs in Organizations can allow/deny Bedrock (or regions) for member accounts."
+      },
+      { mode: "exam", topic: "Security",
+        q: "To allow a Lambda in account A to invoke Bedrock in account B:",
+        options: ["Only IAM in A", "Resource policy on Bedrock in B allowing A + IAM in A allowing invoke", "Only VPC peering", "Only Guardrails"],
+        correct: 1,
+        explain: "Cross-account: resource policy on Bedrock (B) allows A; IAM in A allows Lambda to call Bedrock."
+      },
+      { mode: "comparison", topic: "Security",
+        q: "Bedrock and PCI-DSS:",
+        options: ["Bedrock is never used for PCI", "Use encryption, VPC, IAM, Guardrails; validate with AWS compliance docs", "Only encryption", "Only Guardrails"],
+        correct: 1,
+        explain: "Use security controls and refer to AWS compliance documentation for PCI scope."
+      },
+      // === TRIPLED: DEPLOYMENT ===
+      { mode: "exam", topic: "Deployment",
+        q: "API Gateway in front of Lambda that calls Bedrock helps with:",
+        options: ["Only cost", "Throttling, auth, and a stable API for clients", "Only streaming", "Only batch"],
+        correct: 1,
+        explain: "API Gateway = rate limiting, API keys/auth, and a single endpoint for your GenAI API."
+      },
+      { mode: "exam", topic: "Deployment",
+        q: "For inference that exceeds Lambda timeout, use:",
+        options: ["Only Lambda", "Step Functions + Lambda (or ECS/Fargate) to orchestrate long runs", "Only API Gateway", "Only on-demand"],
+        correct: 1,
+        explain: "Step Functions can orchestrate multi-step or long-running inference beyond Lambda limits."
+      },
+      { mode: "comparison", topic: "Deployment",
+        q: "SageMaker vs. Bedrock for GenAI:",
+        options: ["No difference", "Bedrock = managed FMs; SageMaker = bring your own model, fine-tune, full control", "Only SageMaker has streaming", "Only Bedrock has embeddings"],
+        correct: 1,
+        explain: "Bedrock = managed multi-tenant FMs; SageMaker = your infrastructure, your model, more control."
+      },
+      { mode: "exam", topic: "Deployment",
+        q: "To A/B test two models in production, you can:",
+        options: ["Only deploy one", "Route a percentage of traffic to each model (e.g., Lambda or API Gateway)", "Only use batch", "Only use Provisioned Throughput"],
+        correct: 1,
+        explain: "Route by % traffic (e.g., 90% model A, 10% model B) to compare quality or latency."
+      },
+      { mode: "exam", topic: "Deployment",
+        q: "Infrastructure as Code for a Bedrock-based app might include:",
+        options: ["Only Bedrock console", "Terraform or CloudFormation for Lambda, API Gateway, IAM, Bedrock access", "Only IAM", "Only CloudWatch"],
+        correct: 1,
+        explain: "Define API Gateway, Lambda, IAM roles, and Bedrock permissions in IaC for reproducibility."
+      },
+      { mode: "exam", topic: "Deployment",
+        q: "Cold start for Lambda calling Bedrock is reduced by:",
+        options: ["Only increasing memory", "Provisioned concurrency or keeping Lambda warm (e.g., periodic pings)", "Only streaming", "Only batch"],
+        correct: 1,
+        explain: "Provisioned concurrency or warm-up keeps runtimes ready; reduces cold start latency."
+      },
+      { mode: "exam", topic: "Deployment",
+        q: "To run your own fine-tuned model (e.g., from SageMaker) in production, you would typically:",
+        options: ["Only use Bedrock", "Deploy on SageMaker real-time endpoint or in a container (ECS/EKS)", "Only Lambda", "Only Knowledge Base"],
+        correct: 1,
+        explain: "Custom/fine-tuned models run on SageMaker endpoints or in your own containers."
+      },
+      { mode: "exam", topic: "Deployment",
+        q: "Canary deployment for a GenAI API means:",
+        options: ["Only one version", "Route a small % of traffic to new version, then increase if healthy", "Only batch", "Only async"],
+        correct: 1,
+        explain: "Canary = send a fraction of traffic to new version; monitor; then roll out fully."
+      },
+      { mode: "comparison", topic: "Deployment",
+        q: "When to use ECS/Fargate vs. Lambda for Bedrock invocation:",
+        options: ["Always Lambda", "Lambda for event-driven, short runs; ECS for long-running or stateful workers", "Always ECS", "Only for batch"],
+        correct: 1,
+        explain: "Lambda = event-driven, < 15 min; ECS = long-running, more control, stateful."
+      },
+      // === TRIPLED: COST ===
+      { mode: "exam", topic: "Cost",
+        q: "Input tokens are typically cheaper than output tokens for many Bedrock models because:",
+        options: ["They are the same", "Generation (output) is more compute-intensive", "Only output is billed", "Only for streaming"],
+        correct: 1,
+        explain: "Output token pricing is often higher than input; check the model's pricing page."
+      },
+      { mode: "exam", topic: "Cost",
+        q: "To minimize cost for a high-volume, steady workload, consider:",
+        options: ["Only on-demand", "Provisioned Throughput if committed use is cheaper than on-demand", "Only serverless", "Only batch"],
+        correct: 1,
+        explain: "At high, steady volume, Provisioned Throughput can be more cost-effective than on-demand."
+      },
+      { mode: "comparison", topic: "Cost",
+        q: "Token counting before calling Bedrock helps with:",
+        options: ["Only latency", "Cost estimation and staying under context limits", "Only streaming", "Only batch"],
+        correct: 1,
+        explain: "Count tokens to estimate cost and avoid exceeding model context window."
+      },
+      { mode: "exam", topic: "Cost",
+        q: "Using a smaller context window when possible:",
+        options: ["Only increases cost", "Reduces cost (fewer input tokens) and can reduce latency", "Only for batch", "Only for streaming"],
+        correct: 1,
+        explain: "Send only needed context to reduce input tokens and cost."
+      },
+      { mode: "exam", topic: "Cost",
+        q: "Reserved capacity or committed use for Bedrock:",
+        options: ["Not available", "Provisioned Throughput provides committed capacity (model units) with pricing terms", "Only for Lambda", "Only for SageMaker"],
+        correct: 1,
+        explain: "Provisioned Throughput = commit to model units; can have discount vs. on-demand at scale."
+      },
+      { mode: "exam", topic: "Cost",
+        q: "Cost allocation for Bedrock by project is easier with:",
+        options: ["Only one IAM user", "Tags on resources and IAM roles (and Cost Allocation Tags)", "Only Guardrails", "Only VPC"],
+        correct: 1,
+        explain: "Tag roles/resources and enable cost allocation tags to attribute Bedrock cost by project."
+      },
+      { mode: "exam", topic: "Cost",
+        q: "Stopping unnecessary inference (e.g., duplicate or invalid requests) helps:",
+        options: ["Only latency", "Cost and latency (fewer tokens billed)", "Only accuracy", "Only security"],
+        correct: 1,
+        explain: "Validate and deduplicate before calling Bedrock to avoid wasting tokens."
+      },
+      { mode: "exam", topic: "Cost",
+        q: "Bedrock model pricing varies by:",
+        options: ["Only region", "Model (provider and size) and often input vs. output tokens", "Only account", "Only invocation type"],
+        correct: 1,
+        explain: "Each model has its own price per token (input/output); compare models for cost."
+      },
+      { mode: "comparison", topic: "Cost",
+        q: "For a proof-of-concept with low traffic, the most cost-effective option is usually:",
+        options: ["Provisioned Throughput", "On-Demand or Serverless (pay per use, no commitment)", "Only batch", "Only custom model"],
+        correct: 1,
+        explain: "POC = low volume; on-demand/serverless avoids upfront commitment."
+      },
+      // === TRIPLED: MONITORING ===
+      { mode: "exam", topic: "Monitoring",
+        q: "Key metrics to monitor for a Bedrock-based API include:",
+        options: ["Only cost", "Latency, error rate, token usage, and throttling", "Only tokens", "Only Guardrails"],
+        correct: 1,
+        explain: "Monitor InvocationLatency, errors, token counts, and throttles for health and cost."
+      },
+      { mode: "exam", topic: "Monitoring",
+        q: "To detect when a model response is off-topic or low quality, you can:",
+        options: ["Only use more tokens", "Log inputs/outputs (redacted) and use evaluation or Guardrails metrics", "Only use one model", "Only use batch"],
+        correct: 1,
+        explain: "Evaluate outputs (relevance, safety) and use Guardrails; log for analysis (with PII redaction)."
+      },
+      { mode: "comparison", topic: "Monitoring",
+        q: "X-Ray tracing for a GenAI request can show:",
+        options: ["Only Bedrock", "API Gateway → Lambda → Bedrock and latency per segment", "Only Lambda", "Only errors"],
+        correct: 1,
+        explain: "X-Ray traces the full request path and segment latency across services."
+      },
+      { mode: "exam", topic: "Monitoring",
+        q: "CloudWatch Logs for Bedrock invocations:",
+        options: ["Always log full prompts by default", "Can be enabled; ensure PII/sensitive data is not logged or is redacted", "Only for batch", "Only for agents"],
+        correct: 1,
+        explain: "Logging can include request/response; redact or restrict for compliance."
+      },
+      { mode: "exam", topic: "Monitoring",
+        q: "To set an alarm when Bedrock error rate exceeds a threshold, use:",
+        options: ["Only X-Ray", "CloudWatch alarm on Bedrock metrics (e.g., InvocationClientError)", "Only Guardrails", "Only CloudTrail"],
+        correct: 1,
+        explain: "Create a CloudWatch alarm on the appropriate Bedrock metric (e.g., client errors)."
+      },
+      { mode: "exam", topic: "Monitoring",
+        q: "Evaluating RAG quality might include:",
+        options: ["Only latency", "Relevance of retrieved chunks and faithfulness of the answer to context", "Only token count", "Only cost"],
+        correct: 1,
+        explain: "Measure retrieval relevance and whether the answer is grounded in the retrieved context."
+      },
+      { mode: "exam", topic: "Monitoring",
+        q: "A/B test results for two models should compare:",
+        options: ["Only cost", "Quality (e.g., relevance), latency, and cost", "Only latency", "Only tokens"],
+        correct: 1,
+        explain: "Compare quality metrics, latency, and cost to choose the best model or prompt."
+      },
+      { mode: "exam", topic: "Monitoring",
+        q: "Dashboard for a production GenAI app should include:",
+        options: ["Only score", "Request count, latency (p50/p99), error rate, token usage, cost", "Only Guardrails", "Only model ID"],
+        correct: 1,
+        explain: "Operational dashboard = traffic, latency, errors, tokens, and cost for capacity and health."
+      },
+      { mode: "comparison", topic: "Monitoring",
+        q: "Bedrock throttling (rate limits) means:",
+        options: ["Only cost", "Requests may be limited per second; use exponential backoff or Provisioned Throughput", "Only for batch", "Only for streaming"],
+        correct: 1,
+        explain: "Bedrock has TPS limits; handle throttling with backoff or reserve capacity with Provisioned Throughput."
+      },
+    ];
+
+    const QUESTIONS_PER_QUIZ = 40;
+    let currentIndex = 0;
+    let score = 0;
+    let answered = [];
+    let sessionQuestions = [];
+    let selectedMode = 'mixed';
+
+    function getProfile() {
+      try {
+        const raw = localStorage.getItem(PROFILE_KEY);
+        if (!raw) return { quizId: QUIZ_ID, topicStats: {}, topicMissesFromImports: {} };
+        const p = JSON.parse(raw);
+        return {
+          quizId: p.quizId || QUIZ_ID,
+          topicStats: p.topicStats || {},
+          topicMissesFromImports: p.topicMissesFromImports || {}
+        };
+      } catch (e) {
+        return { quizId: QUIZ_ID, topicStats: {}, topicMissesFromImports: {} };
+      }
+    }
+
+    function saveProfile(profile) {
+      try { localStorage.setItem(PROFILE_KEY, JSON.stringify(profile)); } catch (e) {}
+    }
+
+    function getTopicWeight(profile, topic) {
+      const t = topic || 'Other';
+      let missRate = 0;
+      if (profile.topicStats[t] && profile.topicStats[t].total > 0) {
+        missRate = 1 - (profile.topicStats[t].correct / profile.topicStats[t].total);
+      }
+      const importMisses = (profile.topicMissesFromImports[t] || 0) * 0.2;
+      return 1 + Math.min(missRate + importMisses, 2);
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function weightedSample(arr, n, profile) {
+      const hasData = profile && (Object.keys(profile.topicStats).length > 0 || Object.keys(profile.topicMissesFromImports).length > 0);
+      if (!hasData) {
+        const shuffled = shuffle(arr);
+        return shuffled.slice(0, Math.min(n, shuffled.length));
+      }
+      const withKeys = arr.map(q => {
+        const w = getTopicWeight(profile, q.topic);
+        return { q, key: Math.pow(Math.random(), 1 / w) };
+      });
+      withKeys.sort((a, b) => b.key - a.key);
+      return withKeys.slice(0, Math.min(n, withKeys.length)).map(x => x.q);
+    }
+
+    function getWeakTopics(profile, topN) {
+      const scores = [];
+      const topics = new Set([
+        ...Object.keys(profile.topicStats || {}),
+        ...Object.keys(profile.topicMissesFromImports || {})
+      ]);
+      topics.forEach(t => {
+        let weakness = 0;
+        if (profile.topicStats[t] && profile.topicStats[t].total > 0) {
+          weakness = 1 - (profile.topicStats[t].correct / profile.topicStats[t].total);
+        }
+        weakness += (profile.topicMissesFromImports[t] || 0) * 0.15;
+        scores.push({ topic: t, weakness });
+      });
+      scores.sort((a, b) => b.weakness - a.weakness);
+      return scores.slice(0, topN).filter(x => x.weakness > 0.1).map(x => x.topic);
+    }
+
+    function selectMode(mode) {
+      selectedMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
+      document.querySelector('[data-mode="' + mode + '"]').classList.add('selected');
+    }
+
+    function startQuiz() {
+      const filtered = questionBank.filter(q => {
+        if (selectedMode === 'comparison') return q.mode === 'comparison';
+        if (selectedMode === 'exam') return q.mode === 'exam';
+        return true;
+      });
+      const profile = getProfile();
+      sessionQuestions = weightedSample(filtered, QUESTIONS_PER_QUIZ, profile);
+      sessionQuestions.forEach(q => {
+        const shuffled = shuffle([...q.options]);
+        q._shuffledOptions = shuffled;
+        q._correctDisplayIndex = shuffled.indexOf(q.options[q.correct]);
+      });
+      currentIndex = 0;
+      score = 0;
+      answered = [];
+      const hintEl = document.getElementById('focus-hint');
+      const weak = getWeakTopics(profile, 3);
+      if (weak.length > 0) {
+        hintEl.textContent = "We'll focus more on: " + weak.join(', ') + '.';
+        hintEl.classList.remove('hidden');
+      } else {
+        hintEl.classList.add('hidden');
+      }
+      document.getElementById('start-screen').classList.add('hidden');
+      document.getElementById('results-screen').classList.add('hidden');
+      document.getElementById('quiz-area').classList.remove('hidden');
+      document.getElementById('q-total').textContent = sessionQuestions.length;
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = sessionQuestions[currentIndex];
+      document.getElementById('q-num').textContent = currentIndex + 1;
+      document.getElementById('score-display').textContent = score;
+      document.getElementById('question-text').textContent = q.q;
+      const opts = document.getElementById('options');
+      opts.innerHTML = '';
+      const fb = document.getElementById('feedback');
+      fb.classList.add('hidden');
+      fb.className = 'feedback hidden';
+
+      const optsList = q._shuffledOptions || q.options;
+      const correctIdx = q._correctDisplayIndex !== undefined ? q._correctDisplayIndex : q.correct;
+      optsList.forEach((opt, i) => {
+        const div = document.createElement('div');
+        div.className = 'option';
+        div.textContent = opt;
+        div.dataset.index = i;
+        if (answered[currentIndex] !== undefined) {
+          div.classList.add('disabled');
+          if (i === correctIdx) div.classList.add('correct');
+          else if (i === answered[currentIndex]) div.classList.add('wrong');
+        } else {
+          div.onclick = () => selectOption(currentIndex, i, q);
+        }
+        opts.appendChild(div);
+      });
+
+      if (answered[currentIndex] !== undefined) {
+        fb.classList.remove('hidden');
+        fb.className = 'feedback ' + (answered[currentIndex] === correctIdx ? 'correct-msg' : 'wrong-msg');
+        fb.innerHTML = (answered[currentIndex] === correctIdx ? '✓ Correct. ' : '✗ Incorrect. ') + '<span class="explanation">' + q.explain + '</span>';
+      }
+
+      document.getElementById('prev-btn').disabled = currentIndex === 0;
+    }
+
+    function selectOption(pos, optIdx, q) {
+      if (answered[pos] !== undefined) return;
+      const correctIdx = q._correctDisplayIndex !== undefined ? q._correctDisplayIndex : q.correct;
+      answered[pos] = optIdx;
+      if (optIdx === correctIdx) score++;
+
+      document.querySelectorAll('#options .option').forEach(o => {
+        o.classList.add('disabled');
+        o.onclick = null;
+        if (parseInt(o.dataset.index) === correctIdx) o.classList.add('correct');
+        else if (parseInt(o.dataset.index) === optIdx) o.classList.add('wrong');
+      });
+
+      const fb = document.getElementById('feedback');
+      fb.classList.remove('hidden');
+      fb.innerHTML = (optIdx === correctIdx ? '✓ Correct. ' : '✗ Incorrect. ') + '<span class="explanation">' + q.explain + '</span>';
+      fb.className = 'feedback ' + (optIdx === correctIdx ? 'correct-msg' : 'wrong-msg');
+      document.getElementById('score-display').textContent = score;
+    }
+
+    function nextQuestion() {
+      if (currentIndex < sessionQuestions.length - 1) {
+        currentIndex++;
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderQuestion();
+      }
+    }
+
+    function saveSessionToProfile() {
+      const profile = getProfile();
+      sessionQuestions.forEach((q, i) => {
+        const t = q.topic || 'Other';
+        const correctIdx = q._correctDisplayIndex !== undefined ? q._correctDisplayIndex : q.correct;
+        if (!profile.topicStats[t]) profile.topicStats[t] = { correct: 0, total: 0 };
+        profile.topicStats[t].total++;
+        if (answered[i] !== undefined && answered[i] === correctIdx) {
+          profile.topicStats[t].correct++;
+        }
+      });
+      saveProfile(profile);
+    }
+
+    function showResults() {
+      saveSessionToProfile();
+      document.getElementById('quiz-area').classList.add('hidden');
+      const r = document.getElementById('results-screen');
+      r.classList.remove('hidden');
+      const total = sessionQuestions.length;
+      const pct = Math.round((score / total) * 100);
+      document.getElementById('final-score').textContent = score + ' / ' + total + ' (' + pct + '%)';
+      document.getElementById('final-score').className = 'score ' + (pct >= 72 ? 'pass' : 'fail');
+      document.getElementById('result-msg').textContent = pct >= 72
+        ? 'Passing is 720/1000 (~72%). You\'re on track!'
+        : 'Aim for 720+ (72%) on the real exam. Review and try again.';
+      document.getElementById('copy-toast').classList.add('hidden');
+    }
+
+    function getResultsMarkdown() {
+      const total = sessionQuestions.length;
+      const pct = Math.round((score / total) * 100);
+      const optsList = q => q._shuffledOptions || q.options;
+      const correctIdx = q => q._correctDisplayIndex !== undefined ? q._correctDisplayIndex : q.correct;
+      const missed = sessionQuestions.map((q, i) => ({ q, i })).filter(x => {
+        const cIdx = correctIdx(x.q);
+        return answered[x.i] !== undefined && answered[x.i] !== cIdx;
+      });
+      const topicCounts = {};
+      missed.forEach(x => {
+        const t = x.q.topic || 'Other';
+        topicCounts[t] = (topicCounts[t] || 0) + 1;
+      });
+      let md = '# AWS Certified Generative AI Developer - Professional Quiz Results\n\n';
+      md += '**Date:** ' + new Date().toISOString().slice(0, 10) + '\n';
+      md += '**Mode:** ' + (selectedMode === 'comparison' ? 'Domain Focus' : selectedMode === 'exam' ? 'Exam' : 'Mixed') + '\n';
+      md += '**Score:** ' + score + '/' + total + ' (' + pct + '%)\n';
+      md += '**Pass (72%):** ' + (pct >= 72 ? 'Yes' : 'No') + '\n\n';
+      md += '---\n\n';
+      md += '## Instructions for AI Refactoring\n\n';
+      md += 'Paste this entire block into a Cursor chat and say:\n';
+      md += '> "Refactor the AWS GenAI quiz based on my mistakes. Add more questions on my weak topics."\n\n';
+      if (Object.keys(topicCounts).length > 0) {
+        md += '## Misses by Topic\n\n';
+        Object.entries(topicCounts).sort((a, b) => b[1] - a[1]).forEach(([t, n]) => {
+          md += '- **' + t + ':** ' + n + ' missed\n';
+        });
+        md += '\n';
+      }
+      if (missed.length > 0) {
+        md += '## Missed Questions (for AI refactoring)\n\n';
+        missed.forEach((x, i) => {
+          const q = x.q;
+          const list = optsList(q);
+          const cIdx = correctIdx(q);
+          const yourAns = list[answered[x.i]];
+          const correctAns = list[cIdx];
+          md += '### ' + (i + 1) + '. [' + (q.topic || 'General') + ']\n';
+          md += '**Q:** ' + q.q + '\n';
+          md += '**Your answer:** ' + yourAns + '\n';
+          md += '**Correct answer:** ' + correctAns + '\n';
+          md += '**Explanation:** ' + q.explain + '\n\n';
+        });
+      }
+      return md;
+    }
+
+    function downloadResults() {
+      const blob = new Blob([getResultsMarkdown()], { type: 'text/markdown' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'aws_genai_quiz_results_' + new Date().toISOString().slice(0, 10) + '.md';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function copyResultsToClipboard() {
+      navigator.clipboard.writeText(getResultsMarkdown()).then(() => {
+        document.getElementById('copy-toast').classList.remove('hidden');
+        setTimeout(() => document.getElementById('copy-toast').classList.add('hidden'), 2500);
+      });
+    }
+
+    function parseImportedResults(mdText) {
+      const lines = mdText.split('\n');
+      const firstLine = (lines[0] || '').toLowerCase();
+      if (QUIZ_ID !== 'aws_genai' && (firstLine.includes('genai') || firstLine.includes('generative ai'))) return { ok: false, error: 'This file is for AWS GenAI quiz.' };
+      if (QUIZ_ID === 'aws_genai' && !firstLine.includes('genai') && !firstLine.includes('generative ai')) return { ok: false, error: 'Not an AWS GenAI results file.' };
+      let inSection = false;
+      const topicMisses = {};
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.indexOf('## Misses by Topic') !== -1) {
+          inSection = true;
+          continue;
+        }
+        if (inSection && line.startsWith('## ')) break;
+        if (inSection && line.match(/^\s*-\s*\*\*(.+?)\*\*:\s*(\d+)\s+missed/)) {
+          const m = line.match(/^\s*-\s*\*\*(.+?)\*\*:\s*(\d+)\s+missed/);
+          const topic = m[1].trim();
+          const n = parseInt(m[2], 10);
+          topicMisses[topic] = (topicMisses[topic] || 0) + n;
+        }
+      }
+      if (Object.keys(topicMisses).length === 0) return { ok: false, error: 'No "Misses by Topic" section found.' };
+      return { ok: true, topicMisses };
+    }
+
+    function importResults() {
+      const ta = document.getElementById('import-results');
+      const mdText = (ta && ta.value || '').trim();
+      if (!mdText) {
+        showImportToast('Paste results markdown first, or choose a file.', true);
+        return;
+      }
+      const result = parseImportedResults(mdText);
+      if (!result.ok) {
+        showImportToast(result.error || 'Could not parse results.', true);
+        return;
+      }
+      const profile = getProfile();
+      if (!profile.topicMissesFromImports) profile.topicMissesFromImports = {};
+      Object.entries(result.topicMisses).forEach(([topic, n]) => {
+        profile.topicMissesFromImports[topic] = (profile.topicMissesFromImports[topic] || 0) + n;
+      });
+      saveProfile(profile);
+      const top = Object.entries(result.topicMisses).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]);
+      showImportToast('Imported. We\'ll focus more on: ' + top.join(', ') + '.', false);
+      if (ta) ta.value = '';
+    }
+
+    function onImportFile(ev) {
+      const f = ev.target.files && ev.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = function () {
+        const ta = document.getElementById('import-results');
+        if (ta) ta.value = r.result || '';
+        importResults();
+      };
+      r.readAsText(f);
+      ev.target.value = '';
+    }
+
+    function showImportToast(msg, isError) {
+      const el = document.getElementById('import-toast');
+      if (!el) return;
+      el.textContent = msg;
+      el.className = 'import-toast ' + (isError ? 'err' : 'success');
+      el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 4000);
+    }
+
+    (function initFocusHint() {
+      const profile = getProfile();
+      const weak = getWeakTopics(profile, 3);
+      const hintEl = document.getElementById('focus-hint');
+      if (hintEl && weak.length > 0) {
+        hintEl.textContent = "We'll focus more on: " + weak.join(', ') + '.';
+        hintEl.classList.remove('hidden');
+      }
+    })();
+  </script>
+</body>
+</html>
