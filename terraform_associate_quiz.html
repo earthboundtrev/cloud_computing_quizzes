@@ -8,16 +8,16 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="/manifest.json">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
-  <title>AWS Certified Generative AI Developer - Professional Practice Quiz</title>
+  <title>HashiCorp Certified: Terraform Associate (TA-002-P) Practice Quiz</title>
   <link rel="stylesheet" href="css/quiz-common.css">
-  <style>:root { --accent: #ff9900; --accent-dim: #ec7211; }</style>
+  <style>:root { --accent: #7B42BC; --accent-dim: #6030a8; }</style>
   <script src="sw-register.js"></script>
   <script src="brain-dump.js"></script>
   <script src="motivation.js"></script>
   <script src="session-streak.js"></script>
   <script src="quiz-engine.js"></script>
-  <script src="data/aws-genai-questions.js"></script>
-  <script src="quiz-init-aws-genai.js"></script>
+  <script src="data/terraform-questions.js"></script>
+  <script src="quiz-init-terraform.js"></script>
 </head>
 <body>
   <header class="site-nav">
@@ -28,7 +28,6 @@
       <a href="az900_azure_fundamentals_quiz.html">Azure</a>
       <a href="aws_mlea_quiz.html">AWS MLA</a>
       <a href="aws_data_engineering_quiz.html">AWS DEA</a>
-      <a href="aws_genai_quiz.html">AWS GenAI</a>
       <a href="terraform_associate_quiz.html">Terraform</a>
       <a href="cissp_quiz.html">CISSP</a>
       <a href="rhcsa9_quiz.html">RHCSA 9</a>
@@ -37,32 +36,32 @@
     </nav>
   </header>
   <div class="container">
-    <h1>AWS Certified Generative AI Developer – Professional</h1>
-    <p class="subtitle">Production-ready GenAI with Amazon Bedrock • Beta: 85 questions, 205 min</p>
+    <h1>HashiCorp Certified: Terraform Associate (TA-002-P) Practice Quiz</h1>
+    <p class="subtitle">TA-002-P • IaC, workflow, state, modules, providers</p>
 
     <div id="start-screen" class="start-screen">
       <a href="index.html" class="back-home">← Back to home</a>
-      <p>40 questions per session, drawn from a pool of 165+. Randomized each run. Choose your mode:</p>
+      <p>40 questions per session, drawn from a pool of 170+. Randomized each run. Choose your mode:</p>
       <p id="focus-hint" class="profile-hint hidden"></p>
       <div class="mode-selector">
         <button type="button" class="mode-btn" data-mode="comparison" onclick="selectMode('comparison')">
-          <span class="label">Domain Focus</span>
-          <span class="desc">Bedrock, RAG, agents, guardrails, security, deployment—pick a focus.</span>
+          <span class="label">Comparison (Terraform vs other)</span>
+          <span class="desc">IaC concepts, Terraform vs config management, state, modules, providers.</span>
         </button>
         <button type="button" class="mode-btn" data-mode="exam" onclick="selectMode('exam')">
           <span class="label">Exam (Scenario-based)</span>
-          <span class="desc">Production GenAI scenarios, security, cost—exam-style.</span>
+          <span class="desc">CLI, state, config, variables, outputs, backends, Terraform Cloud.</span>
         </button>
         <button type="button" class="mode-btn selected" data-mode="mixed" onclick="selectMode('mixed')">
           <span class="label">Mixed</span>
-          <span class="desc">Both domain focus and exam-style. Simulates full exam.</span>
+          <span class="desc">Both comparison and exam-style. Simulates full exam.</span>
         </button>
       </div>
       <div class="session-time-row" style="margin: 1rem 0; font-size: 0.9rem; color: var(--text-muted);">
         <label for="session-time-limit">Timed session (simulate exam):</label>
         <select id="session-time-limit" style="margin-left: 0.5rem; padding: 0.35rem; background: var(--surface); color: var(--text); border: 1px solid var(--accent-dim); border-radius: 4px;">
           <option value="0">Off</option>
-          <option value="65">65 min</option>
+          <option value="60">60 min</option>
           <option value="90">90 min</option>
           <option value="120">120 min</option>
         </select>
