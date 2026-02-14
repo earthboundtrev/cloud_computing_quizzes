@@ -135,7 +135,7 @@
       if (typeof nextCardFn === 'function') {
         nextCardFn();
       }
-      setTimeout(focusDump, 100);
+      /* Do not auto-focus dump on next question; keep brain dump optional. */
     });
   }
 

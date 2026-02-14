@@ -180,7 +180,7 @@
     }
 
     document.getElementById('prev-btn').disabled = currentIndex === 0;
-    if (window.BrainDump) window.BrainDump.focusDump();
+    /* Brain dump is optional: do not auto-focus the textarea so users can take the quiz without it. */
   }
 
   function selectOption(pos, optIdx, q) {
