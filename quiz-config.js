@@ -2,6 +2,9 @@
  * Single source of truth for quiz order and closed/completed state.
  * Order in this array = default order. User can reorder on index (saved to localStorage.quizOrder).
  * Set closed: true to show a quiz as completed (badge on index).
+ *
+ * Deploy: To force clients to load new JS/CSS after a deploy, bump the cache version in all HTML
+ * files: change ?v=2 to ?v=3 (or next number) on script and link hrefs.
  */
 window.QUIZ_CONFIG = [
   { id: 'oci', navLabel: 'OCI', name: 'OCI Foundations Associate', href: 'oci_foundations_quiz.html', desc: '1Z0-1085-25 • OCI ↔ AWS comparison &amp; exam-style', cardClass: 'oci', closed: false },

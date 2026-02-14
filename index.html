@@ -9,7 +9,7 @@
   <link rel="manifest" href="/manifest.json">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
   <title>Study Sessions – Practice Quizzes</title>
-  <link rel="stylesheet" href="css/quiz-common.css">
+  <link rel="stylesheet" href="css/quiz-common.css?v=2">
   <style>
     :root {
       --oci: #f97316;
@@ -64,11 +64,11 @@
     .quiz-card-item-drag { opacity: 0.9; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
-  <script src="quiz-config.js"></script>
-  <script src="sw-register.js"></script>
-  <script src="brain-dump.js"></script>
-  <script src="motivation.js"></script>
-  <script src="session-streak.js"></script>
+  <script src="quiz-config.js?v=2"></script>
+  <script src="sw-register.js?v=2"></script>
+  <script src="brain-dump.js?v=2"></script>
+  <script src="motivation.js?v=2"></script>
+  <script src="session-streak.js?v=2"></script>
 </head>
 <body>
   <header class="site-nav">
@@ -76,6 +76,7 @@
     <nav class="nav-links">
       <span id="quiz-nav-links"></span>
       <button type="button" class="nav-dumps-btn" id="review-dumps-btn">Review Dumps</button>
+      <button type="button" class="nav-reset-btn" id="reset-app-btn">Reset app</button>
     </nav>
   </header>
   <div class="container">
@@ -83,7 +84,8 @@
     <p class="subtitle">Choose a practice quiz</p>
     <div id="quiz-list-container"></div>
   </div>
-  <script src="quiz-nav.js"></script>
-  <script src="index-init.js"></script>
+  <script src="quiz-nav.js?v=2"></script>
+  <script src="index-init.js?v=2"></script>
+  <script src="app-reset.js?v=2"></script>
 </body>
 </html>
