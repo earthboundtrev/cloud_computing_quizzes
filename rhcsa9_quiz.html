@@ -91,6 +91,14 @@
         <div class="question-text" id="question-text"></div>
         <div class="options" id="options"></div>
         <div id="feedback" class="feedback hidden"></div>
+        <div id="brain-dump-wrap" class="brain-dump-wrap">
+          <label class="brain-dump-label" for="brain-dump-textarea">Dump your thoughts here (30–60 sec)</label>
+          <textarea id="brain-dump-textarea" placeholder="Dump your thoughts here (30–60 sec)" rows="3"></textarea>
+          <div class="brain-dump-actions">
+            <button type="button" id="brain-dump-save-next">Save &amp; Next</button>
+            <button type="button" id="brain-dump-mic" class="btn-mic" aria-label="Voice input" title="Voice input">🎤</button>
+          </div>
+        </div>
       </div>
       <div class="nav-row">
         <button id="prev-btn" class="secondary" onclick="prevQuestion()">← Previous</button>
