@@ -97,6 +97,18 @@ window.QUESTION_BANK_AZ900 = [
         explain: "Azure Reservations = commit 1–3 years for discount. Like Reserved Instances."
       },
       // === EXAM - Cloud Concepts ===
+      { type: "order", mode: "exam", topic: "Architecture",
+        q: "Order the Azure hierarchy from top to bottom (drag to reorder).",
+        options: ["Management group", "Subscription", "Resource group", "Resource"],
+        correctOrder: [0, 1, 2, 3],
+        explain: "Management group (governance) \u2192 Subscription (billing) \u2192 Resource group \u2192 Resources."
+      },
+      { type: "order", mode: "exam", topic: "Storage",
+        q: "Order Azure Blob storage tiers from most to least frequently accessed (highest to lowest access cost).",
+        options: ["Hot", "Cool", "Archive"],
+        correctOrder: [0, 1, 2],
+        explain: "Hot = frequent access; Cool = 30+ days; Archive = rarely accessed, lowest cost, retrieval delay."
+      },
       { mode: "exam", topic: "Cloud Concepts",
         q: "In the shared responsibility model, who is responsible for patching the OS on an Azure Virtual Machine?",
         options: ["Microsoft only", "Customer only", "Shared equally", "Third-party only"],

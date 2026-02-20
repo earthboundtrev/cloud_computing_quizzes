@@ -40,7 +40,8 @@
       '.brain-dump-modal-item .dump-text { color: var(--text-muted); white-space: pre-wrap; word-break: break-word; }',
       '.brain-dump-modal-item .dump-date { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; opacity: 0.9; }',
       '.brain-dump-modal-empty { color: var(--text-muted); text-align: center; padding: 2rem; }',
-      '.brain-dump-modal-close { margin: 0 1.25rem 1rem; padding: 0.6rem 1.2rem; align-self: flex-end; }',
+      '.brain-dump-modal-actions { display: flex; gap: 0.5rem; padding: 0 1.25rem 1rem; flex-wrap: wrap; }',
+      '.brain-dump-modal-close { margin: 0; padding: 0.6rem 1.2rem; }',
       '.brain-dump-modal-overlay.hidden { display: none !important; }'
     ].join('\n');
     document.head.appendChild(style);
@@ -254,6 +255,34 @@
     if (overlay) overlay.classList.add('hidden');
   }
 
+  function downloadDumps() {
+    getAllDumps().then(function (list) {
+      if (list.length === 0) {
+        if (window.alert) window.alert('No brain-dumps to download.');
+        return;
+      }
+      var lines = ['# Brain-Dump Review Export\n', '**Exported:** ' + new Date().toISOString() + '\n', '**Total:** ' + list.length + ' entries\n\n', '---\n\n'];
+      list.slice().reverse().forEach(function (d, i) {
+        var dateStr = '';
+        try {
+          var dt = new Date(d.timestamp);
+          dateStr = dt.toLocaleDateString() + ' ' + dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        } catch (e) {
+          dateStr = d.timestamp || '';
+        }
+        lines.push('## ' + (i + 1) + '. ' + (d.quizId || '') + ' — ' + dateStr + '\n\n');
+        lines.push('**Question:** ' + (d.questionText || '').replace(/\n/g, ' ') + '\n\n');
+        lines.push(d.dumpText ? d.dumpText + '\n\n' : '*No text*\n\n');
+      });
+      var blob = new Blob([lines.join('')], { type: 'text/markdown;charset=utf-8' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'study_sessions_brain_dumps_' + new Date().toISOString().slice(0, 10) + '.md';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+  }
+
   function ensureDOM() {
     injectStyles();
     var saveBtn = document.getElementById('brain-dump-save-next');
@@ -270,6 +299,8 @@
         '<div class="brain-dump-modal">' +
         '<h3>Review Brain-Dumps</h3>' +
         '<div id="brain-dump-modal-list" class="brain-dump-modal-list"></div>' +
+        '<div class="brain-dump-modal-actions">' +
+        '<button type="button" class="secondary" id="brain-dump-modal-download">Download</button>' +
         '<button type="button" class="secondary brain-dump-modal-close" id="brain-dump-modal-close">Close</button>' +
         '</div>';
       overlay.addEventListener('click', function (e) {
@@ -278,6 +309,8 @@
       document.body.appendChild(overlay);
       var closeBtn = document.getElementById('brain-dump-modal-close');
       if (closeBtn) closeBtn.addEventListener('click', closeReviewModal);
+      var downloadBtn = document.getElementById('brain-dump-modal-download');
+      if (downloadBtn) downloadBtn.addEventListener('click', downloadDumps);
     }
     var reviewBtn = document.getElementById('review-dumps-btn');
     if (reviewBtn && !reviewBtn._bound) {

@@ -10,6 +10,8 @@
   var PROFILE_KEY;
   var questionBank;
   var QUESTIONS_PER_QUIZ;
+  var EXAM_MODE_QUESTIONS;
+  var PASSING_PERCENT;
   var resultsTitle;
   var downloadFilenamePrefix;
 
@@ -119,11 +121,19 @@
       return true;
     });
     var profile = getProfile();
-    sessionQuestions = weightedSample(filtered, QUESTIONS_PER_QUIZ, profile);
+    var n = (selectedMode === 'exam' && EXAM_MODE_QUESTIONS)
+      ? Math.min(EXAM_MODE_QUESTIONS, filtered.length)
+      : Math.min(QUESTIONS_PER_QUIZ, filtered.length);
+    sessionQuestions = weightedSample(filtered, n, profile);
     sessionQuestions.forEach(function (q) {
-      var shuffled = shuffle(q.options.slice());
-      q._shuffledOptions = shuffled;
-      q._correctDisplayIndex = shuffled.indexOf(q.options[q.correct]);
+      if (q.type === 'order') {
+        var indices = q.options.map(function (_, i) { return i; });
+        q._initialOrder = shuffle(indices.slice());
+      } else {
+        var shuffled = shuffle(q.options.slice());
+        q._shuffledOptions = shuffled;
+        q._correctDisplayIndex = shuffled.indexOf(q.options[q.correct]);
+      }
     });
     currentIndex = 0;
     score = 0;
@@ -145,6 +155,12 @@
     renderQuestion();
   }
 
+  function orderMatches(a, b) {
+    if (!a || !b || a.length !== b.length) return false;
+    for (var i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+    return true;
+  }
+
   function renderQuestion() {
     var q = sessionQuestions[currentIndex];
     document.getElementById('q-num').textContent = currentIndex + 1;
@@ -156,31 +172,120 @@
     fb.classList.add('hidden');
     fb.className = 'feedback hidden';
 
-    var optsList = q._shuffledOptions || q.options;
-    var correctIdx = q._correctDisplayIndex !== undefined ? q._correctDisplayIndex : q.correct;
-    optsList.forEach(function (opt, i) {
-      var div = document.createElement('div');
-      div.className = 'option';
-      div.textContent = opt;
-      div.dataset.index = i;
-      if (answered[currentIndex] !== undefined) {
-        div.classList.add('disabled');
-        if (i === correctIdx) div.classList.add('correct');
-        else if (i === answered[currentIndex]) div.classList.add('wrong');
-      } else {
-        div.onclick = function () { selectOption(currentIndex, i, q); };
+    if (q.type === 'order') {
+      var order = answered[currentIndex] !== undefined ? answered[currentIndex] : (q._initialOrder || q.options.map(function (_, i) { return i; }));
+      var isOrderCorrect = answered[currentIndex] !== undefined && orderMatches(answered[currentIndex], q.correctOrder);
+      opts.classList.add('order-options');
+      order.forEach(function (origIdx, pos) {
+        var div = document.createElement('div');
+        div.className = 'option order-item';
+        div.dataset.originalIndex = origIdx;
+        var text = document.createTextNode(q.options[origIdx]);
+        var upBtn = document.createElement('button');
+        upBtn.type = 'button';
+        upBtn.className = 'order-btn order-up';
+        upBtn.setAttribute('aria-label', 'Move up');
+        upBtn.textContent = '\u2191';
+        var downBtn = document.createElement('button');
+        downBtn.type = 'button';
+        downBtn.className = 'order-btn order-down';
+        downBtn.setAttribute('aria-label', 'Move down');
+        downBtn.textContent = '\u2193';
+        if (answered[currentIndex] !== undefined) {
+          upBtn.disabled = true;
+          downBtn.disabled = true;
+          if (isOrderCorrect) div.classList.add('correct');
+          else div.classList.add('wrong');
+        } else {
+          upBtn.addEventListener('click', function () { moveOrderItem(opts, div, -1); });
+          downBtn.addEventListener('click', function () { moveOrderItem(opts, div, 1); });
+        }
+        var label = document.createElement('span');
+        label.className = 'order-label';
+        label.appendChild(text);
+        div.appendChild(upBtn);
+        div.appendChild(downBtn);
+        div.appendChild(label);
+        opts.appendChild(div);
+      });
+      if (answered[currentIndex] === undefined) {
+        var checkWrap = document.createElement('div');
+        checkWrap.className = 'order-check-wrap';
+        var checkBtn = document.createElement('button');
+        checkBtn.type = 'button';
+        checkBtn.className = 'order-check-btn';
+        checkBtn.textContent = 'Check order';
+        checkBtn.addEventListener('click', function () { submitOrder(currentIndex, q); });
+        checkWrap.appendChild(checkBtn);
+        opts.appendChild(checkWrap);
       }
-      opts.appendChild(div);
-    });
-
-    if (answered[currentIndex] !== undefined) {
-      fb.classList.remove('hidden');
-      fb.className = 'feedback ' + (answered[currentIndex] === correctIdx ? 'correct-msg' : 'wrong-msg');
-      setFeedbackContent(fb, answered[currentIndex] === correctIdx, q.explain);
+      if (answered[currentIndex] !== undefined) {
+        fb.classList.remove('hidden');
+        fb.className = 'feedback ' + (isOrderCorrect ? 'correct-msg' : 'wrong-msg');
+        setFeedbackContent(fb, isOrderCorrect, q.explain);
+      }
+    } else {
+      var optsList = q._shuffledOptions || q.options;
+      var correctIdx = q._correctDisplayIndex !== undefined ? q._correctDisplayIndex : q.correct;
+      optsList.forEach(function (opt, i) {
+        var div = document.createElement('div');
+        div.className = 'option';
+        div.textContent = opt;
+        div.dataset.index = i;
+        if (answered[currentIndex] !== undefined) {
+          div.classList.add('disabled');
+          if (i === correctIdx) div.classList.add('correct');
+          else if (i === answered[currentIndex]) div.classList.add('wrong');
+        } else {
+          div.onclick = function () { selectOption(currentIndex, i, q); };
+        }
+        opts.appendChild(div);
+      });
+      if (answered[currentIndex] !== undefined) {
+        fb.classList.remove('hidden');
+        fb.className = 'feedback ' + (answered[currentIndex] === correctIdx ? 'correct-msg' : 'wrong-msg');
+        setFeedbackContent(fb, answered[currentIndex] === correctIdx, q.explain);
+      }
     }
 
     document.getElementById('prev-btn').disabled = currentIndex === 0;
-    /* Brain dump is optional: do not auto-focus the textarea so users can take the quiz without it. */
+  }
+
+  function moveOrderItem(container, item, delta) {
+    var items = [].slice.call(container.querySelectorAll('.order-item'));
+    var idx = items.indexOf(item);
+    if (idx === -1) return;
+    var next = idx + delta;
+    if (next < 0 || next >= items.length) return;
+    if (delta < 0) container.insertBefore(item, items[next]);
+    else container.insertBefore(item, items[next].nextSibling);
+  }
+
+  function submitOrder(pos, q) {
+    if (answered[pos] !== undefined) return;
+    var opts = document.getElementById('options');
+    var items = opts.querySelectorAll('.order-item');
+    var order = [];
+    for (var i = 0; i < items.length; i++) {
+      order.push(parseInt(items[i].dataset.originalIndex, 10));
+    }
+    answered[pos] = order;
+    var isCorrect = orderMatches(order, q.correctOrder);
+    if (isCorrect) score++;
+    [].forEach.call(items, function (el) {
+      el.classList.add('disabled', isCorrect ? 'correct' : 'wrong');
+      var up = el.querySelector('.order-up');
+      var down = el.querySelector('.order-down');
+      if (up) up.disabled = true;
+      if (down) down.disabled = true;
+    });
+    var checkWrap = opts.querySelector('.order-check-wrap');
+    if (checkWrap) checkWrap.remove();
+    var fb = document.getElementById('feedback');
+    fb.classList.remove('hidden');
+    fb.className = 'feedback ' + (isCorrect ? 'correct-msg' : 'wrong-msg');
+    setFeedbackContent(fb, isCorrect, q.explain);
+    document.getElementById('score-display').textContent = score;
   }
 
   function selectOption(pos, optIdx, q) {
@@ -223,12 +328,16 @@
     var profile = getProfile();
     sessionQuestions.forEach(function (q, i) {
       var t = q.topic || 'Other';
-      var correctIdx = q._correctDisplayIndex !== undefined ? q._correctDisplayIndex : q.correct;
+      var isCorrect = false;
+      if (q.type === 'order') {
+        isCorrect = answered[i] !== undefined && orderMatches(answered[i], q.correctOrder);
+      } else {
+        var correctIdx = q._correctDisplayIndex !== undefined ? q._correctDisplayIndex : q.correct;
+        isCorrect = answered[i] !== undefined && answered[i] === correctIdx;
+      }
       if (!profile.topicStats[t]) profile.topicStats[t] = { correct: 0, total: 0 };
       profile.topicStats[t].total++;
-      if (answered[i] !== undefined && answered[i] === correctIdx) {
-        profile.topicStats[t].correct++;
-      }
+      if (isCorrect) profile.topicStats[t].correct++;
     });
     saveProfile(profile);
   }
@@ -240,11 +349,18 @@
     r.classList.remove('hidden');
     var total = sessionQuestions.length;
     var pct = Math.round((score / total) * 100);
-    document.getElementById('final-score').textContent = score + ' / ' + total + ' (' + pct + '%)';
-    document.getElementById('final-score').className = 'score ' + (pct >= 65 ? 'pass' : 'fail');
-    document.getElementById('result-msg').textContent = pct >= 65
-      ? 'Passing is ~65%. You\'re on track!'
-      : 'Aim for 65%+ on the real exam. Review the pattern guide and try again.';
+    var passed = pct >= PASSING_PERCENT;
+    var scoreEl = document.getElementById('final-score');
+    scoreEl.textContent = '';
+    scoreEl.appendChild(document.createTextNode(score + ' / ' + total + ' (' + pct + '%)'));
+    var passFailSpan = document.createElement('span');
+    passFailSpan.className = 'result-pass-fail';
+    passFailSpan.textContent = ' — ' + (passed ? 'Pass' : 'Fail');
+    scoreEl.appendChild(passFailSpan);
+    scoreEl.className = 'score ' + (passed ? 'pass' : 'fail');
+    document.getElementById('result-msg').textContent = passed
+      ? 'Passing is ' + PASSING_PERCENT + '%. You\'re on track!'
+      : 'Aim for ' + PASSING_PERCENT + '%+ on the real exam. Review the pattern guide and try again.';
     document.getElementById('copy-toast').classList.add('hidden');
   }
 
@@ -252,7 +368,9 @@
     var total = sessionQuestions.length;
     var pct = Math.round((score / total) * 100);
     var missed = sessionQuestions.map(function (q, i) { return { q: q, i: i }; }).filter(function (x) {
-      return answered[x.i] !== undefined && answered[x.i] !== x.q.correct;
+      if (answered[x.i] === undefined) return false;
+      if (x.q.type === 'order') return !orderMatches(answered[x.i], x.q.correctOrder);
+      return answered[x.i] !== x.q.correct;
     });
     var topicCounts = {};
     missed.forEach(function (x) {
@@ -263,7 +381,7 @@
     md += '**Date:** ' + new Date().toISOString().slice(0, 10) + '\n';
     md += '**Mode:** ' + (selectedMode === 'comparison' ? 'Comparison' : selectedMode === 'exam' ? 'Exam' : 'Mixed') + '\n';
     md += '**Score:** ' + score + '/' + total + ' (' + pct + '%)\n';
-    md += '**Pass:** ' + (pct >= 65 ? 'Yes' : 'No') + '\n\n';
+    md += '**Pass:** ' + (pct >= PASSING_PERCENT ? 'Yes' : 'No') + '\n\n';
     md += '---\n\n';
     md += '## Instructions for AI Refactoring\n\n';
     md += 'Paste this entire block into a Cursor chat and say:\n';
@@ -279,12 +397,16 @@
       md += '## Missed Questions (for AI refactoring)\n\n';
       missed.forEach(function (x, i) {
         var q = x.q;
-        var yourAns = q.options[answered[x.i]];
-        var correctAns = q.options[q.correct];
-        md += '### ' + (i + 1) + '. [' + (q.topic || 'General') + ']\n';
+        var yourAns = q.type === 'order'
+          ? (answered[x.i] || []).map(function (idx) { return q.options[idx]; }).join(' \u2192 ')
+          : q.options[answered[x.i]];
+        var correctAns = q.type === 'order'
+          ? (q.correctOrder || []).map(function (idx) { return q.options[idx]; }).join(' \u2192 ')
+          : q.options[q.correct];
+        md += '### ' + (i + 1) + '. [' + (q.topic || 'General') + (q.type === 'order' ? ', order' : '') + ']\n';
         md += '**Q:** ' + q.q + '\n';
-        md += '**Your answer:** ' + yourAns + '\n';
-        md += '**Correct answer:** ' + correctAns + '\n';
+        md += '**Your answer:** ' + (yourAns != null ? yourAns : '') + '\n';
+        md += '**Correct answer:** ' + (correctAns != null ? correctAns : '') + '\n';
         md += '**Explanation:** ' + q.explain + '\n\n';
       });
     }
@@ -402,6 +524,8 @@
       PROFILE_KEY = 'study_sessions_profile_' + QUIZ_ID;
       questionBank = config.questionBank || [];
       QUESTIONS_PER_QUIZ = config.questionsPerQuiz || 40;
+      EXAM_MODE_QUESTIONS = config.examModeQuestions;
+      PASSING_PERCENT = config.passingPercent != null ? config.passingPercent : 70;
       resultsTitle = config.resultsTitle || (QUIZ_ID + ' Quiz Results');
       downloadFilenamePrefix = config.downloadFilenamePrefix || (QUIZ_ID + '_quiz_results');
 
