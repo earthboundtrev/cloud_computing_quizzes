@@ -550,6 +550,19 @@
       window.copyResultsToClipboard = copyResultsToClipboard;
 
       initFocusHint();
+      /* Wire mode buttons and Start Quiz via addEventListener (avoids inline onclick issues) */
+      document.querySelectorAll('.mode-selector .mode-btn').forEach(function (btn) {
+        var mode = btn.getAttribute('data-mode');
+        if (mode) {
+          btn.removeAttribute('onclick');
+          btn.addEventListener('click', function () { selectMode(mode); });
+        }
+      });
+      var startBtn = document.getElementById('start-btn');
+      if (startBtn) {
+        startBtn.removeAttribute('onclick');
+        startBtn.addEventListener('click', startQuiz);
+      }
       if (window.BrainDump) window.BrainDump.init({ nextCard: nextQuestion, quizId: QUIZ_ID });
       setTimeout(function () {
         var sel = document.querySelector('.mode-selector');
