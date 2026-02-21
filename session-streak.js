@@ -92,7 +92,7 @@
     var style = document.createElement('style');
     style.id = 'session-streak-styles';
     style.textContent = [
-      '.session-streak-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 10002; height: ' + BAR_HEIGHT_PX + 'px; background: var(--surface, #1a2332); border-bottom: 1px solid rgba(148,163,184,0.2); display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.75rem 1.25rem; padding: 0 1rem; font-family: var(--font, monospace); font-size: 0.85rem; color: var(--text-muted, #94a3b8); }',
+      '.session-streak-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 10002; height: ' + BAR_HEIGHT_PX + 'px; max-height: ' + BAR_HEIGHT_PX + 'px; overflow: hidden; background: var(--surface, #1a2332); border-bottom: 1px solid rgba(148,163,184,0.2); display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.75rem 1.25rem; padding: 0 1rem; font-family: var(--font, monospace); font-size: 0.85rem; color: var(--text-muted, #94a3b8); }',
       '.session-streak-bar .session-timer { font-variant-numeric: tabular-nums; }',
       '.session-streak-bar .streak-count { font-variant-numeric: tabular-nums; }',
       '.session-streak-bar .streak-msg { width: 100%; text-align: center; font-size: 0.8rem; color: var(--accent, #64748b); }',

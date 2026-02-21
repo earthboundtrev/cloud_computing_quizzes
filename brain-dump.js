@@ -42,7 +42,7 @@
       '.brain-dump-modal-empty { color: var(--text-muted); text-align: center; padding: 2rem; }',
       '.brain-dump-modal-actions { display: flex; gap: 0.5rem; padding: 0 1.25rem 1rem; flex-wrap: wrap; }',
       '.brain-dump-modal-close { margin: 0; padding: 0.6rem 1.2rem; }',
-      '.brain-dump-modal-overlay.hidden { display: none !important; }'
+      '.brain-dump-modal-overlay.hidden { display: none !important; pointer-events: none !important; }'
     ].join('\n');
     document.head.appendChild(style);
   }
