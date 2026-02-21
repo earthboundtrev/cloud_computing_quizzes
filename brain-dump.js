@@ -211,7 +211,32 @@
     });
   }
 
+  function ensureReviewModal() {
+    if (document.getElementById('brain-dump-modal-overlay')) return;
+    injectStyles();
+    var overlay = document.createElement('div');
+    overlay.id = 'brain-dump-modal-overlay';
+    overlay.className = 'brain-dump-modal-overlay hidden';
+    overlay.innerHTML =
+      '<div class="brain-dump-modal">' +
+      '<h3>Review Brain-Dumps</h3>' +
+      '<div id="brain-dump-modal-list" class="brain-dump-modal-list"></div>' +
+      '<div class="brain-dump-modal-actions">' +
+      '<button type="button" class="secondary" id="brain-dump-modal-download">Download</button>' +
+      '<button type="button" class="secondary brain-dump-modal-close" id="brain-dump-modal-close">Close</button>' +
+      '</div>';
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) closeReviewModal();
+    });
+    document.body.appendChild(overlay);
+    var closeBtn = document.getElementById('brain-dump-modal-close');
+    if (closeBtn) closeBtn.addEventListener('click', closeReviewModal);
+    var downloadBtn = document.getElementById('brain-dump-modal-download');
+    if (downloadBtn) downloadBtn.addEventListener('click', downloadDumps);
+  }
+
   function openReviewModal() {
+    ensureReviewModal();
     getAllDumps().then(function (list) {
       var overlay = document.getElementById('brain-dump-modal-overlay');
       var listEl = document.getElementById('brain-dump-modal-list');
@@ -291,27 +316,7 @@
       saveBtn.addEventListener('click', saveAndNext);
     }
     setupVoiceInput();
-    if (!document.getElementById('brain-dump-modal-overlay')) {
-      var overlay = document.createElement('div');
-      overlay.id = 'brain-dump-modal-overlay';
-      overlay.className = 'brain-dump-modal-overlay hidden';
-      overlay.innerHTML =
-        '<div class="brain-dump-modal">' +
-        '<h3>Review Brain-Dumps</h3>' +
-        '<div id="brain-dump-modal-list" class="brain-dump-modal-list"></div>' +
-        '<div class="brain-dump-modal-actions">' +
-        '<button type="button" class="secondary" id="brain-dump-modal-download">Download</button>' +
-        '<button type="button" class="secondary brain-dump-modal-close" id="brain-dump-modal-close">Close</button>' +
-        '</div>';
-      overlay.addEventListener('click', function (e) {
-        if (e.target === overlay) closeReviewModal();
-      });
-      document.body.appendChild(overlay);
-      var closeBtn = document.getElementById('brain-dump-modal-close');
-      if (closeBtn) closeBtn.addEventListener('click', closeReviewModal);
-      var downloadBtn = document.getElementById('brain-dump-modal-download');
-      if (downloadBtn) downloadBtn.addEventListener('click', downloadDumps);
-    }
+    /* Overlay created lazily in openReviewModal to avoid blocking clicks on quiz start screen */
     var reviewBtn = document.getElementById('review-dumps-btn');
     if (reviewBtn && !reviewBtn._bound) {
       reviewBtn._bound = true;
