@@ -212,6 +212,7 @@
   }
 
   function ensureReviewModal() {
+    console.log('[BrainDump] ensureReviewModal, overlay exists=', !!document.getElementById('brain-dump-modal-overlay'));
     if (document.getElementById('brain-dump-modal-overlay')) return;
     injectStyles();
     var overlay = document.createElement('div');
@@ -229,6 +230,7 @@
       if (e.target === overlay) closeReviewModal();
     });
     document.body.appendChild(overlay);
+    console.log('[BrainDump] overlay created and appended');
     var closeBtn = document.getElementById('brain-dump-modal-close');
     if (closeBtn) closeBtn.addEventListener('click', closeReviewModal);
     var downloadBtn = document.getElementById('brain-dump-modal-download');
@@ -309,6 +311,7 @@
   }
 
   function ensureDOM() {
+    console.log('[BrainDump] ensureDOM called');
     injectStyles();
     var saveBtn = document.getElementById('brain-dump-save-next');
     if (saveBtn && !saveBtn._bound) {
@@ -321,6 +324,7 @@
     if (reviewBtn && !reviewBtn._bound) {
       reviewBtn._bound = true;
       reviewBtn.addEventListener('click', openReviewModal);
+      console.log('[BrainDump] Review Dumps button wired');
     }
   }
 

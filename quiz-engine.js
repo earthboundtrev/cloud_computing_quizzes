@@ -95,10 +95,12 @@
   }
 
   function selectMode(mode) {
+    console.log('[QuizEngine] selectMode called, mode=', mode);
     selectedMode = mode;
     document.querySelectorAll('.mode-btn').forEach(function (b) { b.classList.remove('selected'); });
     var el = document.querySelector('[data-mode="' + mode + '"]');
     if (el) el.classList.add('selected');
+    console.log('[QuizEngine] selectMode done, el=', el);
   }
 
   function setFeedbackContent(fb, isCorrect, explainText) {
@@ -111,6 +113,7 @@
   }
 
   function startQuiz() {
+    console.log('[QuizEngine] startQuiz called');
     var limitEl = document.getElementById('session-time-limit');
     var customEl = document.getElementById('session-time-custom');
     var minutes = (customEl && customEl.value && parseInt(customEl.value, 10)) || (limitEl ? parseInt(limitEl.value, 10) : 0) || 0;
@@ -519,6 +522,7 @@
 
   window.QuizEngine = {
     run: function (config) {
+      console.log('[QuizEngine] run called, config.quizId=', config && config.quizId);
       config = config || {};
       QUIZ_ID = config.quizId || 'quiz';
       PROFILE_KEY = 'study_sessions_profile_' + QUIZ_ID;
@@ -536,9 +540,10 @@
       selectedMode = 'mixed';
 
       window.startQuiz = startQuiz;
+      window.selectMode = selectMode;
+      console.log('[QuizEngine] selectMode assigned to window, typeof=', typeof window.selectMode);
       window.nextQuestion = nextQuestion;
       window.prevQuestion = prevQuestion;
-      window.selectMode = selectMode;
       window.importResults = importResults;
       window.onImportFile = onImportFile;
       window.downloadResults = downloadResults;
@@ -546,6 +551,14 @@
 
       initFocusHint();
       if (window.BrainDump) window.BrainDump.init({ nextCard: nextQuestion, quizId: QUIZ_ID });
+      setTimeout(function () {
+        var sel = document.querySelector('.mode-selector');
+        var rect = sel ? sel.getBoundingClientRect() : null;
+        var centerX = rect ? rect.left + rect.width / 2 : 0;
+        var centerY = rect ? rect.top + rect.height / 2 : 0;
+        var elementsAtPoint = (rect && centerX > 0 && centerY > 0) ? document.elementsFromPoint(centerX, centerY) : [];
+        console.log('[QuizEngine] diagnostic: mode-selector rect=', rect, 'elementsAtPoint=', elementsAtPoint.length, elementsAtPoint.map(function (e) { return e.id || e.className || e.tagName; }));
+      }, 500);
     }
   };
 })();

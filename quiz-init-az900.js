@@ -1,4 +1,5 @@
 (function () {
+  console.log('[quiz-init-az900] starting');
   QuizEngine.run({
     quizId: 'az900',
     questionBank: window.QUESTION_BANK_AZ900,
@@ -8,4 +9,5 @@
     resultsTitle: 'AZ-900 Azure Fundamentals Quiz Results',
     downloadFilenamePrefix: 'az900_quiz_results'
   });
+  console.log('[quiz-init-az900] QuizEngine.run finished, window.selectMode=', typeof window.selectMode);
 })();
