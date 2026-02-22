@@ -155,6 +155,17 @@
     document.getElementById('results-screen').classList.add('hidden');
     document.getElementById('quiz-area').classList.remove('hidden');
     document.getElementById('q-total').textContent = sessionQuestions.length;
+    var navRow = document.querySelector('#quiz-area .nav-row');
+    var exitBtn = document.getElementById('exit-quiz-btn');
+    if (navRow && !exitBtn) {
+      exitBtn = document.createElement('button');
+      exitBtn.type = 'button';
+      exitBtn.id = 'exit-quiz-btn';
+      exitBtn.className = 'secondary';
+      exitBtn.textContent = 'Exit Quiz';
+      exitBtn.addEventListener('click', exitQuiz);
+      navRow.insertBefore(exitBtn, navRow.firstChild);
+    }
     renderQuestion();
   }
 
@@ -325,6 +336,12 @@
       currentIndex--;
       renderQuestion();
     }
+  }
+
+  function exitQuiz() {
+    document.getElementById('quiz-area').classList.add('hidden');
+    document.getElementById('start-screen').classList.remove('hidden');
+    document.getElementById('results-screen').classList.add('hidden');
   }
 
   function saveSessionToProfile() {
@@ -544,6 +561,7 @@
       console.log('[QuizEngine] selectMode assigned to window, typeof=', typeof window.selectMode);
       window.nextQuestion = nextQuestion;
       window.prevQuestion = prevQuestion;
+      window.exitQuiz = exitQuiz;
       window.importResults = importResults;
       window.onImportFile = onImportFile;
       window.downloadResults = downloadResults;
