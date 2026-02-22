@@ -550,18 +550,25 @@
       window.copyResultsToClipboard = copyResultsToClipboard;
 
       initFocusHint();
-      /* Wire mode buttons and Start Quiz via addEventListener (avoids inline onclick issues) */
-      document.querySelectorAll('.mode-selector .mode-btn').forEach(function (btn) {
-        var mode = btn.getAttribute('data-mode');
-        if (mode) {
-          btn.removeAttribute('onclick');
-          btn.addEventListener('click', function () { selectMode(mode); });
+      /* Wire mode buttons and Start Quiz after DOM is ready (scripts run from head before body exists) */
+      function wireStartScreenButtons() {
+        document.querySelectorAll('.mode-selector .mode-btn').forEach(function (btn) {
+          var mode = btn.getAttribute('data-mode');
+          if (mode) {
+            btn.removeAttribute('onclick');
+            btn.addEventListener('click', function () { selectMode(mode); });
+          }
+        });
+        var startBtn = document.getElementById('start-btn');
+        if (startBtn) {
+          startBtn.removeAttribute('onclick');
+          startBtn.addEventListener('click', startQuiz);
         }
-      });
-      var startBtn = document.getElementById('start-btn');
-      if (startBtn) {
-        startBtn.removeAttribute('onclick');
-        startBtn.addEventListener('click', startQuiz);
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', wireStartScreenButtons);
+      } else {
+        wireStartScreenButtons();
       }
       if (window.BrainDump) window.BrainDump.init({ nextCard: nextQuestion, quizId: QUIZ_ID });
       setTimeout(function () {
