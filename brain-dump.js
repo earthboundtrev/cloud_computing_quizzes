@@ -39,6 +39,10 @@
       '.brain-dump-modal-item .dump-question { font-weight: 600; color: var(--text); margin-bottom: 0.5rem; }',
       '.brain-dump-modal-item .dump-text { color: var(--text-muted); white-space: pre-wrap; word-break: break-word; }',
       '.brain-dump-modal-item .dump-date { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; opacity: 0.9; }',
+      '.brain-dump-modal-item-actions { display: flex; gap: 0.4rem; margin-top: 0.5rem; flex-wrap: wrap; }',
+      '.dump-edit-wrap { margin: 0.5rem 0; }',
+      '.dump-edit-textarea { width: 100%; min-height: 80px; padding: 0.5rem; background: var(--bg); border: 1px solid var(--accent-dim, #475569); border-radius: 6px; color: var(--text); font-family: inherit; font-size: 0.9rem; resize: vertical; box-sizing: border-box; }',
+      '.brain-dump-modal-item-actions button { font-size: 0.8rem; padding: 0.3rem 0.6rem; }',
       '.brain-dump-modal-empty { color: var(--text-muted); text-align: center; padding: 2rem; }',
       '.brain-dump-modal-actions { display: flex; gap: 0.5rem; padding: 0 1.25rem 1rem; flex-wrap: wrap; }',
       '.brain-dump-modal-close { margin: 0; padding: 0.6rem 1.2rem; }',
@@ -84,8 +88,63 @@
         req.onerror = () => reject(req.error);
       });
     }
+    record.id = 'ls_' + Date.now() + '_' + Math.random().toString(36).slice(2);
     const list = JSON.parse(localStorage.getItem(LS_FALLBACK_KEY) || '[]');
     list.push(record);
+    localStorage.setItem(LS_FALLBACK_KEY, JSON.stringify(list));
+    return Promise.resolve();
+  }
+
+  function deleteDump(id) {
+    if (db) {
+      var key = /^\d+$/.test(String(id)) ? parseInt(id, 10) : id;
+      return new Promise(function (resolve, reject) {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        const req = store.delete(key);
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+      });
+    }
+    const list = JSON.parse(localStorage.getItem(LS_FALLBACK_KEY) || '[]').filter(function (d) { return d.id !== id; });
+    localStorage.setItem(LS_FALLBACK_KEY, JSON.stringify(list));
+    return Promise.resolve();
+  }
+
+  function clearAllDumps() {
+    if (db) {
+      return new Promise(function (resolve, reject) {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        const req = store.clear();
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+      });
+    }
+    localStorage.setItem(LS_FALLBACK_KEY, '[]');
+    return Promise.resolve();
+  }
+
+  function updateDump(id, updates) {
+    if (db) {
+      var key = /^\d+$/.test(String(id)) ? parseInt(id, 10) : id;
+      return new Promise(function (resolve, reject) {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        const getReq = store.get(key);
+        getReq.onsuccess = function () {
+          const rec = getReq.result;
+          if (!rec) { resolve(); return; }
+          if (updates.dumpText !== undefined) rec.dumpText = updates.dumpText;
+          store.put(rec);
+          resolve();
+        };
+        getReq.onerror = () => reject(getReq.error);
+      });
+    }
+    const list = JSON.parse(localStorage.getItem(LS_FALLBACK_KEY) || '[]');
+    const idx = list.findIndex(function (d) { return d.id === id; });
+    if (idx >= 0 && updates.dumpText !== undefined) list[idx].dumpText = updates.dumpText;
     localStorage.setItem(LS_FALLBACK_KEY, JSON.stringify(list));
     return Promise.resolve();
   }
@@ -100,7 +159,16 @@
         req.onerror = () => reject(req.error);
       });
     }
-    const list = JSON.parse(localStorage.getItem(LS_FALLBACK_KEY) || '[]');
+    var list = JSON.parse(localStorage.getItem(LS_FALLBACK_KEY) || '[]');
+    var changed = false;
+    list = list.map(function (d, i) {
+      if (d.id == null) {
+        d.id = 'legacy_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2);
+        changed = true;
+      }
+      return d;
+    });
+    if (changed) localStorage.setItem(LS_FALLBACK_KEY, JSON.stringify(list));
     return Promise.resolve(list);
   }
 
@@ -120,11 +188,18 @@
   }
 
   function saveAndNext() {
-    var questionEl = getQuestionEl();
     var ta = getTextarea();
-    if (!questionEl || !ta) return;
-    var questionText = (questionEl.textContent || '').trim();
+    if (!ta) return;
     var dumpText = (ta.value || '').trim();
+    if (typeof nextCardFn !== 'function') return;
+    if (!dumpText) {
+      /* Nothing to save – just advance to next question */
+      nextCardFn();
+      return;
+    }
+    var questionEl = getQuestionEl();
+    if (!questionEl) return;
+    var questionText = (questionEl.textContent || '').trim();
     if (!questionText) return;
     addDump({
       questionText: questionText,
@@ -133,10 +208,7 @@
       quizId: quizId
     }).then(function () {
       ta.value = '';
-      if (typeof nextCardFn === 'function') {
-        nextCardFn();
-      }
-      /* Do not auto-focus dump on next question; keep brain dump optional. */
+      nextCardFn();
     });
   }
 
@@ -224,6 +296,7 @@
       '<div id="brain-dump-modal-list" class="brain-dump-modal-list"></div>' +
       '<div class="brain-dump-modal-actions">' +
       '<button type="button" class="secondary" id="brain-dump-modal-download">Download</button>' +
+      '<button type="button" class="secondary" id="brain-dump-modal-clear-all">Clear all</button>' +
       '<button type="button" class="secondary brain-dump-modal-close" id="brain-dump-modal-close">Close</button>' +
       '</div>';
     overlay.addEventListener('click', function (e) {
@@ -235,40 +308,122 @@
     if (closeBtn) closeBtn.addEventListener('click', closeReviewModal);
     var downloadBtn = document.getElementById('brain-dump-modal-download');
     if (downloadBtn) downloadBtn.addEventListener('click', downloadDumps);
+    var clearAllBtn = document.getElementById('brain-dump-modal-clear-all');
+    if (clearAllBtn) clearAllBtn.addEventListener('click', handleClearAll);
+    var listEl = document.getElementById('brain-dump-modal-list');
+    if (listEl) listEl.addEventListener('click', handleListItemClick);
+  }
+
+  function handleClearAll() {
+    if (!window.confirm('Delete all brain-dumps? This cannot be undone.')) return;
+    clearAllDumps().then(refreshModalList);
+  }
+
+  function handleListItemClick(e) {
+    var target = e.target;
+    if (!target || !target.closest) return;
+    var delBtn = target.closest('[data-action="delete-dump"]');
+    var editBtn = target.closest('[data-action="edit-dump"]');
+    var saveEditBtn = target.closest('[data-action="save-edit"]');
+    var cancelEditBtn = target.closest('[data-action="cancel-edit"]');
+    if (delBtn) {
+      var id = delBtn.getAttribute('data-id');
+      if (id) deleteDump(id).then(refreshModalList);
+    } else if (editBtn) {
+      var id = editBtn.getAttribute('data-id');
+      if (id) startEditDump(id);
+    } else if (saveEditBtn) {
+      var id = saveEditBtn.getAttribute('data-id');
+      if (id) saveEditDump(id);
+    } else if (cancelEditBtn) {
+      var item = cancelEditBtn.closest('.brain-dump-modal-item');
+      if (item) cancelEditDump(item);
+    }
+  }
+
+  function startEditDump(id) {
+    var item = document.querySelector('.brain-dump-modal-item[data-id="' + (typeof CSS !== 'undefined' && CSS.escape ? CSS.escape(String(id)) : String(id).replace(/"/g, '\\"')) + '"]');
+    if (!item) return;
+    var textEl = item.querySelector('.dump-text');
+    if (!textEl) return;
+    var currentText = textEl.textContent || '';
+    var html = '<div class="dump-edit-wrap">' +
+      '<textarea class="dump-edit-textarea" rows="4">' + escapeHtml(currentText) + '</textarea>' +
+      '<div class="brain-dump-modal-item-actions">' +
+      '<button type="button" data-action="save-edit" data-id="' + escapeHtml(String(id)) + '">Save</button>' +
+      '<button type="button" data-action="cancel-edit">Cancel</button>' +
+      '</div></div>';
+    textEl.outerHTML = html;
+    var ta = item.querySelector('.dump-edit-textarea');
+    if (ta) ta.focus();
+  }
+
+  function saveEditDump(id) {
+    var sel = '.brain-dump-modal-item[data-id="' + (typeof CSS !== 'undefined' && CSS.escape ? CSS.escape(String(id)) : String(id).replace(/"/g, '\\"')) + '"]';
+    var item = document.querySelector(sel);
+    if (!item) return;
+    var ta = item.querySelector('.dump-edit-textarea');
+    if (!ta) return;
+    var newText = (ta.value || '').trim();
+    updateDump(id, { dumpText: newText }).then(refreshModalList);
+  }
+
+  function cancelEditDump(item) {
+    var wrap = item.querySelector('.dump-edit-wrap');
+    if (!wrap) return;
+    var ta = item.querySelector('.dump-edit-textarea');
+    var currentText = ta ? (ta.value || '').trim() : '';
+    var id = item.getAttribute('data-id');
+    getAllDumps().then(function (list) {
+      var d = list.find(function (x) { return String(x.id) === id; });
+      var displayText = d ? (d.dumpText || '') : currentText;
+      wrap.outerHTML = '<div class="dump-text">' + (displayText ? escapeHtml(displayText) : '<em>No text</em>') + '</div>';
+    });
+  }
+
+  function refreshModalList() {
+    getAllDumps().then(function (list) {
+      var listEl = document.getElementById('brain-dump-modal-list');
+      var overlay = document.getElementById('brain-dump-modal-overlay');
+      var clearBtn = document.getElementById('brain-dump-modal-clear-all');
+      if (clearBtn) clearBtn.disabled = list.length === 0;
+      if (!listEl || !overlay) return;
+      if (list.length === 0) {
+        listEl.innerHTML = '<p class="brain-dump-modal-empty">No brain-dumps saved yet. Use the text area below a question and click Save &amp; Next.</p>';
+        return;
+      }
+      listEl.innerHTML = list
+        .slice()
+        .reverse()
+        .map(function (d) {
+          var dateStr = '';
+          try {
+            var dt = new Date(d.timestamp);
+            dateStr = dt.toLocaleDateString() + ' ' + dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          } catch (e) {
+            dateStr = d.timestamp || '';
+          }
+          var id = d.id != null ? String(d.id) : '';
+          return (
+            '<div class="brain-dump-modal-item" data-id="' + escapeHtml(id) + '">' +
+            '<div class="dump-question">' + escapeHtml(d.questionText) + '</div>' +
+            '<div class="dump-text">' + (d.dumpText ? escapeHtml(d.dumpText) : '<em>No text</em>') + '</div>' +
+            '<div class="dump-date">' + escapeHtml(dateStr) + (d.quizId ? ' · ' + escapeHtml(d.quizId) : '') + '</div>' +
+            '<div class="brain-dump-modal-item-actions">' +
+            '<button type="button" data-action="edit-dump" data-id="' + escapeHtml(id) + '">Edit</button>' +
+            '<button type="button" data-action="delete-dump" data-id="' + escapeHtml(id) + '">Delete</button>' +
+            '</div></div>'
+          );
+        })
+        .join('');
+    });
   }
 
   function openReviewModal() {
     ensureReviewModal();
-    getAllDumps().then(function (list) {
-      var overlay = document.getElementById('brain-dump-modal-overlay');
-      var listEl = document.getElementById('brain-dump-modal-list');
-      if (!overlay || !listEl) return;
-      if (list.length === 0) {
-        listEl.innerHTML = '<p class="brain-dump-modal-empty">No brain-dumps saved yet. Use the text area below a question and click Save &amp; Next.</p>';
-      } else {
-        listEl.innerHTML = list
-          .slice()
-          .reverse()
-          .map(function (d) {
-            var dateStr = '';
-            try {
-              var dt = new Date(d.timestamp);
-              dateStr = dt.toLocaleDateString() + ' ' + dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            } catch (e) {
-              dateStr = d.timestamp || '';
-            }
-            return (
-              '<div class="brain-dump-modal-item">' +
-              '<div class="dump-question">' + escapeHtml(d.questionText) + '</div>' +
-              '<div class="dump-text">' + (d.dumpText ? escapeHtml(d.dumpText) : '<em>No text</em>') + '</div>' +
-              '<div class="dump-date">' + escapeHtml(dateStr) + (d.quizId ? ' · ' + escapeHtml(d.quizId) : '') + '</div>' +
-              '</div>'
-            );
-          })
-          .join('');
-      }
-      overlay.classList.remove('hidden');
-    });
+    refreshModalList();
+    var overlay = document.getElementById('brain-dump-modal-overlay');
+    if (overlay) overlay.classList.remove('hidden');
   }
 
   function escapeHtml(s) {

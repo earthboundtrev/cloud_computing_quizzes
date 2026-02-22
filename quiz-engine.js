@@ -582,6 +582,16 @@
           startBtn.removeAttribute('onclick');
           startBtn.addEventListener('click', startQuiz);
         }
+        var prevBtn = document.getElementById('prev-btn');
+        var nextBtn = document.getElementById('next-btn');
+        if (prevBtn) {
+          prevBtn.removeAttribute('onclick');
+          prevBtn.addEventListener('click', prevQuestion);
+        }
+        if (nextBtn) {
+          nextBtn.removeAttribute('onclick');
+          nextBtn.addEventListener('click', nextQuestion);
+        }
       }
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', wireStartScreenButtons);
