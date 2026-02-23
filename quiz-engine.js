@@ -457,7 +457,8 @@
     var firstLine = (lines[0] || '').toLowerCase();
     if (QUIZ_ID !== 'oci' && firstLine.indexOf('oci foundations') !== -1) return { ok: false, error: 'This file is for OCI quiz. Open the OCI quiz to import it.' };
     if (QUIZ_ID !== 'gcp' && firstLine.indexOf('gcp cloud digital leader') !== -1) return { ok: false, error: 'This file is for GCP quiz. Open the GCP quiz to import it.' };
-    if (QUIZ_ID !== 'az900' && (firstLine.indexOf('az-900') !== -1 || firstLine.indexOf('azure') !== -1)) return { ok: false, error: 'This file is for AZ-900 quiz. Open the AZ-900 quiz to import it.' };
+    if (QUIZ_ID !== 'ai900' && firstLine.indexOf('ai-900') !== -1) return { ok: false, error: 'This file is for AI-900 quiz. Open the AI-900 quiz to import it.' };
+    if (QUIZ_ID !== 'az900' && (firstLine.indexOf('az-900') !== -1 || (firstLine.indexOf('azure') !== -1 && firstLine.indexOf('ai-900') === -1))) return { ok: false, error: 'This file is for AZ-900 quiz. Open the AZ-900 quiz to import it.' };
     if (QUIZ_ID !== 'terraform' && firstLine.indexOf('terraform') !== -1) return { ok: false, error: 'This file is for Terraform quiz. Open the Terraform quiz to import it.' };
     if (QUIZ_ID === 'oci' && firstLine.indexOf('oci') === -1) return { ok: false, error: 'Not an OCI results file.' };
     if (QUIZ_ID === 'terraform' && firstLine.indexOf('terraform') === -1) return { ok: false, error: 'Not a Terraform Associate results file.' };

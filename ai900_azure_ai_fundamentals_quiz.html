@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="/manifest.json">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
-  <title>AZ-900 Azure Fundamentals Practice Quiz</title>
+  <title>AI-900 Azure AI Fundamentals Practice Quiz</title>
   <link rel="stylesheet" href="css/quiz-common.css?v=2">
   <style>:root { --accent: #0078d4; --accent-dim: #106ebe; }</style>
   <script src="quiz-config.js?v=2"></script>
@@ -17,8 +17,8 @@
   <script src="motivation.js?v=2"></script>
   <script src="session-streak.js?v=2"></script>
   <script src="quiz-engine.js?v=2"></script>
-  <script src="data/az900-questions.js?v=2"></script>
-  <script src="quiz-init-az900.js?v=2"></script>
+  <script src="data/ai900-questions.js?v=2"></script>
+  <script src="quiz-init-ai900.js?v=2"></script>
   <script src="quiz-nav.js?v=2"></script>
   <script src="app-reset.js?v=2"></script>
 </head>
@@ -41,21 +41,21 @@
     </nav>
   </header>
   <div class="container">
-    <h1>AZ-900 Azure Fundamentals Practice Quiz</h1>
-    <p class="subtitle">Microsoft Certified: Azure Fundamentals • Based on az900_azure_fundamentals_pattern_guide.md</p>
+    <h1>AI-900 Azure AI Fundamentals Practice Quiz</h1>
+    <p class="subtitle">Microsoft Certified: Azure AI Fundamentals • Azure OpenAI, ML, Document Intelligence, Speech, and more</p>
 
     <div id="start-screen" class="start-screen">
       <a href="index.html" class="back-home">← Back to home</a>
-      <p>40 questions per session (50 in exam mode). Passing: 70%. Pool of 245. Choose your mode:</p>
+      <p>40 questions per session (50 in exam mode). Passing: 70%. Pool of 269. Choose your mode:</p>
       <p id="focus-hint" class="profile-hint hidden"></p>
       <div class="mode-selector">
         <button type="button" class="mode-btn" data-mode="comparison" onclick="selectMode('comparison')">
-          <span class="label">Comparison (Azure ↔ AWS)</span>
-          <span class="desc">Map Azure services to AWS equivalents. Leverage your SAA/CCP knowledge.</span>
+          <span class="label">Comparison (Azure AI ↔ AWS)</span>
+          <span class="desc">Map Azure AI services to AWS equivalents (Bedrock, Transcribe, Textract, etc.).</span>
         </button>
         <button type="button" class="mode-btn" data-mode="exam" onclick="selectMode('exam')">
           <span class="label">Exam (Scenario-based)</span>
-          <span class="desc">Cloud concepts, Azure architecture, identity, governance—exam-style questions.</span>
+          <span class="desc">Azure AI concepts, services, and responsible AI—exam-style questions.</span>
         </button>
         <button type="button" class="mode-btn selected" data-mode="mixed" onclick="selectMode('mixed')">
           <span class="label">Mixed</span>
@@ -66,9 +66,9 @@
         <label for="session-time-limit">Timed session (simulate exam):</label>
         <select id="session-time-limit" style="margin-left: 0.5rem; padding: 0.35rem; background: var(--surface); color: var(--text); border: 1px solid var(--accent-dim); border-radius: 4px;">
           <option value="0">Off</option>
+          <option value="45">45 min</option>
           <option value="65">65 min</option>
           <option value="90">90 min</option>
-          <option value="120">120 min</option>
         </select>
         <input type="number" id="session-time-custom" min="1" max="240" placeholder="Custom" style="width: 4.5em; margin-left: 0.5rem; padding: 0.35rem; background: var(--surface); color: var(--text); border: 1px solid var(--accent-dim); border-radius: 4px;" title="Custom minutes">
       </div>
