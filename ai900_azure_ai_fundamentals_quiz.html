@@ -73,6 +73,7 @@
         <input type="number" id="session-time-custom" min="1" max="240" placeholder="Custom" style="width: 4.5em; margin-left: 0.5rem; padding: 0.35rem; background: var(--surface); color: var(--text); border: 1px solid var(--accent-dim); border-radius: 4px;" title="Custom minutes">
       </div>
       <button id="start-btn" onclick="startQuiz()">Start Quiz</button>
+      <button type="button" class="secondary" id="start-ml-concepts-btn" onclick="startQuiz('ML Concepts')" style="margin-left: 0.5rem;">Practice ML Concepts only</button>
       <div class="import-area">
         <label for="import-results">Import past results (paste .md or choose file) to focus on weak topics:</label>
         <textarea id="import-results" placeholder="Paste quiz results markdown here..."></textarea>

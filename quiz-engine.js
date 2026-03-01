@@ -112,13 +112,14 @@
     fb.appendChild(sp);
   }
 
-  function startQuiz() {
-    console.log('[QuizEngine] startQuiz called');
+  function startQuiz(topicFilter) {
+    console.log('[QuizEngine] startQuiz called', topicFilter ? 'topicFilter=' + topicFilter : '');
     var limitEl = document.getElementById('session-time-limit');
     var customEl = document.getElementById('session-time-custom');
     var minutes = (customEl && customEl.value && parseInt(customEl.value, 10)) || (limitEl ? parseInt(limitEl.value, 10) : 0) || 0;
     if (window.SessionStreak) window.SessionStreak.setTimeLimit(minutes);
     var filtered = questionBank.filter(function (q) {
+      if (topicFilter) return (q.topic || '') === topicFilter;
       if (selectedMode === 'comparison') return q.mode === 'comparison';
       if (selectedMode === 'exam') return q.mode === 'exam';
       return true;
@@ -581,7 +582,12 @@
         var startBtn = document.getElementById('start-btn');
         if (startBtn) {
           startBtn.removeAttribute('onclick');
-          startBtn.addEventListener('click', startQuiz);
+          startBtn.addEventListener('click', function () { startQuiz(); });
+        }
+        var startMLConceptsBtn = document.getElementById('start-ml-concepts-btn');
+        if (startMLConceptsBtn) {
+          startMLConceptsBtn.removeAttribute('onclick');
+          startMLConceptsBtn.addEventListener('click', function () { startQuiz('ML Concepts'); });
         }
         var prevBtn = document.getElementById('prev-btn');
         var nextBtn = document.getElementById('next-btn');
