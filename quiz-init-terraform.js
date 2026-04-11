@@ -5,7 +5,7 @@
     questionsPerQuiz: 40,
     examModeQuestions: 57,
     passingPercent: 70,
-    resultsTitle: 'Terraform Associate (TA-002-P) Quiz Results',
+    resultsTitle: 'Terraform Associate (004) Quiz Results',
     downloadFilenamePrefix: 'terraform_associate_quiz_results'
   });
 })();

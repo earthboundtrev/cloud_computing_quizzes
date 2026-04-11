@@ -8,19 +8,19 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="/manifest.json">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
-  <title>HashiCorp Certified: Terraform Associate (TA-002-P) Practice Quiz</title>
-  <link rel="stylesheet" href="css/quiz-common.css?v=2">
+  <title>HashiCorp Certified: Terraform Associate (004) Practice Quiz</title>
+  <link rel="stylesheet" href="css/quiz-common.css?v=4">
   <style>:root { --accent: #7B42BC; --accent-dim: #6030a8; }</style>
-  <script src="quiz-config.js?v=2"></script>
-  <script src="sw-register.js?v=2"></script>
-  <script src="brain-dump.js?v=2"></script>
-  <script src="motivation.js?v=2"></script>
-  <script src="session-streak.js?v=2"></script>
-  <script src="quiz-engine.js?v=2"></script>
-  <script src="data/terraform-questions.js?v=2"></script>
-  <script src="quiz-init-terraform.js?v=2"></script>
-  <script src="quiz-nav.js?v=2"></script>
-  <script src="app-reset.js?v=2"></script>
+  <script src="quiz-config.js?v=3"></script>
+  <script src="sw-register.js?v=3"></script>
+  <script src="brain-dump.js?v=3"></script>
+  <script src="motivation.js?v=5"></script>
+  <script src="session-streak.js?v=3"></script>
+  <script src="quiz-engine.js?v=4"></script>
+  <script src="data/terraform-questions.js?v=5"></script>
+  <script src="quiz-init-terraform.js?v=4"></script>
+  <script src="quiz-nav.js?v=3"></script>
+  <script src="app-reset.js?v=3"></script>
 </head>
 <body>
   <header class="site-nav">
@@ -40,12 +40,12 @@
     </nav>
   </header>
   <div class="container">
-    <h1>HashiCorp Certified: Terraform Associate (TA-002-P) Practice Quiz</h1>
-    <p class="subtitle">TA-002-P • IaC, workflow, state, modules, providers</p>
+    <h1>HashiCorp Certified: Terraform Associate (004) Practice Quiz</h1>
+    <p class="subtitle">Terraform Associate 004 • Matches HashiCorp exam content list (IaC, fundamentals, workflow, configuration, modules, state, maintain infra, HCP Terraform)</p>
 
     <div id="start-screen" class="start-screen">
       <a href="index.html" class="back-home">← Back to home</a>
-      <p>40 questions per session (57 in exam mode, matching TA-002-P). Passing: 70%. Pool of 170+. Choose your mode:</p>
+      <p>40 questions per session (57 in exam mode, matching the live Associate 004 format). Passing: 70%. Pool of 240+ (single choice, true/false, select-all-that-apply, comparison). Choose your mode:</p>
       <p id="focus-hint" class="profile-hint hidden"></p>
       <div class="mode-selector">
         <button type="button" class="mode-btn" data-mode="comparison" onclick="selectMode('comparison')">
@@ -54,11 +54,11 @@
         </button>
         <button type="button" class="mode-btn" data-mode="exam" onclick="selectMode('exam')">
           <span class="label">Exam (Scenario-based)</span>
-          <span class="desc">CLI, state, config, variables, outputs, backends, Terraform Cloud.</span>
+          <span class="desc">CLI, state, config, variables, outputs, backends, import, HCP Terraform.</span>
         </button>
         <button type="button" class="mode-btn selected" data-mode="mixed" onclick="selectMode('mixed')">
           <span class="label">Mixed</span>
-          <span class="desc">Both comparison and exam-style. Simulates full exam.</span>
+          <span class="desc">Comparison + exam-style including true/false and select-all (like the real 004 exam).</span>
         </button>
       </div>
       <div class="session-time-row" style="margin: 1rem 0; font-size: 0.9rem; color: var(--text-muted);">

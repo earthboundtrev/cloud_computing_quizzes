@@ -1,3 +1,12 @@
+/**
+ * HashiCorp Certified: Terraform Associate (004) question pool.
+ * Topics follow the official exam content list: IaC; Terraform fundamentals; core workflow;
+ * Terraform configuration; modules; state management; maintain infrastructure; HCP Terraform.
+ * https://developer.hashicorp.com/terraform/tutorials/certification-004/associate-review-004
+ *
+ * Types: omit type for single choice; type: "tf" with correct: true|false; type: "multi" with
+ * correct: [0,2] (original option indices); type: "order" as elsewhere in this codebase.
+ */
 window.QUESTION_BANK_TERRAFORM = [
   // === IaC CONCEPTS ===
   // === Comparison (Terraform vs other) ===
@@ -15,13 +24,13 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "comparison", topic: "State",
     q: "Why does Terraform keep state when other IaC tools might not?",
-    options: ["State is optional in Terraform", "To map config to real resources and track metadata; needed for update/destroy", "Only for Terraform Cloud", "To replace the cloud API"],
+    options: ["State is optional in Terraform", "To map config to real resources and track metadata; needed for update/destroy", "Only for HCP Terraform", "To replace the cloud API"],
     correct: 1,
     explain: "State ties resource addresses in config to real IDs and attributes; enables refresh, update, destroy."
   },
   { mode: "comparison", topic: "Modules",
     q: "How do Terraform modules compare to reusable code in general programming?",
-    options: ["They are unrelated", "Modules encapsulate reusable config (like functions/libraries); call with inputs, get outputs", "Modules only exist in Terraform Cloud", "Modules cannot have inputs"],
+    options: ["They are unrelated", "Modules encapsulate reusable config (like functions/libraries); call with inputs, get outputs", "Modules only exist in HCP Terraform", "Modules cannot have inputs"],
     correct: 1,
     explain: "Modules are reusable units: input variables, output values, call from root or other modules."
   },
@@ -75,7 +84,7 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "exam", topic: "Terraform CLI",
     q: "What does 'terraform fmt' do?",
-    options: ["Formats state file", "Rewrites .tf files to canonical format and style", "Formats output only", "Formats Terraform Cloud UI"],
+    options: ["Formats state file", "Rewrites .tf files to canonical format and style", "Formats output only", "Formats the HCP Terraform web UI"],
     correct: 1,
     explain: "terraform fmt rewrites configuration files to a canonical format."
   },
@@ -99,7 +108,7 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "exam", topic: "State",
     q: "What is state locking?",
-    options: ["Locking the directory", "Preventing concurrent runs from modifying the same state", "Locking variables", "A Terraform Cloud feature only"],
+    options: ["Locking the directory", "Preventing concurrent runs from modifying the same state", "Locking variables", "An HCP Terraform-only feature"],
     correct: 1,
     explain: "State locking prevents multiple terraform apply runs from corrupting state (e.g. DynamoDB for S3 backend)."
   },
@@ -171,7 +180,7 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "exam", topic: "Modules",
     q: "What is the recommended structure for reusing a module in multiple environments?",
-    options: ["Copy-paste the module for each env", "Use one module with different variable values or workspaces", "Modules cannot be reused", "Use Terraform Cloud only"],
+    options: ["Copy-paste the module for each env", "Use one module with different variable values or workspaces", "Modules cannot be reused", "Use HCP Terraform only"],
     correct: 1,
     explain: "Call the same module with different inputs (e.g. env-specific .tfvars or workspace)."
   },
@@ -183,7 +192,7 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "exam", topic: "Providers",
     q: "How do you use multiple provider configurations (e.g. multiple AWS regions)?",
-    options: ["You cannot", "Use alias in the provider block and provider = aws.alias in resources", "Only via workspaces", "Only in Terraform Cloud"],
+    options: ["You cannot", "Use alias in the provider block and provider = aws.alias in resources", "Only via workspaces", "Only in HCP Terraform"],
     correct: 1,
     explain: "provider \"aws\" { alias = \"usw2\"; region = \"us-west-2\" }. Then resource ... { provider = aws.usw2 }."
   },
@@ -195,13 +204,13 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "exam", topic: "Workspaces",
     q: "What are Terraform workspaces used for?",
-    options: ["Separate state files for the same config (e.g. dev/staging/prod)", "Separate directories only", "Terraform Cloud only", "They are deprecated"],
+    options: ["Separate state files for the same config (e.g. dev/staging/prod)", "Separate directories only", "HCP Terraform only", "They are deprecated"],
     correct: 0,
     explain: "Workspaces (terraform workspace select) allow multiple state files; state is keyed by workspace."
   },
   { mode: "exam", topic: "Workspaces",
     q: "Which command lists available workspaces?",
-    options: ["terraform env list", "terraform workspace list", "terraform list workspaces", "Workspaces are only in Terraform Cloud"],
+    options: ["terraform env list", "terraform workspace list", "terraform list workspaces", "Workspaces exist only in HCP Terraform"],
     correct: 1,
     explain: "terraform workspace list. Also: select, new, delete."
   },
@@ -213,19 +222,19 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "exam", topic: "Backend",
     q: "Can you change the backend configuration after state already exists?",
-    options: ["No, never", "Yes, but you must migrate state (e.g. terraform init -migrate-state) or lose state", "Only by deleting state", "Only with Terraform Cloud"],
+    options: ["No, never", "Yes, but you must migrate state (e.g. terraform init -migrate-state) or lose state", "Only by deleting state", "Only with HCP Terraform"],
     correct: 1,
     explain: "Changing backend usually requires migrating state; terraform init will prompt for -migrate-state."
   },
   { mode: "exam", topic: "Security & Best Practices",
     q: "What is a best practice for managing secrets in Terraform?",
-    options: ["Store them in .tf files in git", "Use environment variables (TF_VAR_*), secret stores, or Terraform Cloud variables (sensitive)", "Always use -var on CLI", "Secrets are not supported"],
+    options: ["Store them in .tf files in git", "Use environment variables (TF_VAR_*), secret stores, or HCP Terraform workspace variables (sensitive)", "Always use -var on CLI", "Secrets are not supported"],
     correct: 1,
-    explain: "Avoid committing secrets. Use env vars, vault, or marked-sensitive variables in Terraform Cloud."
+    explain: "Avoid committing secrets. Use env vars, Vault, or marked-sensitive variables in HCP Terraform."
   },
   { mode: "exam", topic: "Security & Best Practices",
     q: "How do you mark an output as sensitive so it is redacted in the CLI?",
-    options: ["sensitive = true in the output block", "output_sensitive = true", "Only in Terraform Cloud", "You cannot"],
+    options: ["sensitive = true in the output block", "output_sensitive = true", "Only in HCP Terraform", "You cannot"],
     correct: 0,
     explain: "output \"secret\" { value = ...; sensitive = true } redacts the value in plan/apply and terraform output."
   },
@@ -235,15 +244,15 @@ window.QUESTION_BANK_TERRAFORM = [
     correct: 0,
     explain: "-lock=false skips state lock (e.g. for automation with care); can cause state corruption if concurrent."
   },
-  { mode: "exam", topic: "Terraform Cloud",
-    q: "What is Terraform Cloud?",
-    options: ["A cloud provider", "HashiCorp's hosted service for remote state, runs, and collaboration", "A type of backend only", "A Terraform module"],
+  { mode: "exam", topic: "HCP Terraform",
+    q: "What is HCP Terraform?",
+    options: ["A cloud provider like AWS", "HashiCorp's managed platform for remote state, runs, collaboration, and governance (formerly Terraform Cloud)", "Only a state file format", "A built-in Terraform language block"],
     correct: 1,
-    explain: "Terraform Cloud provides remote state, remote execution, VCS integration, and collaboration."
+    explain: "HCP Terraform is the managed service for remote state, CI/CD-style runs, VCS integration, policy, and teams."
   },
-  { mode: "exam", topic: "Terraform Cloud",
-    q: "How do you configure Terraform to use Terraform Cloud as the backend?",
-    options: ["backend \"cloud\" { organization = \"...\"; workspaces { name = \"...\" } }", "Only via UI", "terraform cloud init", "Cannot use Terraform Cloud as backend"],
+  { mode: "exam", topic: "HCP Terraform",
+    q: "How do you configure Terraform to use HCP Terraform as the backend?",
+    options: ["backend \"cloud\" { organization = \"...\"; workspaces { name = \"...\" } }", "Only via the web UI (no config)", "terraform cloud init", "Cannot use HCP Terraform as backend"],
     correct: 0,
     explain: "backend \"cloud\" { organization = \"...\"; workspaces { name = \"...\" } } or tags = { ... }."
   },
@@ -285,7 +294,7 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "exam", topic: "Modules",
     q: "What is the Terraform Registry?",
-    options: ["A cloud provider", "A public repository of Terraform modules and providers", "Only for Terraform Cloud", "A type of backend"],
+    options: ["A cloud provider", "A public repository of Terraform modules and providers", "Only for HCP Terraform", "A type of backend"],
     correct: 1,
     explain: "registry.terraform.io hosts modules and providers (e.g. hashicorp/aws)."
   },
@@ -303,13 +312,13 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "exam", topic: "Configuration",
     q: "What is a 'data source' in Terraform?",
-    options: ["A type of variable", "A read-only reference to existing infrastructure or external data", "A resource that only reads state", "A Terraform Cloud feature"],
+    options: ["A type of variable", "A read-only reference to existing infrastructure or external data", "A resource that only reads state", "An HCP Terraform-only concept"],
     correct: 1,
     explain: "data \"aws_vpc\" \"main\" { ... } fetches existing data; use data.aws_vpc.main.id etc."
   },
   { mode: "exam", topic: "Configuration",
     q: "How do you make a resource depend on another without referencing its attributes?",
-    options: ["depends_on = [other_resource.type.name]", "dependency block", "You must always reference an attribute", "depends_on is only in Terraform Cloud"],
+    options: ["depends_on = [other_resource.type.name]", "dependency block", "You must always reference an attribute", "depends_on exists only in HCP Terraform"],
     correct: 0,
     explain: "depends_on = [aws_instance.web] forces order when there is no attribute reference."
   },
@@ -333,7 +342,7 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "exam", topic: "Modules",
     q: "Can a module use a different provider than the root module?",
-    options: ["No", "Yes; pass provider via the module block (providers argument) or inherit from root", "Only with Terraform Cloud", "Only with alias"],
+    options: ["No", "Yes; pass provider via the module block (providers argument) or inherit from root", "Only with HCP Terraform", "Only with alias"],
     correct: 1,
     explain: "Modules inherit providers by default; you can pass providers = { aws = aws.usw2 } to override."
   },
@@ -400,7 +409,7 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "exam", topic: "State",
     q: "What is 'terraform state push'?",
-    options: ["Push config to Git", "Upload a state file to the backend (use with extreme caution)", "Push to Terraform Cloud only", "Push variables"],
+    options: ["Push config to Git", "Upload a state file to the backend (use with extreme caution)", "Push to HCP Terraform only", "Push variables"],
     correct: 1,
     explain: "terraform state push <file> overwrites remote state with the file; can cause corruption if misused."
   },
@@ -418,7 +427,7 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "exam", topic: "State",
     q: "Can you have multiple state files for the same configuration?",
-    options: ["No", "Yes, using workspaces or separate backend configs (e.g. different keys)", "Only in Terraform Cloud", "Only by copying files manually"],
+    options: ["No", "Yes, using workspaces or separate backend configs (e.g. different keys)", "Only in HCP Terraform", "Only by copying files manually"],
     correct: 1,
     explain: "Workspaces or different backend configs (e.g. different key per env) give separate state files."
   },
@@ -430,7 +439,7 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "exam", topic: "Configuration",
     q: "How do you mark a variable as sensitive so it is redacted in plan/apply output?",
-    options: ["sensitive = true in the variable block", "variable_sensitive = true", "Only in Terraform Cloud", "Variables cannot be sensitive"],
+    options: ["sensitive = true in the variable block", "variable_sensitive = true", "Only in HCP Terraform", "Variables cannot be sensitive"],
     correct: 0,
     explain: "variable \"pwd\" { sensitive = true } redacts the value in logs and plan output."
   },
@@ -490,7 +499,7 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "exam", topic: "Modules",
     q: "Can a module call another module?",
-    options: ["No", "Yes; modules can nest other modules", "Only in Terraform Cloud", "Only one level deep"],
+    options: ["No", "Yes; modules can nest other modules", "Only in HCP Terraform", "Only one level deep"],
     correct: 1,
     explain: "Child modules can call other modules; the result is a tree of modules."
   },
@@ -508,13 +517,13 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "exam", topic: "Providers",
     q: "What is the 'default' provider configuration?",
-    options: ["The one in default workspace", "The provider block without an alias; used when no provider is specified on a resource", "The first provider in required_providers", "The one in Terraform Cloud"],
+    options: ["The one in default workspace", "The provider block without an alias; used when no provider is specified on a resource", "The first provider in required_providers", "The one defined only in HCP Terraform"],
     correct: 1,
     explain: "Resources use the default (no-alias) provider unless provider = <alias> is set."
   },
   { mode: "exam", topic: "Providers",
     q: "Where does Terraform store downloaded providers?",
-    options: ["In the state file", "In .terraform/providers/ (inside the working directory)", "In /usr/lib/terraform", "Only in Terraform Cloud"],
+    options: ["In the state file", "In .terraform/providers/ (inside the working directory)", "In /usr/lib/terraform", "Only in HCP Terraform"],
     correct: 1,
     explain: "terraform init downloads providers into .terraform/providers/ (platform-specific subdirs)."
   },
@@ -532,7 +541,7 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "exam", topic: "Workspaces",
     q: "How does state isolation work with workspaces?",
-    options: ["All workspaces share one state file", "Each workspace has its own state (e.g. different state key or namespace)", "Only in Terraform Cloud", "State is not isolated"],
+    options: ["All workspaces share one state file", "Each workspace has its own state (e.g. different state key or namespace)", "Only in HCP Terraform", "State is not isolated"],
     correct: 1,
     explain: "Backend stores state per workspace (e.g. key = \"env/${terraform.workspace}/terraform.tfstate\")."
   },
@@ -544,7 +553,7 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "exam", topic: "Backend",
     q: "Can you use partial backend configuration?",
-    options: ["No", "Yes; some settings can be provided via -backend-config or interactively at init", "Only for local backend", "Only in Terraform Cloud"],
+    options: ["No", "Yes; some settings can be provided via -backend-config or interactively at init", "Only for local backend", "Only in HCP Terraform"],
     correct: 1,
     explain: "Backend config can be partial; terraform init will prompt or use -backend-config for the rest."
   },
@@ -562,7 +571,7 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "exam", topic: "Security & Best Practices",
     q: "What is the purpose of variable validation blocks?",
-    options: ["To validate state", "To enforce rules on variable values (e.g. allowed values, format)", "To validate providers", "Only in Terraform Cloud"],
+    options: ["To validate state", "To enforce rules on variable values (e.g. allowed values, format)", "To validate providers", "Only in HCP Terraform"],
     correct: 1,
     explain: "variable \"env\" { validation { condition = contains([\"dev\",\"prod\"], var.env); error_message = \"...\" } }."
   },
@@ -572,20 +581,20 @@ window.QUESTION_BANK_TERRAFORM = [
     correct: 1,
     explain: "Use separate state (workspaces/dirs), -target sparingly, and plan review before apply."
   },
-  { mode: "exam", topic: "Terraform Cloud",
-    q: "What is a 'run' in Terraform Cloud?",
+  { mode: "exam", topic: "HCP Terraform",
+    q: "What is a 'run' in HCP Terraform?",
     options: ["A single terraform plan", "A plan and optionally apply (triggered by VCS, CLI, or API)", "Only apply", "A workspace"],
     correct: 1,
     explain: "A run = plan + optional apply. Triggered by push (VCS), terraform apply, or API."
   },
-  { mode: "exam", topic: "Terraform Cloud",
-    q: "How can you run Terraform locally but store state in Terraform Cloud?",
-    options: ["You cannot", "Use backend \"cloud\" { ... }; run terraform init and then plan/apply locally", "Only with Terraform Cloud Agent", "State cannot be in Terraform Cloud when running locally"],
+  { mode: "exam", topic: "HCP Terraform",
+    q: "How can you run Terraform locally but store state in HCP Terraform?",
+    options: ["You cannot", "Use backend \"cloud\" { ... }; run terraform init and then plan/apply locally", "Only when using HCP Terraform agents for every operation", "Remote state in HCP Terraform forbids local plan/apply"],
     correct: 1,
-    explain: "Backend \"cloud\" stores state in TFC; you can still run plan/apply from your machine (local execution)."
+    explain: "Backend \"cloud\" stores state in HCP Terraform; you can still run plan/apply from your machine (local execution)."
   },
-  { mode: "exam", topic: "Terraform Cloud",
-    q: "What are Terraform Cloud workspace tags used for (in backend config)?",
+  { mode: "exam", topic: "HCP Terraform",
+    q: "What are HCP Terraform workspace tags used for (in backend config)?",
     options: ["Only for display", "To select a single workspace by name or multiple workspaces by tags", "Only for naming", "Tags are not supported in backend"],
     correct: 1,
     explain: "workspaces { tags = [\"env:prod\"] } selects workspaces with that tag (one must be used)."
@@ -628,7 +637,7 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "comparison", topic: "Configuration",
     q: "How do Terraform variables compare to environment variables?",
-    options: ["They are the same", "Terraform variables are typed and can have defaults/validation; TF_VAR_ can set them from env", "Environment variables cannot be used", "Variables are only in Terraform Cloud"],
+    options: ["They are the same", "Terraform variables are typed and can have defaults/validation; TF_VAR_ can set them from env", "Environment variables cannot be used", "Variables exist only inside HCP Terraform"],
     correct: 1,
     explain: "Variable block defines type/default/validation; TF_VAR_name sets from environment."
   },
@@ -694,7 +703,7 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "exam", topic: "Backend",
     q: "What is the 'local' backend?",
-    options: ["Backend in Terraform Cloud", "Stores state in a local file (default behavior)", "Backend for localhost", "Deprecated"],
+    options: ["Backend hosted in HCP Terraform", "Stores state in a local file (default behavior)", "Backend for localhost", "Deprecated"],
     correct: 1,
     explain: "backend \"local\" or no backend = state in terraform.tfstate in the working directory."
   },
@@ -728,9 +737,9 @@ window.QUESTION_BANK_TERRAFORM = [
     correct: 1,
     explain: "Never commit secret .tfvars; use .gitignore and supply them securely (e.g. CI secrets, env)."
   },
-  { mode: "exam", topic: "Terraform Cloud",
-    q: "What is 'remote execution' in Terraform Cloud?",
-    options: ["Running Terraform in TFC instead of your machine (plan/apply in the cloud)", "Running only plan locally", "Remote state only", "SSH to instances"],
+  { mode: "exam", topic: "HCP Terraform",
+    q: "What is 'remote execution' in HCP Terraform?",
+    options: ["Running Terraform on HCP Terraform's runners instead of your machine (plan/apply in the cloud)", "Running only plan locally", "Remote state only", "SSH to instances"],
     correct: 0,
     explain: "Remote execution = Terraform runs (plan/apply) on HashiCorp's infrastructure; no local run."
   },
@@ -814,7 +823,7 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "exam", topic: "Modules",
     q: "What does 'source = \"hashicorp/consul/aws\"' refer to?",
-    options: ["A local path", "The public Terraform Registry (registry.terraform.io); hashicorp/consul/aws is namespace/module/provider", "A Git URL", "Terraform Cloud only"],
+    options: ["A local path", "The public Terraform Registry (registry.terraform.io); hashicorp/consul/aws is namespace/module/provider", "A Git URL", "HCP Terraform only"],
     correct: 1,
     explain: "Registry source: <namespace>/<name>/<provider> for provider-specific module."
   },
@@ -824,15 +833,15 @@ window.QUESTION_BANK_TERRAFORM = [
     correct: 1,
     explain: "type = object({ name = string; count = number }) enforces structure."
   },
-  { mode: "exam", topic: "Terraform Cloud",
-    q: "What is a 'sentinel' policy (Terraform Enterprise/Cloud)?",
-    options: ["A type of backend", "Policy-as-code to enforce rules on plan/apply (e.g. no public S3)", "A provider", "A module"],
+  { mode: "exam", topic: "HCP Terraform",
+    q: "What is OPA policy enforcement in HCP Terraform?",
+    options: ["A built-in Terraform language linter", "Policy-as-code (Open Policy Agent / Rego) that evaluates runs and can block applies that violate rules", "A replacement for remote state", "A provider authentication method"],
     correct: 1,
-    explain: "Sentinel policies evaluate the plan and can block apply (e.g. cost or security rules)."
+    explain: "HCP Terraform supports OPA-based policy enforcement alongside other governance features; policies inspect the plan and can deny apply."
   },
   { mode: "exam", topic: "Terraform CLI",
     q: "What does 'terraform console' do?",
-    options: ["Opens Terraform Cloud UI", "Interactive console to evaluate expressions (e.g. try functions, references)", "Only for debugging state", "Not a valid command"],
+    options: ["Opens the HCP Terraform web UI", "Interactive console to evaluate expressions (e.g. try functions, references)", "Only for debugging state", "Not a valid command"],
     correct: 1,
     explain: "terraform console lets you evaluate HCL expressions in the context of the current state and config."
   },
@@ -850,7 +859,7 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "exam", topic: "State",
     q: "What is 'terraform state push' typically used for?",
-    options: ["Routine workflow", "One-time migration or recovery (e.g. importing existing state into backend)", "Pushing to Git", "Syncing with Terraform Cloud only"],
+    options: ["Routine workflow", "One-time migration or recovery (e.g. importing existing state into backend)", "Pushing to Git", "Syncing with HCP Terraform only"],
     correct: 1,
     explain: "state push overwrites remote state; use for migration or recovery, not daily use."
   },
@@ -862,9 +871,9 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "exam", topic: "Modules",
     q: "What is a 'private registry' in Terraform?",
-    options: ["A type of backend", "A private (e.g. org-internal) registry for modules/providers", "A secret state", "Terraform Cloud only"],
+    options: ["A type of backend", "A private (e.g. org-internal) registry for modules/providers", "A secret state", "HCP Terraform only"],
     correct: 1,
-    explain: "Private registry hosts internal modules; Terraform Cloud/Enterprise and other solutions support it."
+    explain: "Private registry hosts internal modules; HCP Terraform and Terraform Enterprise support private registries."
   },
   { mode: "exam", topic: "Terraform Workflow",
     q: "When you change a resource's 'name' in config (e.g. aws_instance.web to aws_instance.app), what does Terraform do by default?",
@@ -880,7 +889,7 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "exam", topic: "Backend",
     q: "Can different workspaces use different backend configs?",
-    options: ["Yes, each workspace can have its own backend", "No; backend is shared, but state key/prefix can include workspace name", "Only in Terraform Cloud", "Workspaces and backends are unrelated"],
+    options: ["Yes, each workspace can have its own backend", "No; backend is shared, but state key/prefix can include workspace name", "Only in HCP Terraform", "Workspaces and backends are unrelated"],
     correct: 1,
     explain: "One backend config; use key = \"env/${terraform.workspace}/terraform.tfstate\" to separate state per workspace."
   },
@@ -898,7 +907,7 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "exam", topic: "Configuration",
     q: "What is 'null_resource' typically used for?",
-    options: ["Empty state", "Running provisioners or triggers when no real cloud resource is needed", "Deleting resources", "Only in Terraform Cloud"],
+    options: ["Empty state", "Running provisioners or triggers when no real cloud resource is needed", "Deleting resources", "Only in HCP Terraform"],
     correct: 1,
     explain: "null_resource with local-exec or other provisioners runs scripts; triggers re-run when dependency changes."
   },
@@ -950,11 +959,11 @@ window.QUESTION_BANK_TERRAFORM = [
     correct: 1,
     explain: "terraform apply tfplan applies that exact plan; no new plan is generated."
   },
-  { mode: "exam", topic: "Terraform Cloud",
-    q: "What is 'cost estimation' in Terraform Cloud?",
+  { mode: "exam", topic: "HCP Terraform",
+    q: "What is 'cost estimation' in HCP Terraform?",
     options: ["Free tier only", "Feature that estimates cost of planned changes (e.g. AWS pricing)", "Same as budget", "Not available"],
     correct: 1,
-    explain: "TFC can integrate with Infracost or similar to show estimated cost impact of a run."
+    explain: "HCP Terraform can integrate with cost estimation tools (e.g. Infracost) to show estimated cost impact of a run."
   },
   { mode: "exam", topic: "Configuration",
     q: "What does 'concat(list1, list2)' do?",
@@ -969,14 +978,14 @@ window.QUESTION_BANK_TERRAFORM = [
     explain: "format(fmt, args...) works like sprintf; format(\"%02d\", 5) = \"05\"."
   },
   { mode: "exam", topic: "Backend",
-    q: "What backend is built-in for Terraform Cloud?",
+    q: "What backend is built-in for HCP Terraform?",
     options: ["S3", "cloud (remote)", "local only", "None; use -backend-config"],
     correct: 1,
-    explain: "backend \"remote\" (older) or backend \"cloud\" for Terraform Cloud/Enterprise."
+    explain: "backend \"remote\" (legacy) or backend \"cloud\" for HCP Terraform / Terraform Enterprise."
   },
   { mode: "exam", topic: "Workspaces",
     q: "Can you delete the 'default' workspace?",
-    options: ["Yes", "No; the default workspace cannot be deleted", "Only if empty", "Only in Terraform Cloud"],
+    options: ["Yes", "No; the default workspace cannot be deleted", "Only if empty", "Only in HCP Terraform"],
     correct: 1,
     explain: "The default workspace is permanent; you can create and delete other workspaces."
   },
@@ -990,7 +999,7 @@ window.QUESTION_BANK_TERRAFORM = [
     q: "How does Terraform's remote state compare to storing state in Git?",
     options: ["Identical", "Remote backend supports locking, encryption, access control; Git has no locking and state may contain secrets", "Git is preferred", "Terraform does not support remote state"],
     correct: 1,
-    explain: "Remote backend (S3, TFC, etc.) gives locking and security; Git is not suitable for state."
+    explain: "Remote backend (S3, HCP Terraform, etc.) gives locking and security; Git is not suitable for state."
   },
   { mode: "exam", topic: "Terraform CLI",
     q: "What does -parallelism=n do for terraform apply?",
@@ -1006,7 +1015,7 @@ window.QUESTION_BANK_TERRAFORM = [
   },
   { mode: "exam", topic: "Modules",
     q: "What does 'source = \"./modules/vpc\"' mean?",
-    options: ["Registry module", "Local module in the path ./modules/vpc relative to the module calling it", "Git module", "Terraform Cloud module"],
+    options: ["Registry module", "Local module in the path ./modules/vpc relative to the module calling it", "Git module", "HCP Terraform-hosted module only"],
     correct: 1,
     explain: "Relative path is relative to the current module directory (path.module)."
   },
@@ -1034,10 +1043,408 @@ window.QUESTION_BANK_TERRAFORM = [
     correct: 1,
     explain: "templatefile(path, vars) reads a file and replaces ${var.name} with vars; returns string."
   },
-  { mode: "exam", topic: "Terraform Cloud",
-    q: "What is 'VCS-driven workflow' in Terraform Cloud?",
+  { mode: "exam", topic: "HCP Terraform",
+    q: "What is a 'VCS-driven workflow' in HCP Terraform?",
     options: ["Version control only", "Runs triggered by Git push (e.g. PR creates plan; merge triggers apply)", "Only for state", "Not supported"],
     correct: 1,
-    explain: "Connect VCS repo; TFC runs plan on PR/push and can auto-apply on merge to main."
+    explain: "Connect a VCS repo; HCP Terraform runs plan on PR/push and can auto-apply on merge to the default branch."
+  },
+  // === Terraform Associate 004: maintain infrastructure, state refactor, HCP Terraform ===
+  { mode: "exam", topic: "Maintain infrastructure",
+    q: "What does terraform import do?",
+    options: ["Downloads providers from the registry", "Associates an existing real infrastructure object with a resource address in Terraform state", "Copies .tf files from another directory", "Encrypts terraform.tfstate"],
+    correct: 1,
+    explain: "terraform import maps an existing object into state at a given address; you still need matching configuration (or generate it) so the next plan is clean."
+  },
+  { mode: "exam", topic: "Maintain infrastructure",
+    q: "Which environment variables are used for verbose Terraform logging when troubleshooting?",
+    options: ["TF_VERBOSE and TF_TRACE only", "TF_LOG (e.g. DEBUG or TRACE) and optionally TF_LOG_PATH for a log file", "TERRAFORM_DEBUG only", "LOG_LEVEL=terraform"],
+    correct: 1,
+    explain: "Set TF_LOG to TRACE, DEBUG, INFO, WARN, or ERROR; TF_LOG_PATH writes logs to a file. See HashiCorp debugging documentation."
+  },
+  { mode: "exam", topic: "State",
+    q: "What is the purpose of a moved block (Terraform 1.1+)?",
+    options: ["Migrate state between backends only", "Declare that a resource address changed so Terraform updates state without destroy/create when possible", "Move providers between regions", "Copy variables from a child module to the root"],
+    correct: 1,
+    explain: "moved blocks record refactorings (renamed resources/modules); Terraform rewrites state addresses to match the new configuration."
+  },
+  { mode: "exam", topic: "State",
+    q: "What does a removed block (Terraform 1.7+) express?",
+    options: ["That terraform destroy must skip all resources", "That a resource was removed from configuration and how Terraform should handle the existing object (e.g. destroy or retain)", "That the remote backend was deleted", "That a provider is no longer required"],
+    correct: 1,
+    explain: "removed is part of the configuration-driven workflow for dropping resources from config while controlling lifecycle of the real infrastructure."
+  },
+  { mode: "exam", topic: "Configuration",
+    q: "What is a check block used for in modern Terraform?",
+    options: ["Checking out Git branches", "Continuous validation: assert conditions (often using data sources) at plan or apply time", "Replacing the terraform block", "Importing resources automatically"],
+    correct: 1,
+    explain: "check blocks validate infrastructure expectations (exam objective 4g ties to custom validation and checks in the content list)."
+  },
+  { mode: "exam", topic: "HCP Terraform",
+    q: "What are variable sets in HCP Terraform?",
+    options: ["Variables stored only in Git-tracked .tfvars", "Reusable groups of variables you attach to one or more workspaces at the organization level", "Local-only TF_VAR defaults", "Provider credentials built into Terraform Core"],
+    correct: 1,
+    explain: "Variable sets reduce duplication by applying the same variables across many workspaces (see HCP Terraform variable sets documentation)."
+  },
+  { mode: "exam", topic: "HCP Terraform",
+    q: "What is the role of projects in HCP Terraform?",
+    options: ["Git branches inside a module", "Grouping workspaces for access control, reporting, and organization", "Terraform Core project metadata only", "A replacement for the public Terraform Registry"],
+    correct: 1,
+    explain: "Projects help organize workspaces (e.g. by team or application) within an organization."
+  },
+  { mode: "exam", topic: "HCP Terraform",
+    q: "What do run triggers provide in HCP Terraform?",
+    options: ["Automatic terraform fmt on save", "Chaining workspaces so a successful apply in one workspace can queue runs in downstream workspaces", "A substitute for terraform plan", "Automatic import of every unmanaged resource"],
+    correct: 1,
+    explain: "Run triggers connect workspaces for pipeline-style automation after applies complete."
+  },
+  { mode: "exam", topic: "HCP Terraform",
+    q: "Which CLI command authenticates your local Terraform CLI to HCP Terraform?",
+    options: ["terraform auth", "terraform login", "terraform cloud connect", "terraform init --login"],
+    correct: 1,
+    explain: "terraform login obtains an API token used for cloud backend operations and other integrations."
+  },
+  { mode: "exam", topic: "Terraform fundamentals",
+    q: "Besides backend \"cloud\", how can you connect a working directory to HCP Terraform using a terraform block (Terraform 1.1+)?",
+    options: ["plugin_dir { ... }", "cloud { organization = \"...\" workspaces { name = \"...\" } }", "experiments = [\"cloud\"]", "provider_meta"],
+    correct: 1,
+    explain: "A cloud {} block inside terraform {} configures the CLI integration with HCP Terraform (alternative to legacy remote backend patterns in some setups)."
+  },
+  { mode: "exam", topic: "HCP Terraform",
+    q: "What is drift detection in HCP Terraform?",
+    options: ["Deleting unmanaged local files", "Comparing workspace state to real infrastructure on a schedule or on demand to find unexpected differences", "Automatically renaming resources", "Running terraform fmt in CI"],
+    correct: 1,
+    explain: "Drift detection highlights when live infrastructure no longer matches the managed state."
+  },
+  { mode: "exam", topic: "Terraform fundamentals",
+    q: "Why does the Terraform Associate (004) content list call out HashiCorp Vault alongside managed sensitive data?",
+    options: ["Vault deletes sensitive values from state automatically", "Vault is a common way to supply secrets or dynamic credentials instead of storing them in plaintext in VCS", "Terraform cannot read secrets without Vault", "Vault replaces the need for variables"],
+    correct: 1,
+    explain: "Exam objective 4h covers sensitive data practices and Vault integration tutorials; many teams fetch secrets from Vault rather than committing them."
+  },
+  { mode: "comparison", topic: "HCP Terraform",
+    q: "How do CLI-managed workspaces (terraform workspace) differ from HCP Terraform workspaces?",
+    options: ["They are identical", "CLI workspaces swap the local state file (or key) for one configuration; HCP Terraform workspaces are cloud-managed units of state, runs, and variables", "Neither supports remote state", "Only HCP Terraform has a default workspace"],
+    correct: 1,
+    explain: "Same word, different concepts: OSS workspaces partition state locally; HCP Terraform workspaces are first-class objects in the platform."
+  },
+  // --- True/false (Associate 004 style) ---
+  { mode: "exam", topic: "State", type: "tf",
+    q: "Usernames, passwords, or tokens referenced in Terraform configuration can end up in the state file in forms Terraform or providers persist.",
+    correct: true,
+    explain: "State stores attributes after apply; sensitive values may still appear unless you use patterns that avoid persisting them (and mark outputs/variables sensitive where applicable)."
+  },
+  { mode: "exam", topic: "Terraform CLI", type: "tf",
+    q: "terraform validate contacts your cloud provider APIs to verify that resources exist.",
+    correct: false,
+    explain: "validate checks configuration syntax and internal consistency only; it does not reach cloud APIs."
+  },
+  { mode: "exam", topic: "IaC Concepts", type: "tf",
+    q: "Terraform is declarative: you describe desired end state and Terraform determines the actions to reach it.",
+    correct: true,
+    explain: "Declarative IaC contrasts with imperative step-by-step scripts."
+  },
+  { mode: "exam", topic: "Terraform fundamentals", type: "tf",
+    q: "The .terraform.lock.hcl file should generally be committed to version control so all collaborators use the same provider versions.",
+    correct: true,
+    explain: "Commit the lock file for reproducible terraform init across machines and CI."
+  },
+  { mode: "exam", topic: "State", type: "tf",
+    q: "terraform state rm destroys the real infrastructure object at that address.",
+    correct: false,
+    explain: "state rm removes the binding from state only; the real resource is left running (orphaned from Terraform's view)."
+  },
+  { mode: "exam", topic: "Configuration", type: "tf",
+    q: "A data block creates and manages new infrastructure the same way a resource block does.",
+    correct: false,
+    explain: "Data sources are read-only; they look up existing data and never manage lifecycle of a new object."
+  },
+  { mode: "exam", topic: "Terraform Workflow", type: "tf",
+    q: "terraform fmt rewrites .tf files on disk to a canonical formatting style.",
+    correct: true,
+    explain: "fmt updates files in place (unless using -check for CI validation)."
+  },
+  { mode: "exam", topic: "Modules", type: "tf",
+    q: "A child module's output values can be read from the root module as module.<name>.<output_name>.",
+    correct: true,
+    explain: "Outputs expose values upward to the caller."
+  },
+  { mode: "exam", topic: "HCP Terraform", type: "tf",
+    q: "With remote execution enabled, terraform plan and apply always run only on your laptop.",
+    correct: false,
+    explain: "Remote execution runs operations on HCP Terraform's infrastructure instead of (or in addition to patterns with) local runs, depending on workspace settings."
+  },
+  { mode: "exam", topic: "Maintain infrastructure", type: "tf",
+    q: "terraform import can bring an existing cloud object into state without you adding a matching resource block to configuration.",
+    correct: false,
+    explain: "Import only maps state; you still need configuration that matches the object or the next plan will try to change or remove it."
+  },
+  { mode: "exam", topic: "State", type: "tf",
+    q: "Remote backends can enforce state locking so two applies do not corrupt the same state simultaneously.",
+    correct: true,
+    explain: "Locking (e.g. DynamoDB with S3, or HCP Terraform) is a key production practice."
+  },
+  // --- Select all that apply (official sample patterns) ---
+  { mode: "exam", topic: "Terraform CLI", type: "multi",
+    q: "Which commands refresh Terraform state from real infrastructure by default (unless flags disable refresh)? Pick 2.",
+    options: ["terraform plan", "terraform state", "terraform apply", "terraform validate", "terraform output"],
+    correct: [0, 2],
+    explain: "plan and apply refresh state as part of their workflow unless you use flags such as -refresh=false."
+  },
+  { mode: "exam", topic: "Terraform Workflow", type: "multi",
+    q: "What happens when you successfully apply Terraform configuration? Pick 2.",
+    options: ["Terraform may create, update, or destroy infrastructure to match the configuration", "Terraform downloads required provider plugins", "Terraform updates state to reflect changes it made", "terraform fmt fixes all HCL typos automatically", "Terraform always destroys every resource and recreates from scratch"],
+    correct: [0, 2],
+    explain: "Apply reconciles infrastructure with config and writes the resulting state; init (not apply) fetches plugins; fmt does not fix semantic errors."
+  },
+  { mode: "exam", topic: "Configuration", type: "multi",
+    q: "You defined variable values in terraform.tfvars in the working directory. Which approaches use those values when planning? Pick 2.",
+    options: ["Run terraform plan (auto-loads *.auto.tfvars and terraform.tfvars when present)", "Run terraform plan -var-file=terraform.tfvars", "Run terraform plan -refresh-only only (ignores tfvars)", "Rename the file to .env and export TF_VAR_ manually only", "terraform validate loads tfvars for graph builds"],
+    correct: [0, 1],
+    explain: "Terraform automatically loads terraform.tfvars and *.auto.tfvars from the working directory; you can also pass -var-file explicitly."
+  },
+  { mode: "exam", topic: "Configuration", type: "multi",
+    q: "Which blocks or constructs can help manage sensitive values? Pick 2.",
+    options: ["variable { sensitive = true }", "output { sensitive = true }", "terraform { sensitive_global = true }", "provider { hide_secrets = true }"],
+    correct: [0, 1],
+    explain: "Sensitive variables and outputs are redacted in CLI output; there is no sensitive_global or hide_secrets meta-block in core HCL."
+  },
+  { mode: "exam", topic: "State", type: "multi",
+    q: "Which are valid reasons to use a remote backend instead of only local terraform.tfstate? Pick 2.",
+    options: ["State locking for team collaboration", "Storing state only in RAM", "Offload state to shared storage with access control", "Guarantee that secrets never appear in state"],
+    correct: [0, 2],
+    explain: "Remote backends add locking, sharing, and ACLs; state may still contain sensitive attributes—design accordingly."
+  },
+  { mode: "exam", topic: "Terraform CLI", type: "multi",
+    q: "Which commands are safe to run in CI to validate configuration without changing infrastructure? Pick 2.",
+    options: ["terraform fmt -check", "terraform apply -auto-approve", "terraform validate", "terraform destroy"],
+    correct: [0, 2],
+    explain: "fmt -check and validate are read-only with respect to infrastructure; apply and destroy change real resources."
+  },
+  { mode: "exam", topic: "Terraform fundamentals", type: "multi",
+    q: "Which files or directories are normally safe to add to .gitignore for a Terraform project (choose common practice)? Pick 2.",
+    options: [".terraform/", "terraform.tfstate", "All *.tf files", "terraform.tfvars.example"],
+    correct: [0, 1],
+    explain: "Ignore plugin cache and local state; commit .tf sources and example tfvars; do not commit real secret tfvars."
+  },
+  { mode: "exam", topic: "Modules", type: "multi",
+    q: "Which are valid module sources? Pick 3.",
+    options: ["A local path such as ./modules/vpc", "A public registry reference such as hashicorp/consul/aws", "An HTTPS or Git URL with optional ref", "Only files ending in .tf.json", "A random string with no protocol"],
+    correct: [0, 1, 2],
+    explain: "Modules load from paths, registry addresses, and Version Control URLs per Terraform documentation."
+  },
+  { mode: "exam", topic: "Maintain infrastructure", type: "multi",
+    q: "Which statements about terraform import are true? Pick 2.",
+    options: ["It maps an existing infrastructure ID into state at a given resource address", "It generates complete HCL for you with no follow-up needed", "You typically run it after writing or generating a matching resource block", "It deletes the resource from the cloud if the ID is wrong"],
+    correct: [0, 2],
+    explain: "Import links existing infra to state; you must align configuration; it does not auto-author full config or destroy on error."
+  },
+  { mode: "exam", topic: "HCP Terraform", type: "multi",
+    q: "Which are collaboration or governance features called out for HCP Terraform in the Associate 004 content list? Pick 2.",
+    options: ["Policy enforcement (e.g. OPA)", "Drift detection", "terraform console REPL", "Local .terraform directory sharing"],
+    correct: [0, 1],
+    explain: "The exam content list highlights policy enforcement, drift detection, variable sets, projects, teams, registry, etc."
+  },
+  // --- Comparison bank (expanded): Terraform vs other tools / workflows ---
+  { mode: "comparison", topic: "IaC Concepts",
+    q: "How does Terraform most differ from CloudFormation for AWS-only infrastructure?",
+    options: ["Terraform is AWS-only; CloudFormation is multi-cloud", "Terraform uses a provider model and can target many clouds with one workflow; CloudFormation is AWS-native", "CloudFormation cannot use templates", "There is no difference"],
+    correct: 1,
+    explain: "Terraform is cloud-agnostic via providers; CloudFormation is deeply integrated with AWS stacks and service features."
+  },
+  { mode: "comparison", topic: "IaC Concepts",
+    q: "Compared to Pulumi (TypeScript/Python), what is Terraform's default configuration style?",
+    options: ["Imperative scripts only", "HashiCorp Configuration Language (HCL) as the common default, with optional CDKTF for general-purpose languages", "JSON only", "GUI wizards only"],
+    correct: 1,
+    explain: "Terraform's first-class language is HCL; Pulumi defaults to real programming languages for infrastructure."
+  },
+  { mode: "comparison", topic: "Terraform Workflow",
+    q: "How does a typical GitOps controller (e.g. Argo CD applying Kubernetes YAML) differ from Terraform's core workflow?",
+    options: ["They never use Git", "GitOps reconciles declared manifests from Git to a cluster continuously; Terraform is usually CLI/API plan-apply driven (though CI/VCS integrations overlap)", "Terraform cannot run in CI", "GitOps never plans"],
+    correct: 1,
+    explain: "GitOps emphasizes continuous reconcile from Git; Terraform emphasizes explicit plan/apply with state, often triggered from CI or HCP Terraform."
+  },
+  { mode: "comparison", topic: "Terraform Workflow",
+    q: "Relative to a Jenkins pipeline that runs shell + AWS CLI steps, what does Terraform add?",
+    options: ["Nothing", "A dependency graph, declarative desired state, and stateful reconciliation instead of mostly imperative steps", "Only formatting", "Only Docker builds"],
+    correct: 1,
+    explain: "Terraform plans changes from config+state and applies a graph of operations; ad-hoc scripts lack that unified model."
+  },
+  { mode: "comparison", topic: "Providers",
+    q: "How do Terraform providers compare to Kubernetes controllers/operators?",
+    options: ["They are identical", "Providers implement cloud APIs as Terraform resources; operators reconcile custom resources inside a cluster", "Providers only run inside Kubernetes", "Operators cannot manage cloud resources"],
+    correct: 1,
+    explain: "Different layers: Terraform providers talk to cloud/vendor APIs; K8s operators extend the API server reconciliation loop."
+  },
+  { mode: "comparison", topic: "Modules",
+    q: "How does a reusable Terraform module differ from a Helm chart?",
+    options: ["Helm charts cannot be versioned", "Helm packages Kubernetes app templates/values; Terraform modules are general IaC units usable across providers", "Modules only install Helm", "They are the same format"],
+    correct: 1,
+    explain: "Helm is Kubernetes-centric packaging; Terraform modules are broader (network, IAM, data stores, K8s via provider, etc.)."
+  },
+  { mode: "comparison", topic: "State",
+    q: "How does Terraform state differ from Ansible's inventory + facts for a server?",
+    options: ["Ansible stores full cloud API state in one file", "Terraform state maps resource addresses to cloud IDs and attributes for reconciliation; Ansible inventory/facts describe hosts, not Terraform resource graphs", "Ansible has no facts", "Terraform cannot track IDs"],
+    correct: 1,
+    explain: "Terraform state is the source for what Terraform believes exists for its managed objects; Ansible models hosts differently."
+  },
+  { mode: "comparison", topic: "Backend",
+    q: "Storing Terraform state in Git vs an S3+DynamoDB remote backend—what is the main contrast?",
+    options: ["Git provides state locking", "Remote backends support locking, partial access control, and encryption patterns suited to state; Git lacks Terraform-native locking and encourages committing risky artifacts", "S3 cannot store JSON", "They are equivalent"],
+    correct: 1,
+    explain: "Remote backends are designed for state lifecycle; plain Git is a poor fit for concurrent applies and secrets in state."
+  },
+  { mode: "comparison", topic: "Security & Best Practices",
+    q: "Compared to baking secrets into a Jenkins credential shell script, Terraform's variable + backend patterns aim to:",
+    options: ["Eliminate the need for any secrets", "Keep secrets out of VCS and reduce exposure via env vars, secret stores, sensitive flags, and remote state access controls", "Store all secrets in .tf files", "Disable encryption"],
+    correct: 1,
+    explain: "Both tools need discipline; Terraform patterns emphasize not committing secrets and limiting who can read state."
+  },
+  { mode: "comparison", topic: "Maintain infrastructure",
+    q: "How does terraform import differ from vendor 'resource import' wizards in a cloud console?",
+    options: ["They always generate perfect modules", "Import links an existing object into Terraform state at an address; you still own matching config and ongoing drift handling in code", "Import deletes the object", "Console wizards always produce Terraform code"],
+    correct: 1,
+    explain: "Terraform import is state-centric; aligning HCL and lifecycle is still your responsibility."
+  },
+  { mode: "comparison", topic: "HCP Terraform",
+    q: "How does HCP Terraform remote execution differ from only using an S3 backend for state?",
+    options: ["S3 runs Terraform in the cloud automatically", "S3 (with locking) stores state; HCP Terraform can additionally run plans/applies, policies, and VCS-driven workflows on managed runners", "S3 replaces providers", "HCP Terraform cannot use remote state"],
+    correct: 1,
+    explain: "Remote state backends store data; HCP Terraform is a full collaboration/execution platform option."
+  },
+  { mode: "comparison", topic: "Terraform fundamentals",
+    q: "Bicep or ARM JSON for Azure vs Terraform for Azure—what is a fair distinction?",
+    options: ["Terraform cannot manage Azure", "Both are declarative; Terraform uses the azurerm provider and one workflow across clouds, while Bicep/ARM are Azure-first languages", "Bicep only runs on Linux", "ARM cannot use parameters"],
+    correct: 1,
+    explain: "Azure-native templates are deep on Azure; Terraform trades some Azure-only sugar for multi-cloud consistency via providers."
+  },
+  // --- True/false bank (expanded) ---
+  { mode: "exam", topic: "Terraform CLI", type: "tf",
+    q: "terraform plan can emit a JSON representation of the plan when you pass the -json flag (supported versions).",
+    correct: true,
+    explain: "terraform plan -json is intended for tooling and CI integration (see CLI documentation for your Terraform version)."
+  },
+  { mode: "exam", topic: "Configuration", type: "tf",
+    q: "You may set both count and for_each on the same resource block at once.",
+    correct: false,
+    explain: "Use either count or for_each per resource, not both."
+  },
+  { mode: "exam", topic: "Configuration", type: "tf",
+    q: "The expression terraform.workspace is available in Terraform configuration to read the current CLI workspace name.",
+    correct: true,
+    explain: "terraform.workspace reflects the selected workspace (e.g. default, staging) for state partitioning."
+  },
+  { mode: "exam", topic: "Terraform fundamentals", type: "tf",
+    q: "required_providers can reference a private registry hostname in the source address.",
+    correct: true,
+    explain: "Private registry hosts are supported for module and provider sources per your registry configuration."
+  },
+  { mode: "exam", topic: "Backend", type: "tf",
+    q: "When you change backend configuration, terraform init may offer to migrate existing state to the new backend.",
+    correct: true,
+    explain: "Init can prompt for -migrate-state to copy state safely when reconfiguring backends."
+  },
+  { mode: "exam", topic: "Terraform CLI", type: "tf",
+    q: "terraform apply -replace=ADDRESS targets only that resource instance for forced replacement on the next apply.",
+    correct: true,
+    explain: "-replace (or legacy -target patterns) forces recreation of the selected resource address."
+  },
+  { mode: "exam", topic: "State", type: "tf",
+    q: "terraform refresh (legacy) and terraform apply -refresh-only both update state from real infrastructure without applying non-refresh changes—conceptually similar goals.",
+    correct: true,
+    explain: "Refresh-only apply is the preferred modern way to align state without other changes; refresh is the older dedicated command."
+  },
+  { mode: "exam", topic: "Terraform Workflow", type: "tf",
+    q: "terraform destroy removes the Terraform binary from your PATH.",
+    correct: false,
+    explain: "destroy removes managed infrastructure per state; it does not uninstall Terraform."
+  },
+  { mode: "exam", topic: "Security & Best Practices", type: "tf",
+    q: "Marking an output as sensitive prevents it from appearing in terraform apply's normal log output but may still be accessible via terraform output with appropriate flags depending on version and settings.",
+    correct: true,
+    explain: "Sensitive redacts casual logs; understand output behavior for automation and compliance."
+  },
+  { mode: "exam", topic: "Modules", type: "tf",
+    q: "A module's input variables are defined with variable blocks inside the module and passed from the caller via the module block arguments.",
+    correct: true,
+    explain: "Child modules declare variables; the parent sets them as arguments on module \"name\" { ... }."
+  },
+  { mode: "exam", topic: "HCP Terraform", type: "tf",
+    q: "HCP Terraform variable sets can attach the same variables to multiple workspaces in an organization.",
+    correct: true,
+    explain: "Variable sets reduce duplication across many workspaces."
+  },
+  // --- Select all that apply (expanded) ---
+  { mode: "exam", topic: "Configuration", type: "multi",
+    q: "Which are valid arguments inside a resource lifecycle block? Pick 3.",
+    options: ["create_before_destroy", "prevent_destroy", "ignore_changes", "always_refresh", "pin_provider_version"],
+    correct: [0, 1, 2],
+    explain: "lifecycle supports create_before_destroy, prevent_destroy, ignore_changes, replace_triggered_by (version-dependent), etc.; not generic always_refresh or pin_provider_version."
+  },
+  { mode: "exam", topic: "Terraform CLI", type: "multi",
+    q: "Which outcomes occur during a normal terraform init in a clean directory? Pick 3.",
+    options: ["Provider plugins are installed per configuration", "Modules are downloaded if referenced", "The backend is initialized", "terraform apply runs automatically", "All cloud resources are destroyed"],
+    correct: [0, 1, 2],
+    explain: "init prepares providers, modules, and backend; it does not apply or destroy infrastructure."
+  },
+  { mode: "exam", topic: "Configuration", type: "multi",
+    q: "Which of the following are built-in structural types you can use in variable type constraints? Pick 3.",
+    options: ["object({ ... })", "tuple([string, number])", "map(string)", "unsorted-set", "pointer(string)"],
+    correct: [0, 1, 2],
+    explain: "Terraform supports object, tuple, map, list, set, and primitive constraints; not arbitrary pointer or unsorted-set keywords."
+  },
+  { mode: "exam", topic: "Terraform CLI", type: "multi",
+    q: "Which flags are commonly used for non-interactive automation of plan/apply? Pick 2.",
+    options: ["-auto-approve", "-input=false", "-destroy-all", "-no-plugins", "-skip-state"],
+    correct: [0, 1],
+    explain: "-auto-approve skips the apply confirmation; -input=false avoids prompts for unset variables when values are supplied elsewhere."
+  },
+  { mode: "exam", topic: "State", type: "multi",
+    q: "Which are real terraform state subcommands? Pick 3.",
+    options: ["list", "mv", "rm", "purge-cloud", "rewrite-json-only"],
+    correct: [0, 1, 2],
+    explain: "Common state commands include list, show, mv, rm, pull, push, replace-provider—use official CLI docs for the full set."
+  },
+  { mode: "exam", topic: "HCP Terraform", type: "multi",
+    q: "Which items are typical HCP Terraform platform capabilities called out in certification prep? Pick 2.",
+    options: ["Variable sets shared across workspaces", "Explorer views across workspaces", "Built-in Linux package manager", "Automatic deletion of all cloud accounts"],
+    correct: [0, 1],
+    explain: "Variable sets and Explorer are part of collaboration/visibility; the distractors are nonsense."
+  },
+  { mode: "exam", topic: "Configuration", type: "multi",
+    q: "Which language features help build dynamic nested blocks from collections? Pick 2.",
+    options: ["dynamic blocks", "for expressions", "import blocks only", "only count without for_each"],
+    correct: [0, 1],
+    explain: "dynamic generates nested blocks; for produces transformed lists/maps—both underpin dynamic configuration."
+  },
+  { mode: "exam", topic: "Backend", type: "multi",
+    q: "Which are valid Terraform backend types (built-in or documented)? Pick 3.",
+    options: ["s3", "azurerm", "gcs", "ftp-anonymous-only", "random-tcp-backend"],
+    correct: [0, 1, 2],
+    explain: "HashiCorp documents multiple first-party backends including s3, azurerm, gcs, consul, kubernetes, cloud, etc."
+  },
+  { mode: "exam", topic: "Terraform fundamentals", type: "multi",
+    q: "Which commands or flows update the dependency lock file for providers? Pick 2.",
+    options: ["terraform init -upgrade", "terraform providers lock (when pinning platforms)", "terraform fmt", "terraform output"],
+    correct: [0, 1],
+    explain: "init -upgrade can relax and re-resolve within constraints; providers lock records checksums for selected platforms."
+  },
+  { mode: "exam", topic: "Configuration", type: "multi",
+    q: "Which functions are commonly used for IPv4 CIDR math in Terraform? Pick 2.",
+    options: ["cidrsubnet", "cidrhost", "http_delete", "uuidv5_only"],
+    correct: [0, 1],
+    explain: "cidrsubnet and cidrhost split and pick addresses inside a prefix; the others are unrelated distractors."
+  },
+  { mode: "exam", topic: "Providers", type: "multi",
+    q: "Which statements about provider aliases are true? Pick 2.",
+    options: ["Multiple provider blocks can use the same provider type with different aliases", "Resources can select a non-default provider with provider = aws.west", "Aliases remove the need for required_providers", "Aliases duplicate state files automatically"],
+    correct: [0, 1],
+    explain: "Alias named configurations exist alongside the default; resources reference them via the meta-argument provider."
+  },
+  { mode: "exam", topic: "Terraform Workflow", type: "multi",
+    q: "Which statements about terraform plan and terraform apply are true? Pick 2.",
+    options: ["plan proposes changes; apply can execute them after confirmation (or -auto-approve)", "plan never reads state", "apply may update state after successful changes", "apply always skips the planning phase when given no arguments"],
+    correct: [0, 2],
+    explain: "Both read state; plan is preview; default apply includes a plan step unless you pass a saved plan file."
   },
 ];

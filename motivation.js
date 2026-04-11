@@ -4,7 +4,8 @@
 (function () {
   'use strict';
 
-  var MOTIVATIONS = [
+  /** General reframes (weight 1 each when picking). */
+  var MOTIVATIONS_GENERAL = [
     'This pattern = securing drone data so I can script satire instead of bugs.',
     'Mastering this = more money to direct AI for creative freedom.',
     'Every correct answer = one step closer to escaping legacy-code hell.',
@@ -23,6 +24,35 @@
     'This focus = trading short-term comfort for long-term optionality.',
     'Every pass = one step closer to the work that actually excites you.'
   ];
+
+  /** Gauntlet AI path — counted multiple times in the weighted pool so they surface more often. */
+  var MOTIVATIONS_GAUNTLET = [
+    'This session = reps toward Gauntlet AI — keep the goal in the room.',
+    'Gauntlet AI is on the map: every hard question is tuition, not torture.',
+    'You are building the baseline Gauntlet AI will expect — stay in it.',
+    'One more pass = one more proof you are serious about Gauntlet AI.',
+    'Tough stretch? Same energy you will bring on day one at Gauntlet AI.',
+    'This grind = stacking signal that you belong in a Gauntlet AI cohort.',
+    'Not giving up here = the same discipline that gets you through Gauntlet AI.',
+    'Right now you are earning the seat — Gauntlet AI is the finish line, not fantasy.'
+  ];
+
+  /** How many copies of each Gauntlet line go into the draw (raise to bump Gauntlet share further). */
+  var GAUNTLET_WEIGHT = 2;
+
+  function buildWeightedMotivations() {
+    var out = MOTIVATIONS_GENERAL.slice();
+    var i;
+    var j;
+    for (i = 0; i < MOTIVATIONS_GAUNTLET.length; i++) {
+      for (j = 0; j < GAUNTLET_WEIGHT; j++) {
+        out.push(MOTIVATIONS_GAUNTLET[i]);
+      }
+    }
+    return out;
+  }
+
+  var MOTIVATIONS = buildWeightedMotivations();
 
   var TOAST_DURATION_MS = 5000;
   var FADE_OUT_MS = 400;

@@ -2,6 +2,12 @@
  * Shared quiz engine for Cloud Cram. Call QuizEngine.run(config) with
  * { quizId, questionBank, questionsPerQuiz, resultsTitle?, downloadFilenamePrefix? }.
  * Exposes startQuiz, nextQuestion, prevQuestion, selectMode, importResults, onImportFile, downloadResults, copyResultsToClipboard on window for onclick handlers.
+ *
+ * Question shapes:
+ * - Default (single choice): { q, options[], correct: number, explain, mode, topic? }
+ * - True/false: { type: 'tf', correct: true|false, q, explain, ... } — options are always True / False
+ * - Select all: { type: 'multi', options[], correct: number[] (original indices), explain, ... }
+ * - Ordering: { type: 'order', options[], correctOrder: number[], ... }
  */
 (function () {
   'use strict';
@@ -129,16 +135,7 @@
       ? Math.min(EXAM_MODE_QUESTIONS, filtered.length)
       : Math.min(QUESTIONS_PER_QUIZ, filtered.length);
     sessionQuestions = weightedSample(filtered, n, profile);
-    sessionQuestions.forEach(function (q) {
-      if (q.type === 'order') {
-        var indices = q.options.map(function (_, i) { return i; });
-        q._initialOrder = shuffle(indices.slice());
-      } else {
-        var shuffled = shuffle(q.options.slice());
-        q._shuffledOptions = shuffled;
-        q._correctDisplayIndex = shuffled.indexOf(q.options[q.correct]);
-      }
-    });
+    sessionQuestions.forEach(prepareQuestionShuffle);
     currentIndex = 0;
     score = 0;
     answered = [];
@@ -176,6 +173,46 @@
     return true;
   }
 
+  function sameSortedIndices(a, b) {
+    if (a === b) return true;
+    if (!a || !b || a.length !== b.length) return false;
+    var sa = a.slice().sort(function (x, y) { return x - y; });
+    var sb = b.slice().sort(function (x, y) { return x - y; });
+    for (var i = 0; i < sa.length; i++) if (sa[i] !== sb[i]) return false;
+    return true;
+  }
+
+  function prepareQuestionShuffle(q) {
+    if (q.type === 'order') {
+      var indices = q.options.map(function (_, i) { return i; });
+      q._initialOrder = shuffle(indices.slice());
+      return;
+    }
+    if (q.type === 'tf') {
+      q._shuffledOptions = ['True', 'False'];
+      q._correctDisplayIndex = (q.correct === true || q.correct === 'true') ? 0 : 1;
+      delete q._correctDisplayIndices;
+      return;
+    }
+    if (q.type === 'multi') {
+      var correctOrig = Array.isArray(q.correct) ? q.correct.slice() : [];
+      var pairs = q.options.map(function (text, i) { return { text: text, i: i }; });
+      var shuffledPairs = shuffle(pairs);
+      q._shuffledOptions = shuffledPairs.map(function (p) { return p.text; });
+      q._correctDisplayIndices = [];
+      for (var di = 0; di < shuffledPairs.length; di++) {
+        if (correctOrig.indexOf(shuffledPairs[di].i) !== -1) q._correctDisplayIndices.push(di);
+      }
+      q._correctDisplayIndices.sort(function (a, b) { return a - b; });
+      delete q._correctDisplayIndex;
+      return;
+    }
+    var shuffled = shuffle(q.options.slice());
+    q._shuffledOptions = shuffled;
+    q._correctDisplayIndex = shuffled.indexOf(q.options[q.correct]);
+    delete q._correctDisplayIndices;
+  }
+
   function renderQuestion() {
     var q = sessionQuestions[currentIndex];
     document.getElementById('q-num').textContent = currentIndex + 1;
@@ -183,6 +220,7 @@
     document.getElementById('question-text').textContent = q.q;
     var opts = document.getElementById('options');
     opts.innerHTML = '';
+    opts.classList.remove('order-options');
     var fb = document.getElementById('feedback');
     fb.classList.add('hidden');
     fb.className = 'feedback hidden';
@@ -238,6 +276,52 @@
         fb.classList.remove('hidden');
         fb.className = 'feedback ' + (isOrderCorrect ? 'correct-msg' : 'wrong-msg');
         setFeedbackContent(fb, isOrderCorrect, q.explain);
+      }
+    } else if (q.type === 'multi') {
+      var pickN = (Array.isArray(q.correct) ? q.correct.length : 0) || (q._correctDisplayIndices || []).length;
+      var hint = document.createElement('div');
+      hint.className = 'multi-hint';
+      hint.textContent = 'Select all that apply (' + pickN + ' correct).';
+      opts.appendChild(hint);
+      var mopts = q._shuffledOptions || q.options;
+      var corrDisp = q._correctDisplayIndices || [];
+      mopts.forEach(function (opt, i) {
+        var div = document.createElement('div');
+        div.className = 'option multi-opt';
+        div.textContent = opt;
+        div.dataset.index = i;
+        if (answered[currentIndex] !== undefined) {
+          var chosen = answered[currentIndex];
+          var isSel = chosen.indexOf(i) !== -1;
+          var isCorr = corrDisp.indexOf(i) !== -1;
+          div.classList.add('disabled');
+          if (isCorr && isSel) div.classList.add('correct');
+          else if (isCorr && !isSel) div.classList.add('missed-correct');
+          else if (!isCorr && isSel) div.classList.add('wrong');
+        } else {
+          div.addEventListener('click', function () {
+            if (answered[currentIndex] !== undefined) return;
+            div.classList.toggle('selected');
+          });
+        }
+        opts.appendChild(div);
+      });
+      if (answered[currentIndex] === undefined) {
+        var multiCheckWrap = document.createElement('div');
+        multiCheckWrap.className = 'multi-check-wrap';
+        var multiCheckBtn = document.createElement('button');
+        multiCheckBtn.type = 'button';
+        multiCheckBtn.className = 'multi-check-btn';
+        multiCheckBtn.textContent = 'Check answer';
+        multiCheckBtn.addEventListener('click', function () { submitMulti(currentIndex, q); });
+        multiCheckWrap.appendChild(multiCheckBtn);
+        opts.appendChild(multiCheckWrap);
+      }
+      if (answered[currentIndex] !== undefined) {
+        var multiCorrect = sameSortedIndices(answered[currentIndex], corrDisp);
+        fb.classList.remove('hidden');
+        fb.className = 'feedback ' + (multiCorrect ? 'correct-msg' : 'wrong-msg');
+        setFeedbackContent(fb, multiCorrect, q.explain);
       }
     } else {
       var optsList = q._shuffledOptions || q.options;
@@ -323,6 +407,41 @@
     document.getElementById('score-display').textContent = score;
   }
 
+  function submitMulti(pos, q) {
+    if (answered[pos] !== undefined) return;
+    var optsEl = document.getElementById('options');
+    var nodes = optsEl.querySelectorAll('.option.multi-opt');
+    var selected = [];
+    for (var i = 0; i < nodes.length; i++) {
+      if (nodes[i].classList.contains('selected')) selected.push(parseInt(nodes[i].dataset.index, 10));
+    }
+    selected.sort(function (a, b) { return a - b; });
+    answered[pos] = selected;
+    var corrDisp = q._correctDisplayIndices || [];
+    var isCorrect = sameSortedIndices(selected, corrDisp);
+    if (isCorrect) score++;
+    var corrSet = {};
+    for (var c = 0; c < corrDisp.length; c++) corrSet[corrDisp[c]] = true;
+    for (var j = 0; j < nodes.length; j++) {
+      var node = nodes[j];
+      var di = parseInt(node.dataset.index, 10);
+      var isSel = selected.indexOf(di) !== -1;
+      var isCorr = !!corrSet[di];
+      node.classList.remove('selected');
+      node.classList.add('disabled');
+      if (isCorr && isSel) node.classList.add('correct');
+      else if (isCorr && !isSel) node.classList.add('missed-correct');
+      else if (!isCorr && isSel) node.classList.add('wrong');
+    }
+    var wrap = optsEl.querySelector('.multi-check-wrap');
+    if (wrap) wrap.remove();
+    var fb = document.getElementById('feedback');
+    fb.classList.remove('hidden');
+    fb.className = 'feedback ' + (isCorrect ? 'correct-msg' : 'wrong-msg');
+    setFeedbackContent(fb, isCorrect, q.explain);
+    document.getElementById('score-display').textContent = score;
+  }
+
   function nextQuestion() {
     if (currentIndex < sessionQuestions.length - 1) {
       currentIndex++;
@@ -352,6 +471,8 @@
       var isCorrect = false;
       if (q.type === 'order') {
         isCorrect = answered[i] !== undefined && orderMatches(answered[i], q.correctOrder);
+      } else if (q.type === 'multi') {
+        isCorrect = answered[i] !== undefined && sameSortedIndices(answered[i], q._correctDisplayIndices || []);
       } else {
         var correctIdx = q._correctDisplayIndex !== undefined ? q._correctDisplayIndex : q.correct;
         isCorrect = answered[i] !== undefined && answered[i] === correctIdx;
@@ -390,8 +511,11 @@
     var pct = Math.round((score / total) * 100);
     var missed = sessionQuestions.map(function (q, i) { return { q: q, i: i }; }).filter(function (x) {
       if (answered[x.i] === undefined) return false;
-      if (x.q.type === 'order') return !orderMatches(answered[x.i], x.q.correctOrder);
-      return answered[x.i] !== x.q.correct;
+      var qq = x.q;
+      if (qq.type === 'order') return !orderMatches(answered[x.i], qq.correctOrder);
+      if (qq.type === 'multi') return !sameSortedIndices(answered[x.i], qq._correctDisplayIndices || []);
+      var cidx = qq._correctDisplayIndex !== undefined ? qq._correctDisplayIndex : qq.correct;
+      return answered[x.i] !== cidx;
     });
     var topicCounts = {};
     missed.forEach(function (x) {
@@ -418,13 +542,19 @@
       md += '## Missed Questions (for AI refactoring)\n\n';
       missed.forEach(function (x, i) {
         var q = x.q;
+        var sh = q._shuffledOptions || q.options;
+        var typeTag = q.type === 'order' ? ', order' : q.type === 'multi' ? ', multi' : q.type === 'tf' ? ', true/false' : '';
         var yourAns = q.type === 'order'
           ? (answered[x.i] || []).map(function (idx) { return q.options[idx]; }).join(' \u2192 ')
-          : q.options[answered[x.i]];
+          : q.type === 'multi'
+          ? (answered[x.i] || []).map(function (di) { return sh[di]; }).join('; ')
+          : sh[answered[x.i]];
         var correctAns = q.type === 'order'
           ? (q.correctOrder || []).map(function (idx) { return q.options[idx]; }).join(' \u2192 ')
-          : q.options[q.correct];
-        md += '### ' + (i + 1) + '. [' + (q.topic || 'General') + (q.type === 'order' ? ', order' : '') + ']\n';
+          : q.type === 'multi'
+          ? (q._correctDisplayIndices || []).map(function (di) { return sh[di]; }).join('; ')
+          : sh[q._correctDisplayIndex !== undefined ? q._correctDisplayIndex : q.correct];
+        md += '### ' + (i + 1) + '. [' + (q.topic || 'General') + typeTag + ']\n';
         md += '**Q:** ' + q.q + '\n';
         md += '**Your answer:** ' + (yourAns != null ? yourAns : '') + '\n';
         md += '**Correct answer:** ' + (correctAns != null ? correctAns : '') + '\n';
