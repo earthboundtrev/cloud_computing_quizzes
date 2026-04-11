@@ -50,11 +50,17 @@
 
     var listEl = document.getElementById('quiz-sortable-list');
     if (listEl && window.Sortable) {
+      var coarsePointer =
+        typeof window.matchMedia === 'function' &&
+        window.matchMedia('(pointer: coarse)').matches;
       window.Sortable.create(listEl, {
         animation: 150,
         handle: '.drag-handle',
         ghostClass: 'quiz-card-item-ghost',
         dragClass: 'quiz-card-item-drag',
+        /* Native HTML5 DnD is unreliable on touch; fallback uses touch/pointer consistently. */
+        forceFallback: coarsePointer,
+        fallbackTolerance: coarsePointer ? 5 : 0,
         onEnd: function () {
           var ids = [];
           var items = listEl.querySelectorAll('.quiz-card-item');

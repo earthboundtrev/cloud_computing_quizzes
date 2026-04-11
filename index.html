@@ -29,11 +29,19 @@
       text-decoration: none;
       color: var(--text);
       border-left: 4px solid var(--accent);
-      transition: background 0.15s, transform 0.1s;
+      /* Only transition background here — transform transitions on tiles break
+         SortableJS touch drags on mobile (see SortableJS/Sortable#2426). */
+      transition: background 0.15s;
+      -webkit-user-drag: none;
     }
-    a.quiz-card:hover {
-      background: #151d2b;
-      transform: translateX(2px);
+    @media (hover: hover) and (pointer: fine) {
+      a.quiz-card {
+        transition: background 0.15s, transform 0.1s;
+      }
+      a.quiz-card:hover {
+        background: #151d2b;
+        transform: translateX(2px);
+      }
     }
     a.quiz-card.oci { border-left-color: var(--oci); }
     a.quiz-card.gcp { border-left-color: var(--gcp); }
@@ -64,10 +72,10 @@
     .quiz-card-item-drag { opacity: 0.9; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
-  <script src="quiz-config.js?v=2"></script>
+  <script src="quiz-config.js?v=3"></script>
   <script src="sw-register.js?v=2"></script>
   <script src="brain-dump.js?v=2"></script>
-  <script src="motivation.js?v=2"></script>
+  <script src="motivation.js?v=4"></script>
   <script src="session-streak.js?v=2"></script>
 </head>
 <body>
@@ -85,7 +93,7 @@
     <div id="quiz-list-container"></div>
   </div>
   <script src="quiz-nav.js?v=2"></script>
-  <script src="index-init.js?v=2"></script>
+  <script src="index-init.js?v=3"></script>
   <script src="app-reset.js?v=2"></script>
 </body>
 </html>
