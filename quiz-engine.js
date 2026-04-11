@@ -565,21 +565,49 @@
   }
 
   function downloadResults() {
-    var blob = new Blob([getResultsMarkdown()], { type: 'text/markdown' });
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = downloadFilenamePrefix + '_' + new Date().toISOString().slice(0, 10) + '.md';
-    a.click();
-    URL.revokeObjectURL(a.href);
+    try {
+      var md = getResultsMarkdown();
+      var blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = downloadFilenamePrefix + '_' + new Date().toISOString().slice(0, 10) + '.md';
+      a.rel = 'noopener';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      /* Revoke after a tick: synchronous revoke breaks downloads in some browsers (e.g. Brave). */
+      setTimeout(function () {
+        try { URL.revokeObjectURL(url); } catch (e2) {}
+      }, 2500);
+    } catch (e) {
+      console.error('[QuizEngine] downloadResults failed', e);
+      try {
+        window.alert('Could not download results. Use Copy to Clipboard, or check the browser console.');
+      } catch (e3) {}
+    }
   }
 
   function copyResultsToClipboard() {
-    navigator.clipboard.writeText(getResultsMarkdown()).then(function () {
+    var md = getResultsMarkdown();
+    if (!navigator.clipboard || !navigator.clipboard.writeText) {
+      try {
+        window.alert('Clipboard API is not available in this context. Try Download Results or use HTTPS.');
+      } catch (e) {}
+      return;
+    }
+    navigator.clipboard.writeText(md).then(function () {
       var el = document.getElementById('copy-toast');
       if (el) {
         el.classList.remove('hidden');
         setTimeout(function () { el.classList.add('hidden'); }, 2500);
       }
+    }).catch(function (err) {
+      console.error('[QuizEngine] copyResultsToClipboard failed', err);
+      try {
+        window.alert('Could not copy to clipboard (permission or browser policy). Try Download Results.');
+      } catch (e) {}
     });
   }
 
@@ -728,6 +756,26 @@
         if (nextBtn) {
           nextBtn.removeAttribute('onclick');
           nextBtn.addEventListener('click', nextQuestion);
+        }
+        /* Results + import: inline onclick is blocked by CSP (script-src 'self' without unsafe-inline in _headers). */
+        function wireOptional(id, handler) {
+          var el = document.getElementById(id);
+          if (!el) return;
+          el.removeAttribute('onclick');
+          el.addEventListener('click', handler);
+        }
+        wireOptional('quiz-retry-btn', function () { startQuiz(); });
+        wireOptional('quiz-download-results-btn', function () { downloadResults(); });
+        wireOptional('quiz-copy-results-btn', function () { copyResultsToClipboard(); });
+        wireOptional('import-submit-btn', function () { importResults(); });
+        wireOptional('import-choose-file-btn', function () {
+          var inp = document.getElementById('import-file');
+          if (inp) inp.click();
+        });
+        var importFileInput = document.getElementById('import-file');
+        if (importFileInput) {
+          importFileInput.removeAttribute('onchange');
+          importFileInput.addEventListener('change', onImportFile);
         }
       }
       if (document.readyState === 'loading') {

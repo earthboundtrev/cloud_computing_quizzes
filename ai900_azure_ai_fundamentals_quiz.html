@@ -16,7 +16,7 @@
   <script src="brain-dump.js?v=2"></script>
   <script src="motivation.js?v=5"></script>
   <script src="session-streak.js?v=2"></script>
-  <script src="quiz-engine.js?v=3"></script>
+  <script src="quiz-engine.js?v=5"></script>
   <script src="data/ai900-questions.js?v=2"></script>
   <script src="quiz-init-ai900.js?v=2"></script>
   <script src="quiz-nav.js?v=2"></script>
@@ -77,9 +77,9 @@
       <div class="import-area">
         <label for="import-results">Import past results (paste .md or choose file) to focus on weak topics:</label>
         <textarea id="import-results" placeholder="Paste quiz results markdown here..."></textarea>
-        <button type="button" class="secondary" style="margin-top: 0.5rem;" onclick="importResults()">Import results</button>
-        <input type="file" id="import-file" accept=".md,text/markdown" style="display: none;" onchange="onImportFile(event)">
-        <button type="button" class="secondary" style="margin-top: 0.5rem; margin-left: 0.5rem;" onclick="document.getElementById('import-file').click()">Choose file</button>
+        <button type="button" class="secondary" id="import-submit-btn" style="margin-top: 0.5rem;">Import results</button>
+        <input type="file" id="import-file" accept=".md,text/markdown" style="display: none;">
+        <button type="button" class="secondary" id="import-choose-file-btn" style="margin-top: 0.5rem; margin-left: 0.5rem;">Choose file</button>
         <p id="import-toast" class="import-toast hidden"></p>
       </div>
     </div>
@@ -113,10 +113,10 @@
       <div class="score" id="final-score"></div>
       <p id="result-msg" style="margin-bottom: 1.5rem; color: var(--text-muted);"></p>
       <div class="results-actions">
-        <button onclick="startQuiz()">Try Again</button>
+        <button type="button" id="quiz-retry-btn">Try Again</button>
         <a href="index.html" class="btn-link">Back to home</a>
-        <button class="secondary" onclick="downloadResults()">Download Results</button>
-        <button class="secondary" onclick="copyResultsToClipboard()">Copy to Clipboard</button>
+        <button type="button" class="secondary" id="quiz-download-results-btn">Download Results</button>
+        <button type="button" class="secondary" id="quiz-copy-results-btn">Copy to Clipboard</button>
       </div>
       <p id="copy-toast" class="copy-toast hidden">Copied! Paste into Cursor chat for AI refactoring.</p>
     </div>
