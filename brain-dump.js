@@ -30,7 +30,7 @@
       '.btn-mic:disabled { opacity: 0.6; cursor: not-allowed; }',
       '.nav-dumps-btn { background: transparent; color: var(--text-muted); border: none; font-family: inherit; font-size: 0.9rem; cursor: pointer; padding: 0.25rem 0.5rem; border-radius: 4px; }',
       '.nav-dumps-btn:hover { color: var(--accent); }',
-      '.brain-dump-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; box-sizing: border-box; }',
+      '.brain-dump-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10050; display: flex; align-items: center; justify-content: center; padding: 1rem; box-sizing: border-box; }',
       '.brain-dump-modal { background: var(--surface); border-radius: 12px; max-width: 560px; width: 100%; max-height: 85vh; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }',
       '.brain-dump-modal h3 { padding: 1rem 1.25rem; margin: 0; font-size: 1.1rem; color: var(--accent); border-bottom: 1px solid rgba(148,163,184,0.2); }',
       '.brain-dump-modal-list { padding: 1rem; overflow-y: auto; flex: 1; min-height: 0; }',

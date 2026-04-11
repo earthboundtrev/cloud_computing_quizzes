@@ -61,7 +61,19 @@ h1 {
 }
 .option.selected { border-color: var(--accent); background: #151d2b; }
 .option.correct { border-color: var(--correct); background: rgba(34,197,94,0.1); }
+.option.missed-correct {
+  border-color: var(--correct);
+  border-style: dashed;
+  background: rgba(34,197,94,0.06);
+}
 .option.wrong { border-color: var(--wrong); background: rgba(239,68,68,0.1); }
+.multi-hint {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+.multi-check-wrap { margin-top: 0.75rem; }
+.multi-check-btn { margin-top: 0.25rem; }
 .option.disabled { cursor: not-allowed; opacity: 0.7; }
 .feedback {
   margin-top: 1rem;
@@ -77,6 +89,13 @@ h1 {
   justify-content: space-between;
   align-items: center;
   margin-top: 1.5rem;
+}
+/* Fixed controls (e.g. motivation FAB z-index 9998) are appended after the page
+   container and paint on top of in-flow content on narrow viewports. Keep quiz
+   nav above the FAB but below the session bar (10002) and brain-dump modal. */
+#quiz-area .nav-row {
+  position: relative;
+  z-index: 10001;
 }
 button {
   padding: 0.6rem 1.2rem;
@@ -190,7 +209,7 @@ button.secondary:hover { background: rgba(100,116,139,0.1); }
 .nav-dumps-btn:hover { color: var(--accent); }
 .nav-reset-btn { background: transparent; color: var(--text-muted); border: none; font-family: inherit; font-size: 0.9rem; cursor: pointer; padding: 0.25rem 0.5rem; border-radius: 4px; }
 .nav-reset-btn:hover { color: var(--wrong, #ef4444); }
-.brain-dump-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; box-sizing: border-box; }
+.brain-dump-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10050; display: flex; align-items: center; justify-content: center; padding: 1rem; box-sizing: border-box; }
 .brain-dump-modal { background: var(--surface); border-radius: 12px; max-width: 560px; width: 100%; max-height: 85vh; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
 .brain-dump-modal h3 { padding: 1rem 1.25rem; margin: 0; font-size: 1.1rem; color: var(--accent); border-bottom: 1px solid rgba(148,163,184,0.2); }
 .brain-dump-modal-list { padding: 1rem; overflow-y: auto; flex: 1; min-height: 0; }
