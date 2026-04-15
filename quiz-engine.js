@@ -1,6 +1,9 @@
 /**
  * Shared quiz engine for Cloud Cram. Call QuizEngine.run(config) with
- * { quizId, questionBank, questionsPerQuiz, resultsTitle?, downloadFilenamePrefix? }.
+ * { quizId, questionBank, questionsPerQuiz, resultsTitle?, downloadFilenamePrefix?,
+ *   examModeQuestions?, passingPercent?, topicBootstrapWeights? }.
+ * topicBootstrapWeights: optional map of topic string -> additive sampling weight (e.g. 0.7)
+ * used before local profile stats exist and blended with miss-rate weighting afterward.
  * Exposes startQuiz, nextQuestion, prevQuestion, selectMode, importResults, onImportFile, downloadResults, copyResultsToClipboard on window for onclick handlers.
  *
  * Question shapes:
@@ -20,6 +23,7 @@
   var PASSING_PERCENT;
   var resultsTitle;
   var downloadFilenamePrefix;
+  var TOPIC_BOOTSTRAP_WEIGHTS;
 
   var currentIndex = 0;
   var score = 0;
@@ -55,7 +59,8 @@
       missRate = 1 - (profile.topicStats[t].correct / profile.topicStats[t].total);
     }
     var importMisses = (profile.topicMissesFromImports[t] || 0) * 0.2;
-    return 1 + Math.min(missRate + importMisses, 2);
+    var boot = (TOPIC_BOOTSTRAP_WEIGHTS && TOPIC_BOOTSTRAP_WEIGHTS[t]) || 0;
+    return 1 + Math.min(missRate + importMisses, 2) + boot;
   }
 
   function shuffle(arr) {
@@ -70,8 +75,9 @@
   }
 
   function weightedSample(arr, n, profile) {
-    var hasData = profile && (Object.keys(profile.topicStats).length > 0 || Object.keys(profile.topicMissesFromImports).length > 0);
-    if (!hasData) {
+    var hasBootstrap = TOPIC_BOOTSTRAP_WEIGHTS && Object.keys(TOPIC_BOOTSTRAP_WEIGHTS).length > 0;
+    var hasProfileData = profile && (Object.keys(profile.topicStats).length > 0 || Object.keys(profile.topicMissesFromImports).length > 0);
+    if (!hasProfileData && !hasBootstrap) {
       var shuffled = shuffle(arr);
       return shuffled.slice(0, Math.min(n, shuffled.length));
     }
@@ -97,7 +103,17 @@
       scores.push({ topic: t, weakness: weakness });
     });
     scores.sort(function (a, b) { return b.weakness - a.weakness; });
-    return scores.slice(0, topN).filter(function (x) { return x.weakness > 0.1; }).map(function (x) { return x.topic; });
+    var fromProfile = scores.slice(0, topN).filter(function (x) { return x.weakness > 0.1; }).map(function (x) { return x.topic; });
+    if (fromProfile.length > 0) return fromProfile;
+
+    if (TOPIC_BOOTSTRAP_WEIGHTS && Object.keys(TOPIC_BOOTSTRAP_WEIGHTS).length > 0) {
+      var bootScores = Object.keys(TOPIC_BOOTSTRAP_WEIGHTS).map(function (t) {
+        return { topic: t, weakness: TOPIC_BOOTSTRAP_WEIGHTS[t] };
+      });
+      bootScores.sort(function (a, b) { return b.weakness - a.weakness; });
+      return bootScores.slice(0, topN).filter(function (x) { return x.weakness > 0.05; }).map(function (x) { return x.topic; });
+    }
+    return [];
   }
 
   function selectMode(mode) {
@@ -709,6 +725,7 @@
       PASSING_PERCENT = config.passingPercent != null ? config.passingPercent : 70;
       resultsTitle = config.resultsTitle || (QUIZ_ID + ' Quiz Results');
       downloadFilenamePrefix = config.downloadFilenamePrefix || (QUIZ_ID + '_quiz_results');
+      TOPIC_BOOTSTRAP_WEIGHTS = config.topicBootstrapWeights || null;
 
       currentIndex = 0;
       score = 0;
