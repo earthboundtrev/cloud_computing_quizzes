@@ -9,6 +9,7 @@
 window.QUIZ_CONFIG = [
   { id: 'oci', navLabel: 'OCI', name: 'OCI Foundations Associate', href: 'oci_foundations_quiz.html', desc: '1Z0-1085-25 • OCI ↔ AWS comparison &amp; exam-style', cardClass: 'oci', closed: false },
   { id: 'gcp', navLabel: 'GCP', name: 'GCP Cloud Digital Leader', href: 'gcp_cloud_digital_leader_quiz.html', desc: 'GCP ↔ AWS comparison &amp; exam-style', cardClass: 'gcp', closed: false },
+  { id: 'gcp_pca', navLabel: 'GCP PCA', name: 'GCP Professional Cloud Architect', href: 'gcp_professional_cloud_architect_quiz.html', desc: 'Architect scenarios • GCP ↔ AWS (closest track to AWS SAA)', cardClass: 'gcp', closed: false },
   { id: 'az900', navLabel: 'Azure', name: 'AZ-900 Azure Fundamentals', href: 'az900_azure_fundamentals_quiz.html', desc: 'Microsoft Certified: Azure Fundamentals • Azure ↔ AWS &amp; exam-style', cardClass: 'azure', closed: false },
   { id: 'ai900', navLabel: 'AI-900', name: 'AI-900 Azure AI Fundamentals', href: 'ai900_azure_ai_fundamentals_quiz.html', desc: 'Microsoft Certified: Azure AI Fundamentals • OpenAI, ML, Document Intelligence, Speech, etc.', cardClass: 'azure', closed: false },
   { id: 'aws_mlea', navLabel: 'AWS MLA', name: 'AWS ML Engineer Associate', href: 'aws_mlea_quiz.html', desc: 'MLA-C01 • Data prep, model dev, deployment, monitoring', cardClass: 'aws', closed: false },
