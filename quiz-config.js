@@ -17,6 +17,7 @@ window.QUIZ_CONFIG = [
   { id: 'terraform', navLabel: 'Terraform', name: 'HashiCorp Certified: Terraform Associate (004)', href: 'terraform_associate_quiz.html', desc: 'Terraform Associate 004 • IaC, workflow, config, modules, state, import, HCP Terraform', cardClass: 'terraform', closed: false },
   { id: 'aws_genai', navLabel: 'AWS GenAI', name: 'AWS Certified Generative AI Developer – Professional', href: 'aws_genai_quiz.html', desc: 'Bedrock, RAG, agents, guardrails, production GenAI • Beta: 85 q, 205 min', cardClass: 'aws', closed: false },
   { id: 'cissp', navLabel: 'CISSP', name: 'CISSP', href: 'cissp_quiz.html', desc: '8 domains • Security &amp; Risk through Software Development Security', cardClass: 'cissp', closed: false },
+  { id: 'secai', navLabel: 'SecAI+', name: 'CompTIA SecAI+', href: 'secai_quiz.html', desc: 'CY0-001 • Securing AI, AI-assisted security, AI GRC (expansion cert)', cardClass: 'secai', closed: false },
   { id: 'rhcsa9', navLabel: 'RHCSA 9', name: 'RHCSA 9', href: 'rhcsa9_quiz.html', desc: 'EX200 • RHEL 9 vs RHEL 7 &amp; exam-style (if you passed RHCSA 7)', cardClass: 'redhat', closed: false },
   { id: 'rhce', navLabel: 'RHCE', name: 'RHCE', href: 'rhce_quiz.html', desc: 'EX294 • Ansible playbooks for system administration', cardClass: 'redhat', closed: false },
 ];

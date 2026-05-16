@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE_NAME = 'cloudcram-v5';
+const CACHE_NAME = 'cloudcram-v6';
 
 const PRECACHE_PATHS = [
   '/index.html',
@@ -16,6 +16,7 @@ const PRECACHE_PATHS = [
   '/aws_genai_quiz.html',
   '/terraform_associate_quiz.html',
   '/cissp_quiz.html',
+  '/secai_quiz.html',
   '/rhcsa9_quiz.html',
   '/rhce_quiz.html',
   '/css/quiz-common.css',
@@ -27,6 +28,7 @@ const PRECACHE_PATHS = [
   '/data/aws-data-engineering-questions.js',
   '/data/aws-genai-questions.js',
   '/data/cissp-questions.js',
+  '/data/secai-questions.js',
   '/data/rhcsa9-questions.js',
   '/data/rhce-questions.js',
   '/quiz-init-oci.js',
@@ -37,6 +39,7 @@ const PRECACHE_PATHS = [
   '/quiz-init-aws-genai.js',
   '/quiz-init-terraform.js',
   '/quiz-init-cissp.js',
+  '/quiz-init-secai.js',
   '/quiz-init-rhcsa9.js',
   '/quiz-init-rhce.js',
   '/quiz-config.js',
