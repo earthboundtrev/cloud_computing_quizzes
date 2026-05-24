@@ -12,6 +12,8 @@ Open `index.html` in a browser to access all quizzes. No build step or server re
 |------|------|------|-----------|------|--------|
 | **OCI Foundations Associate** | [oci_foundations_quiz.html](oci_foundations_quiz.html) | 1Z0-1085-25 | 41/session | 77+ | `oci_foundations_pattern_guide.md` |
 | **GCP Cloud Digital Leader** | [gcp_cloud_digital_leader_quiz.html](gcp_cloud_digital_leader_quiz.html) | — | 40/session | 60+ | `gcp_cloud_digital_leader_guide.md` |
+| **GCP Associate Cloud Engineer** | [gcp_associate_cloud_engineer_quiz.html](gcp_associate_cloud_engineer_quiz.html) | Associate Cloud Engineer | 40/session (50 exam) | 110+ | — |
+| **GCP Professional Cloud Architect** | [gcp_professional_cloud_architect_quiz.html](gcp_professional_cloud_architect_quiz.html) | Professional Cloud Architect | 40/session (50 exam) | 100+ | — |
 | **AZ-900 Azure Fundamentals** | [az900_azure_fundamentals_quiz.html](az900_azure_fundamentals_quiz.html) | Microsoft Certified: Azure Fundamentals | 40/session | 55+ | `az900_azure_fundamentals_pattern_guide.md` |
 | **AWS ML Engineer Associate** | [aws_mlea_quiz.html](aws_mlea_quiz.html) | MLA-C01 | 40/session | 55+ | — |
 | **AWS Data Engineer Associate** | [aws_data_engineering_quiz.html](aws_data_engineering_quiz.html) | DEA-C01 | 40/session | 55+ | — |
@@ -55,6 +57,7 @@ Open `index.html` in a browser to access all quizzes. No build step or server re
 
 - **AZ-900:** ~70% (700+ on real exam)
 - **GCP Cloud Digital Leader:** ~70%
+- **GCP Associate Cloud Engineer & Professional Cloud Architect:** ~70%
 - **OCI Foundations:** ~65%
 - **AWS MLEA & Data Engineer:** ~72% (720/1000)
 - **CISSP:** ~70% (700/1000)

@@ -4,12 +4,14 @@
  */
 'use strict';
 
-const CACHE_NAME = 'cloudcram-v6';
+const CACHE_NAME = 'cloudcram-v7';
 
 const PRECACHE_PATHS = [
   '/index.html',
   '/oci_foundations_quiz.html',
   '/gcp_cloud_digital_leader_quiz.html',
+  '/gcp_professional_cloud_architect_quiz.html',
+  '/gcp_associate_cloud_engineer_quiz.html',
   '/az900_azure_fundamentals_quiz.html',
   '/aws_mlea_quiz.html',
   '/aws_data_engineering_quiz.html',
@@ -23,6 +25,8 @@ const PRECACHE_PATHS = [
   '/quiz-engine.js',
   '/data/oci-questions.js',
   '/data/gcp-questions.js',
+  '/data/gcp-pca-questions.js',
+  '/data/gcp-ace-questions.js',
   '/data/az900-questions.js',
   '/data/aws-mlea-questions.js',
   '/data/aws-data-engineering-questions.js',
@@ -33,6 +37,8 @@ const PRECACHE_PATHS = [
   '/data/rhce-questions.js',
   '/quiz-init-oci.js',
   '/quiz-init-gcp.js',
+  '/quiz-init-gcp-pca.js',
+  '/quiz-init-gcp-ace.js',
   '/quiz-init-az900.js',
   '/quiz-init-aws-mlea.js',
   '/quiz-init-aws-data-engineering.js',
