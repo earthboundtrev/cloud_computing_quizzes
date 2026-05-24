@@ -13,13 +13,32 @@ Open `index.html` in a browser to access all quizzes. No build step or server re
 | **OCI Foundations Associate** | [oci_foundations_quiz.html](oci_foundations_quiz.html) | 1Z0-1085-25 | 41/session | 77+ | `oci_foundations_pattern_guide.md` |
 | **GCP Cloud Digital Leader** | [gcp_cloud_digital_leader_quiz.html](gcp_cloud_digital_leader_quiz.html) | — | 40/session | 60+ | `gcp_cloud_digital_leader_guide.md` |
 | **GCP Associate Cloud Engineer** | [gcp_associate_cloud_engineer_quiz.html](gcp_associate_cloud_engineer_quiz.html) | Associate Cloud Engineer | 40/session (50 exam) | 110+ | — |
-| **GCP Professional Cloud Architect** | [gcp_professional_cloud_architect_quiz.html](gcp_professional_cloud_architect_quiz.html) | Professional Cloud Architect | 40/session (50 exam) | 100+ | — |
+| **GCP Professional Cloud Architect** | [gcp_professional_cloud_architect_quiz.html](gcp_professional_cloud_architect_quiz.html) | Professional Cloud Architect | 40/session (50 exam); 8 Q per case study exam | 180+ | Case-study split view (EHR Healthcare, Mountkirk Games) |
 | **AZ-900 Azure Fundamentals** | [az900_azure_fundamentals_quiz.html](az900_azure_fundamentals_quiz.html) | Microsoft Certified: Azure Fundamentals | 40/session | 55+ | `az900_azure_fundamentals_pattern_guide.md` |
-| **AWS ML Engineer Associate** | [aws_mlea_quiz.html](aws_mlea_quiz.html) | MLA-C01 | 40/session | 55+ | — |
-| **AWS Data Engineer Associate** | [aws_data_engineering_quiz.html](aws_data_engineering_quiz.html) | DEA-C01 | 40/session | 55+ | — |
-| **CISSP** | [cissp_quiz.html](cissp_quiz.html) | 8 domains | 40/session | 55+ | — |
+| **AWS ML Engineer Associate** | [aws_mlea_quiz.html](aws_mlea_quiz.html) | MLA-C01 | 40/session | 150+ | Case studies |
+| **AWS Data Engineer Associate** | [aws_data_engineering_quiz.html](aws_data_engineering_quiz.html) | DEA-C01 | 40/session | 160+ | Case studies |
+| **AWS GenAI Developer Pro** | [aws_genai_quiz.html](aws_genai_quiz.html) | AIP-C01 | 40/session | 175+ | Case studies |
+| **CISSP** | [cissp_quiz.html](cissp_quiz.html) | 8 domains | 40/session (100 exam) | 275+ | Scenario blocks |
+| **CompTIA SecAI+** | [secai_quiz.html](secai_quiz.html) | CY0-001 | 40/session | 238+ | Scenario blocks |
 | **RHCSA 9** | [rhcsa9_quiz.html](rhcsa9_quiz.html) | EX200 | 40/session | 55+ | — |
 | **RHCE** | [rhce_quiz.html](rhce_quiz.html) | EX294 | 40/session | 55+ | — |
+
+## Case study / scenario blocks
+
+These quizzes support **split-view case studies** (context panel + linked questions), similar to formal exam case blocks:
+
+| Quiz | Format on real exam | Mini-exams in app |
+|------|---------------------|-------------------|
+| **GCP Professional Cloud Architect** | 2 published case studies (~20–30% of exam) | EHR Healthcare, Mountkirk Games (8 Q each) |
+| **CISSP** | Scenario-based CAT items (first/next/best) | Regional Hospital, Northwind Financial (6 Q each) |
+| **AWS ML Engineer Associate** | Case study sections | SageMaker enterprise app, Fraud detection (6 Q each) |
+| **AWS Data Engineer Associate** | Case-style blocks | RetailCo data lake, StreamOrders (6 Q each) |
+| **AWS GenAI Developer Professional** | Long compound scenarios | OmniDocs RAG, Apex Financial (6 Q each) |
+| **CompTIA SecAI+** | PBQ + scenario MCQ (PBQs not simulated here) | HelpNow chatbot, InsightRAG (6 Q each) |
+
+**No shared case-study blocks** (standalone scenario MCQs only): OCI Foundations, GCP Digital Leader, GCP ACE, AZ-900, AI-900, Terraform Associate, RHCSA 9, RHCE.
+
+Use **Case studies (mixed)** or the **mini-exam** buttons on each quiz start screen.
 
 ## Quiz Modes
 

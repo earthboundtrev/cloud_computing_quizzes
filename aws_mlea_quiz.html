@@ -16,9 +16,11 @@
   <script src="brain-dump.js?v=2"></script>
   <script src="motivation.js?v=5"></script>
   <script src="session-streak.js?v=2"></script>
-  <script src="quiz-engine.js?v=5"></script>
+  <script src="quiz-engine.js?v=7"></script>
+  <script src="data/aws-mlea-case-studies.js?v=1"></script>
   <script src="data/aws-mlea-questions.js?v=2"></script>
-  <script src="quiz-init-aws-mlea.js?v=2"></script>
+  <script src="data/aws-mlea-scenario-questions.js?v=1"></script>
+  <script src="quiz-init-aws-mlea.js?v=3"></script>
   <script src="quiz-nav.js?v=2"></script>
   <script src="app-reset.js?v=2"></script>
 </head>
@@ -45,7 +47,7 @@
 
     <div id="start-screen" class="start-screen">
       <a href="index.html" class="back-home">← Back to home</a>
-      <p>40 questions per session (85 in exam mode, matching MLA-C01). Passing: 72%. Pool of 138+. Choose your mode:</p>
+      <p>40 questions per session (85 in exam mode). Passing: 72%. Pool of 150+ with case-study blocks. Choose your mode:</p>
       <p id="focus-hint" class="profile-hint hidden"></p>
       <div class="mode-selector">
         <button type="button" class="mode-btn" data-mode="comparison" onclick="selectMode('comparison')">
@@ -55,6 +57,10 @@
         <button type="button" class="mode-btn" data-mode="exam" onclick="selectMode('exam')">
           <span class="label">Exam (Scenario-based)</span>
           <span class="desc">ML pipelines, deployment, monitoring, security—exam-style.</span>
+        </button>
+        <button type="button" class="mode-btn" data-mode="scenario" onclick="selectMode('scenario')">
+          <span class="label">Case studies (mixed)</span>
+          <span class="desc">Random case-study questions with split-view context (MLA-C01 style).</span>
         </button>
         <button type="button" class="mode-btn selected" data-mode="mixed" onclick="selectMode('mixed')">
           <span class="label">Mixed</span>
@@ -72,6 +78,7 @@
         <input type="number" id="session-time-custom" min="1" max="240" placeholder="Custom" style="width: 4.5em; margin-left: 0.5rem; padding: 0.35rem; background: var(--surface); color: var(--text); border: 1px solid var(--accent-dim); border-radius: 4px;" title="Custom minutes">
       </div>
       <button id="start-btn" onclick="startQuiz()">Start Quiz</button>
+      <div id="case-study-exams" class="case-study-exams" data-heading="Case study mini-exams" data-intro="One narrative, six questions in order—similar to MLA-C01 case study sections."></div>
       <div class="import-area">
         <label for="import-results">Import past results (paste .md or choose file) to focus on weak topics:</label>
         <textarea id="import-results" placeholder="Paste quiz results markdown here..."></textarea>

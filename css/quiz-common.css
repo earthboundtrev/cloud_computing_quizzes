@@ -20,6 +20,91 @@ body {
   line-height: 1.6;
 }
 .container { max-width: 720px; margin: 0 auto; }
+.container.case-study-active { max-width: 1100px; }
+.case-study-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 38%) 1fr;
+  gap: 1rem;
+  align-items: start;
+  margin-bottom: 1rem;
+}
+.case-study-panel {
+  background: var(--surface);
+  border-radius: 8px;
+  border-left: 3px solid var(--accent);
+  max-height: min(70vh, 640px);
+  overflow: hidden;
+  position: sticky;
+  top: 0.5rem;
+}
+.case-study-panel-inner {
+  padding: 1rem 1.1rem;
+  overflow-y: auto;
+  max-height: min(70vh, 640px);
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+.case-study-title {
+  font-size: 1rem;
+  color: var(--accent);
+  margin-bottom: 0.35rem;
+}
+.case-study-note {
+  font-size: 0.78rem;
+  margin-bottom: 0.75rem;
+  font-style: italic;
+}
+.case-study-heading {
+  font-size: 0.88rem;
+  color: var(--text);
+  margin: 0.75rem 0 0.35rem;
+}
+.case-study-body {
+  white-space: pre-wrap;
+  margin-bottom: 0.5rem;
+}
+.case-study-quiz-main .question-card { margin-bottom: 0; }
+@media (max-width: 800px) {
+  .case-study-layout {
+    grid-template-columns: 1fr;
+  }
+  .case-study-panel {
+    position: relative;
+    max-height: 40vh;
+  }
+  .case-study-panel-inner { max-height: 40vh; }
+}
+.case-study-exams {
+  margin: 1.25rem auto 0;
+  max-width: 420px;
+  text-align: left;
+}
+.case-study-exams h3 {
+  font-size: 0.95rem;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+.case-study-exam-btn {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  text-align: left;
+  padding: 0.85rem 1rem;
+  background: var(--surface);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  color: var(--text);
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.case-study-exam-btn:hover {
+  border-color: var(--accent-dim);
+  background: #151d2b;
+}
+.case-study-exam-btn .label { font-weight: 600; display: block; }
+.case-study-exam-btn .desc { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem; }
 h1 {
   font-size: 1.5rem;
   color: var(--accent);
@@ -46,6 +131,7 @@ h1 {
   margin-bottom: 1rem;
   font-weight: 500;
 }
+.question-text.case-study-question { white-space: pre-wrap; }
 .options { display: flex; flex-direction: column; gap: 0.5rem; }
 .option {
   padding: 0.75rem 1rem;

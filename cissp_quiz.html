@@ -16,9 +16,11 @@
   <script src="brain-dump.js?v=2"></script>
   <script src="motivation.js?v=5"></script>
   <script src="session-streak.js?v=2"></script>
-  <script src="quiz-engine.js?v=5"></script>
+  <script src="quiz-engine.js?v=7"></script>
+  <script src="data/cissp-case-studies.js?v=1"></script>
   <script src="data/cissp-questions.js?v=2"></script>
-  <script src="quiz-init-cissp.js?v=2"></script>
+  <script src="data/cissp-scenario-questions.js?v=1"></script>
+  <script src="quiz-init-cissp.js?v=3"></script>
   <script src="quiz-nav.js?v=2"></script>
   <script src="app-reset.js?v=2"></script>
 </head>
@@ -45,7 +47,7 @@
 
     <div id="start-screen" class="start-screen">
       <a href="index.html" class="back-home">← Back to home</a>
-      <p>40 questions per session (100 in exam mode, CAT-style). Passing: 70%. Pool of 264+. Choose your mode:</p>
+      <p>40 questions per session (100 in exam mode, CAT-style). Passing: 70%. Pool of 275+ including scenario blocks. Choose your mode:</p>
       <p id="focus-hint" class="profile-hint hidden"></p>
       <div class="mode-selector">
         <button type="button" class="mode-btn" data-mode="comparison" onclick="selectMode('comparison')">
@@ -55,6 +57,10 @@
         <button type="button" class="mode-btn" data-mode="exam" onclick="selectMode('exam')">
           <span class="label">Exam (Scenario-based)</span>
           <span class="desc">Scenario questions across all domains—CISSP exam style.</span>
+        </button>
+        <button type="button" class="mode-btn" data-mode="scenario" onclick="selectMode('scenario')">
+          <span class="label">Scenario blocks</span>
+          <span class="desc">Shared narrative panel + judgment questions (first/next/best)—like CAT scenarios.</span>
         </button>
         <button type="button" class="mode-btn selected" data-mode="mixed" onclick="selectMode('mixed')">
           <span class="label">Mixed</span>
@@ -72,6 +78,7 @@
         <input type="number" id="session-time-custom" min="1" max="240" placeholder="Custom" style="width: 4.5em; margin-left: 0.5rem; padding: 0.35rem; background: var(--surface); color: var(--text); border: 1px solid var(--accent-dim); border-radius: 4px;" title="Custom minutes">
       </div>
       <button id="start-btn" onclick="startQuiz()">Start Quiz</button>
+      <div id="case-study-exams" class="case-study-exams" data-heading="Scenario mini-exams" data-intro="Each block keeps the organization context on screen while you answer 6 linked judgment questions."></div>
       <div class="import-area">
         <label for="import-results">Import past results (paste .md or choose file) to focus on weak topics:</label>
         <textarea id="import-results" placeholder="Paste quiz results markdown here..."></textarea>

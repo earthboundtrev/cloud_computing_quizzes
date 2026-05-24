@@ -16,9 +16,11 @@
   <script src="brain-dump.js?v=2"></script>
   <script src="motivation.js?v=5"></script>
   <script src="session-streak.js?v=2"></script>
-  <script src="quiz-engine.js?v=5"></script>
+  <script src="quiz-engine.js?v=7"></script>
+  <script src="data/secai-case-studies.js?v=1"></script>
   <script src="data/secai-questions.js?v=2"></script>
-  <script src="quiz-init-secai.js?v=1"></script>
+  <script src="data/secai-scenario-questions.js?v=1"></script>
+  <script src="quiz-init-secai.js?v=2"></script>
   <script src="quiz-nav.js?v=2"></script>
   <script src="app-reset.js?v=2"></script>
 </head>
@@ -37,7 +39,7 @@
 
     <div id="start-screen" class="start-screen">
       <a href="index.html" class="back-home">← Back to home</a>
-      <p>40 questions per session (60 in exam mode, matching the live exam cap). Passing: 70% (live exam: 600/900). Pool of 226. Choose your mode:</p>
+      <p>40 questions per session (60 in exam mode). Passing: 70% (live exam: 600/900). Pool of 238+ with PBQ-style scenario blocks. Choose your mode:</p>
       <p id="focus-hint" class="profile-hint hidden"></p>
       <div class="mode-selector">
         <button type="button" class="mode-btn" data-mode="comparison" onclick="selectMode('comparison')">
@@ -47,6 +49,10 @@
         <button type="button" class="mode-btn" data-mode="exam" onclick="selectMode('exam')">
           <span class="label">Exam (Scenario-based)</span>
           <span class="desc">Scenario-style questions across all SecAI+ objectives.</span>
+        </button>
+        <button type="button" class="mode-btn" data-mode="scenario" onclick="selectMode('scenario')">
+          <span class="label">Scenario blocks</span>
+          <span class="desc">Situational cases with split-view context (MCQ practice for PBQ-style exams).</span>
         </button>
         <button type="button" class="mode-btn selected" data-mode="mixed" onclick="selectMode('mixed')">
           <span class="label">Mixed</span>
@@ -63,6 +69,7 @@
         <input type="number" id="session-time-custom" min="1" max="240" placeholder="Custom" style="width: 4.5em; margin-left: 0.5rem; padding: 0.35rem; background: var(--surface); color: var(--text); border: 1px solid var(--accent-dim); border-radius: 4px;" title="Custom minutes">
       </div>
       <button id="start-btn" onclick="startQuiz()">Start Quiz</button>
+      <div id="case-study-exams" class="case-study-exams" data-heading="Scenario mini-exams" data-intro="Practice multi-step AI security situations (drag-and-drop PBQs on the live exam are separate)."></div>
       <div class="import-area">
         <label for="import-results">Import past results (paste .md or choose file) to focus on weak topics:</label>
         <textarea id="import-results" placeholder="Paste quiz results markdown here..."></textarea>

@@ -1,7 +1,10 @@
 (function () {
+  var bank = (window.QUESTION_BANK_SECAI || []).concat(window.QUESTION_BANK_SECAI_SCENARIOS || []);
   QuizEngine.run({
     quizId: 'secai',
-    questionBank: window.QUESTION_BANK_SECAI,
+    questionBank: bank,
+    caseStudies: window.CASE_STUDIES_SECAI || {},
+    caseStudyExamQuestions: 6,
     questionsPerQuiz: 40,
     examModeQuestions: 60,
     passingPercent: 70,

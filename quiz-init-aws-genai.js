@@ -1,7 +1,10 @@
 (function () {
+  var bank = (window.QUESTION_BANK_AWS_GENAI || []).concat(window.QUESTION_BANK_AWS_GENAI_SCENARIOS || []);
   QuizEngine.run({
     quizId: 'aws_genai',
-    questionBank: window.QUESTION_BANK_AWS_GENAI,
+    questionBank: bank,
+    caseStudies: window.CASE_STUDIES_AWS_GENAI || {},
+    caseStudyExamQuestions: 6,
     questionsPerQuiz: 40,
     examModeQuestions: 85,
     passingPercent: 75,

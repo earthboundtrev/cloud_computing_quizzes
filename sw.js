@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE_NAME = 'cloudcram-v7';
+const CACHE_NAME = 'cloudcram-v9';
 
 const PRECACHE_PATHS = [
   '/index.html',
@@ -26,12 +26,24 @@ const PRECACHE_PATHS = [
   '/data/oci-questions.js',
   '/data/gcp-questions.js',
   '/data/gcp-pca-questions.js',
+  '/data/gcp-pca-case-studies.js',
+  '/data/gcp-pca-scenario-questions.js',
   '/data/gcp-ace-questions.js',
   '/data/az900-questions.js',
   '/data/aws-mlea-questions.js',
   '/data/aws-data-engineering-questions.js',
   '/data/aws-genai-questions.js',
   '/data/cissp-questions.js',
+  '/data/cissp-case-studies.js',
+  '/data/cissp-scenario-questions.js',
+  '/data/aws-mlea-case-studies.js',
+  '/data/aws-mlea-scenario-questions.js',
+  '/data/aws-dea-case-studies.js',
+  '/data/aws-dea-scenario-questions.js',
+  '/data/aws-genai-case-studies.js',
+  '/data/aws-genai-scenario-questions.js',
+  '/data/secai-case-studies.js',
+  '/data/secai-scenario-questions.js',
   '/data/secai-questions.js',
   '/data/rhcsa9-questions.js',
   '/data/rhce-questions.js',

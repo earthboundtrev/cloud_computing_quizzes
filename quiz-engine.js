@@ -11,6 +11,9 @@
  * - True/false: { type: 'tf', correct: true|false, q, explain, ... } — options are always True / False
  * - Select all: { type: 'multi', options[], correct: number[] (original indices), explain, ... }
  * - Ordering: { type: 'order', options[], correctOrder: number[], ... }
+ * - Case study (PCA-style): { mode: 'scenario', caseStudyId: string, q, options, correct, explain, topic? }
+ *   Requires config.caseStudies[id] = { title, shortName, sections: [{ heading, body }] }.
+ *   Use startCaseStudyQuiz(id) or Case study buttons; shows a split panel like the real exam.
  */
 (function () {
   'use strict';
@@ -24,6 +27,14 @@
   var resultsTitle;
   var downloadFilenamePrefix;
   var TOPIC_BOOTSTRAP_WEIGHTS;
+  var caseStudies = {};
+  var CASE_STUDY_EXAM_QUESTIONS;
+  var CASE_STUDY_QUESTION_PREFIX = 'For this question, refer to the {name} case study.\n\n';
+  var CASE_STUDY_PANEL_NOTE = 'Reference while answering (like the exam split view).';
+  var activeCaseStudyId = null;
+  var lastCaseStudyId = null;
+  var caseStudyPanelEl = null;
+  var caseStudyLayoutEl = null;
 
   var currentIndex = 0;
   var score = 0;
@@ -134,23 +145,161 @@
     fb.appendChild(sp);
   }
 
+  function getCaseStudy(csId) {
+    return csId && caseStudies[csId] ? caseStudies[csId] : null;
+  }
+
+  function ensureCaseStudyLayout() {
+    var quizArea = document.getElementById('quiz-area');
+    if (!quizArea || caseStudyLayoutEl) return;
+    var card = quizArea.querySelector('.question-card');
+    if (!card) return;
+    var wrap = document.createElement('div');
+    wrap.id = 'case-study-layout';
+    wrap.className = 'case-study-layout hidden';
+    var panel = document.createElement('aside');
+    panel.id = 'case-study-panel';
+    panel.className = 'case-study-panel';
+    panel.setAttribute('aria-label', 'Case study reference');
+    var panelInner = document.createElement('div');
+    panelInner.id = 'case-study-panel-inner';
+    panelInner.className = 'case-study-panel-inner';
+    panel.appendChild(panelInner);
+    var main = document.createElement('div');
+    main.className = 'case-study-quiz-main';
+    card.parentNode.insertBefore(wrap, card);
+    wrap.appendChild(panel);
+    wrap.appendChild(main);
+    main.appendChild(card);
+    var navRow = quizArea.querySelector('.nav-row');
+    if (navRow) main.appendChild(navRow);
+    caseStudyLayoutEl = wrap;
+    caseStudyPanelEl = panelInner;
+  }
+
+  function renderCaseStudyPanel(csId) {
+    ensureCaseStudyLayout();
+    var cs = getCaseStudy(csId);
+    var container = document.querySelector('.container');
+    if (caseStudyLayoutEl) caseStudyLayoutEl.classList.toggle('hidden', !cs);
+    if (container) container.classList.toggle('case-study-active', !!cs);
+    if (!cs || !caseStudyPanelEl) return;
+    caseStudyPanelEl.textContent = '';
+    var title = document.createElement('h3');
+    title.className = 'case-study-title';
+    title.textContent = cs.title || cs.shortName || csId;
+    caseStudyPanelEl.appendChild(title);
+    var note = document.createElement('p');
+    note.className = 'case-study-note';
+    note.textContent = (cs && cs.panelNote) || CASE_STUDY_PANEL_NOTE;
+    caseStudyPanelEl.appendChild(note);
+    (cs.sections || []).forEach(function (sec) {
+      var h = document.createElement('h4');
+      h.className = 'case-study-heading';
+      h.textContent = sec.heading || '';
+      caseStudyPanelEl.appendChild(h);
+      var p = document.createElement('p');
+      p.className = 'case-study-body';
+      p.textContent = sec.body || '';
+      caseStudyPanelEl.appendChild(p);
+    });
+  }
+
+  function scenarioQuestionLead(q) {
+    var cs = getCaseStudy(q.caseStudyId);
+    if (cs && cs.questionLead) return cs.questionLead;
+    var name = (cs && cs.shortName) || q.caseStudyId || 'case study';
+    return CASE_STUDY_QUESTION_PREFIX.replace(/\{name\}/g, name);
+  }
+
+  function renderCaseStudyStartScreen() {
+    var container = document.getElementById('case-study-exams');
+    if (!container || !caseStudies || !Object.keys(caseStudies).length) return;
+    if (container.querySelector('[data-case-study]')) return;
+    if (!container.querySelector('h3')) {
+      var h3 = document.createElement('h3');
+      h3.textContent = container.getAttribute('data-heading') || 'Case study mini-exams';
+      container.appendChild(h3);
+    }
+    var intro = container.getAttribute('data-intro');
+    if (intro && !container.querySelector('.case-study-exams-intro')) {
+      var introP = document.createElement('p');
+      introP.className = 'case-study-exams-intro';
+      introP.style.fontSize = '0.85rem';
+      introP.style.color = 'var(--text-muted)';
+      introP.style.marginBottom = '0.75rem';
+      introP.textContent = intro;
+      container.appendChild(introP);
+    }
+    Object.keys(caseStudies).forEach(function (id) {
+      var cs = caseStudies[id];
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'case-study-exam-btn';
+      btn.setAttribute('data-case-study', id);
+      var label = document.createElement('span');
+      label.className = 'label';
+      label.textContent = cs.examLabel || (cs.title + ' case exam');
+      btn.appendChild(label);
+      if (cs.examDesc) {
+        var desc = document.createElement('span');
+        desc.className = 'desc';
+        desc.textContent = cs.examDesc;
+        btn.appendChild(desc);
+      }
+      container.appendChild(btn);
+    });
+  }
+
+  function filterQuestionBank(topicFilter, caseStudyId) {
+    return questionBank.filter(function (q) {
+      if (caseStudyId) return q.caseStudyId === caseStudyId;
+      if (topicFilter) return (q.topic || '') === topicFilter;
+      if (selectedMode === 'comparison') return q.mode === 'comparison';
+      if (selectedMode === 'exam') return q.mode === 'exam';
+      if (selectedMode === 'scenario') return !!q.caseStudyId;
+      return true;
+    });
+  }
+
+  function startCaseStudyQuiz(caseStudyId) {
+    if (!getCaseStudy(caseStudyId)) {
+      console.warn('[QuizEngine] unknown caseStudyId', caseStudyId);
+      return;
+    }
+    activeCaseStudyId = caseStudyId;
+    lastCaseStudyId = caseStudyId;
+    selectedMode = 'scenario';
+    document.querySelectorAll('.mode-btn').forEach(function (b) { b.classList.remove('selected'); });
+    var scenarioBtn = document.querySelector('[data-mode="scenario"]');
+    if (scenarioBtn) scenarioBtn.classList.add('selected');
+    startQuizInternal(null, caseStudyId);
+  }
+
   function startQuiz(topicFilter) {
-    console.log('[QuizEngine] startQuiz called', topicFilter ? 'topicFilter=' + topicFilter : '');
+    activeCaseStudyId = null;
+    lastCaseStudyId = null;
+    startQuizInternal(topicFilter, null);
+  }
+
+  function startQuizInternal(topicFilter, caseStudyId) {
+    console.log('[QuizEngine] startQuizInternal', topicFilter ? 'topic=' + topicFilter : '', caseStudyId ? 'case=' + caseStudyId : '');
     var limitEl = document.getElementById('session-time-limit');
     var customEl = document.getElementById('session-time-custom');
     var minutes = (customEl && customEl.value && parseInt(customEl.value, 10)) || (limitEl ? parseInt(limitEl.value, 10) : 0) || 0;
     if (window.SessionStreak) window.SessionStreak.setTimeLimit(minutes);
-    var filtered = questionBank.filter(function (q) {
-      if (topicFilter) return (q.topic || '') === topicFilter;
-      if (selectedMode === 'comparison') return q.mode === 'comparison';
-      if (selectedMode === 'exam') return q.mode === 'exam';
-      return true;
-    });
+    var filtered = filterQuestionBank(topicFilter, caseStudyId);
     var profile = getProfile();
-    var n = (selectedMode === 'exam' && EXAM_MODE_QUESTIONS)
-      ? Math.min(EXAM_MODE_QUESTIONS, filtered.length)
-      : Math.min(QUESTIONS_PER_QUIZ, filtered.length);
-    sessionQuestions = weightedSample(filtered, n, profile);
+    var n;
+    if (caseStudyId) {
+      n = Math.min(CASE_STUDY_EXAM_QUESTIONS || filtered.length, filtered.length);
+      sessionQuestions = filtered.slice(0, n);
+    } else {
+      n = (selectedMode === 'exam' && EXAM_MODE_QUESTIONS)
+        ? Math.min(EXAM_MODE_QUESTIONS, filtered.length)
+        : Math.min(QUESTIONS_PER_QUIZ, filtered.length);
+      sessionQuestions = weightedSample(filtered, n, profile);
+    }
     sessionQuestions.forEach(prepareQuestionShuffle);
     currentIndex = 0;
     score = 0;
@@ -169,6 +318,20 @@
     document.getElementById('results-screen').classList.add('hidden');
     document.getElementById('quiz-area').classList.remove('hidden');
     document.getElementById('q-total').textContent = sessionQuestions.length;
+    var statsEl = document.querySelector('#quiz-area .stats');
+    if (statsEl) {
+      var csLabel = caseStudyId && getCaseStudy(caseStudyId);
+      var existing = document.getElementById('case-study-session-label');
+      if (csLabel) {
+        if (!existing) {
+          existing = document.createElement('span');
+          existing.id = 'case-study-session-label';
+          statsEl.appendChild(existing);
+        }
+        existing.textContent = ' • ' + (csLabel.shortName || csLabel.title);
+      } else if (existing) existing.remove();
+    }
+    renderCaseStudyPanel(caseStudyId || (sessionQuestions[0] && sessionQuestions[0].caseStudyId));
     var navRow = document.querySelector('#quiz-area .nav-row');
     var exitBtn = document.getElementById('exit-quiz-btn');
     if (navRow && !exitBtn) {
@@ -233,7 +396,11 @@
     var q = sessionQuestions[currentIndex];
     document.getElementById('q-num').textContent = currentIndex + 1;
     document.getElementById('score-display').textContent = score;
-    document.getElementById('question-text').textContent = q.q;
+    if (q.caseStudyId) renderCaseStudyPanel(q.caseStudyId);
+    var qText = q.caseStudyId ? scenarioQuestionLead(q) + q.q : q.q;
+    var qEl = document.getElementById('question-text');
+    qEl.textContent = qText;
+    qEl.classList.toggle('case-study-question', !!q.caseStudyId);
     var opts = document.getElementById('options');
     opts.innerHTML = '';
     opts.classList.remove('order-options');
@@ -475,6 +642,12 @@
   }
 
   function exitQuiz() {
+    activeCaseStudyId = null;
+    var container = document.querySelector('.container');
+    if (container) container.classList.remove('case-study-active');
+    if (caseStudyLayoutEl) caseStudyLayoutEl.classList.add('hidden');
+    var label = document.getElementById('case-study-session-label');
+    if (label) label.remove();
     document.getElementById('quiz-area').classList.add('hidden');
     document.getElementById('start-screen').classList.remove('hidden');
     document.getElementById('results-screen').classList.add('hidden');
@@ -540,7 +713,14 @@
     });
     var md = '# ' + resultsTitle + '\n\n';
     md += '**Date:** ' + new Date().toISOString().slice(0, 10) + '\n';
-    md += '**Mode:** ' + (selectedMode === 'comparison' ? 'Comparison' : selectedMode === 'exam' ? 'Exam' : 'Mixed') + '\n';
+    var modeLabel = selectedMode === 'comparison' ? 'Comparison'
+      : selectedMode === 'exam' ? 'Exam'
+      : selectedMode === 'scenario' ? 'Case study scenarios'
+      : 'Mixed';
+    if (activeCaseStudyId && getCaseStudy(activeCaseStudyId)) {
+      modeLabel += ' (' + (getCaseStudy(activeCaseStudyId).shortName || activeCaseStudyId) + ')';
+    }
+    md += '**Mode:** ' + modeLabel + '\n';
     md += '**Score:** ' + score + '/' + total + ' (' + pct + '%)\n';
     md += '**Pass:** ' + (pct >= PASSING_PERCENT ? 'Yes' : 'No') + '\n\n';
     md += '---\n\n';
@@ -570,8 +750,9 @@
           : q.type === 'multi'
           ? (q._correctDisplayIndices || []).map(function (di) { return sh[di]; }).join('; ')
           : sh[q._correctDisplayIndex !== undefined ? q._correctDisplayIndex : q.correct];
-        md += '### ' + (i + 1) + '. [' + (q.topic || 'General') + typeTag + ']\n';
-        md += '**Q:** ' + q.q + '\n';
+        var csTag = q.caseStudyId ? ', ' + q.caseStudyId : '';
+        md += '### ' + (i + 1) + '. [' + (q.topic || 'General') + typeTag + csTag + ']\n';
+        md += '**Q:** ' + (q.caseStudyId ? scenarioQuestionLead(q) : '') + q.q + '\n';
         md += '**Your answer:** ' + (yourAns != null ? yourAns : '') + '\n';
         md += '**Correct answer:** ' + (correctAns != null ? correctAns : '') + '\n';
         md += '**Explanation:** ' + q.explain + '\n\n';
@@ -728,6 +909,10 @@
       resultsTitle = config.resultsTitle || (QUIZ_ID + ' Quiz Results');
       downloadFilenamePrefix = config.downloadFilenamePrefix || (QUIZ_ID + '_quiz_results');
       TOPIC_BOOTSTRAP_WEIGHTS = config.topicBootstrapWeights || null;
+      caseStudies = config.caseStudies || {};
+      CASE_STUDY_EXAM_QUESTIONS = config.caseStudyExamQuestions;
+      if (config.caseStudyQuestionPrefix) CASE_STUDY_QUESTION_PREFIX = config.caseStudyQuestionPrefix;
+      if (config.caseStudyPanelNote) CASE_STUDY_PANEL_NOTE = config.caseStudyPanelNote;
 
       currentIndex = 0;
       score = 0;
@@ -736,6 +921,7 @@
       selectedMode = 'mixed';
 
       window.startQuiz = startQuiz;
+      window.startCaseStudyQuiz = startCaseStudyQuiz;
       window.selectMode = selectMode;
       console.log('[QuizEngine] selectMode assigned to window, typeof=', typeof window.selectMode);
       window.nextQuestion = nextQuestion;
@@ -783,7 +969,10 @@
           el.removeAttribute('onclick');
           el.addEventListener('click', handler);
         }
-        wireOptional('quiz-retry-btn', function () { startQuiz(); });
+        wireOptional('quiz-retry-btn', function () {
+          if (lastCaseStudyId) startCaseStudyQuiz(lastCaseStudyId);
+          else startQuiz();
+        });
         wireOptional('quiz-download-results-btn', function () { downloadResults(); });
         wireOptional('quiz-copy-results-btn', function () { copyResultsToClipboard(); });
         wireOptional('import-submit-btn', function () { importResults(); });
@@ -796,6 +985,13 @@
           importFileInput.removeAttribute('onchange');
           importFileInput.addEventListener('change', onImportFile);
         }
+        renderCaseStudyStartScreen();
+        document.querySelectorAll('[data-case-study]').forEach(function (btn) {
+          var csId = btn.getAttribute('data-case-study');
+          if (!csId) return;
+          btn.removeAttribute('onclick');
+          btn.addEventListener('click', function () { startCaseStudyQuiz(csId); });
+        });
       }
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', wireStartScreenButtons);
