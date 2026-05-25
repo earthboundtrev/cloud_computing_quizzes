@@ -10,18 +10,22 @@ Open `index.html` in a browser to access all quizzes. No build step or server re
 
 | Quiz | File | Exam | Questions | Pool | Source |
 |------|------|------|-----------|------|--------|
-| **OCI Foundations Associate** | [oci_foundations_quiz.html](oci_foundations_quiz.html) | 1Z0-1085-25 | 41/session | 77+ | `oci_foundations_pattern_guide.md` |
-| **GCP Cloud Digital Leader** | [gcp_cloud_digital_leader_quiz.html](gcp_cloud_digital_leader_quiz.html) | — | 40/session | 60+ | `gcp_cloud_digital_leader_guide.md` |
-| **GCP Associate Cloud Engineer** | [gcp_associate_cloud_engineer_quiz.html](gcp_associate_cloud_engineer_quiz.html) | Associate Cloud Engineer | 40/session (50 exam) | 110+ | — |
-| **GCP Professional Cloud Architect** | [gcp_professional_cloud_architect_quiz.html](gcp_professional_cloud_architect_quiz.html) | Professional Cloud Architect | 40/session (50 exam); 8 Q per case study exam | 180+ | Case-study split view (EHR Healthcare, Mountkirk Games) |
-| **AZ-900 Azure Fundamentals** | [az900_azure_fundamentals_quiz.html](az900_azure_fundamentals_quiz.html) | Microsoft Certified: Azure Fundamentals | 40/session | 55+ | `az900_azure_fundamentals_pattern_guide.md` |
-| **AWS ML Engineer Associate** | [aws_mlea_quiz.html](aws_mlea_quiz.html) | MLA-C01 | 40/session | 150+ | Case studies |
-| **AWS Data Engineer Associate** | [aws_data_engineering_quiz.html](aws_data_engineering_quiz.html) | DEA-C01 | 40/session | 160+ | Case studies |
-| **AWS GenAI Developer Pro** | [aws_genai_quiz.html](aws_genai_quiz.html) | AIP-C01 | 40/session | 175+ | Case studies |
-| **CISSP** | [cissp_quiz.html](cissp_quiz.html) | 8 domains | 40/session (100 exam) | 275+ | Scenario blocks |
-| **CompTIA SecAI+** | [secai_quiz.html](secai_quiz.html) | CY0-001 | 40/session | 238+ | Scenario blocks |
-| **RHCSA 9** | [rhcsa9_quiz.html](rhcsa9_quiz.html) | EX200 | 40/session | 55+ | — |
-| **RHCE** | [rhce_quiz.html](rhce_quiz.html) | EX294 | 40/session | 55+ | — |
+| **OCI Foundations Associate** | [oci_foundations_quiz.html](oci_foundations_quiz.html) | 1Z0-1085-25 | 41/session (55 exam) | 190+ | `oci_foundations_pattern_guide.md` |
+| **GCP Cloud Digital Leader** | [gcp_cloud_digital_leader_quiz.html](gcp_cloud_digital_leader_quiz.html) | — | 40/session (55 exam) | 155+ | `gcp_cloud_digital_leader_guide.md` |
+| **GCP Associate Cloud Engineer** | [gcp_associate_cloud_engineer_quiz.html](gcp_associate_cloud_engineer_quiz.html) | Associate Cloud Engineer | 40/session (50 exam) | 200+ | — |
+| **GCP Professional Cloud Architect** | [gcp_professional_cloud_architect_quiz.html](gcp_professional_cloud_architect_quiz.html) | Professional Cloud Architect | 40/session (50 exam); 8 Q per case study exam | 185+ | Case-study split view (EHR Healthcare, Mountkirk Games) |
+| **AZ-900 Azure Fundamentals** | [az900_azure_fundamentals_quiz.html](az900_azure_fundamentals_quiz.html) | Microsoft Certified: Azure Fundamentals | 40/session (50 exam) | 245+ | `az900_azure_fundamentals_pattern_guide.md` |
+| **AZ-104 Azure Administrator** | [az104_azure_administrator_quiz.html](az104_azure_administrator_quiz.html) | Administrator Associate (typical step after AZ-900) | 40/session (50 exam); 8 Q per case study | 210+ | `az104_azure_administrator_pattern_guide.md` |
+| **AZ-305 Azure Solutions Architect** | [az305_azure_solutions_architect_quiz.html](az305_azure_solutions_architect_quiz.html) | Solutions Architect Expert (closest Azure track to AWS SAA) | 40/session (50 exam); 8 Q per case study | 255+ | `az305_azure_solutions_architect_pattern_guide.md` |
+| **AI-900 Azure AI Fundamentals** | [ai900_azure_ai_fundamentals_quiz.html](ai900_azure_ai_fundamentals_quiz.html) | Azure AI Fundamentals | 40/session (50 exam) | 290+ | — |
+| **AWS ML Engineer Associate** | [aws_mlea_quiz.html](aws_mlea_quiz.html) | MLA-C01 | 40/session (85 exam) | 210+ | Case studies |
+| **AWS Data Engineer Associate** | [aws_data_engineering_quiz.html](aws_data_engineering_quiz.html) | DEA-C01 | 40/session (65 exam) | 215+ | Case studies |
+| **AWS GenAI Developer Pro** | [aws_genai_quiz.html](aws_genai_quiz.html) | AIP-C01 | 40/session (85 exam) | 200+ | Case studies |
+| **Terraform Associate** | [terraform_associate_quiz.html](terraform_associate_quiz.html) | 004 | 40/session (65 exam) | 385+ | — |
+| **CISSP** | [cissp_quiz.html](cissp_quiz.html) | 8 domains | 40/session (100 exam) | 235+ | Scenario blocks |
+| **CompTIA SecAI+** | [secai_quiz.html](secai_quiz.html) | CY0-001 | 40/session (60 exam) | 238+ | Scenario blocks |
+| **RHCSA 9** | [rhcsa9_quiz.html](rhcsa9_quiz.html) | EX200 | 40/session | 205+ | — |
+| **RHCE** | [rhce_quiz.html](rhce_quiz.html) | EX294 | 40/session | 165+ | — |
 
 ## Case study / scenario blocks
 
@@ -35,6 +39,8 @@ These quizzes support **split-view case studies** (context panel + linked questi
 | **AWS Data Engineer Associate** | Case-style blocks | RetailCo data lake, StreamOrders (6 Q each) |
 | **AWS GenAI Developer Professional** | Long compound scenarios | OmniDocs RAG, Apex Financial (6 Q each) |
 | **CompTIA SecAI+** | PBQ + scenario MCQ (PBQs not simulated here) | HelpNow chatbot, InsightRAG (6 Q each) |
+| **AZ-104 Azure Administrator** | Case study sections (split-screen on exam) | Northwind Operations, Fabrikam Research (8 Q each) |
+| **AZ-305 Azure Solutions Architect** | Case study sections (multi-tab scenarios) | Litware Digital, Adventure Works Global (8 Q each) |
 
 **No shared case-study blocks** (standalone scenario MCQs only): OCI Foundations, GCP Digital Leader, GCP ACE, AZ-900, AI-900, Terraform Associate, RHCSA 9, RHCE.
 
@@ -74,7 +80,7 @@ Use **Case studies (mixed)** or the **mini-exam** buttons on each quiz start scr
 
 ## Pass Targets
 
-- **AZ-900:** ~70% (700+ on real exam)
+- **AZ-900, AZ-104, AZ-305:** ~70% (700+ on real exams)
 - **GCP Cloud Digital Leader:** ~70%
 - **GCP Associate Cloud Engineer & Professional Cloud Architect:** ~70%
 - **OCI Foundations:** ~65%
@@ -90,4 +96,6 @@ The CISSP quiz is based on the 8 official CISSP domains. To add questions from y
 
 - `oci_foundations_pattern_guide.md` — OCI study guide
 - `gcp_cloud_digital_leader_guide.md` — GCP study guide  
-- `az900_azure_fundamentals_pattern_guide.md` — Azure study guide
+- `az900_azure_fundamentals_pattern_guide.md` — Azure Fundamentals  
+- `az104_azure_administrator_pattern_guide.md` — Azure Administrator (after AZ-900)  
+- `az305_azure_solutions_architect_pattern_guide.md` — Azure Solutions Architect (SAA-equivalent scope)

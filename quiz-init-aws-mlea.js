@@ -1,5 +1,7 @@
 (function () {
-  var bank = (window.QUESTION_BANK_AWS_MLEA || []).concat(window.QUESTION_BANK_AWS_MLEA_SCENARIOS || []);
+  var bank = (window.QUESTION_BANK_AWS_MLEA || [])
+    .concat(window.QUESTION_BANK_AWS_MLEA_EXTRA || [])
+    .concat(window.QUESTION_BANK_AWS_MLEA_SCENARIOS || []);
   QuizEngine.run({
     quizId: 'aws_mlea',
     questionBank: bank,

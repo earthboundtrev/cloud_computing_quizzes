@@ -1,7 +1,7 @@
 (function () {
   QuizEngine.run({
     quizId: 'gcp_ace',
-    questionBank: window.QUESTION_BANK_GCP_ACE,
+    questionBank: (window.QUESTION_BANK_GCP_ACE || []).concat(window.QUESTION_BANK_GCP_ACE_EXTRA || []),
     questionsPerQuiz: 40,
     examModeQuestions: 50,
     passingPercent: 70,

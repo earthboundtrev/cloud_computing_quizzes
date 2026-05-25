@@ -6,6 +6,16 @@
 
 **AWS Overlap:** ~50–60% with CCP/SAA—Azure VM ≈ EC2, Blob ≈ S3, Azure AD ≈ IAM, VNet ≈ VPC. Use your AWS brain, swap the names.
 
+## Certification path (different exams)
+
+| Goal | Microsoft exam | In this repo |
+|------|----------------|--------------|
+| Fundamentals (you are here) | **AZ-900** | `az900_azure_fundamentals_quiz.html` |
+| Next step after fundamentals (admin/ops) | **AZ-104** Administrator Associate | `az104_azure_administrator_quiz.html` |
+| Closest to **AWS SAA** (solution design) | **AZ-305** Solutions Architect Expert | `az305_azure_solutions_architect_quiz.html` |
+
+**AZ-104** and **AZ-305** are not the same: AZ-104 is hands-on administration; AZ-305 is architecture (requires AZ-104 or AZ-204 first). Typical SAA holders: AZ-900 → AZ-104 → AZ-305.
+
 ---
 
 ## 🎯 Pre-Session Affirmation (Read Before Every Study Burst)

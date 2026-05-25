@@ -1,7 +1,7 @@
 (function () {
   QuizEngine.run({
     quizId: 'rhcsa9',
-    questionBank: window.QUESTION_BANK_RHCSA9,
+    questionBank: (window.QUESTION_BANK_RHCSA9 || []).concat(window.QUESTION_BANK_RHCSA9_EXTRA || []),
     questionsPerQuiz: 40,
     examModeQuestions: 40,
     passingPercent: 70,

@@ -1,5 +1,7 @@
 (function () {
-  var bank = (window.QUESTION_BANK_AWS_DATA_ENGINEERING || []).concat(window.QUESTION_BANK_AWS_DEA_SCENARIOS || []);
+  var bank = (window.QUESTION_BANK_AWS_DATA_ENGINEERING || [])
+    .concat(window.QUESTION_BANK_AWS_DEA_EXTRA || [])
+    .concat(window.QUESTION_BANK_AWS_DEA_SCENARIOS || []);
   QuizEngine.run({
     quizId: 'aws_dea',
     questionBank: bank,

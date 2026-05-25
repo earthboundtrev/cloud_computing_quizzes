@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE_NAME = 'cloudcram-v9';
+const CACHE_NAME = 'cloudcram-v13';
 
 const PRECACHE_PATHS = [
   '/index.html',
@@ -13,6 +13,8 @@ const PRECACHE_PATHS = [
   '/gcp_professional_cloud_architect_quiz.html',
   '/gcp_associate_cloud_engineer_quiz.html',
   '/az900_azure_fundamentals_quiz.html',
+  '/az104_azure_administrator_quiz.html',
+  '/az305_azure_solutions_architect_quiz.html',
   '/aws_mlea_quiz.html',
   '/aws_data_engineering_quiz.html',
   '/aws_genai_quiz.html',
@@ -30,6 +32,20 @@ const PRECACHE_PATHS = [
   '/data/gcp-pca-scenario-questions.js',
   '/data/gcp-ace-questions.js',
   '/data/az900-questions.js',
+  '/data/az104-questions.js',
+  '/data/az104-extra-questions.js',
+  '/data/az104-boost-questions.js',
+  '/data/az104-case-studies.js',
+  '/data/az104-scenario-questions.js',
+  '/data/az305-questions.js',
+  '/data/az305-extra-questions.js',
+  '/data/az305-boost-questions.js',
+  '/data/az305-case-studies.js',
+  '/data/az305-scenario-questions.js',
+  '/data/gcp-ace-extra-questions.js',
+  '/data/aws-mlea-extra-questions.js',
+  '/data/aws-dea-extra-questions.js',
+  '/data/aws-genai-extra-questions.js',
   '/data/aws-mlea-questions.js',
   '/data/aws-data-engineering-questions.js',
   '/data/aws-genai-questions.js',
@@ -46,12 +62,15 @@ const PRECACHE_PATHS = [
   '/data/secai-scenario-questions.js',
   '/data/secai-questions.js',
   '/data/rhcsa9-questions.js',
+  '/data/rhcsa9-extra-questions.js',
   '/data/rhce-questions.js',
   '/quiz-init-oci.js',
   '/quiz-init-gcp.js',
   '/quiz-init-gcp-pca.js',
   '/quiz-init-gcp-ace.js',
   '/quiz-init-az900.js',
+  '/quiz-init-az104.js',
+  '/quiz-init-az305.js',
   '/quiz-init-aws-mlea.js',
   '/quiz-init-aws-data-engineering.js',
   '/quiz-init-aws-genai.js',
