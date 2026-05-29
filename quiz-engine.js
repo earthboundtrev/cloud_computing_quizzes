@@ -156,7 +156,7 @@
     if (!card) return;
     var wrap = document.createElement('div');
     wrap.id = 'case-study-layout';
-    wrap.className = 'case-study-layout hidden';
+    wrap.className = 'case-study-layout case-study-layout--solo';
     var panel = document.createElement('aside');
     panel.id = 'case-study-panel';
     panel.className = 'case-study-panel';
@@ -181,7 +181,14 @@
     ensureCaseStudyLayout();
     var cs = getCaseStudy(csId);
     var container = document.querySelector('.container');
-    if (caseStudyLayoutEl) caseStudyLayoutEl.classList.toggle('hidden', !cs);
+    /* Only hide the reference panel when there is no case study — never hide the whole
+       layout or quiz content (question card lives inside case-study-quiz-main). */
+    if (caseStudyLayoutEl) {
+      caseStudyLayoutEl.classList.remove('hidden');
+      caseStudyLayoutEl.classList.toggle('case-study-layout--solo', !cs);
+    }
+    var panelWrap = caseStudyLayoutEl && caseStudyLayoutEl.querySelector('.case-study-panel');
+    if (panelWrap) panelWrap.classList.toggle('hidden', !cs);
     if (container) container.classList.toggle('case-study-active', !!cs);
     if (!cs || !caseStudyPanelEl) return;
     caseStudyPanelEl.textContent = '';
@@ -301,6 +308,15 @@
       sessionQuestions = weightedSample(filtered, n, profile);
     }
     sessionQuestions.forEach(prepareQuestionShuffle);
+    if (sessionQuestions.length === 0) {
+      console.warn('[QuizEngine] no questions for this mode/filter');
+      var modeName = selectedMode === 'comparison' ? 'Comparison'
+        : selectedMode === 'exam' ? 'Exam'
+        : selectedMode === 'scenario' ? 'Case studies'
+        : 'this mode';
+      window.alert('No questions available for ' + modeName + '. Try Mixed mode or reload the page.');
+      return;
+    }
     currentIndex = 0;
     score = 0;
     answered = [];
@@ -394,6 +410,10 @@
 
   function renderQuestion() {
     var q = sessionQuestions[currentIndex];
+    if (!q) {
+      console.error('[QuizEngine] missing question at index', currentIndex);
+      return;
+    }
     document.getElementById('q-num').textContent = currentIndex + 1;
     document.getElementById('score-display').textContent = score;
     if (q.caseStudyId) renderCaseStudyPanel(q.caseStudyId);

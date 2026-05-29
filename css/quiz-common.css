@@ -65,6 +65,13 @@ body {
   margin-bottom: 0.5rem;
 }
 .case-study-quiz-main .question-card { margin-bottom: 0; }
+/* Question card sits inside case-study-layout; solo = no reference panel (Mixed/Exam/etc.) */
+.case-study-layout.case-study-layout--solo {
+  grid-template-columns: 1fr;
+}
+.case-study-layout.case-study-layout--solo .case-study-panel {
+  display: none;
+}
 @media (max-width: 800px) {
   .case-study-layout {
     grid-template-columns: 1fr;
