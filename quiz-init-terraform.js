@@ -18,9 +18,12 @@
     'Providers': 0.44
   };
 
+  var bank = (window.QUESTION_BANK_TERRAFORM || [])
+    .concat(window.QUESTION_BANK_TERRAFORM_EXTRA || []);
+
   QuizEngine.run({
     quizId: 'terraform',
-    questionBank: window.QUESTION_BANK_TERRAFORM,
+    questionBank: bank,
     questionsPerQuiz: 40,
     examModeQuestions: 65,
     passingPercent: 70,

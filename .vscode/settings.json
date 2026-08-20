@@ -1,0 +1,7 @@
+{
+  "files.associations": {
+    "*.tf": "terraform",
+    "*.tfvars": "terraformvars"
+  },
+  "terraform.languageServer.enable": true
+}

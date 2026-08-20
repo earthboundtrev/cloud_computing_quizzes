@@ -21,7 +21,7 @@ Open `index.html` in a browser to access all quizzes. No build step or server re
 | **AWS ML Engineer Associate** | [aws_mlea_quiz.html](aws_mlea_quiz.html) | MLA-C01 | 40/session (85 exam) | 210+ | Case studies |
 | **AWS Data Engineer Associate** | [aws_data_engineering_quiz.html](aws_data_engineering_quiz.html) | DEA-C01 | 40/session (65 exam) | 215+ | Case studies |
 | **AWS GenAI Developer Pro** | [aws_genai_quiz.html](aws_genai_quiz.html) | AIP-C01 | 40/session (85 exam) | 200+ | Case studies |
-| **Terraform Associate** | [terraform_associate_quiz.html](terraform_associate_quiz.html) | 004 | 40/session (65 exam) | 385+ | — |
+| **Terraform Associate** | [terraform_associate_quiz.html](terraform_associate_quiz.html) | 004 | 40/session (65 exam) | 420+ | `terraform_associate_pattern_guide.md` + `terraform-labs/` |
 | **CISSP** | [cissp_quiz.html](cissp_quiz.html) | 8 domains | 40/session (100 exam) | 235+ | Scenario blocks |
 | **CompTIA SecAI+** | [secai_quiz.html](secai_quiz.html) | CY0-001 | 40/session (60 exam) | 238+ | Scenario blocks |
 | **RHCSA 9** | [rhcsa9_quiz.html](rhcsa9_quiz.html) | EX200 | 40/session | 205+ | — |
@@ -99,3 +99,5 @@ The CISSP quiz is based on the 8 official CISSP domains. To add questions from y
 - `az900_azure_fundamentals_pattern_guide.md` — Azure Fundamentals  
 - `az104_azure_administrator_pattern_guide.md` — Azure Administrator (after AZ-900)  
 - `az305_azure_solutions_architect_pattern_guide.md` — Azure Solutions Architect (SAA-equivalent scope)
+- `terraform_associate_pattern_guide.md` — Terraform Associate 004 CLI/HCP traps + 12-day plan
+- `terraform-labs/` — local-only hands-on labs (random/local/null; no cloud account)
