@@ -21,7 +21,7 @@ window.QUIZ_CONFIG = [
   { id: 'aws_genai', navLabel: 'AWS GenAI', name: 'AWS Certified Generative AI Developer – Professional', href: 'aws_genai_quiz.html', desc: '200+ Q • case-study scenarios • Bedrock, RAG, guardrails', cardClass: 'aws', closed: false, examCode: 'AIP-C01' },
   { id: 'cissp', navLabel: 'CISSP', name: 'CISSP', href: 'cissp_quiz.html', desc: '8 domains • scenario blocks • CAT-style judgment questions', cardClass: 'cissp', closed: false, examCode: null },
   { id: 'secai', navLabel: 'SecAI+', name: 'CompTIA SecAI+', href: 'secai_quiz.html', desc: 'CY0-001 • scenario mini-exams • securing AI &amp; GRC', cardClass: 'secai', closed: false, examCode: 'CY0-001' },
-  { id: 'rhcsa9', navLabel: 'RHCSA 9', name: 'RHCSA 9', href: 'rhcsa9_quiz.html', desc: 'EX200 • 205+ Q • RHEL 10 vs RHEL 9 &amp; hands-on exam-style', cardClass: 'redhat', closed: false, examCode: 'EX200' },
+  { id: 'rhcsa10', navLabel: 'RHCSA (RHEL 10)', name: 'RHCSA (EX200, RHEL 10)', href: 'rhcsa10_quiz.html', desc: 'EX200 • 249 Q • RHEL 10 • GPT, Flatpak, tuned, systemd timers', cardClass: 'redhat', closed: false, examCode: 'EX200' },
   { id: 'rhce', navLabel: 'RHCE', name: 'RHCE', href: 'rhce_quiz.html', desc: 'EX294 • Ansible playbooks for system administration', cardClass: 'redhat', closed: false, examCode: 'EX294' },
 ];
 

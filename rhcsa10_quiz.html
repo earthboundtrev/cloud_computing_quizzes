@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f1419">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <title>RHCSA (EX200, RHEL 10) Practice Quiz</title>
+  <link rel="stylesheet" href="css/quiz-common.css?v=3">
+  <style>:root { --accent: #ee0000; --accent-dim: #cc0000; }</style>
+  <script src="rhcsa-migration.js?v=1"></script>
+  <script src="quiz-config.js?v=3"></script>
+  <script src="sw-register.js?v=3"></script>
+  <script src="brain-dump.js?v=2"></script>
+  <script src="motivation.js?v=5"></script>
+  <script src="session-streak.js?v=2"></script>
+  <script src="quiz-engine.js?v=8"></script>
+  <script src="data/rhcsa10-questions.js?v=1"></script>
+  <script src="data/rhcsa10-extra-questions.js?v=1"></script>
+  <script src="quiz-init-rhcsa10.js?v=1"></script>
+  <script src="quiz-nav.js?v=2"></script>
+  <script src="app-reset.js?v=2"></script>
+</head>
+<body>
+  <header class="site-nav">
+    <a href="index.html" class="nav-brand">Study Sessions</a>
+    <nav class="nav-links">
+      <a href="oci_foundations_quiz.html">OCI</a>
+      <a href="gcp_cloud_digital_leader_quiz.html">GCP</a>
+      <a href="az900_azure_fundamentals_quiz.html">Azure</a>
+      <a href="aws_mlea_quiz.html">AWS MLA</a>
+      <a href="aws_data_engineering_quiz.html">AWS DEA</a>
+      <a href="terraform_associate_quiz.html">Terraform</a>
+      <a href="cissp_quiz.html">CISSP</a>
+      <a href="rhcsa10_quiz.html">RHCSA (RHEL 10)</a>
+      <a href="rhce_quiz.html">RHCE</a>
+      <button type="button" class="nav-dumps-btn" id="review-dumps-btn">Review Dumps</button>
+      <button type="button" class="nav-reset-btn" id="reset-app-btn">Reset app</button>
+    </nav>
+  </header>
+  <div class="container">
+    <h1>RHCSA (EX200, RHEL 10) Practice Quiz</h1>
+    <p class="subtitle">Performance-based exam • GPT, Flatpak, tuned, systemd timers • 249 questions</p>
+
+    <div id="start-screen" class="start-screen">
+      <a href="index.html" class="back-home">← Back to home</a>
+      <p>40 questions per session. Passing: 70%. Pool of 249. EX200 is performance-based (hands-on tasks); configurations must persist after reboot. These MCQs build command recall. Choose your mode:</p>
+      <p id="focus-hint" class="profile-hint hidden"></p>
+      <div class="mode-selector">
+        <button type="button" class="mode-btn selected" data-mode="exam" onclick="selectMode('exam')">
+          <span class="label">Exam (RHEL 10 objectives)</span>
+          <span class="desc">Storage (GPT, LVM), systemd, firewalld, SELinux, Flatpak, tuned, networking, users, scheduling.</span>
+        </button>
+      </div>
+      <div class="session-time-row" style="margin: 1rem 0; font-size: 0.9rem; color: var(--text-muted);">
+        <label for="session-time-limit">Timed session (simulate exam pressure):</label>
+        <select id="session-time-limit" style="margin-left: 0.5rem; padding: 0.35rem; background: var(--surface); color: var(--text); border: 1px solid var(--accent-dim); border-radius: 4px;">
+          <option value="0">Off</option>
+          <option value="65">65 min</option>
+          <option value="90">90 min</option>
+          <option value="120">120 min</option>
+        </select>
+        <input type="number" id="session-time-custom" min="1" max="240" placeholder="Custom" style="width: 4.5em; margin-left: 0.5rem; padding: 0.35rem; background: var(--surface); color: var(--text); border: 1px solid var(--accent-dim); border-radius: 4px;" title="Custom minutes">
+      </div>
+      <button id="start-btn" onclick="startQuiz()">Start Quiz</button>
+      <div class="import-area">
+        <label for="import-results">Import past results (paste .md or choose file) to focus on weak topics:</label>
+        <textarea id="import-results" placeholder="Paste quiz results markdown here..."></textarea>
+        <button type="button" class="secondary" id="import-submit-btn" style="margin-top: 0.5rem;">Import results</button>
+        <input type="file" id="import-file" accept=".md,text/markdown" style="display: none;">
+        <button type="button" class="secondary" id="import-choose-file-btn" style="margin-top: 0.5rem; margin-left: 0.5rem;">Choose file</button>
+        <p id="import-toast" class="import-toast hidden"></p>
+      </div>
+    </div>
+
+    <div id="quiz-area" class="hidden">
+      <div class="stats">
+        <span>Question <span id="q-num">1</span> of <span id="q-total">40</span></span>
+        <span>Correct: <span id="score-display">0</span></span>
+      </div>
+      <div class="question-card">
+        <div class="question-text" id="question-text"></div>
+        <div class="options" id="options"></div>
+        <div id="feedback" class="feedback hidden"></div>
+        <div id="brain-dump-wrap" class="brain-dump-wrap">
+          <label class="brain-dump-label" for="brain-dump-textarea">Dump your thoughts here (30–60 sec)</label>
+          <textarea id="brain-dump-textarea" placeholder="Dump your thoughts here (30–60 sec)" rows="3"></textarea>
+          <div class="brain-dump-actions">
+            <button type="button" id="brain-dump-save-next">Save &amp; Next</button>
+            <button type="button" id="brain-dump-mic" class="btn-mic" aria-label="Voice input" title="Voice input">🎤</button>
+          </div>
+        </div>
+      </div>
+      <div class="nav-row">
+        <button id="prev-btn" class="secondary" onclick="prevQuestion()">← Previous</button>
+        <button id="next-btn" onclick="nextQuestion()">Next →</button>
+      </div>
+    </div>
+
+    <div id="results-screen" class="results hidden">
+      <h2>Quiz Complete</h2>
+      <div class="score" id="final-score"></div>
+      <p id="result-msg" style="margin-bottom: 1.5rem; color: var(--text-muted);"></p>
+      <div class="results-actions">
+        <button type="button" id="quiz-retry-btn">Try Again</button>
+        <a href="index.html" class="btn-link">Back to home</a>
+        <button type="button" class="secondary" id="quiz-download-results-btn">Download Results</button>
+        <button type="button" class="secondary" id="quiz-copy-results-btn">Copy to Clipboard</button>
+      </div>
+      <p id="copy-toast" class="copy-toast hidden">Copied! Paste into Cursor chat for AI refactoring.</p>
+    </div>
+  </div>
+
+</body>
+</html>

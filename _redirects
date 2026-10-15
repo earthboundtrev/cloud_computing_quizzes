@@ -1,0 +1,7 @@
+# Netlify redirects
+# RHCSA 9 → RHCSA 10 (301 permanent redirects)
+/rhcsa9_quiz.html          /rhcsa10_quiz.html         301
+/quiz-init-rhcsa9.js       /quiz-init-rhcsa10.js      301
+/data/rhcsa9-questions.js  /data/rhcsa10-questions.js 301
+/data/rhcsa9-extra-questions.js /data/rhcsa10-extra-questions.js 301
+/data/rhcsa9-objectives.js /data/rhcsa10-objectives.js 301
