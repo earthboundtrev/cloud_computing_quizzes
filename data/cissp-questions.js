@@ -170,11 +170,11 @@ window.QUESTION_BANK_CISSP = [
         correct: 1,
         explain: "Residual risk = risk left after controls. Accept, transfer, mitigate, or avoid."
       },
-      { mode: "comparison", topic: "Security and Risk Management",
-        q: "Due care vs due diligence: Due diligence is:",
-        options: ["One-time action", "Ongoing activities to maintain security", "Only legal", "Only technical"],
-        correct: 1,
-        explain: "Due care = reasonable action. Due diligence = ongoing maintenance, verification, monitoring."
+      { mode: "exam", topic: "Security and Risk Management",
+        q: "Due diligence is BEST described as:",
+        options: ["Establishing the plans, policies and processes (knowing what should be done)", "Performing the day-to-day security activities", "Verifying compliance after an incident", "Transferring risk to an insurer"],
+        correct: 0,
+        explain: "Due diligence = establishing a plan, policy, and process to protect the organization (knowing what should be done and planning for it). Due care = practicing the individual activities that maintain the due diligence effort (doing the right action at the right time). (ISC)² CISSP Official Study Guide, 10th ed., Ch. 1, p. 27."
       },
       // === MORE DOMAINS ===
       { mode: "exam", topic: "Asset Security",
@@ -468,10 +468,10 @@ window.QUESTION_BANK_CISSP = [
         explain: "Salt = random bits added before hashing. Defeats rainbow tables; each password needs unique table."
       },
       { mode: "exam", topic: "Network Security",
-        q: "802.1X provides:",
-        options: ["Only encryption", "Port-based Network Access Control (NAC)", "Antivirus", "IDS only"],
+        q: "In an 802.1X deployment, which device acts as the authenticator?",
+        options: ["The client workstation (supplicant)", "The network switch or wireless access point", "The RADIUS server", "The domain controller"],
         correct: 1,
-        explain: "802.1X = NAC; authenticate before granting network access; EAP, RADIUS."
+        explain: "802.1X roles: supplicant (client), authenticator (switch/AP that enforces port access), authentication server (RADIUS). The authenticator relays EAP between supplicant and RADIUS."
       },
       { mode: "exam", topic: "Security Operations",
         q: "Pre-action sprinkler systems:",
@@ -491,11 +491,11 @@ window.QUESTION_BANK_CISSP = [
         correct: 1,
         explain: "Mandatory vacation = suspend to investigate fraud/tampering; person can't cover tracks."
       },
-      { mode: "comparison", topic: "Security and Risk Management",
-        q: "Due Care vs Due Diligence: Due Diligence is:",
-        options: ["Managerial planning only", "Validation/verification that due care actions were undertaken", "Same as due care", "Optional"],
+      { mode: "exam", topic: "Security and Risk Management",
+        q: "Your organization's security policy requires monthly vulnerability patching. Each month, the system administrator applies the patches. This is an example of:",
+        options: ["Due diligence", "Due care", "Risk avoidance", "Risk transfer"],
         correct: 1,
-        explain: "Due Care = reasonable steps to prevent harm (planning, custodial actions). Due Diligence = verify those steps were done (verification, metrics)."
+        explain: "Due care = practicing the individual activities that maintain the due diligence effort (doing the right action at the right time). The policy (due diligence) established what should be done; the administrator's patching (due care) executes it. (ISC)² CISSP Official Study Guide, 10th ed., Ch. 1, p. 27."
       },
       { mode: "exam", topic: "IAM",
         q: "Kerberos: A TGT (Ticket Granting Ticket) is issued by:",
