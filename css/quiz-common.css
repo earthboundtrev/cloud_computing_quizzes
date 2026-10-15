@@ -316,3 +316,29 @@ button.secondary:hover { background: rgba(100,116,139,0.1); }
 .session-time-row select,
 .session-time-row input[type="number"] { margin-left: 0.5rem; padding: 0.35rem; background: var(--surface); color: var(--text); border: 1px solid var(--accent-dim); border-radius: 4px; }
 .session-time-row input[type="number"] { width: 4.5em; }
+/* Code snippet support (<pre> tags for questions with code) */
+pre {
+  background: var(--bg);
+  border: 1px solid var(--accent-dim);
+  border-radius: 6px;
+  padding: 0.75rem;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0.75rem 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+code {
+  background: var(--surface);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.9em;
+}
+pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
