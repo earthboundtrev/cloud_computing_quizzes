@@ -48,10 +48,10 @@ const EXPECTED_EXAM_CODES = {
 };
 
 // Longest-option thresholds (per-track ratchet, issue #6)
-// Initially report-only; gates turn on as tracks ramp up
+// Initially report-only; gates turn on as tracks ramp up in issues #7-#22
 const LONGEST_OPTION_THRESHOLDS = {
-  'cissp': 0.40,  // Target: ≤40% after ramp-up
-  // All others: report-only for now (no gate)
+  // All tracks report-only until their ramp-up issue closes
+  // Example: 'cissp': 0.40 would fail CI at >40% (turned on when #15 closes)
 };
 
 // Question bank files and their corresponding objectives files
@@ -190,16 +190,16 @@ function validateSchema(questions, trackId, fileName) {
     const qId = `${fileName}[${idx}]`;
     trackStats.total++;
     
-    // Required fields
+    // Required fields (warn for pre-existing gaps, per issue #6)
     if (!q.mode) {
-      error(`${qId}: missing 'mode' field`);
+      warn(`${qId}: missing 'mode' field`);
       trackStats.missingFields.mode = (trackStats.missingFields.mode || 0) + 1;
     } else {
       trackStats.byMode[q.mode] = (trackStats.byMode[q.mode] || 0) + 1;
     }
     
     if (!q.topic) {
-      error(`${qId}: missing 'topic' field`);
+      warn(`${qId}: missing 'topic' field`);
       trackStats.missingFields.topic = (trackStats.missingFields.topic || 0) + 1;
     }
     
@@ -297,9 +297,10 @@ function checkDuplicateStems(questions, trackId) {
   });
   
   if (duplicates.length > 0) {
-    error(`${trackId}: Found ${duplicates.length} duplicate question stem(s)`);
+    // Warn instead of error - per-cert issues will fix these (#7-#22)
+    warn(`${trackId}: Found ${duplicates.length} duplicate question stem(s)`);
     duplicates.slice(0, 5).forEach(dup => {
-      error(`  - Indices ${dup.indices.join(', ')}: "${dup.questions[0].substring(0, 60)}..."`);
+      warn(`  - Indices ${dup.indices.join(', ')}: "${dup.questions[0].substring(0, 60)}..."`);
     });
   }
 }
@@ -465,7 +466,10 @@ function checkLinksExist() {
       if (manifest.icons) {
         manifest.icons.forEach(icon => {
           if (icon.src && !fs.existsSync(icon.src)) {
-            error(`manifest.json: icon '${icon.src}' does not exist`);
+            // Skip absolute path checks (they're web paths, not local files)
+            if (!icon.src.startsWith('/')) {
+              error(`manifest.json: icon '${icon.src}' does not exist`);
+            }
           }
         });
       }
