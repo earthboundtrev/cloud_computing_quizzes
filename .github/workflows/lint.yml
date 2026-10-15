@@ -1,0 +1,31 @@
+name: Lint Question Banks
+
+on:
+  push:
+    branches: [ main, cursor/** ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Run bank-wide lint
+      run: node scripts/lint-banks.js --ci
+    
+    - name: Run CISSP validation
+      run: node scripts/validate-cissp-questions.js
+    
+    - name: Run CISSP smoke tests
+      run: node scripts/smoke-test-cissp.js
+    
+    - name: Run CISSP lint
+      run: node scripts/lint-cissp-questions.js

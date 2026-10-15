@@ -141,7 +141,13 @@
     fb.appendChild(document.createTextNode(isCorrect ? '✓ Correct. ' : '✗ Incorrect. '));
     var sp = document.createElement('span');
     sp.className = 'explanation';
-    sp.textContent = explainText || '';
+    // Support <pre> tags for code snippets (convert \n to actual newlines)
+    var text = (explainText || '').replace(/\\n/g, '\n');
+    if (text.indexOf('<pre>') !== -1 || text.indexOf('<code>') !== -1) {
+      sp.innerHTML = text;
+    } else {
+      sp.textContent = text;
+    }
     fb.appendChild(sp);
   }
 
@@ -419,7 +425,13 @@
     if (q.caseStudyId) renderCaseStudyPanel(q.caseStudyId);
     var qText = q.caseStudyId ? scenarioQuestionLead(q) + q.q : q.q;
     var qEl = document.getElementById('question-text');
-    qEl.textContent = qText;
+    // Support <pre> tags for code snippets (convert \n to actual newlines)
+    var text = (qText || '').replace(/\\n/g, '\n');
+    if (text.indexOf('<pre>') !== -1 || text.indexOf('<code>') !== -1) {
+      qEl.innerHTML = text;
+    } else {
+      qEl.textContent = text;
+    }
     qEl.classList.toggle('case-study-question', !!q.caseStudyId);
     var opts = document.getElementById('options');
     opts.innerHTML = '';
@@ -491,7 +503,13 @@
       mopts.forEach(function (opt, i) {
         var div = document.createElement('div');
         div.className = 'option multi-opt';
-        div.textContent = opt;
+        // Support <pre> tags in options
+        var optText = (opt || '').replace(/\\n/g, '\n');
+        if (optText.indexOf('<pre>') !== -1 || optText.indexOf('<code>') !== -1) {
+          div.innerHTML = optText;
+        } else {
+          div.textContent = optText;
+        }
         div.dataset.index = i;
         if (answered[currentIndex] !== undefined) {
           var chosen = answered[currentIndex];
@@ -532,7 +550,13 @@
       optsList.forEach(function (opt, i) {
         var div = document.createElement('div');
         div.className = 'option';
-        div.textContent = opt;
+        // Support <pre> tags in options
+        var optText = (opt || '').replace(/\\n/g, '\n');
+        if (optText.indexOf('<pre>') !== -1 || optText.indexOf('<code>') !== -1) {
+          div.innerHTML = optText;
+        } else {
+          div.textContent = optText;
+        }
         div.dataset.index = i;
         if (answered[currentIndex] !== undefined) {
           div.classList.add('disabled');
