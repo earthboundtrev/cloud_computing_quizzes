@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE_NAME = 'cloudcram-v14';
+const CACHE_NAME = 'cloudcram-v15';
 
 const PRECACHE_PATHS = [
   '/index.html',
@@ -23,6 +23,12 @@ const PRECACHE_PATHS = [
   '/secai_quiz.html',
   '/rhcsa9_quiz.html',
   '/rhce_quiz.html',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
+  '/icons/icon-512-maskable.png',
+  '/icons/apple-touch-icon.png',
+  '/icons/favicon-32.png',
+  '/favicon.ico',
   '/css/quiz-common.css',
   '/quiz-engine.js',
   '/data/oci-questions.js',
