@@ -4,10 +4,11 @@
  */
 'use strict';
 
-const CACHE_NAME = 'cloudcram-v15';
+const CACHE_NAME = 'cloudcram-v16';
 
 const PRECACHE_PATHS = [
   '/index.html',
+  '/manifest.json',
   '/oci_foundations_quiz.html',
   '/gcp_cloud_digital_leader_quiz.html',
   '/gcp_professional_cloud_architect_quiz.html',
@@ -15,6 +16,7 @@ const PRECACHE_PATHS = [
   '/az900_azure_fundamentals_quiz.html',
   '/az104_azure_administrator_quiz.html',
   '/az305_azure_solutions_architect_quiz.html',
+  '/ai900_azure_ai_fundamentals_quiz.html',
   '/aws_mlea_quiz.html',
   '/aws_data_engineering_quiz.html',
   '/aws_genai_quiz.html',
@@ -22,6 +24,7 @@ const PRECACHE_PATHS = [
   '/cissp_quiz.html',
   '/secai_quiz.html',
   '/rhcsa9_quiz.html',
+  '/rhcsa10_quiz.html',
   '/rhce_quiz.html',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
@@ -31,6 +34,7 @@ const PRECACHE_PATHS = [
   '/favicon.ico',
   '/css/quiz-common.css',
   '/quiz-engine.js',
+  '/app-reset.js',
   '/data/oci-questions.js',
   '/data/gcp-questions.js',
   '/data/gcp-pca-questions.js',
@@ -38,6 +42,7 @@ const PRECACHE_PATHS = [
   '/data/gcp-pca-scenario-questions.js',
   '/data/gcp-ace-questions.js',
   '/data/az900-questions.js',
+  '/data/ai900-questions.js',
   '/data/az104-questions.js',
   '/data/az104-extra-questions.js',
   '/data/az104-boost-questions.js',
@@ -67,14 +72,19 @@ const PRECACHE_PATHS = [
   '/data/secai-case-studies.js',
   '/data/secai-scenario-questions.js',
   '/data/secai-questions.js',
+  '/data/terraform-questions.js',
+  '/data/terraform-extra-questions.js',
   '/data/rhcsa9-questions.js',
   '/data/rhcsa9-extra-questions.js',
+  '/data/rhcsa10-questions.js',
+  '/data/rhcsa10-extra-questions.js',
   '/data/rhce-questions.js',
   '/quiz-init-oci.js',
   '/quiz-init-gcp.js',
   '/quiz-init-gcp-pca.js',
   '/quiz-init-gcp-ace.js',
   '/quiz-init-az900.js',
+  '/quiz-init-ai900.js',
   '/quiz-init-az104.js',
   '/quiz-init-az305.js',
   '/quiz-init-aws-mlea.js',
@@ -84,7 +94,9 @@ const PRECACHE_PATHS = [
   '/quiz-init-cissp.js',
   '/quiz-init-secai.js',
   '/quiz-init-rhcsa9.js',
+  '/quiz-init-rhcsa10.js',
   '/quiz-init-rhce.js',
+  '/rhcsa-migration.js',
   '/quiz-config.js',
   '/quiz-nav.js',
   '/brain-dump.js',
@@ -101,9 +113,7 @@ function fullUrl(path) {
 self.addEventListener('install', function (event) {
   event.waitUntil(
     caches.open(CACHE_NAME).then(function (cache) {
-      return cache.addAll(PRECACHE_PATHS.map(fullUrl)).catch(function (err) {
-        console.warn('SW precache failed for some URLs:', err);
-      });
+      return cache.addAll(PRECACHE_PATHS.map(fullUrl));
     }).then(function () {
       return self.skipWaiting();
     })
@@ -130,20 +140,22 @@ self.addEventListener('fetch', function (event) {
   if (url.origin !== self.location.origin) return;
 
   event.respondWith(
-    caches.match(event.request).then(function (cached) {
-      if (cached) return cached;
-      return fetch(event.request).then(function (response) {
+    caches.match(event.request, { ignoreSearch: true }).then(function (cached) {
+      var fetchPromise = fetch(event.request).then(function (response) {
         if (!response || response.status !== 200 || response.type !== 'basic') return response;
         var clone = response.clone();
         caches.open(CACHE_NAME).then(function (cache) {
           cache.put(event.request, clone);
         });
         return response;
-      }).catch(function () {
-        return caches.match('/index.html').then(function (fallback) {
+      }).catch(function (err) {
+        if (cached) return cached;
+        return caches.match('/index.html', { ignoreSearch: true }).then(function (fallback) {
           return fallback || new Response('Offline', { status: 503, statusText: 'Offline' });
         });
       });
+
+      return cached || fetchPromise;
     })
   );
 });
