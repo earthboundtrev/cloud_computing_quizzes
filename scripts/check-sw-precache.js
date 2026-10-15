@@ -43,10 +43,21 @@ function main() {
     process.exit(1);
   }
   
-  // Collect all HTML files
-  const htmlFiles = fs.readdirSync(__dirname + '/..')
-    .filter(f => f.endsWith('.html'))
-    .map(f => path.join(__dirname, '..', f));
+  // Collect HTML files that are actively used (not deprecated/redirected)
+  // Load quiz-config.js to get active quiz pages
+  const quizConfigPath = path.join(__dirname, '..', 'quiz-config.js');
+  const quizConfigContent = fs.readFileSync(quizConfigPath, 'utf8');
+  
+  // Extract href values from QUIZ_CONFIG
+  const hrefMatches = [...quizConfigContent.matchAll(/href:\s*['"]([^'"]+)['"]/g)];
+  const activeQuizPages = ['index.html'];
+  
+  for (const match of hrefMatches) {
+    activeQuizPages.push(match[1]);
+  }
+  
+  // Only check HTML files that are actively linked in the app
+  const htmlFiles = activeQuizPages.map(f => path.join(__dirname, '..', f));
   
   const requiredPaths = new Set();
   const errors = [];
