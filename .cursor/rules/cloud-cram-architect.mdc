@@ -1,0 +1,57 @@
+---
+description: Cloud Cram Architect pre-merge gate — layers, SW/banks, storage, merge-ready
+alwaysApply: false
+---
+
+# Cloud Cram Architect
+
+Run as a **separate** Task during **ARCHITECT** (never the implementer self-certifying). Prefer **`cursor-grok-4.6-high-fast`** → **`cursor-grok-4.5-high-fast`** → omit `model`. Do **not** use Opus/Sonnet for this gate unless the user explicitly asks. Stay **local** — `.cursor/rules/prefer-local-agents.mdc`. Cost chains: `.cursor/rules/subagent-watchdog.mdc`.
+
+**Why Grok 4.6 High (aligned with Ducking Gravity / SmartAstro 8/18/2026):** separate Task from implement; must not burn premium tokens on routine merge-ready checks.
+
+## Role in the pipeline
+
+```
+IMPLEMENT → BUGBOT → TESTS → ARCHITECT → DEPLOY
+```
+
+1. **IMPLEMENT** — Composer Fast / parent
+2. **BUGBOT** — separate `bugbot` Task; fix → re-run until clean
+3. **TESTS** — CI Node scripts; failures → rewind **BUGBOT**
+4. **ARCHITECT** — this rule; **blockers → rewind BUGBOT**, then TESTS → ARCHITECT again
+5. **DEPLOY** — validate, push, PR; human merge exits
+
+Skip upfront architect design unless the user explicitly requests it (new quiz track, engine refactor, storage schema change).
+
+## Pre-merge architect review (required for every ticket)
+
+Run **after** Bugbot is clean and tests pass, **before** push/PR.
+
+Produce a concise review covering:
+
+- **AC coverage** — each GitHub issue criterion met; call out gaps
+- **Layering** — banks in `data/`, thin `quiz-init-*.js`, logic in `quiz-engine.js`; no duplicated engine code in HTML
+- **New/changed questions** — IDs unique; `obj`/`topic`/`mode` consistent; lint-banks clean
+- **Wiring** — quiz listed in `quiz-config.js` when new; HTML loads bank scripts; hub link in `index.html` if new track
+- **Offline** — `sw.js` `PRECACHE_PATHS` + `CACHE_NAME` bump when precache changes; `check-sw-precache.js` would pass
+- **Storage** — profile keys stable or migrated (`rhcsa-migration.js` pattern); reset still works
+- **Case studies** — `caseStudies` config matches `mode: 'scenario'` questions
+- **README.MD** — user-visible feature bullets when shipping new quiz modes or tracks (not every typo fix)
+- **Risks** — cache bust `?v=` on HTML assets; duplicate stems; longest-option leaks
+- **Verdict** — merge-ready, or list blockers
+
+**Fix blockers** before opening the PR. After any code fix: rewind to **BUGBOT**, then TESTS → ARCHITECT again.
+
+## Risky changes
+
+For service worker strategy changes, storage schema, import parsing, mic/speech, or new network use: run **`.cursor/rules/security-review.mdc`** (Grok 4.6 High Task) and resolve medium+ findings before merge.
+
+## Delivery standards
+
+- Minimal diffs; extend `QuizEngine.run(config)` rather than forking per quiz
+- No npm/build step — validators stay plain Node in `scripts/`
+- CI must stay green: `.github/workflows/lint.yml`
+
+## Response format (substantive tasks)
+
+**Pipeline pointer** → work current stage → report Bugbot/tests/architect/deploy status → advance or rewind per `.cursor/rules/ticket-lifecycle-loop.mdc`.

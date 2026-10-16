@@ -1,0 +1,161 @@
+---
+description: Core Cloud Cram / Study Sessions PWA standards — always apply
+alwaysApply: true
+---
+
+# Cloud Cram Core Rules
+
+## Project identity
+
+- **Study Sessions (Cloud Cram)** — static HTML/JS PWA for certification practice quizzes (cloud, security, Linux).
+- **Repo:** https://github.com/earthboundtrev/cloud_computing_quizzes
+- Root **`README.MD`** is the product overview. Do not rewrite it casually. Put **new technical docs** in existing pattern guides or focused markdown at repo root only when the user asks.
+
+## Architecture (mental model)
+
+| Layer | Role |
+|-------|------|
+| `*_quiz.html` + `quiz-init-*.js` | Per-quiz shell; wires bank + config into `QuizEngine.run()` |
+| `quiz-engine.js` | Shared engine: modes, scoring, import/export, weighted sampling, case-study UI |
+| `data/*-questions.js` (+ objectives, case studies, scenarios) | Question banks and metadata |
+| `quiz-config.js` | Quiz catalog, order, completion badges (`localStorage`) |
+| `index.html` / `index-init.js` | Hub and navigation |
+| `sw.js` / `sw-register.js` | Offline precache; bump `CACHE_NAME` when precache list changes |
+| `brain-dump.js` | Per-question notes — **IndexedDB** (`StudySessionsBrainDumps`), localStorage fallback |
+| `session-streak.js`, `motivation.js` | Engagement — **localStorage** |
+| `rhcsa-migration.js` | One-time **localStorage** migrations (idempotent flags) |
+| `app-reset.js` | Clears localStorage + IndexedDB |
+| `scripts/*.js` | Node validators (banks, SW precache, CISSP, migrations) — no bundler |
+
+Progress keys follow `study_sessions_profile_{quizId}` in localStorage. Changing keys or shapes requires migration scripts and regression tests.
+
+## Product principles
+
+- **Offline-first** — no backend; service worker precaches static assets.
+- **Local-only progress** — quiz stats, order, brain dumps stay in the browser unless the user exports results.
+- **Bank integrity** — new/changed questions must pass bank lint and stay wired in HTML + `sw.js` precache when applicable.
+
+## Scope and quality
+
+- **Minimal diffs** — match existing IIFE style, `var` in legacy modules, and naming in sibling quizzes.
+- **Ticket workflow:** pointer pipeline `IMPLEMENT → BUGBOT → TESTS → ARCHITECT → DEPLOY` until human sign-off — `.cursor/rules/ticket-lifecycle-loop.mdc`. Any code fix rewinds to **BUGBOT**.
+
+## Model strategy (ticket work)
+
+Human approval happens at **issue/PR intent**. Use **different agents/models per role** (`.cursor/rules/ticket-lifecycle-loop.mdc`). **Cost default (aligned with Ducking Gravity / SmartAstro 8/18/2026):** implement on Composer Fast; Bugbot/Architect/security on **Grok 4.6 High** — do **not** omit `model` on checks (costly default) and do **not** burn Opus/Sonnet on routine reviews.
+
+| Phase | Stage | Who / what | Primary → fallback(s) |
+|-------|-------|------------|------------------------|
+| **Implement** | IMPLEMENT | Parent / implement Task | `composer-2.5-fast` → `cursor-grok-4.5-high-fast` |
+| **Bugbot** | BUGBOT | Separate **`bugbot`** Task — never self-review | `cursor-grok-4.6-high-fast` → `cursor-grok-4.5-high-fast` → omit |
+| **Tests** | TESTS | Same session | — |
+| **Architect** | ARCHITECT | Separate Architect Task (`review-architect`) | `cursor-grok-4.6-high-fast` → `cursor-grok-4.5-high-fast` → omit |
+| **Deploy** | DEPLOY | Default Agent | Composer → Grok / parent |
+| **Security** | (within BUGBOT→DEPLOY) | `security-review` when risky | `cursor-grok-4.6-high-fast` → `cursor-grok-4.5-high-fast` → omit |
+
+Outages: `.cursor/rules/subagent-watchdog.mdc`. Prefer local Tasks: `.cursor/rules/prefer-local-agents.mdc`.
+
+**Architect blockers → rewind pointer to BUGBOT**, then forward through TESTS and ARCHITECT again.
+
+Do **not** run the heavy architect review before implementation unless the user explicitly asks for upfront design on a large/cross-cutting change.
+
+## Git workflow (GitHub)
+
+**Before writing code** for a GitHub issue or feature branch, sync with `main`.
+
+### 1. Load issue context
+
+- Run `gh issue view {N}` for acceptance criteria.
+- Note the issue number for commits and PR description (`Closes #N`).
+
+### 2. Update local `main`
+
+```bash
+git fetch origin
+git checkout main
+git pull origin main
+```
+
+### 3. Branch
+
+```bash
+git checkout -b feature/short-description-{N}
+```
+
+Continuing branch: merge `origin/main` (not rebase unless the user asks). Resolve conflicts before new commits.
+
+### 4. During implementation
+
+- Work on the feature branch only — never commit directly to `main` unless the user explicitly asks.
+- Do not open the PR until §5a and §5b are complete.
+- **Never** commit secrets, API keys, or user quiz exports with PII.
+
+### 5a. BUGBOT & TESTS stages
+
+Pipeline: `.cursor/rules/ticket-lifecycle-loop.mdc`. Pointer reaches **TESTS** only after **BUGBOT** is clean on the current diff.
+
+#### BUGBOT (repeat until clean)
+
+- Launch **Bugbot** per Cursor `review-bugbot` skill (`Diff: branch changes`).
+- Fix valid findings → stay at **BUGBOT**, re-run on updated diff.
+
+#### TESTS (after Bugbot clean)
+
+Run the same checks as CI (`.github/workflows/lint.yml`):
+
+```bash
+node scripts/lint-banks.js --ci
+node scripts/check-sw-precache.js
+node scripts/check-page-banks.js
+node scripts/validate-cissp-questions.js
+node scripts/smoke-test-cissp.js
+node scripts/lint-cissp-questions.js
+```
+
+When touching related areas, also run targeted scripts:
+
+- `node scripts/test-rhcsa-migration.js` — after `rhcsa-migration.js` or profile key changes
+- `node scripts/test-cissp.js` — CISSP bank/engine changes (wraps validate/smoke/lint)
+
+Failures or material test-driven code changes → rewind pointer to **BUGBOT**.
+
+### 5b. ARCHITECT stage
+
+**After BUGBOT clean and TESTS pass.** Blockers fixed → **rewind to BUGBOT**, then TESTS → ARCHITECT again.
+
+Run **`review-architect`** or `.cursor/rules/cloud-cram-architect.mdc` as a **separate** Task with **`model: "cursor-grok-4.6-high-fast"`**.
+
+For service worker, storage, import parsing, or new network use: also run **security-review** per `.cursor/rules/security-review.mdc`.
+
+### 5c. DEPLOY stage
+
+**Only after ARCHITECT merge-ready.**
+
+1. Re-run CI commands above (full set when risky).
+2. Push; open/update PR with **`Closes #N`** in the body.
+3. Watch GitHub Actions — code changes → **IMPLEMENT**, then **BUGBOT** before skipping ahead.
+4. Merge/close **only when the human explicitly asks**.
+5. After merge: verify issue `#N` is **CLOSED**; delete the feature branch when asked.
+
+### 6. Confirm before coding
+
+```bash
+git branch --show-current
+git log --oneline -1 origin/main
+git status -sb
+```
+
+## Deploy / cache hygiene
+
+- Static hosting (e.g. Netlify): `_headers`, `_redirects` at repo root.
+- After changing precached assets: update `PRECACHE_PATHS` in `sw.js` and bump `CACHE_NAME`.
+- After JS/CSS logic changes: bump `?v=` query on script/link tags in affected HTML (see comment in `quiz-config.js`).
+
+## AI collaboration
+
+- **Ticket pipeline:** `.cursor/rules/ticket-lifecycle-loop.mdc`
+- **Subagent watchdog:** `.cursor/rules/subagent-watchdog.mdc`
+- **Prefer local agents:** `.cursor/rules/prefer-local-agents.mdc`
+- **Architect (pre-merge):** `.cursor/rules/cloud-cram-architect.mdc` + `/review-architect`
+- **Bugbot:** Cursor `review-bugbot` skill
+- **Security (SW, storage, imports):** `.cursor/rules/security-review.mdc`

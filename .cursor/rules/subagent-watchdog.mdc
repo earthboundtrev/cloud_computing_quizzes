@@ -1,0 +1,63 @@
+---
+description: Subagent watchdog — comparable model fallbacks on outage/stuck; never idle
+alwaysApply: true
+---
+
+# Subagent watchdog (no idle stalls)
+
+Whenever you launch a **Task / subagent** (Bugbot, Architect, security-review, explore, shell, generalPurpose, etc.) — especially when you **choose a model** — you own the clock. Do not leave the ticket pipeline sitting with no forward progress because a model hung, timed out, was unavailable, or returned nothing.
+
+## Stuck / unavailable definition
+
+- Tool/runtime timeout, abort, or **provider/model outage**
+- Explicit “model unavailable” / capacity / rate-limit failure on that slug
+- ~**2–3 minutes** with no meaningful progress
+- Repeated identical failure on the same model without a code/prompt change
+
+Do **not** wait indefinitely for any premium model.
+
+## Required recovery (walk comparable chain)
+
+1. **Cancel** the hung invocation.
+2. **Retry** down that stage’s **comparable fallback chain** (below) — same prompt, next unused slug.
+3. If any retry succeeds → continue; note which model produced the result.
+4. If the **entire chain** fails → **soft-fail continue** with an explicit note:
+   - `Review skipped: <stage> unavailable (comparable models stuck/outage after chain)`
+   - **ARCHITECT:** concise parent merge-ready check (AC, SW precache, banks, tests) — do not block DEPLOY forever.
+   - **BUGBOT:** brief parent diff skim; if none obvious, proceed to TESTS and note skip.
+   - **IMPLEMENT:** parent continues IMPLEMENT.
+5. One short status line: what failed and which fallback ran (or chain exhausted).
+
+**Do not recover on cloud.** Stuck retries stay **local** — `.cursor/rules/prefer-local-agents.mdc`.
+
+## Comparable model chains (this repo)
+
+**Why (aligned with Ducking Gravity / SmartAstro 8/18/2026):** Grok 4.6 High token spend is far below Opus/Sonnet. The bill was checks: omitted `model` on Bugbot/Architect, or Sonnet→Opus on every rewind. Checks **must** pass `cursor-grok-4.6-high-fast`. Do not “upgrade” a stuck check to Opus.
+
+Only use slugs from the Task tool’s **allowed model list**.
+
+| Stage / job | Primary | Fallback 1 | Fallback 2 | After chain exhausted |
+|-------------|---------|------------|------------|------------------------|
+| **IMPLEMENT** | `composer-2.5-fast` | `cursor-grok-4.5-high-fast` | omit / parent | Parent continues IMPLEMENT |
+| **BUGBOT** | **`cursor-grok-4.6-high-fast`** | `cursor-grok-4.5-high-fast` | omit `model` | Parent diff skim → TESTS if clear |
+| **ARCHITECT** | **`cursor-grok-4.6-high-fast`** | `cursor-grok-4.5-high-fast` | omit `model` | Parent merge-ready skim |
+| **Security** | **`cursor-grok-4.6-high-fast`** | `cursor-grok-4.5-high-fast` | omit `model` | Parent threat skim; note gap |
+
+### Comparability notes
+
+- **Cost:** Grok 4.6 High for **checks**; Composer Fast for **implement**.
+- **Do not** use `composer-2.5-fast` as Bugbot/Architect/security.
+- **Do not** use Opus or Sonnet on routine checks unless the user **explicitly** asks.
+- **Do not** use cloud to reach Opus/Sonnet.
+
+Full role table: `.cursor/rules/ticket-lifecycle-loop.mdc`.
+
+## Pipeline interaction
+
+- Applies inside **IMPLEMENT → BUGBOT → TESTS → ARCHITECT → DEPLOY**.
+- Soft-fail does **not** skip required **code fixes** when a review returned blockers.
+- Soft-fail **does** prevent an empty hang from freezing the pointer.
+
+## Response snippet (when recovery fired)
+
+`Watchdog: <stage> unavailable on <model> → tried <fallback…> → <continued | parent skim>.`
