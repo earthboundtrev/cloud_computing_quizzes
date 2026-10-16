@@ -1,0 +1,116 @@
+---
+description: Pointer-based ticket pipeline — implement through ship until human sign-off
+alwaysApply: true
+---
+
+# Ticket pipeline (pointer)
+
+Active **GitHub issue `#N`** and/or **open PR** work follows a **fixed stage order**. Track a **pointer** to the current stage. Advance forward only when that stage passes. **Any code fix rewinds the pointer to `BUGBOT`** (then move forward again).
+
+Adapted from SmartAstro / Ducking Gravity / Integral for this static PWA (GitHub + Node lint scripts, no package.json).
+
+## Hard gate — tickets must close on merge
+
+A ticket is **not done** until **all** of these are true:
+
+1. PR merged into `main`
+2. GitHub issue `#N` state is **`CLOSED`**
+3. Feature branch gone from `origin` (`delete_branch_on_merge` + `--delete-branch`)
+
+**Never** end a merge turn while `gh issue view {N} --json state -q .state` is still `OPEN`.
+
+## Stages (in order)
+
+```
+IMPLEMENT → BUGBOT → TESTS → ARCHITECT → DEPLOY
+```
+
+| Stage | What happens | Advance when |
+|-------|----------------|--------------|
+| **IMPLEMENT** | Ship code/docs for AC, review feedback, or CI fixes | Chunk ready for review → **BUGBOT** |
+| **BUGBOT** | Separate `bugbot` Task (`review-bugbot`) — never self-review as Bugbot | **Clean** on current diff → **TESTS** |
+| **TESTS** | CI-equivalent Node scripts (see below); targeted extras when storage/SW/banks touched | **Pass** → **ARCHITECT** |
+| **ARCHITECT** | Separate Task per `.cursor/rules/cloud-cram-architect.mdc` — never implementer self-certify | **Merge-ready** → **DEPLOY** |
+| **DEPLOY** | Validate, push, PR with `Closes #N`; watch Actions; human merge + issue closed | Human **merge/sign-off** → **exit** |
+
+### TESTS commands (mirror `.github/workflows/lint.yml`)
+
+```bash
+node scripts/lint-banks.js --ci
+node scripts/check-sw-precache.js
+node scripts/check-page-banks.js
+node scripts/validate-cissp-questions.js
+node scripts/smoke-test-cissp.js
+node scripts/lint-cissp-questions.js
+```
+
+Optional when relevant: `node scripts/test-rhcsa-migration.js`, `node scripts/test-cissp.js`.
+
+## Separate agents / models (mandatory)
+
+Implementer, Bugbot, and Architect **must not be the same review perspective**.
+
+**Why the model slugs (aligned with Ducking Gravity / SmartAstro 8/18/2026):** Cursor Grok 4.6 High is far cheaper per token than Opus or Sonnet. Implement uses **`composer-2.5-fast`**. Checks were the expensive leak — Bugbot/Architect often **omitted `model`** or fell through to Sonnet/Opus on every rewind. Routine reviews must not burn premium tokens.
+
+| Role | How it must run | Primary model | Comparable fallback(s) |
+|------|-----------------|---------------|------------------------|
+| **IMPLEMENT** | Parent and/or implement Task | **`composer-2.5-fast`** | `cursor-grok-4.5-high-fast` → omit / parent |
+| **BUGBOT** | Always a separate **`bugbot`** Task | **`cursor-grok-4.6-high-fast`** | `cursor-grok-4.5-high-fast` → omit |
+| **ARCHITECT** | Always a separate Architect Task | **`cursor-grok-4.6-high-fast`** | `cursor-grok-4.5-high-fast` → omit |
+
+**Hard rules**
+
+1. Do **not** skip Bugbot or Architect by self-certifying (except watchdog soft-fail after comparable chain exhausted — `.cursor/rules/subagent-watchdog.mdc`).
+2. **Implement is cheap:** **`composer-2.5-fast`**. Do not spend Opus, Sonnet, or Grok 4.6 High on routine IMPLEMENT.
+3. **Checks are Grok 4.6 High:** Bugbot, Architect, and security-review use **`model: "cursor-grok-4.6-high-fast"`**. Do **not** omit `model` on those Tasks. Do **not** use Opus/Sonnet for routine checks unless the user **explicitly** names that model.
+4. After any code fix, rewind to **BUGBOT** and launch a **fresh** Bugbot on the new diff.
+5. On outage/stuck, walk that role’s **comparable** chain before soft-fail — `.cursor/rules/subagent-watchdog.mdc`.
+6. **Stay local by default** — `.cursor/rules/prefer-local-agents.mdc`.
+
+## Rewind rules (mandatory)
+
+| Situation | Pointer moves to |
+|-----------|------------------|
+| Bugbot reports findings | Stay **BUGBOT** — fix, re-run until clean |
+| Tests fail or test fixes change behavior | **BUGBOT** |
+| Architect reports blockers | **BUGBOT** — fix, Bugbot → Tests → Architect |
+| PR/CI/human review needs code changes | **IMPLEMENT** — then **BUGBOT** before skipping ahead |
+
+**Never skip BUGBOT** after a code change.
+
+## Bug-class that must get a regression test
+
+When changing behavior, add or extend Node tests under `scripts/` (e.g. migration mock tests, CISSP suite):
+
+- **localStorage / IndexedDB** profile keys, migrations, reset
+- **Service worker** precache list vs actual assets
+- **Question bank** schema, IDs, duplicates, exam codes
+- **Import results** parsing and topic miss weighting
+
+## Post-merge hygiene (when human asks to merge)
+
+```bash
+gh pr merge {PR} --merge --delete-branch
+gh issue view {N} --json state,closedAt
+# If still OPEN: gh issue close {N} --reason completed
+git fetch --prune origin
+```
+
+PR body must include `Closes #N` on its own line (title alone does not close the issue).
+
+## Session resume
+
+1. Sync git + read issue/PR.
+2. If the branch diff changed since last **clean Bugbot**, set pointer to **BUGBOT**.
+3. Report: `Pipeline pointer: <STAGE>`.
+4. Merged PR but issue still OPEN → close issue before new work on that ticket.
+
+## Standalone `/review-bugbot` or `/review-architect`
+
+No active ticket → report findings only unless the user asks to fix. Ticket work always uses this pipeline.
+
+## Response format (active ticket)
+
+End substantive work with:
+
+**Pipeline:** `IMPLEMENT` | `BUGBOT` | `TESTS` | `ARCHITECT` | `DEPLOY` — status + **issue open|closed** + **next stage**.
