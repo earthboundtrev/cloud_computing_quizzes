@@ -19,7 +19,8 @@
   };
 
   var bank = (window.QUESTION_BANK_TERRAFORM || [])
-    .concat(window.QUESTION_BANK_TERRAFORM_EXTRA || []);
+    .concat(window.QUESTION_BANK_TERRAFORM_EXTRA || [])
+    .concat(window.QUESTION_BANK_TERRAFORM_RAMP || []);
 
   QuizEngine.run({
     quizId: 'terraform',
