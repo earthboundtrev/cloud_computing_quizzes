@@ -14,7 +14,7 @@ const banks = {
   aws_mlea: ['aws-mlea-questions.js', 'aws-mlea-extra-questions.js', 'aws-mlea-scenario-questions.js'],
   aws_dea: ['aws-data-engineering-questions.js', 'aws-dea-extra-questions.js', 'aws-dea-scenario-questions.js'],
   aws_genai: ['aws-genai-questions.js', 'aws-genai-extra-questions.js', 'aws-genai-scenario-questions.js'],
-  terraform: ['terraform-questions.js'],
+  terraform: ['terraform-questions.js', 'terraform-extra-questions.js', 'terraform-ramp-questions.js'],
   cissp: ['cissp-questions.js', 'cissp-scenario-questions.js'],
   secai: ['secai-questions.js', 'secai-scenario-questions.js'],
   rhcsa9: ['rhcsa9-questions.js', 'rhcsa9-extra-questions.js'],

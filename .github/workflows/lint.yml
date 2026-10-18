@@ -21,6 +21,9 @@ jobs:
     - name: Run bank-wide lint
       run: node scripts/lint-banks.js --ci
     
+    - name: Terraform 004 ramp metadata lint
+      run: node scripts/lint-terraform-ramp.js --ci
+    
     - name: Check service worker precache
       run: node scripts/check-sw-precache.js
     
