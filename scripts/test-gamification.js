@@ -242,6 +242,64 @@ test('two-tab merge: concurrent answers sum without duplicate dedup keys', async
   assert(snap.answers === 2, 'both tabs counted');
 });
 
+function makeSharedLocksMock() {
+  let chain = Promise.resolve();
+  return {
+    request: function (_name, fn) {
+      chain = chain.then(function () {
+        return Promise.resolve(fn());
+      });
+      return chain;
+    }
+  };
+}
+
+test('two-tab interleaved concurrent answers: no loss or double count', async function () {
+  const ls = new LocalStorageMock();
+  const locks = makeSharedLocksMock();
+  const now = Date.parse('2026-08-15T12:00:00');
+  const deps = {
+    localStorage: ls,
+    now: function () { return now; },
+    locks: locks,
+    storageEventTarget: null
+  };
+  const gameA = loadGame();
+  const gameB = loadGame();
+  gameA.setDeps(deps);
+  gameB.setDeps(deps);
+  gameA.syncWrite(function (st) {
+    st.firstRunDone = true;
+    st.lastProcessedDate = '2026-08-15';
+    st.lastSeenDate = '2026-08-15';
+    return st;
+  });
+  const expectedKeys = [];
+  const ops = [];
+  for (let q = 1; q <= 4; q++) {
+    expectedKeys.push('2026-08-15:tab-a:q' + q);
+    expectedKeys.push('2026-08-15:tab-b:q' + q);
+    ops.push(gameA.recordAnswer('tab-a', 'q' + q));
+    ops.push(gameB.recordAnswer('tab-b', 'q' + q));
+  }
+  await Promise.all(ops);
+  const raw = JSON.parse(ls.getItem('cloudcram_game_v1'));
+  const dedupKeys = Object.keys(raw.answerDedup);
+  assert(dedupKeys.length === 8, 'eight dedup keys, got ' + dedupKeys.length);
+  expectedKeys.forEach(function (k) {
+    assert(raw.answerDedup[k], 'missing key ' + k);
+  });
+  const snap = gameA.getSnapshot();
+  assert(snap.answers === 8, 'snapshot answers 8, got ' + snap.answers);
+  await Promise.all([
+    gameA.recordAnswer('tab-a', 'q1'),
+    gameB.recordAnswer('tab-b', 'q2')
+  ]);
+  const raw2 = JSON.parse(ls.getItem('cloudcram_game_v1'));
+  assert(Object.keys(raw2.answerDedup).length === 8, 'idempotent replay keeps 8 keys');
+  assert(gameA.getSnapshot().answers === 8, 'no double count after replay');
+});
+
 test('Monday meet then Wednesday open marks Tuesday missed', function () {
   const env = makeEnv(Date.parse('2026-10-05T20:00:00'));
   env.game.syncWrite(function (st) {
