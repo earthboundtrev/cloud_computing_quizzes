@@ -62,6 +62,9 @@ jobs:
     
     - name: Run CISSP smoke tests
       run: node scripts/smoke-test-cissp.js
+
+    - name: Shared quiz smoke tests (#67)
+      run: node scripts/smoke-test-quiz.js --all
     
     - name: Run CISSP lint
       run: node scripts/lint-cissp-questions.js
