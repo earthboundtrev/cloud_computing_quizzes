@@ -47,11 +47,15 @@
       var raw = localStorage.getItem(PROFILE_KEY);
       if (!raw) return { quizId: QUIZ_ID, topicStats: {}, topicMissesFromImports: {} };
       var p = JSON.parse(raw);
-      return {
+      var profile = {
         quizId: p.quizId || QUIZ_ID,
         topicStats: p.topicStats || {},
         topicMissesFromImports: p.topicMissesFromImports || {}
       };
+      if (Array.isArray(p.mergedFrom)) {
+        profile.mergedFrom = p.mergedFrom.slice();
+      }
+      return profile;
     } catch (e) {
       return { quizId: QUIZ_ID, topicStats: {}, topicMissesFromImports: {} };
     }

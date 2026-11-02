@@ -35,6 +35,8 @@ There is no dedicated `bugbot` subagent_type in all environments — use **`gene
 
 Human merge/sign-off still required per `core.mdc`. Any code fix → rewind pointer to **BUGBOT**.
 
+**Closing issues:** Use `Closes #N` in the PR **only** when every acceptance criterion on #N is done. Incremental ramps and partial fixes use `Refs #N` and keep the issue **OPEN** until a closing PR. Tracker: `.cursor/pipeline/P1-workflow-tracker.md`.
+
 **One Bugbot per diff:** a clean Bugbot on diff *D* covers fixes for *D*; no second Bugbot before merge unless the diff changed (new commits). **TESTS** must pass on the commit being merged.
 
 ## TESTS on Cloud Agent
