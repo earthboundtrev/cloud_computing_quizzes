@@ -14,7 +14,7 @@
 | [14](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/14) | Terraform ramp | IMPLEMENT | 500 Q — 7c TF_LOG pack |
 | [13](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/13) | AWS GenAI ramp | IMPLEMENT | ~300Q AC |
 | [14](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/14) | Terraform ramp | IMPLEMENT | #44 + follow-ups |
-| [15](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/15) | CISSP ramp | IMPLEMENT | #48 + follow-ups |
+| [15](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/15) | CISSP ramp | IMPLEMENT | 44 ramp Q — judgment stems |
 | [7–12](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/7) | GCP/Azure/AWS ramps | IMPLEMENT | per issue AC |
 | [16](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/16) | SecAI+ ramp | IMPLEMENT | per issue AC |
 | [18](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/18) | RHCE ramp | IMPLEMENT | per issue AC |
