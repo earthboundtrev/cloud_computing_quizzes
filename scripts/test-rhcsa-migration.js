@@ -176,7 +176,7 @@ function testScenarioC2() {
         Containers: { correct: 9, total: 9 }
       },
       topicMissesFromImports: {
-        Networking: ['n1', 'n2', 'n3']
+        Networking: 3
       }
     })
   );
@@ -189,7 +189,7 @@ function testScenarioC2() {
         Flatpak: { correct: 1, total: 4 }
       },
       topicMissesFromImports: {
-        Networking: ['n4']
+        Networking: 1
       }
     })
   );
@@ -202,8 +202,39 @@ function testScenarioC2() {
   assertDeepEqual(p.topicStats.SELinux, { correct: 1, total: 2 }, 'SELinux from rhcsa9');
   assertDeepEqual(p.topicStats.Boot, { correct: 3, total: 5 }, 'Boot from rhcsa9');
   assert(p.topicStats.Containers === undefined, 'Containers excluded');
-  assert(p.topicMissesFromImports.Networking.length === 4, 'Networking misses union');
+  assertEqual(p.topicMissesFromImports.Networking, 4, 'Networking misses sum');
   assert(localStorage.getItem(MIGRATION_FLAG) === 'true', 'flag set');
+}
+
+function testScenarioC2WithV10_2OverlapSum() {
+  const localStorage = new LocalStorageMock();
+  localStorage.setItem(LEGACY_FLAG_V2, 'true');
+
+  localStorage.setItem(
+    'study_sessions_profile_rhcsa9',
+    JSON.stringify({
+      quizId: 'rhcsa9',
+      topicStats: { Storage: { correct: 14, total: 20 }, Boot: { correct: 3, total: 5 } },
+      topicMissesFromImports: { Networking: 3 }
+    })
+  );
+  localStorage.setItem(
+    'study_sessions_profile_rhcsa10',
+    JSON.stringify({
+      quizId: 'rhcsa10',
+      topicStats: { Storage: { correct: 2, total: 3 }, Flatpak: { correct: 1, total: 4 } },
+      topicMissesFromImports: { Networking: 1 }
+    })
+  );
+
+  executeMigrationWithLocalStorage(localStorage);
+
+  const p = JSON.parse(localStorage.getItem('study_sessions_profile_rhcsa10'));
+  assertDeepEqual(p.topicStats.Storage, { correct: 16, total: 23 }, 'v10_2 overlap sum');
+  assertDeepEqual(p.topicStats.Flatpak, { correct: 1, total: 4 }, 'Flatpak kept');
+  assert(p.topicStats.Boot === undefined, 'rhcsa9-only not re-copied after v10_2');
+  assertEqual(p.topicMissesFromImports.Networking, 4, 'miss counts summed');
+  assert(p.mergedFrom.indexOf('rhcsa9') !== -1, 'mergedFrom set');
 }
 
 function testAlreadyMergedWithV10_2Flag() {
@@ -223,7 +254,8 @@ function testAlreadyMergedWithV10_2Flag() {
     JSON.stringify({
       quizId: 'rhcsa10',
       topicStats: { Storage: { correct: 20, total: 30 } },
-      topicMissesFromImports: {}
+      topicMissesFromImports: {},
+      mergedFrom: ['rhcsa9']
     })
   );
 
@@ -343,7 +375,8 @@ const tests = [
   ['Basic migration of profile data', testBasicMigration],
   ['Merge sums overlapping topic stats (#41)', testMergeExistingDataSums],
   ['Scenario C2 overlap sums', testScenarioC2],
-  ['Scenario P: v10_2 already merged — no double count', testAlreadyMergedWithV10_2Flag],
+  ['Scenario C2 with v10_2 — overlap sum only', testScenarioC2WithV10_2OverlapSum],
+  ['Scenario P: mergedFrom — no double count', testAlreadyMergedWithV10_2Flag],
   ['Idempotent second run', testIdempotent],
   ['Both rhcsa9 and rhcsa10 in quizCompleted', testBothInCompleted],
   ['Missing topicStats on rhcsa10', testMissingFieldsOnRhcsa10],

@@ -33,14 +33,18 @@
     };
   }
 
-  function mergeMissArrays(a, b) {
-    var out = (a || []).slice();
-    (b || []).forEach(function (id) {
-      if (out.indexOf(id) === -1) {
-        out.push(id);
-      }
-    });
-    return out;
+  function missCount(value) {
+    if (typeof value === 'number' && !isNaN(value)) {
+      return value;
+    }
+    if (Array.isArray(value)) {
+      return value.length;
+    }
+    return 0;
+  }
+
+  function sumMissCounts(a, b) {
+    return missCount(a) + missCount(b);
   }
 
   try {
@@ -73,8 +77,10 @@
         newProfile.topicMissesFromImports = {};
       }
       if (!Array.isArray(newProfile.mergedFrom)) {
-        newProfile.mergedFrom = localStorage.getItem(LEGACY_FLAG_V2) ? ['rhcsa9'] : [];
+        newProfile.mergedFrom = [];
       }
+
+      var v10_2Ran = localStorage.getItem(LEGACY_FLAG_V2) === 'true';
 
       if (!oldProfile.topicStats || typeof oldProfile.topicStats !== 'object') {
         oldProfile.topicStats = {};
@@ -94,7 +100,7 @@
             var oldStat = oldProfile.topicStats[topic];
             if (newProfile.topicStats[topic]) {
               newProfile.topicStats[topic] = sumTopicStats(newProfile.topicStats[topic], oldStat);
-            } else {
+            } else if (!v10_2Ran) {
               newProfile.topicStats[topic] = oldStat;
             }
           });
@@ -106,10 +112,15 @@
               return;
             }
             var oldMiss = oldProfile.topicMissesFromImports[topic];
-            if (newProfile.topicMissesFromImports[topic]) {
-              newProfile.topicMissesFromImports[topic] = mergeMissArrays(newProfile.topicMissesFromImports[topic], oldMiss);
-            } else {
-              newProfile.topicMissesFromImports[topic] = oldMiss;
+            var hasNewMiss = newProfile.topicMissesFromImports[topic] !== undefined &&
+              newProfile.topicMissesFromImports[topic] !== null;
+            if (hasNewMiss) {
+              newProfile.topicMissesFromImports[topic] = sumMissCounts(
+                newProfile.topicMissesFromImports[topic],
+                oldMiss
+              );
+            } else if (!v10_2Ran) {
+              newProfile.topicMissesFromImports[topic] = missCount(oldMiss);
             }
           });
         }
