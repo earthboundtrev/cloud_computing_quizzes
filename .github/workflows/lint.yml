@@ -30,6 +30,9 @@ jobs:
     - name: CISSP ramp metadata lint
       run: node scripts/lint-cissp-ramp.js --ci
     
+    - name: AWS GenAI ramp metadata lint
+      run: node scripts/lint-aws-genai-ramp.js
+    
     - name: Check service worker precache
       run: node scripts/check-sw-precache.js
     

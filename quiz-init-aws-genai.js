@@ -1,7 +1,8 @@
 (function () {
   var bank = (window.QUESTION_BANK_AWS_GENAI || [])
     .concat(window.QUESTION_BANK_AWS_GENAI_EXTRA || [])
-    .concat(window.QUESTION_BANK_AWS_GENAI_SCENARIOS || []);
+    .concat(window.QUESTION_BANK_AWS_GENAI_SCENARIOS || [])
+    .concat(window.QUESTION_BANK_AWS_GENAI_RAMP || []);
   QuizEngine.run({
     quizId: 'aws_genai',
     questionBank: bank,
