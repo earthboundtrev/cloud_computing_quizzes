@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE_NAME = 'cloudcram-v17';
+const CACHE_NAME = 'cloudcram-v18';
 
 const PRECACHE_PATHS = [
   '/index.html',
@@ -75,8 +75,10 @@ const PRECACHE_PATHS = [
   '/data/terraform-questions.js',
   '/data/terraform-extra-questions.js',
   '/data/terraform-ramp-questions.js',
+  '/data/rhcsa10-objectives.js',
   '/data/rhcsa10-questions.js',
   '/data/rhcsa10-extra-questions.js',
+  '/data/rhcsa10-gap-questions.js',
   '/data/rhce-questions.js',
   '/quiz-init-oci.js',
   '/quiz-init-gcp.js',

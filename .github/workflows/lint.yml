@@ -24,6 +24,9 @@ jobs:
     - name: Terraform 004 ramp metadata lint
       run: node scripts/lint-terraform-ramp.js --ci
     
+    - name: RHCSA10 content quality lint
+      run: node scripts/lint-rhcsa10.js --ci
+    
     - name: Check service worker precache
       run: node scripts/check-sw-precache.js
     
