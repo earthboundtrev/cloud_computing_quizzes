@@ -466,6 +466,26 @@ test('vacation days are not finalized as missed after vacation ends', function (
   assert(!s.dayRecords['2026-01-03'] || s.dayRecords['2026-01-03'].kind !== 'missed', 'vacation day not missed');
 });
 
+test('open repair merge keeps live streak after goal met during repair', function () {
+  const game = loadGame();
+  const live = game.defaultState();
+  live.streak = 1;
+  live.repair = {
+    openedAt: 100,
+    streakAtBreak: 8,
+    metDays: ['2026-06-05'],
+    missedDay: '2026-06-02',
+    missedDays: ['2026-06-02', '2026-06-03'],
+    maxNow: 100
+  };
+  live.dayRecords['2026-06-05'] = { answers: 3, met: true, celebrated: false, streakAwarded: true, kind: 'normal' };
+  const stale = game.defaultState();
+  stale.streak = 0;
+  stale.repair = Object.assign({}, live.repair, { metDays: [] });
+  const m = game.mergeStates(live, stale);
+  assert(m.streak === 1, 'live streak kept during repair merge, got ' + m.streak);
+});
+
 test('newer unmet miss wins streak over stale high tab with old miss', function () {
   const game = loadGame();
   const live = game.defaultState();

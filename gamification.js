@@ -522,8 +522,18 @@
         out.streak = Math.max(base.streak, other.streak);
         out.repair = null;
       } else if (out.repair) {
-        if (outMissed && (base.streak === 0 || other.streak === 0)) {
-          out.streak = Math.min(base.streak, other.streak);
+        var repairBaseMiss = unmetMissedDays(base).length;
+        var repairOtherMiss = unmetMissedDays(other).length;
+        var repairBaseNew = newestUnmetMissDate(base);
+        var repairOtherNew = newestUnmetMissDate(other);
+        if (repairBaseMiss && !repairOtherMiss) {
+          out.streak = base.streak;
+        } else if (repairOtherMiss && !repairBaseMiss) {
+          out.streak = other.streak;
+        } else if (repairBaseNew && repairOtherNew && compareDateStr(repairBaseNew, repairOtherNew) > 0) {
+          out.streak = base.streak;
+        } else if (repairBaseNew && repairOtherNew && compareDateStr(repairOtherNew, repairBaseNew) > 0) {
+          out.streak = other.streak;
         } else {
           out.streak = Math.max(base.streak, other.streak);
         }
