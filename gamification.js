@@ -347,6 +347,13 @@
     });
   }
 
+  function newestUnmetMissDate(state) {
+    var list = unmetMissedDays(state);
+    if (!list.length) return null;
+    list.sort();
+    return list[list.length - 1];
+  }
+
   function mergeDayKind(a, b) {
     var ra = DAY_KIND_RANK[a] || 0;
     var rb = DAY_KIND_RANK[b] || 0;
@@ -528,7 +535,19 @@
         } else if (otherMiss && !baseMiss) {
           out.streak = other.streak;
         } else if (baseMiss && otherMiss) {
-          out.streak = Math.max(base.streak, other.streak);
+          var baseNewMiss = newestUnmetMissDate(base);
+          var otherNewMiss = newestUnmetMissDate(other);
+          if (baseNewMiss && otherNewMiss && compareDateStr(baseNewMiss, otherNewMiss) > 0) {
+            out.streak = base.streak;
+          } else if (baseNewMiss && otherNewMiss && compareDateStr(otherNewMiss, baseNewMiss) > 0) {
+            out.streak = other.streak;
+          } else if (baseNewMiss && otherNewMiss && compareDateStr(baseNewMiss, otherNewMiss) === 0) {
+            out.streak = Math.max(base.streak, other.streak);
+          } else if (base.streak === 0 || other.streak === 0) {
+            out.streak = Math.min(base.streak, other.streak);
+          } else {
+            out.streak = Math.max(base.streak, other.streak);
+          }
         } else if (base.streak === 0 || other.streak === 0) {
           out.streak = Math.min(base.streak, other.streak);
         } else {

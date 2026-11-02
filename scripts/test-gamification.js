@@ -466,6 +466,19 @@ test('vacation days are not finalized as missed after vacation ends', function (
   assert(!s.dayRecords['2026-01-03'] || s.dayRecords['2026-01-03'].kind !== 'missed', 'vacation day not missed');
 });
 
+test('newer unmet miss wins streak over stale high tab with old miss', function () {
+  const game = loadGame();
+  const live = game.defaultState();
+  live.streak = 0;
+  live.dayRecords['2026-01-01'] = { answers: 0, met: false, celebrated: false, streakAwarded: false, kind: 'missed' };
+  live.dayRecords['2026-02-01'] = { answers: 0, met: false, celebrated: false, streakAwarded: false, kind: 'missed' };
+  const stale = game.defaultState();
+  stale.streak = 10;
+  stale.dayRecords['2026-01-01'] = { answers: 0, met: false, celebrated: false, streakAwarded: false, kind: 'missed' };
+  const m = game.mergeStates(live, stale);
+  assert(m.streak === 0, 'live newer miss keeps streak 0, got ' + m.streak);
+});
+
 test('new break after past repair uses min streak not stale max', function () {
   const game = loadGame();
   const live = game.defaultState();
