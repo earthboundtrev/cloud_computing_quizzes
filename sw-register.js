@@ -131,8 +131,9 @@
     syncBodyBannerOffset();
   }
 
-  function applyUpdate() {
-    if (isQuizActive()) {
+  function applyUpdate(options) {
+    options = options || {};
+    if (!options.force && isQuizActive()) {
       maybeShowBanner();
       return false;
     }
@@ -159,8 +160,12 @@
    * After registration.update(), wait until a worker is waiting (install finished)
    * or until timeoutMs. Resolves with the waiting ServiceWorker or null.
    */
-  function waitForWaitingWorker(timeoutMs) {
+  function waitForWaitingWorker(timeoutMs, waitOptions) {
     timeoutMs = timeoutMs || UPDATE_WAIT_TIMEOUT_MS;
+    waitOptions = waitOptions || {};
+    var userInitiated = waitOptions.userInitiated === true;
+    var UPDATE_FOUND_GRACE_MS = 400;
+
     return new Promise(function (resolve) {
       if (!registration) {
         resolve(null);
@@ -169,9 +174,11 @@
 
       var settled = false;
       var timer = null;
+      var longWaitTimer = null;
 
       function cleanup() {
         if (timer) clearTimeout(timer);
+        if (longWaitTimer) clearTimeout(longWaitTimer);
         registration.removeEventListener('updatefound', onUpdateFoundWhileWaiting);
       }
 
@@ -182,49 +189,88 @@
         resolve(worker);
       }
 
+      function waitingIsActionable() {
+        if (!registration.waiting) return false;
+        return userInitiated || hasControllingWorker();
+      }
+
       function tryResolveWaiting() {
-        if (registration.waiting && hasControllingWorker()) {
+        if (waitingIsActionable()) {
           finish(registration.waiting);
           return true;
         }
         return false;
       }
 
+      function resolveWhenInstalled(worker) {
+        if (!worker) return;
+        if (worker.state === 'installed' && (registration.waiting || worker) && (userInitiated || hasControllingWorker())) {
+          finish(registration.waiting || worker);
+        }
+      }
+
       function watchInstalling(worker) {
         if (!worker) return;
+        resolveWhenInstalled(worker);
         worker.addEventListener('statechange', function () {
-          if (worker.state === 'installed' && hasControllingWorker()) {
-            finish(registration.waiting || worker);
-          }
+          resolveWhenInstalled(worker);
         });
+      }
+
+      function startInstallTimeout() {
+        if (longWaitTimer) return;
+        longWaitTimer = setTimeout(function () {
+          if (tryResolveWaiting()) return;
+          finish(null);
+        }, timeoutMs);
       }
 
       function onUpdateFoundWhileWaiting() {
         watchInstalling(registration.installing);
         tryResolveWaiting();
+        if (registration.installing) {
+          startInstallTimeout();
+        }
       }
 
       if (tryResolveWaiting()) return;
 
-      watchInstalling(registration.installing);
       registration.addEventListener('updatefound', onUpdateFoundWhileWaiting);
 
-      timer = setTimeout(function () {
-        finish(null);
-      }, timeoutMs);
+      if (registration.installing) {
+        watchInstalling(registration.installing);
+        startInstallTimeout();
+        return;
+      }
+
+      if (userInitiated) {
+        timer = setTimeout(function () {
+          if (tryResolveWaiting()) return;
+          if (registration.installing) {
+            watchInstalling(registration.installing);
+            startInstallTimeout();
+            return;
+          }
+          finish(null);
+        }, UPDATE_FOUND_GRACE_MS);
+        return;
+      }
+
+      finish(null);
     });
   }
 
   function waitAndApplyUpdate(options) {
     options = options || {};
     var timeoutMs = options.timeoutMs || UPDATE_WAIT_TIMEOUT_MS;
-    return waitForWaitingWorker(timeoutMs).then(function (waiting) {
+    var userInitiated = options.userInitiated === true;
+    return waitForWaitingWorker(timeoutMs, { userInitiated: userInitiated }).then(function (waiting) {
       if (!waiting) {
         return { applied: false, reason: 'no_update' };
       }
       pendingWaitingWorker = waiting;
       updatePending = true;
-      var applied = applyUpdate();
+      var applied = applyUpdate({ force: userInitiated });
       return { applied: applied, reason: applied ? 'skip_waiting' : 'blocked' };
     });
   }

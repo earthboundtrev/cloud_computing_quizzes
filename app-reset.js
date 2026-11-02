@@ -143,7 +143,7 @@
     check
       .then(function () {
         if (window.CloudCramUpdate && typeof window.CloudCramUpdate.waitAndApplyUpdate === 'function') {
-          return window.CloudCramUpdate.waitAndApplyUpdate();
+          return window.CloudCramUpdate.waitAndApplyUpdate({ userInitiated: true });
         }
         var applied = false;
         if (window.CloudCramUpdate && typeof window.CloudCramUpdate.applyUpdate === 'function') {

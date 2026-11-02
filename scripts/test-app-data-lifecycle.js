@@ -141,7 +141,7 @@ test('app-reset.js update path does not unregister SW or clear all localStorage'
   assert(!/localStorage\.clear/.test(updateBlock[0]), 'updateApp must not localStorage.clear');
   assert(!/unregister/.test(updateBlock[0]), 'updateApp must not unregister SW');
   assert(/CloudCramUpdate/.test(updateBlock[0]), 'updateApp uses CloudCramUpdate');
-  assert(/waitAndApplyUpdate/.test(updateBlock[0]), 'updateApp waits for SW install before apply');
+  assert(/waitAndApplyUpdate\(\{\s*userInitiated:\s*true\s*\}\)/.test(updateBlock[0]), 'updateApp waits for SW install before apply');
   assert(!/clearAllCaches/.test(updateBlock[0]), 'updateApp must not clear caches before SW activates');
 });
 

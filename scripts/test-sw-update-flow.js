@@ -80,6 +80,8 @@ test('sw-register.js waits for installing worker before apply', function () {
   assert(/waitAndApplyUpdate/.test(reg), 'waitAndApplyUpdate missing');
   assert(/state === 'installed'/.test(reg), 'installed state wait missing');
   assert(/UPDATE_WAIT_TIMEOUT_MS/.test(reg), 'update wait timeout missing');
+  assert(/userInitiated/.test(reg), 'user-initiated update path missing');
+  assert(/force:\s*userInitiated/.test(reg), 'Update app must force apply during quiz');
 });
 
 test('sw-register.js uses controllerchange reload guard', function () {
