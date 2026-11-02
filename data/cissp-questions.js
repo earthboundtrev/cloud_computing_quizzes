@@ -463,13 +463,13 @@ window.QUESTION_BANK_CISSP = [
     "topic": "Security and Risk Management",
     "q": "Due diligence is BEST described as:",
     "options": [
-      "Establishing the plans, policies and processes (knowing what should be done)",
-      "Performing the day-to-day security activities",
-      "Verifying compliance after an incident",
-      "Transferring risk to an insurer"
+      "Defining plans, policies, and processes (knowing what should be done)",
+      "Performing day-to-day security activities that maintain protection",
+      "Verifying compliance primarily after a security incident",
+      "Transferring organizational risk to an insurer or vendor"
     ],
     "correct": 0,
-    "explain": "Due diligence = establishing a plan, policy, and process to protect the organization (knowing what should be done and planning for it). Due care = practicing the individual activities that maintain the due diligence effort (doing the right action at the right time). (ISC)² CISSP Official Study Guide, 10th ed., Ch. 1, Ch. 1.",
+    "explain": "Due diligence = establishing a plan, policy, and process to protect the organization (knowing what should be done and planning for it). Due care = practicing the individual activities that maintain the due diligence effort (doing the right action at the right time). (ISC)² CISSP Official Study Guide, 10th ed., Ch. 1, 'Due Diligence and Due Care'.",
     "obj": "1",
     "level": 4,
     "ref": "https://www.isc2.org/certifications/cissp/cissp-certification-exam-outline",
@@ -1370,7 +1370,7 @@ window.QUESTION_BANK_CISSP = [
       "Risk transfer"
     ],
     "correct": 1,
-    "explain": "Due care = practicing the individual activities that maintain the due diligence effort (doing the right action at the right time). The policy (due diligence) established what should be done; the administrator's patching (due care) executes it. (ISC)² CISSP Official Study Guide, 10th ed., Ch. 1, Ch. 1.",
+    "explain": "Due care = practicing the individual activities that maintain the due diligence effort (doing the right action at the right time). The policy (due diligence) established what should be done; the administrator's patching (due care) executes it. (ISC)² CISSP Official Study Guide, 10th ed., Ch. 1, 'Due Diligence and Due Care'.",
     "obj": "1",
     "level": 3,
     "ref": "https://www.isc2.org/certifications/cissp/cissp-certification-exam-outline",
