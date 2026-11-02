@@ -8,7 +8,8 @@ const fs = require('fs');
 const path = require('path');
 
 const STRICT_FILES = [
-  'data/aws-genai-ramp-questions.js'
+  'data/aws-genai-ramp-questions.js',
+  'data/aws-genai-scenario-questions.js'
 ];
 const errors = [];
 
