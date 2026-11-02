@@ -339,6 +339,18 @@ test('mergeStates reconciles answer counts from dedup keys', function () {
   assert(m.dayRecords['2026-05-02'].answers === 2, 'answers from dedup');
 });
 
+test('both tabs with historic miss keep higher rebuilt streak', function () {
+  const game = loadGame();
+  const live = game.defaultState();
+  live.streak = 10;
+  live.dayRecords['2026-01-01'] = { answers: 0, met: false, celebrated: false, streakAwarded: false, kind: 'missed' };
+  const stale = game.defaultState();
+  stale.streak = 0;
+  stale.dayRecords['2026-01-01'] = { answers: 0, met: false, celebrated: false, streakAwarded: false, kind: 'missed' };
+  const m = game.mergeStates(live, stale);
+  assert(m.streak === 10, 'max streak when both carry same historic miss, got ' + m.streak);
+});
+
 test('rebuilt streak not minned by historic missed day', function () {
   const game = loadGame();
   const live = game.defaultState();
