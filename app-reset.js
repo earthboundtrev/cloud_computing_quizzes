@@ -128,7 +128,110 @@
     document.body.appendChild(link);
   }
 
-  function updateApp() {
+  function trapFocusInDialog(dialogEl, focusables, ev) {
+    if (ev.key !== 'Tab' || !focusables.length) return;
+    var first = focusables[0];
+    var last = focusables[focusables.length - 1];
+    var active = document.activeElement;
+    if (ev.shiftKey) {
+      if (active === first || !dialogEl.contains(active)) {
+        ev.preventDefault();
+        last.focus();
+      }
+    } else if (active === last || !dialogEl.contains(active)) {
+      ev.preventDefault();
+      first.focus();
+    }
+  }
+
+  function isQuizSessionActive() {
+    return !!(
+      window.QuizEngine &&
+      typeof window.QuizEngine.isQuizActive === 'function' &&
+      window.QuizEngine.isQuizActive()
+    );
+  }
+
+  function confirmUpdateDuringActiveQuiz(onProceed, triggerEl) {
+    var settled = false;
+    var overlay = document.createElement('div');
+    overlay.className = 'delete-data-dialog-overlay';
+    overlay.setAttribute('role', 'presentation');
+
+    var dialog = document.createElement('div');
+    dialog.className = 'delete-data-dialog';
+    dialog.setAttribute('role', 'dialog');
+    dialog.setAttribute('aria-modal', 'true');
+    dialog.setAttribute('aria-labelledby', 'update-app-quiz-dialog-title');
+
+    var title = document.createElement('h3');
+    title.id = 'update-app-quiz-dialog-title';
+    title.textContent = 'Update app?';
+
+    var body = document.createElement('p');
+    body.textContent =
+      'You have a quiz in progress. Update anyway? Your current quiz will be lost.';
+
+    var actions = document.createElement('div');
+    actions.className = 'delete-data-dialog-actions';
+
+    var cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.className = 'delete-data-dialog-cancel';
+    cancelBtn.textContent = 'Cancel';
+
+    var confirmBtn = document.createElement('button');
+    confirmBtn.type = 'button';
+    confirmBtn.className = 'delete-data-dialog-confirm';
+    confirmBtn.textContent = 'Update anyway';
+
+    actions.appendChild(cancelBtn);
+    actions.appendChild(confirmBtn);
+    dialog.appendChild(title);
+    dialog.appendChild(body);
+    dialog.appendChild(actions);
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+
+    var focusables = [cancelBtn, confirmBtn];
+
+    function closeDialog(confirmed) {
+      if (settled) return;
+      settled = true;
+      overlay.remove();
+      document.removeEventListener('keydown', onKeyDown);
+      if (triggerEl && typeof triggerEl.focus === 'function') {
+        triggerEl.focus();
+      }
+      if (confirmed && typeof onProceed === 'function') {
+        onProceed();
+      }
+    }
+
+    function onKeyDown(ev) {
+      if (ev.key === 'Escape') {
+        ev.preventDefault();
+        closeDialog(false);
+        return;
+      }
+      trapFocusInDialog(dialog, focusables, ev);
+    }
+
+    document.addEventListener('keydown', onKeyDown);
+    cancelBtn.addEventListener('click', function () {
+      closeDialog(false);
+    });
+    overlay.addEventListener('click', function (ev) {
+      if (ev.target === overlay) closeDialog(false);
+    });
+    confirmBtn.addEventListener('click', function () {
+      closeDialog(true);
+    });
+
+    cancelBtn.focus();
+  }
+
+  function runUpdateAppFlow() {
     sessionStorage.clear();
     var keysApi = getKeysApi();
     if (keysApi) {
@@ -142,20 +245,32 @@
 
     check
       .then(function () {
+        if (window.CloudCramUpdate && typeof window.CloudCramUpdate.waitAndApplyUpdate === 'function') {
+          return window.CloudCramUpdate.waitAndApplyUpdate({ userInitiated: true });
+        }
         var applied = false;
         if (window.CloudCramUpdate && typeof window.CloudCramUpdate.applyUpdate === 'function') {
           applied = window.CloudCramUpdate.applyUpdate();
         }
-        if (applied) {
+        return { applied: applied };
+      })
+      .then(function (result) {
+        if (result && result.applied) {
           return;
         }
-        return clearAllCaches().then(function () {
-          window.location.reload();
-        });
+        window.location.reload();
       })
       .catch(function () {
         window.location.reload();
       });
+  }
+
+  function updateApp(triggerEl) {
+    if (isQuizSessionActive()) {
+      confirmUpdateDuringActiveQuiz(runUpdateAppFlow, triggerEl);
+      return;
+    }
+    runUpdateAppFlow();
   }
 
   function deleteAllMyData(options) {
@@ -243,7 +358,9 @@
   function initUpdateButton() {
     var btn = document.getElementById('update-app-btn') || document.getElementById('reset-app-btn');
     if (btn) {
-      btn.addEventListener('click', updateApp);
+      btn.addEventListener('click', function () {
+        updateApp(btn);
+      });
     }
   }
 

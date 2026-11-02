@@ -14,6 +14,7 @@
   var pendingWaitingWorker = null;
   var UPDATE_INTERVAL_MS = 60 * 60 * 1000;
   var DEFER_POLL_MS = 5000;
+  var UPDATE_WAIT_TIMEOUT_MS = 15000;
 
   function isQuizActive() {
     return !!(window.QuizEngine && typeof window.QuizEngine.isQuizActive === 'function' && window.QuizEngine.isQuizActive());
@@ -130,8 +131,9 @@
     syncBodyBannerOffset();
   }
 
-  function applyUpdate() {
-    if (isQuizActive()) {
+  function applyUpdate(options) {
+    options = options || {};
+    if (!options.force && isQuizActive()) {
       maybeShowBanner();
       return false;
     }
@@ -151,6 +153,125 @@
     if (!registration) return Promise.resolve();
     return registration.update().catch(function (err) {
       console.warn('Cloud Cram SW update check failed:', err);
+    });
+  }
+
+  /**
+   * After registration.update(), wait until a worker is waiting (install finished)
+   * or until timeoutMs. Resolves with the waiting ServiceWorker or null.
+   */
+  function waitForWaitingWorker(timeoutMs, waitOptions) {
+    timeoutMs = timeoutMs || UPDATE_WAIT_TIMEOUT_MS;
+    waitOptions = waitOptions || {};
+    var userInitiated = waitOptions.userInitiated === true;
+    var UPDATE_FOUND_GRACE_MS = 400;
+
+    return new Promise(function (resolve) {
+      if (!registration) {
+        resolve(null);
+        return;
+      }
+
+      var settled = false;
+      var timer = null;
+      var longWaitTimer = null;
+
+      function cleanup() {
+        if (timer) clearTimeout(timer);
+        if (longWaitTimer) clearTimeout(longWaitTimer);
+        registration.removeEventListener('updatefound', onUpdateFoundWhileWaiting);
+      }
+
+      function finish(worker) {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        resolve(worker);
+      }
+
+      function waitingIsActionable() {
+        if (!registration.waiting) return false;
+        return userInitiated || hasControllingWorker();
+      }
+
+      function tryResolveWaiting() {
+        if (waitingIsActionable()) {
+          finish(registration.waiting);
+          return true;
+        }
+        return false;
+      }
+
+      function resolveWhenInstalled(worker) {
+        if (!worker) return;
+        if (worker.state === 'installed' && (registration.waiting || worker) && (userInitiated || hasControllingWorker())) {
+          finish(registration.waiting || worker);
+        }
+      }
+
+      function watchInstalling(worker) {
+        if (!worker) return;
+        resolveWhenInstalled(worker);
+        worker.addEventListener('statechange', function () {
+          resolveWhenInstalled(worker);
+        });
+      }
+
+      function startInstallTimeout() {
+        if (longWaitTimer) return;
+        longWaitTimer = setTimeout(function () {
+          if (tryResolveWaiting()) return;
+          finish(null);
+        }, timeoutMs);
+      }
+
+      function onUpdateFoundWhileWaiting() {
+        watchInstalling(registration.installing);
+        tryResolveWaiting();
+        if (registration.installing) {
+          startInstallTimeout();
+        }
+      }
+
+      if (tryResolveWaiting()) return;
+
+      registration.addEventListener('updatefound', onUpdateFoundWhileWaiting);
+
+      if (registration.installing) {
+        watchInstalling(registration.installing);
+        startInstallTimeout();
+        return;
+      }
+
+      if (userInitiated) {
+        timer = setTimeout(function () {
+          if (tryResolveWaiting()) return;
+          if (registration.installing) {
+            watchInstalling(registration.installing);
+            startInstallTimeout();
+            return;
+          }
+          finish(null);
+        }, UPDATE_FOUND_GRACE_MS);
+        return;
+      }
+
+      finish(null);
+    });
+  }
+
+  function waitAndApplyUpdate(options) {
+    options = options || {};
+    var timeoutMs = options.timeoutMs || UPDATE_WAIT_TIMEOUT_MS;
+    var userInitiated = options.userInitiated === true;
+    return waitForWaitingWorker(timeoutMs, { userInitiated: userInitiated }).then(function (waiting) {
+      if (!waiting) {
+        return { applied: false, reason: 'no_update' };
+      }
+      pendingWaitingWorker = waiting;
+      updatePending = true;
+      var applied = applyUpdate({ force: userInitiated });
+      return { applied: applied, reason: applied ? 'skip_waiting' : 'blocked' };
     });
   }
 
@@ -206,6 +327,8 @@
   window.CloudCramUpdate = {
     checkForUpdate: checkForUpdate,
     applyUpdate: applyUpdate,
+    waitForWaitingWorker: waitForWaitingWorker,
+    waitAndApplyUpdate: waitAndApplyUpdate,
     onQuizActivityChange: onQuizActivityChange
   };
 })();

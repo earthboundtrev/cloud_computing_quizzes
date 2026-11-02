@@ -82,7 +82,23 @@
     });
   }
 
-  function openDeleteConfirmDialog() {
+  function trapFocusInDialog(dialogEl, focusables, ev) {
+    if (ev.key !== 'Tab' || !focusables.length) return;
+    var first = focusables[0];
+    var last = focusables[focusables.length - 1];
+    var active = document.activeElement;
+    if (ev.shiftKey) {
+      if (active === first || !dialogEl.contains(active)) {
+        ev.preventDefault();
+        last.focus();
+      }
+    } else if (active === last || !dialogEl.contains(active)) {
+      ev.preventDefault();
+      first.focus();
+    }
+  }
+
+  function openDeleteConfirmDialog(triggerEl) {
     var overlay = document.createElement('div');
     overlay.className = 'delete-data-dialog-overlay';
     overlay.setAttribute('role', 'presentation');
@@ -127,16 +143,23 @@
     overlay.appendChild(dialog);
     document.body.appendChild(overlay);
 
+    var focusables = [cancelBtn, exportBtn, confirmBtn];
+
     function closeDialog() {
       overlay.remove();
       document.removeEventListener('keydown', onKeyDown);
+      if (triggerEl && typeof triggerEl.focus === 'function') {
+        triggerEl.focus();
+      }
     }
 
     function onKeyDown(ev) {
       if (ev.key === 'Escape') {
         ev.preventDefault();
         closeDialog();
+        return;
       }
+      trapFocusInDialog(dialog, focusables, ev);
     }
 
     document.addEventListener('keydown', onKeyDown);
@@ -164,6 +187,8 @@
 
   var deleteBtn = document.getElementById('delete-all-data-btn');
   if (deleteBtn) {
-    deleteBtn.addEventListener('click', openDeleteConfirmDialog);
+    deleteBtn.addEventListener('click', function () {
+      openDeleteConfirmDialog(deleteBtn);
+    });
   }
 })();

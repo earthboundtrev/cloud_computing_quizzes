@@ -136,11 +136,31 @@ test('data-export.js buildExportPayload omits push auth token', function () {
 
 test('app-reset.js update path does not unregister SW or clear all localStorage', function () {
   const src = fs.readFileSync(path.join(ROOT, 'app-reset.js'), 'utf8');
-  const updateBlock = src.match(/function updateApp\(\)[\s\S]*?^  \}/m);
+  const flowBlock = src.match(/function runUpdateAppFlow\(\)[\s\S]*?^  \}/m);
+  assert(flowBlock, 'runUpdateAppFlow not found');
+  assert(!/localStorage\.clear/.test(flowBlock[0]), 'update flow must not localStorage.clear');
+  assert(!/unregister/.test(flowBlock[0]), 'update flow must not unregister SW');
+  assert(/CloudCramUpdate/.test(flowBlock[0]), 'update flow uses CloudCramUpdate');
+  assert(/waitAndApplyUpdate\(\{\s*userInitiated:\s*true\s*\}\)/.test(flowBlock[0]), 'update flow waits for SW install before apply');
+  assert(!/clearAllCaches/.test(flowBlock[0]), 'update flow must not clear caches before SW activates');
+});
+
+test('app-reset.js active quiz update confirm cancel and proceed paths', function () {
+  const src = fs.readFileSync(path.join(ROOT, 'app-reset.js'), 'utf8');
+  const updateBlock = src.match(/function updateApp\([^)]*\)[\s\S]*?^  \}/m);
   assert(updateBlock, 'updateApp not found');
-  assert(!/localStorage\.clear/.test(updateBlock[0]), 'updateApp must not localStorage.clear');
-  assert(!/unregister/.test(updateBlock[0]), 'updateApp must not unregister SW');
-  assert(/CloudCramUpdate/.test(updateBlock[0]), 'updateApp uses CloudCramUpdate');
+  assert(/isQuizSessionActive/.test(src), 'quiz session guard missing');
+  assert(/QuizEngine\.isQuizActive/.test(src), 'QuizEngine.isQuizActive check missing');
+  assert(/confirmUpdateDuringActiveQuiz/.test(src), 'quiz update confirm dialog missing');
+  assert(/Your current quiz will be lost/.test(src), 'quiz loss warning missing');
+  assert(!/sessionStorage\.clear/.test(updateBlock[0]), 'updateApp must not clear storage before confirm');
+  assert(/confirmUpdateDuringActiveQuiz\(runUpdateAppFlow,\s*triggerEl\)/.test(updateBlock[0]), 'confirm then run flow');
+  assert(/closeDialog\(false\)/.test(src), 'cancel path must not proceed');
+  assert(/closeDialog\(true\)/.test(src), 'confirm path must proceed');
+  assert(/cancelBtn\.focus\(\)/.test(src), 'cancel focused by default on quiz update confirm');
+  assert(/trapFocusInDialog/.test(src), 'quiz update confirm must trap focus');
+  assert(/triggerEl\.focus/.test(src), 'quiz update confirm must restore trigger focus');
+  assert(/settled/.test(src), 'quiz update confirm must guard against double close');
 });
 
 test('app-reset.js delete uses BroadcastChannel and server hook', function () {
@@ -181,6 +201,15 @@ test('index-init delete dialog uses accessible dialog pattern', function () {
   assert(/role',\s*'dialog'/.test(src) || /setAttribute\('role',\s*'dialog'\)/.test(src), 'dialog role');
   assert(/Export first/.test(src), 'export first offered');
   assert(/cancelBtn\.focus\(\)/.test(src), 'cancel focused by default');
+});
+
+test('index-init delete dialog traps focus and restores trigger', function () {
+  const src = fs.readFileSync(path.join(ROOT, 'index-init.js'), 'utf8');
+  assert(/trapFocusInDialog/.test(src), 'focus trap helper missing');
+  assert(/'Tab'/.test(src) && /trapFocusInDialog/.test(src), 'Tab focus trap missing');
+  assert(/shiftKey/.test(src), 'Shift+Tab handling missing');
+  assert(/triggerEl\.focus/.test(src), 'focus must return to trigger on close');
+  assert(/Escape/.test(src), 'Escape closes dialog');
 });
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed');
