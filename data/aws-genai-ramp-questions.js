@@ -1151,5 +1151,117 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     ],
     "correct": 0,
     "explain": "Streaming can be cut by intermediary timeouts while the model continues generating."
+  },
+  {
+    "id": "genai-ramp-066",
+    "mode": "exam",
+    "topic": "Compliance",
+    "obj": "1",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/data-protection.html",
+    "q": "A healthcare team must keep patient prompts and model outputs in a specific AWS Region and block cross-Region inference for regulated workloads. Which combination addresses data residency for Bedrock use?",
+    "options": [
+      "Enable cross-Region inference profiles so each request auto-routes to the lowest-latency Region available",
+      "Keep Bedrock and KB in the approved Region; IAM limits InvokeModel to that Region",
+      "Mirror prompts nightly to every Region for disaster recovery without encryption or access logging",
+      "Log full prompts to a shared analytics account in another Region to centralize compliance reporting"
+    ],
+    "correct": 1,
+    "explain": "Bedrock and KB resources are Regional; IAM can restrict InvokeModel to approved Regions/models. Cross-Region profiles and uncontrolled replication move data outside residency boundaries."
+  },
+  {
+    "id": "genai-ramp-067",
+    "mode": "exam",
+    "topic": "Foundation Models",
+    "type": "multi",
+    "obj": "1",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html",
+    "q": "You are onboarding a new account for Bedrock: developers need Claude and Titan in us-east-1, finance wants visibility into who enabled models, and security wants no model use until approved. Which TWO controls apply first? (Pick 2)",
+    "options": [
+      "Enable model access per foundation model in the Bedrock console for the account/Region",
+      "Attach IAM policies granting bedrock:InvokeModel only to approved roles after access is on",
+      "Grant bedrock:* on * to the developers group to avoid access delays during the pilot",
+      "Rely on default VPC security groups alone without Bedrock model access requests",
+      "Use the AWS account root user for daily InvokeModel calls to skip role setup"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "Model access must be enabled per model/Region; IAM then gates InvokeModel to authorized principals. Wildcard bedrock:*, VPC-only controls, and daily root use bypass least privilege."
+  },
+  {
+    "id": "genai-ramp-068",
+    "mode": "exam",
+    "topic": "Guardrails",
+    "obj": "3",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html",
+    "q": "A customer-facing chatbot occasionally returns toxic content when users jailbreak with role-play prompts. Leadership wants filtering without retraining the base model. What should you implement?",
+    "options": [
+      "Shorten max_tokens so harmful replies truncate before users read them in the chat UI",
+      "Switch to a smaller foundation model because smaller models inherently refuse more jailbreak attempts",
+      "Use a Bedrock Guardrail with denied topics and toxicity filters on InvokeModel",
+      "Remove the system prompt so user messages are the only instructions the model receives"
+    ],
+    "correct": 2,
+    "explain": "Guardrails apply input/output policy filters without changing model weights. Token limits and model size do not reliably block jailbreaks; dropping the system prompt often weakens safety instructions."
+  },
+  {
+    "id": "genai-ramp-069",
+    "mode": "exam",
+    "topic": "Evaluation",
+    "obj": "5",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-evaluation.html",
+    "q": "After a KB sync, stakeholders report correct answers dropped 15 points on a golden Q&A set while retrieval logs show fewer chunks returned for SKU-heavy queries. What is the BEST next diagnostic step?",
+    "options": [
+      "Raise top_k to the service maximum on every query so more chunks always return regardless of relevance",
+      "Run KB evaluation on the golden Q&A set; compare retrieval scores to the pre-sync baseline",
+      "Rollback the embedding model to an older version without reviewing sync job logs or chunk statistics",
+      "Turn off chunking so each source document becomes one giant vector passed to the generator"
+    ],
+    "correct": 1,
+    "explain": "KB evaluation measures retrieval and answer quality on labeled data, isolating sync regressions. Arbitrary top_k changes, blind rollbacks, or disabling chunking mask ingestion issues."
+  },
+  {
+    "id": "genai-ramp-070",
+    "mode": "exam",
+    "topic": "Converse API",
+    "obj": "2",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/conversation-inference.html",
+    "q": "Your microservices call different Bedrock models but need one SDK pattern for multi-turn chat, tool use, and Guardrails on the same thread. What reduces integration sprawl?",
+    "options": [
+      "Implement separate InvokeModel, InvokeModelWithResponseStream, and Agent runtime clients per feature team",
+      "Standardize on the Converse and ConverseStream APIs with shared message history and toolConfig blocks",
+      "Proxy all models through a single EC2 instance running custom HTTP wrappers",
+      "Store conversation state only in browser localStorage without server-side session binding"
+    ],
+    "correct": 1,
+    "explain": "Converse/ConverseStream unify multi-turn messages, tools, and guardrail config across models. Per-model bespoke clients and ad hoc proxies increase maintenance; client-only state breaks server-side control."
+  },
+  {
+    "id": "genai-ramp-071",
+    "mode": "exam",
+    "topic": "Data ingestion",
+    "type": "multi",
+    "obj": "1",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/kb-data-source-sync.html",
+    "q": "A knowledge base ingests from S3 documents and Confluence via connectors. Compliance requires PII redaction before embedding and an audit trail of sync jobs. Which TWO practices fit? (Pick 2)",
+    "options": [
+      "Redact or tag PII in upstream ETL before connector sync; retain sync job history plus CloudTrail for Bedrock/KB APIs",
+      "Scope the KB service role to required S3 prefixes and store connector credentials in Secrets Manager",
+      "Grant the connector broad admin on Confluence so sync never fails on permissions",
+      "Skip incremental sync and full re-embed all documents hourly to simplify auditing",
+      "Use one shared IAM user access key checked into the connector config repository"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "Redaction upstream plus audit logs supports compliance; least-privilege IAM and secrets for connectors is standard. Over-broad connector admin, wasteful full re-embeds, and keys in repos violate security baselines."
   }
 ];
