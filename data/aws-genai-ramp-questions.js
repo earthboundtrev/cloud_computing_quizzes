@@ -1263,5 +1263,234 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
       1
     ],
     "explain": "Redaction upstream plus audit logs supports compliance; least-privilege IAM and secrets for connectors is standard. Over-broad connector admin, wasteful full re-embeds, and keys in repos violate security baselines."
+  },
+  {
+    "id": "genai-ramp-072",
+    "mode": "exam",
+    "topic": "Embeddings",
+    "obj": "1",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-setup.html",
+    "q": "A multilingual support KB must retrieve equally well in English and Spanish product docs. Current English-only embedding model hurts Spanish recall. FIRST change?",
+    "options": [
+      "Raise generation temperature so answers sound more confident in every language regardless of retrieval quality",
+      "Select a multilingual embedding model (or per-locale indexes) aligned to document languages",
+      "Delete Spanish documents to keep a single-language index size smaller and simplify chunking rules",
+      "Disable vector search and rely on full-document prompts only without changing the embedding model"
+    ],
+    "correct": 1,
+    "explain": "Retrieval quality depends on embedding-language alignment. Temperature and deleting locales do not fix recall; skipping vectors removes RAG benefits."
+  },
+  {
+    "id": "genai-ramp-073",
+    "mode": "exam",
+    "topic": "Security",
+    "type": "multi",
+    "obj": "1",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/data-protection.html",
+    "q": "Security reviews a new Bedrock workload storing prompts in S3 and invoking models from Lambda. Which TWO controls address encryption and access? (Pick 2)",
+    "options": [
+      "Enable SSE-KMS on prompt/log buckets with keys restricted to the workload account",
+      "Use IAM roles for Lambda with least-privilege bedrock:InvokeModel and s3:GetObject scoped to prefixes",
+      "Publish bucket policies with Principal \"*\" for easier cross-team testing",
+      "Disable TLS between Lambda and Bedrock to reduce CPU overhead in the VPC",
+      "Store model IDs in plaintext GitHub gists for developer convenience"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "KMS-backed encryption and role-based least privilege are baseline for Bedrock data paths. Public principals, plaintext transport, and leaked config widen blast radius."
+  },
+  {
+    "id": "genai-ramp-074",
+    "mode": "exam",
+    "topic": "Agents",
+    "obj": "2",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/agents.html",
+    "q": "An agent must book appointments by calling your REST API with OAuth client credentials rotated monthly. How should credentials reach the action group Lambda?",
+    "options": [
+      "Hard-code client secrets in the agent instruction prompt for faster cold starts on every invocation",
+      "Store secrets in Secrets Manager; Lambda retrieves them at runtime with a scoped execution role",
+      "Email the refresh token to agents as a system message on every user turn for operators to read",
+      "Embed secrets in OpenAPI schema descriptions visible to the foundation model during planning"
+    ],
+    "correct": 1,
+    "explain": "Secrets Manager plus IAM-scoped Lambda retrieval keeps credentials out of prompts and model-visible artifacts."
+  },
+  {
+    "id": "genai-ramp-075",
+    "mode": "exam",
+    "topic": "Prompt Management",
+    "type": "multi",
+    "obj": "2",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/prompt-management.html",
+    "q": "Product wants reusable prompt templates, A/B tests between versions, and a visual path from prompt to KB to model. Which TWO Bedrock features combine? (Pick 2)",
+    "options": [
+      "Prompt Management versions/aliases for template lifecycle",
+      "Flows to wire prompt, retrieval, and model nodes with conditions",
+      "S3 lifecycle rules on model weights for prompt storage",
+      "EC2 user-data scripts as the only prompt store",
+      "CloudFront cache behaviors to store system prompts at edge"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "Prompt Management governs template versions; Flows orchestrates multi-step generative paths including prompts and KB retrieval."
+  },
+  {
+    "id": "genai-ramp-076",
+    "mode": "exam",
+    "topic": "Governance",
+    "obj": "3",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/security_iam_id-based-policy-examples.html",
+    "q": "A shared AWS account hosts Bedrock for multiple product lines. Auditors require developers cannot invoke unapproved models even if they guess model IDs. BEST IAM pattern?",
+    "options": [
+      "Allow bedrock:InvokeModel on * for the Developers group to avoid ticket delays during the pilot phase",
+      "Deny InvokeModel unless Region and model ARN match an allow-list on approved models",
+      "Remove all Deny statements because Deny breaks CI pipelines automatically in every account layout",
+      "Use the root user access keys in CI because they bypass service quotas and model access gates"
+    ],
+    "correct": 1,
+    "explain": "Condition keys and explicit allow-lists block invocation of unapproved foundation models while permitting approved ARNs."
+  },
+  {
+    "id": "genai-ramp-077",
+    "mode": "exam",
+    "topic": "Guardrails",
+    "type": "multi",
+    "obj": "3",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-sensitive-filters.html",
+    "q": "A healthcare assistant must block PII in user uploads and model replies while still allowing clinical FAQ answers. Which TWO Guardrail capabilities apply? (Pick 2)",
+    "options": [
+      "Sensitive information filters on input and output",
+      "Denied topic policies for non-clinical advice categories",
+      "Word filters that delete every medical term from all responses",
+      "Contextual grounding checks only, with no input filters",
+      "Disable logging so PII never appears in CloudWatch"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "Sensitive filters redact PII; denied topics steer away from disallowed categories without stripping all medical vocabulary."
+  },
+  {
+    "id": "genai-ramp-078",
+    "mode": "exam",
+    "topic": "Cost",
+    "obj": "4",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/provisioned-throughput.html",
+    "q": "Traffic is flat at 25 RPS for one Claude model 24×7. On-demand bills are spiking. Finance wants predictable cost without sacrificing latency. FIRST lever?",
+    "options": [
+      "Purchase Provisioned Throughput sized to the steady baseline for that model in the Region",
+      "Move all traffic to batch inference jobs polled every hour for synchronous chat responses",
+      "Delete Guardrails to reduce billed tokens per request without changing the inference mode",
+      "Switch to the smallest embedding model for chat generation to cut generation pricing"
+    ],
+    "correct": 0,
+    "explain": "Provisioned Throughput fits steady high-volume inference. Batch is asynchronous; Guardrails and embedding models do not replace generation pricing models."
+  },
+  {
+    "id": "genai-ramp-079",
+    "mode": "exam",
+    "topic": "Optimization",
+    "type": "multi",
+    "obj": "4",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/prompt-caching.html",
+    "q": "An internal copilot reuses a 4k-token policy preamble and tool JSON on every request. Latency and input-token cost are high. Which TWO optimizations help? (Pick 2)",
+    "options": [
+      "Enable prompt caching for the static prefix on supported models",
+      "Right-size max_tokens to expected answer length instead of always using model maximum",
+      "Duplicate the preamble in every user message to improve recall",
+      "Disable streaming to eliminate time-to-first-token metrics",
+      "Turn off CloudWatch metrics to save cost"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "Prompt caching bills and processes repeated prefixes once; tighter max_tokens caps generation spend."
+  },
+  {
+    "id": "genai-ramp-080",
+    "mode": "exam",
+    "topic": "Chunking",
+    "obj": "1",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/kb-chunking.html",
+    "q": "PDF manuals mix long prose with tables of SKU specifications. Retrieval returns prose chunks but misses table rows for part numbers. BEST ingestion tweak?",
+    "options": [
+      "Use hierarchical or custom chunking that preserves table rows and headings where supported",
+      "Set chunk size to 10 tokens so every table splits into random fragments during every sync job",
+      "Remove all tables at ingest because embeddings cannot represent numbers in any AWS Region",
+      "Answer part-number questions from the generation model without retrieval or grounding checks"
+    ],
+    "correct": 0,
+    "explain": "Chunking strategies that respect structure improve lexical and semantic recall for tabular SKUs."
+  },
+  {
+    "id": "genai-ramp-081",
+    "mode": "exam",
+    "topic": "Integration",
+    "obj": "2",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/cross-account-access.html",
+    "q": "Account A hosts the app; Account B owns the Bedrock custom model and KMS keys. How should Account A invoke the custom model?",
+    "options": [
+      "Share root credentials across accounts for simplicity when rotating keys each quarter",
+      "Use a resource policy on the custom model plus KMS grants so Account A's role can InvokeModel",
+      "Copy model artifacts to a public S3 bucket in Account A for faster cross-account downloads",
+      "Disable encryption on the custom model endpoint in Account B to reduce KMS API calls"
+    ],
+    "correct": 1,
+    "explain": "Cross-account invocation relies on resource policies and KMS permissions on the model account, not shared root keys or public artifacts."
+  },
+  {
+    "id": "genai-ramp-082",
+    "mode": "exam",
+    "topic": "Troubleshooting",
+    "obj": "5",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/troubleshooting-api-error-codes.html",
+    "q": "Production sees intermittent ThrottlingException on InvokeModel during marketing spikes. Application logs show retries without backoff. BEST mitigation?",
+    "options": [
+      "Implement exponential backoff with jitter and request a service quota increase if sustained",
+      "Remove all retries so failures surface immediately to users without recovery or alerting",
+      "Switch to a different AWS Region mid-request without client changes or endpoint configuration",
+      "Hard-code sleep(0) in a tight loop to maximize throughput during quota enforcement windows"
+    ],
+    "correct": 0,
+    "explain": "Backoff reduces thundering herds; quota increases address sustained overages. Blind region hops or zero-delay loops worsen throttling."
+  },
+  {
+    "id": "genai-ramp-083",
+    "mode": "exam",
+    "topic": "Evaluation",
+    "type": "multi",
+    "obj": "5",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-evaluation-jobs.html",
+    "q": "Before promoting a new RAG prompt version, which TWO validation steps match Bedrock evaluation practices? (Pick 2)",
+    "options": [
+      "Run automated model evaluation jobs on golden prompts with human review where required",
+      "Compare retrieval metrics on a labeled Q&A set after KB or prompt changes",
+      "Ship to 100% traffic first, then measure social media sentiment",
+      "Disable Guardrails during eval so scores look higher",
+      "Skip labeled data because production traffic is enough"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "Managed evaluation jobs plus retrieval checks on labeled sets catch regressions before full rollout."
   }
 ];
