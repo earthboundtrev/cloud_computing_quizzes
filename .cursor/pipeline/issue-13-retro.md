@@ -48,6 +48,7 @@ node scripts/lint-cissp-questions.js
 ## Follow-up PRs
 
 - **#51** — cloud rules + confession strip + lint-banks fixes (pipeline complete for retro)
-- Future: real distractor rewrite, dedupe extra bank, strict metadata on full GenAI pool
+- **dedupe PR** — empty duplicate extra bank (206 unique pool)
+- Future: real distractor rewrite, strict metadata gates on full pool
 
 See also: [README.md](./README.md) for #14 / #15 / #31 retro status.
