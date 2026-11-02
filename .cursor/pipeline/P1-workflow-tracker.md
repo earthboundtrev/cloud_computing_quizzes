@@ -11,7 +11,7 @@
 | [32](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/32) | CISSP p.27 / Q27 | **merged** | CLOSED |
 | [33](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/33) | Track metadata | **merged** | main @ fffb645 — Refs (partial AC) |
 | [36](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/36) | lint-banks isolation | **DEPLOY** | fixture + #33 path fix |
-| [14](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/14) | Terraform ramp | IMPLEMENT | 494 Q — HTML/CI hygiene |
+| [14](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/14) | Terraform ramp | IMPLEMENT | 500 Q — 7c TF_LOG pack |
 | [13](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/13) | AWS GenAI ramp | IMPLEMENT | ~300Q AC |
 | [14](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/14) | Terraform ramp | IMPLEMENT | #44 + follow-ups |
 | [15](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/15) | CISSP ramp | IMPLEMENT | #48 + follow-ups |

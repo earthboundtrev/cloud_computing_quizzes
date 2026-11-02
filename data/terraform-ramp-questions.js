@@ -1128,5 +1128,107 @@ window.QUESTION_BANK_TERRAFORM_RAMP = [
     ],
     "correct": 1,
     "explain": "CLI tokens grant HCP access; protect like any secret (8d security hygiene)."
+  },
+  {
+    "mode": "exam",
+    "topic": "Maintain infrastructure",
+    "obj": "7c",
+    "level": 3,
+    "id": "tf-ramp-7c-03",
+    "ref": "https://developer.hashicorp.com/terraform/internals/debugging",
+    "q": "Plan succeeds but apply fails with opaque provider error. Fastest way to capture Terraform core logs?",
+    "options": [
+      "Set TF_LOG=TRACE (or DEBUG) and re-run apply",
+      "Delete .terraform.lock.hcl",
+      "terraform fmt -recursive only",
+      "Disable state locking"
+    ],
+    "correct": 0,
+    "explain": "TF_LOG raises Terraform and provider log verbosity for apply failures (7c). Lock file and fmt do not capture RPC traces."
+  },
+  {
+    "mode": "exam",
+    "topic": "Maintain infrastructure",
+    "obj": "7c",
+    "level": 4,
+    "id": "tf-ramp-7c-04",
+    "ref": "https://developer.hashicorp.com/terraform/internals/debugging",
+    "q": "TF_LOG=INFO is set but logs are too noisy for a ticket attachment. Better setting?",
+    "options": [
+      "TF_LOG=ERROR only",
+      "TF_LOG=DEBUG or TRACE with TF_LOG_PATH=/tmp/tf.log",
+      "Unset TF_LOG and use terraform cloud only",
+      "TF_VAR_log_level"
+    ],
+    "correct": 1,
+    "explain": "DEBUG/TRACE plus TF_LOG_PATH captures detail to a file without flooding CI stdout (7c)."
+  },
+  {
+    "mode": "exam",
+    "topic": "Maintain infrastructure",
+    "obj": "7c",
+    "level": 4,
+    "id": "tf-ramp-7c-05",
+    "ref": "https://developer.hashicorp.com/terraform/internals/debugging",
+    "q": "Which log level shows provider gRPC calls and Terraform graph steps?",
+    "options": [
+      "TRACE",
+      "WARN",
+      "ERROR",
+      "OFF"
+    ],
+    "correct": 0,
+    "explain": "TRACE is the most verbose TF_LOG level, including provider RPC detail (7c)."
+  },
+  {
+    "mode": "exam",
+    "topic": "Maintain infrastructure",
+    "obj": "7c",
+    "level": 3,
+    "id": "tf-ramp-7c-06",
+    "ref": "https://developer.hashicorp.com/terraform/internals/debugging",
+    "q": "A teammate runs apply with TF_LOG=TRACE locally but you need the same capture in GitHub Actions. Typical fix?",
+    "options": [
+      "Add env TF_LOG and TF_LOG_PATH; upload the log artifact",
+      "Commit terraform.tfstate",
+      "Use terraform login in the workflow only",
+      "Run apply with -lock=false"
+    ],
+    "correct": 0,
+    "explain": "CI needs explicit env vars and often TF_LOG_PATH because default stderr is truncated or hidden (7c)."
+  },
+  {
+    "mode": "exam",
+    "topic": "Maintain infrastructure",
+    "obj": "7c",
+    "level": 4,
+    "id": "tf-ramp-7c-07",
+    "ref": "https://developer.hashicorp.com/terraform/internals/debugging",
+    "q": "<pre>TF_LOG=DEBUG terraform apply -auto-approve</pre>Output still lacks provider details. What else to try?",
+    "options": [
+      "Bump to TF_LOG=TRACE; confirm provider plugin logs are not filtered",
+      "Switch to local backend only",
+      "Remove required_providers block",
+      "Use terraform destroy instead"
+    ],
+    "correct": 0,
+    "explain": "Provider RPC detail often needs TRACE; DEBUG may omit some plugin chatter (7c)."
+  },
+  {
+    "mode": "exam",
+    "topic": "Maintain infrastructure",
+    "obj": "7c",
+    "level": 3,
+    "id": "tf-ramp-7c-08",
+    "ref": "https://developer.hashicorp.com/terraform/internals/debugging",
+    "q": "After debugging, you leave TF_LOG=TRACE in a shared shell profile. Risk?",
+    "options": [
+      "Huge logs and possible secret leakage in traces; reset to unset or WARN",
+      "State file corruption",
+      "Automatic terraform destroy",
+      "Lock file deletion"
+    ],
+    "correct": 0,
+    "explain": "Verbose logs can include sensitive values; disable TF_LOG after troubleshooting (7c hygiene)."
   }
 ];
