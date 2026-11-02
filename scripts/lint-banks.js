@@ -72,7 +72,7 @@ const BANK_FILES = {
   'cissp': ['data/cissp-questions.js', 'data/cissp-ramp-questions.js', 'data/cissp-case-studies.js', 'data/cissp-scenario-questions.js'],
   'secai': ['data/secai-questions.js', 'data/secai-case-studies.js', 'data/secai-scenario-questions.js'],
   'rhcsa9': ['data/rhcsa9-questions.js', 'data/rhcsa9-extra-questions.js'],
-  'rhcsa10': ['data/rhcsa10-questions.js', 'data/rhcsa10-extra-questions.js'],
+  'rhcsa10': ['data/rhcsa10-questions.js', 'data/rhcsa10-extra-questions.js', 'data/rhcsa10-gap-questions.js'],
   'rhce': ['data/rhce-questions.js']
 };
 

@@ -66,6 +66,9 @@ function validateQuestion(q, file, idx) {
   if (!q.ref || !String(q.ref).match(/^https:\/\//)) {
     fail(label + ": missing or invalid 'ref' (https://…)");
   }
+  if (/not correct for Terraform|not the primary Terraform workflow|misstates how Terraform/i.test((q.options || []).join(' '))) {
+    fail(label + ': confession-style distractor suffix detected');
+  }
   if (!q.explain || String(q.explain).length < 40) {
     warn(label + ': explanation is very short for exam-ready bar');
   }

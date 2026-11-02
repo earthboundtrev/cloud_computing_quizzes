@@ -6,7 +6,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "id": "rhcsa10-gap-001",
     "mode": "exam",
     "topic": "RHCSA gap fill",
-    "q": "Send stdout of dpkg-query to a file on RHEL (concept: redirection):",
+    "q": "Send stdout of rpm -qa to a file on RHEL (concept: redirection):",
     "options": [
       "cmd 2>&1 | tee log",
       "cmd > outfile.txt",
@@ -539,10 +539,10 @@ window.QUESTION_BANK_RHCSA10_GAP = [
       "setfacl -m u:dana:rw shared.txt",
       "chmod 777 shared.txt only",
       "chown dana shared.txt only",
-      "getfacl removes ACLs"
+      "getfacl -c only omits header comments"
     ],
     "correct": 0,
-    "explain": "setfacl -m modifies ACL; getfacl -c clears.",
+    "explain": "setfacl -m modifies ACL entries; remove all ACLs with setfacl -b path (getfacl -c is not clear-all).",
     "obj": "6.5",
     "level": 2
   },
@@ -687,7 +687,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     ],
     "correct": 0,
     "explain": "GRUB2 + shim; mokutil for MOK enrollment.",
-    "obj": "2.3",
+    "obj": "7.6",
     "level": 2
   },
   {

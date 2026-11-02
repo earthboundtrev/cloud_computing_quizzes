@@ -28,4 +28,4 @@ Would not certify merge-ready: **249 vs 293** copy mismatch; gap-043 wrong obj; 
 
 ## Follow-up PRs
 
-_(TBD — key fixes, HTML copy, gap bank in lint-banks)_
+- **fix-retro-priority** — restore RHCSA options from baseline; gap/HTML/lint fixes
