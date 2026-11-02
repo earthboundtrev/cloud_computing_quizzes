@@ -80,4 +80,108 @@
       window.BrainDump.init({}).then(function () { window.BrainDump.openReview(); });
     });
   }
+
+  var statusEl = document.getElementById('settings-status');
+  function showSettingsStatus(msg) {
+    if (statusEl) statusEl.textContent = msg || '';
+  }
+
+  try {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('deleted') === '1') {
+      var offlineMsg = sessionStorage.getItem('cloudcram_delete_offline_note');
+      if (offlineMsg) {
+        showSettingsStatus(offlineMsg);
+        sessionStorage.removeItem('cloudcram_delete_offline_note');
+      }
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, '', 'index.html');
+      }
+    }
+  } catch (e) {}
+
+  function openDeleteConfirmDialog() {
+    var overlay = document.createElement('div');
+    overlay.className = 'delete-data-dialog-overlay';
+    overlay.setAttribute('role', 'presentation');
+
+    var dialog = document.createElement('div');
+    dialog.className = 'delete-data-dialog';
+    dialog.setAttribute('role', 'dialog');
+    dialog.setAttribute('aria-modal', 'true');
+    dialog.setAttribute('aria-labelledby', 'delete-data-dialog-title');
+
+    var title = document.createElement('h3');
+    title.id = 'delete-data-dialog-title';
+    title.textContent = 'Delete all my data?';
+
+    var body = document.createElement('p');
+    body.textContent = 'Delete all my data removes everything from this device and the reminder server.';
+
+    var actions = document.createElement('div');
+    actions.className = 'delete-data-dialog-actions';
+
+    var cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.className = 'delete-data-dialog-cancel';
+    cancelBtn.textContent = 'Cancel';
+
+    var exportBtn = document.createElement('button');
+    exportBtn.type = 'button';
+    exportBtn.className = 'delete-data-dialog-export';
+    exportBtn.textContent = 'Export first';
+
+    var confirmBtn = document.createElement('button');
+    confirmBtn.type = 'button';
+    confirmBtn.className = 'delete-data-dialog-confirm';
+    confirmBtn.textContent = 'Delete everything';
+
+    actions.appendChild(cancelBtn);
+    actions.appendChild(exportBtn);
+    actions.appendChild(confirmBtn);
+    dialog.appendChild(title);
+    dialog.appendChild(body);
+    dialog.appendChild(actions);
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+
+    function closeDialog() {
+      overlay.remove();
+      document.removeEventListener('keydown', onKeyDown);
+    }
+
+    function onKeyDown(ev) {
+      if (ev.key === 'Escape') {
+        ev.preventDefault();
+        closeDialog();
+      }
+    }
+
+    document.addEventListener('keydown', onKeyDown);
+
+    cancelBtn.addEventListener('click', closeDialog);
+    overlay.addEventListener('click', function (ev) {
+      if (ev.target === overlay) closeDialog();
+    });
+
+    exportBtn.addEventListener('click', function () {
+      if (window.CloudCramDataExport && typeof window.CloudCramDataExport.exportAllUserData === 'function') {
+        window.CloudCramDataExport.exportAllUserData();
+      }
+    });
+
+    confirmBtn.addEventListener('click', function () {
+      closeDialog();
+      if (typeof window.deleteAllMyData === 'function') {
+        window.deleteAllMyData();
+      }
+    });
+
+    cancelBtn.focus();
+  }
+
+  var deleteBtn = document.getElementById('delete-all-data-btn');
+  if (deleteBtn) {
+    deleteBtn.addEventListener('click', openDeleteConfirmDialog);
+  }
 })();

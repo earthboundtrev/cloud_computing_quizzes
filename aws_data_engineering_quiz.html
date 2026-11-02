@@ -11,7 +11,7 @@
   <link rel="icon" href="/favicon.ico">
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
   <title>AWS Data Engineer Associate Practice Quiz</title>
-  <link rel="stylesheet" href="css/quiz-common.css?v=4">
+  <link rel="stylesheet" href="css/quiz-common.css?v=5">
   <style>:root { --accent: #ff9900; --accent-dim: #ec7211; }</style>
   <script src="quiz-config.js?v=2"></script>
   <script src="sw-register.js?v=3"></script>
@@ -25,7 +25,8 @@
   <script src="data/aws-dea-scenario-questions.js?v=1"></script>
   <script src="quiz-init-aws-data-engineering.js?v=4"></script>
   <script src="quiz-nav.js?v=2"></script>
-  <script src="app-reset.js?v=2"></script>
+  <script src="storage-keys.js?v=1"></script>
+  <script src="app-reset.js?v=3"></script>
 </head>
 <body>
   <header class="site-nav">
@@ -33,7 +34,8 @@
     <nav class="nav-links">
       <span id="quiz-nav-links"></span>
       <button type="button" class="nav-dumps-btn" id="review-dumps-btn">Review Dumps</button>
-      <button type="button" class="nav-reset-btn" id="reset-app-btn">Reset app</button>
+      <button type="button" class="nav-update-btn" id="update-app-btn" aria-describedby="nav-update-help">Update app</button>
+      <span id="nav-update-help" class="visually-hidden">Update app keeps your progress and reminders</span>
     </nav>
   </header>
   <div class="container">
