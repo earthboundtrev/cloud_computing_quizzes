@@ -160,9 +160,20 @@
 
   function deleteAllMyData(options) {
     options = options || {};
-    notifyTabsDeleteStarting();
-    window.__cloudcramDeleteInProgress = true;
+    if (!getKeysApi()) {
+      window.alert(
+        'Could not clear stored data safely because the app storage registry did not load. Reload Study Sessions and try Delete all my data again.'
+      );
+      return Promise.resolve();
+    }
 
+    return notifyTabsDeleteStarting().then(function () {
+      window.__cloudcramDeleteInProgress = true;
+      return runDeleteAllMyDataAfterNotify(options);
+    });
+  }
+
+  function runDeleteAllMyDataAfterNotify(options) {
     var reminderApi = window.CloudCramReminderServer;
     var serverPromise = reminderApi && typeof reminderApi.deleteReminderServerRecord === 'function'
       ? reminderApi.deleteReminderServerRecord()
@@ -189,12 +200,7 @@
             throw new Error('IDB_DELETE_BLOCKED');
           }
           sessionStorage.clear();
-          var keysApi = getKeysApi();
-          if (!keysApi) {
-            window.__cloudcramDeleteInProgress = false;
-            throw new Error('STORAGE_KEYS_MISSING');
-          }
-          keysApi.clearLocalStorageForDelete(localStorage);
+          getKeysApi().clearLocalStorageForDelete(localStorage);
           return { offlineNote: offlineNote, idbOk: idbOk };
         });
       })
@@ -226,11 +232,6 @@
             'Could not fully clear stored notes. Close other Study Sessions tabs and try Delete all my data again.'
           );
           return;
-        }
-        if (err && err.message === 'STORAGE_KEYS_MISSING') {
-          window.alert(
-            'Could not clear stored data safely because the app storage registry did not load. Reload Study Sessions and try Delete all my data again.'
-          );
         }
       });
   }

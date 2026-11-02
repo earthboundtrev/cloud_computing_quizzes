@@ -149,7 +149,8 @@ test('app-reset.js delete uses BroadcastChannel and server hook', function () {
   assert(/deleteReminderServerRecord/.test(src), 'server DELETE hook required');
   assert(/unregisterAllServiceWorkers/.test(src), 'SW unregister on delete');
   assert(/SERVER_DELETE_FAILED/.test(src), 'fail closed on server delete failure');
-  assert(/STORAGE_KEYS_MISSING/.test(src), 'fail closed when storage-keys missing');
+  assert(/app storage registry did not load/.test(src), 'fail closed when storage-keys missing');
+  assert(/notifyTabsDeleteStarting\(\)\.then/.test(src), 'delete waits for cross-tab notify');
   assert(!/localStorage\.clear\(\)/.test(src), 'must not localStorage.clear fallback');
   assert(/showDeleteCompletePage/.test(src), 'delete completion page without rewriting storage');
 });
