@@ -682,5 +682,73 @@ window.QUESTION_BANK_CISSP_RAMP = [
     ],
     "correct": 1,
     "explain": "Tabletops test process and coordination without full technical simulation."
+  },
+  {
+    "id": "cissp-ramp-041",
+    "mode": "exam",
+    "topic": "Security and Risk Management",
+    "obj": "1",
+    "level": 4,
+    "ref": "https://www.isc2.org/certifications/cissp/cissp-certification-exam-outline",
+    "q": "Legal wants to adopt a new SaaS CRM storing EU customer PII. As security lead, what should you do FIRST?",
+    "options": [
+      "Sign the vendor contract to avoid project delay",
+      "Perform vendor risk and privacy review against policy and regulatory obligations",
+      "Disable encryption to simplify integration testing",
+      "Publish all customer records to the vendor sandbox"
+    ],
+    "correct": 1,
+    "explain": "Due diligence and risk assessment precede procurement; signing without review accepts unknown risk. Encryption and data handling must align with policy before go-live."
+  },
+  {
+    "id": "cissp-ramp-042",
+    "mode": "exam",
+    "topic": "Network Security",
+    "obj": "4",
+    "level": 4,
+    "ref": "https://www.isc2.org/certifications/cissp/cissp-certification-exam-outline",
+    "q": "Remote workers bypass the corporate VPN for SaaS apps. MOST effective near-term control?",
+    "options": [
+      "Block all outbound DNS",
+      "Enforce SSO with MFA and CASB or equivalent SaaS visibility",
+      "Remove password complexity rules",
+      "Disable TLS on proxies"
+    ],
+    "correct": 1,
+    "explain": "Identity-centric access with MFA and SaaS security controls addresses shadow IT better than blunt network blocks that break legitimate work."
+  },
+  {
+    "id": "cissp-ramp-043",
+    "mode": "exam",
+    "topic": "Software Development Security",
+    "obj": "8",
+    "level": 4,
+    "ref": "https://www.isc2.org/certifications/cissp/cissp-certification-exam-outline",
+    "q": "A team ships weekly; production defects trace to missing security tests in CI. BEST next step?",
+    "options": [
+      "Add security gates in the pipeline (SAST/DAST or equivalent) with defined fail criteria",
+      "Stop all releases until manual code review of every line",
+      "Remove version control to speed commits",
+      "Allow only senior developers to use laptops"
+    ],
+    "correct": 0,
+    "explain": "Automated security testing in SDLC scales with release cadence; halting all releases is unsustainable; process and tooling beat ad hoc review."
+  },
+  {
+    "id": "cissp-ramp-044",
+    "mode": "exam",
+    "topic": "Asset Security",
+    "obj": "2",
+    "level": 3,
+    "ref": "https://www.isc2.org/certifications/cissp/cissp-certification-exam-outline",
+    "q": "Backup tapes leave the data center weekly. Which control MOST reduces loss during transit?",
+    "options": [
+      "Label tapes \"confidential\" only",
+      "Encrypt backups and use logged chain-of-custody with sealed containers",
+      "Store tapes in unlocked office cabinets",
+      "Email backup manifests to personal accounts"
+    ],
+    "correct": 1,
+    "explain": "Encryption protects confidentiality if media is lost; chain-of-custody supports integrity and accountability for physical media."
   }
 ];
