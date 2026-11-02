@@ -107,6 +107,33 @@ test('export omits push auth token', function () {
   assert(payload.quizCompleted === '[]', 'other keys exported');
 });
 
+test('data-export.js buildExportPayload omits push auth token', function () {
+  const vm = require('vm');
+  const ls = new LocalStorageMock();
+  ls.setItem('cloudcram_push_auth_token', 'secret-token');
+  ls.setItem('quizCompleted', '["cissp"]');
+  const sandbox = {
+    window: {},
+    localStorage: ls,
+    indexedDB: undefined,
+    console: console,
+    setTimeout: setTimeout,
+    Blob: function () {},
+    URL: { createObjectURL: function () { return ''; }, revokeObjectURL: function () {} },
+    document: { body: { appendChild: function () {} }, createElement: function () { return {}; } }
+  };
+  sandbox.window = sandbox;
+  sandbox.window.CloudCramStorageKeys = registry;
+  vm.createContext(sandbox);
+  vm.runInContext(fs.readFileSync(path.join(ROOT, 'data-export.js'), 'utf8'), sandbox);
+  const payload = sandbox.window.CloudCramDataExport.buildExportPayload([]);
+  assert(
+    !Object.prototype.hasOwnProperty.call(payload.localStorage, 'cloudcram_push_auth_token'),
+    'data-export must not include push auth token'
+  );
+  assert(payload.localStorage.quizCompleted === '["cissp"]', 'data-export keeps other keys');
+});
+
 test('app-reset.js update path does not unregister SW or clear all localStorage', function () {
   const src = fs.readFileSync(path.join(ROOT, 'app-reset.js'), 'utf8');
   const updateBlock = src.match(/function updateApp\(\)[\s\S]*?^  \}/m);
@@ -122,6 +149,8 @@ test('app-reset.js delete uses BroadcastChannel and server hook', function () {
   assert(/deleteReminderServerRecord/.test(src), 'server DELETE hook required');
   assert(/unregisterAllServiceWorkers/.test(src), 'SW unregister on delete');
   assert(/SERVER_DELETE_FAILED/.test(src), 'fail closed on server delete failure');
+  assert(/STORAGE_KEYS_MISSING/.test(src), 'fail closed when storage-keys missing');
+  assert(!/localStorage\.clear\(\)/.test(src), 'must not localStorage.clear fallback');
   assert(/showDeleteCompletePage/.test(src), 'delete completion page without rewriting storage');
 });
 

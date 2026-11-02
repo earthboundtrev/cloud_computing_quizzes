@@ -7,7 +7,9 @@
 (function migrateRHCSA9toRHCSA10() {
   'use strict';
 
-  if (window.cloudCramStorageWritesBlocked && window.cloudCramStorageWritesBlocked()) {
+  if (typeof window !== 'undefined' &&
+    window.cloudCramStorageWritesBlocked &&
+    window.cloudCramStorageWritesBlocked()) {
     return;
   }
 

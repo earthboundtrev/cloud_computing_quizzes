@@ -190,11 +190,11 @@
           }
           sessionStorage.clear();
           var keysApi = getKeysApi();
-          if (keysApi) {
-            keysApi.clearLocalStorageForDelete(localStorage);
-          } else {
-            localStorage.clear();
+          if (!keysApi) {
+            window.__cloudcramDeleteInProgress = false;
+            throw new Error('STORAGE_KEYS_MISSING');
           }
+          keysApi.clearLocalStorageForDelete(localStorage);
           return { offlineNote: offlineNote, idbOk: idbOk };
         });
       })
@@ -224,6 +224,12 @@
         if (err && err.message === 'IDB_DELETE_BLOCKED') {
           window.alert(
             'Could not fully clear stored notes. Close other Study Sessions tabs and try Delete all my data again.'
+          );
+          return;
+        }
+        if (err && err.message === 'STORAGE_KEYS_MISSING') {
+          window.alert(
+            'Could not clear stored data safely because the app storage registry did not load. Reload Study Sessions and try Delete all my data again.'
           );
         }
       });
