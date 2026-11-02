@@ -424,6 +424,8 @@
           out.streak = base.streak;
         } else if (otherMiss && !baseMiss) {
           out.streak = other.streak;
+        } else if (base.streak === 0 || other.streak === 0) {
+          out.streak = Math.min(base.streak, other.streak);
         } else {
           out.streak = Math.max(base.streak, other.streak);
         }
