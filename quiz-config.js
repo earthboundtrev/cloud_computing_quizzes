@@ -42,6 +42,7 @@ window.setQuizCompleted = function (id, completed) {
   var i = ids.indexOf(id);
   if (completed && i === -1) ids.push(id);
   else if (!completed && i !== -1) ids.splice(i, 1);
+  if (window.cloudCramStorageWritesBlocked && window.cloudCramStorageWritesBlocked()) return;
   try { localStorage.setItem(QUIZ_COMPLETED_KEY, JSON.stringify(ids)); } catch (e) {}
 };
 

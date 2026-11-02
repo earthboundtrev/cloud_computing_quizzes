@@ -65,6 +65,7 @@
           var ids = [];
           var items = listEl.querySelectorAll('.quiz-card-item');
           for (var j = 0; j < items.length; j++) ids.push(items[j].getAttribute('data-id'));
+          if (window.cloudCramStorageWritesBlocked && window.cloudCramStorageWritesBlocked()) return;
           try {
             localStorage.setItem('quizOrder', JSON.stringify(ids));
           } catch (e) {}
@@ -80,25 +81,6 @@
       window.BrainDump.init({}).then(function () { window.BrainDump.openReview(); });
     });
   }
-
-  var statusEl = document.getElementById('settings-status');
-  function showSettingsStatus(msg) {
-    if (statusEl) statusEl.textContent = msg || '';
-  }
-
-  try {
-    var params = new URLSearchParams(window.location.search);
-    if (params.get('deleted') === '1') {
-      var offlineMsg = sessionStorage.getItem('cloudcram_delete_offline_note');
-      if (offlineMsg) {
-        showSettingsStatus(offlineMsg);
-        sessionStorage.removeItem('cloudcram_delete_offline_note');
-      }
-      if (window.history && window.history.replaceState) {
-        window.history.replaceState({}, '', 'index.html');
-      }
-    }
-  } catch (e) {}
 
   function openDeleteConfirmDialog() {
     var overlay = document.createElement('div');

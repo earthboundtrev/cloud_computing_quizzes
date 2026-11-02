@@ -121,6 +121,23 @@ test('app-reset.js delete uses BroadcastChannel and server hook', function () {
   assert(/BroadcastChannel/.test(src), 'BroadcastChannel required');
   assert(/deleteReminderServerRecord/.test(src), 'server DELETE hook required');
   assert(/unregisterAllServiceWorkers/.test(src), 'SW unregister on delete');
+  assert(/SERVER_DELETE_FAILED/.test(src), 'fail closed on server delete failure');
+  assert(/showDeleteCompletePage/.test(src), 'delete completion page without rewriting storage');
+});
+
+test('storage-write-guard and writers respect delete flag', function () {
+  const guard = fs.readFileSync(path.join(ROOT, 'storage-write-guard.js'), 'utf8');
+  assert(/cloudCramStorageWritesBlocked/.test(guard), 'guard export missing');
+  const engine = fs.readFileSync(path.join(ROOT, 'quiz-engine.js'), 'utf8');
+  assert(/cloudCramStorageWritesBlocked/.test(engine), 'quiz-engine guard missing');
+});
+
+test('registry lists every IndexedDB database', function () {
+  assert(registry.IDB_DATABASES.length >= 1, 'IDB list empty');
+  assert(
+    registry.IDB_DATABASES.some(function (d) { return d.name === 'StudySessionsBrainDumps'; }),
+    'brain dump DB missing from registry'
+  );
 });
 
 test('reminder-server.js exposes deleteReminderServerRecord hook', function () {

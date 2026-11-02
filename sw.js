@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE_NAME = 'cloudcram-v38';
+const CACHE_NAME = 'cloudcram-v39';
 
 const PRECACHE_PATHS = [
   '/index.html',
@@ -35,6 +35,7 @@ const PRECACHE_PATHS = [
   '/quiz-engine.js',
   '/app-reset.js',
   '/storage-keys.js',
+  '/storage-write-guard.js',
   '/reminder-server.js',
   '/data-export.js',
   '/data/oci-questions.js',

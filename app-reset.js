@@ -6,6 +6,7 @@
 
   var IDB_NAME = 'StudySessionsBrainDumps';
   var BROADCAST_CHANNEL = 'cloudcram-data-lifecycle';
+  var PUSH_UNSUBSCRIBE_TIMEOUT_MS = 4000;
 
   function getKeysApi() {
     return window.CloudCramStorageKeys;
@@ -25,32 +26,59 @@
     });
   }
 
+  function closeBrainDumpConnections() {
+    if (window.BrainDump && typeof window.BrainDump.closeConnection === 'function') {
+      window.BrainDump.closeConnection();
+    }
+  }
+
+  function deleteIndexedDatabase(name) {
+    return new Promise(function (resolve) {
+      if (typeof indexedDB === 'undefined') {
+        resolve(false);
+        return;
+      }
+      var settled = false;
+      function done(ok) {
+        if (settled) return;
+        settled = true;
+        resolve(ok);
+      }
+      var req = indexedDB.deleteDatabase(name);
+      req.onsuccess = function () { done(true); };
+      req.onerror = function () { done(false); };
+      req.onblocked = function () {
+        /* Retry once after closing app connections. */
+        setTimeout(function () {
+          var retry = indexedDB.deleteDatabase(name);
+          retry.onsuccess = function () { done(true); };
+          retry.onerror = function () { done(false); };
+          retry.onblocked = function () { done(false); };
+        }, 250);
+      };
+    });
+  }
+
   function deleteIndexedDatabases() {
+    closeBrainDumpConnections();
     var dbs = [{ name: IDB_NAME }];
     if (getKeysApi() && getKeysApi().IDB_DATABASES) {
       dbs = getKeysApi().IDB_DATABASES.map(function (d) { return { name: d.name }; });
     }
     return Promise.all(dbs.map(function (dbInfo) {
-      return new Promise(function (resolve) {
-        if (typeof indexedDB === 'undefined') {
-          resolve();
-          return;
-        }
-        var req = indexedDB.deleteDatabase(dbInfo.name);
-        req.onsuccess = function () { resolve(); };
-        req.onerror = function () { resolve(); };
-        req.onblocked = function () { resolve(); };
-      });
-    }));
+      return deleteIndexedDatabase(dbInfo.name);
+    })).then(function (results) {
+      return results.every(function (r) { return r; });
+    });
   }
 
   function unsubscribePushIfPresent() {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
       return Promise.resolve();
     }
-    return navigator.serviceWorker.ready
+    var unsub = navigator.serviceWorker.getRegistration('/')
       .then(function (reg) {
-        if (!reg.pushManager) return null;
+        if (!reg || !reg.pushManager) return null;
         return reg.pushManager.getSubscription();
       })
       .then(function (sub) {
@@ -60,6 +88,12 @@
         return null;
       })
       .catch(function () { return null; });
+    return Promise.race([
+      unsub,
+      new Promise(function (resolve) {
+        setTimeout(resolve, PUSH_UNSUBSCRIBE_TIMEOUT_MS);
+      })
+    ]);
   }
 
   function notifyTabsDeleteStarting() {
@@ -71,15 +105,24 @@
     } catch (e) {}
   }
 
-  function setupDeleteBroadcastListener() {
-    if (typeof BroadcastChannel === 'undefined') return;
-    try {
-      var ch = new BroadcastChannel(BROADCAST_CHANNEL);
-      ch.onmessage = function (ev) {
-        if (!ev.data || ev.data.type !== 'DELETE_ALL_DATA') return;
-        window.__cloudcramDeleteInProgress = true;
-      };
-    } catch (e) {}
+  function showDeleteCompletePage(offlineNote) {
+    var title = document.createElement('title');
+    title.textContent = 'Data removed';
+    document.head.appendChild(title);
+    document.body.innerHTML = '';
+    document.body.style.cssText = 'font-family: system-ui, sans-serif; max-width: 22rem; margin: 2rem auto; padding: 1rem; line-height: 1.5;';
+    var heading = document.createElement('h1');
+    heading.textContent = 'Data removed';
+    heading.style.fontSize = '1.25rem';
+    var para = document.createElement('p');
+    para.textContent = offlineNote ||
+      'Your progress and settings were removed from this device.';
+    var link = document.createElement('a');
+    link.href = 'index.html';
+    link.textContent = 'Return to Study Sessions';
+    document.body.appendChild(heading);
+    document.body.appendChild(para);
+    document.body.appendChild(link);
   }
 
   function updateApp() {
@@ -89,21 +132,23 @@
       keysApi.pruneLocalStorageForUpdate(localStorage);
     }
 
-    clearAllCaches()
-      .then(function () {
-        if (window.CloudCramUpdate && typeof window.CloudCramUpdate.checkForUpdate === 'function') {
-          return window.CloudCramUpdate.checkForUpdate();
-        }
-        return null;
-      })
+    var check = Promise.resolve();
+    if (window.CloudCramUpdate && typeof window.CloudCramUpdate.checkForUpdate === 'function') {
+      check = window.CloudCramUpdate.checkForUpdate();
+    }
+
+    check
       .then(function () {
         var applied = false;
         if (window.CloudCramUpdate && typeof window.CloudCramUpdate.applyUpdate === 'function') {
           applied = window.CloudCramUpdate.applyUpdate();
         }
-        if (!applied) {
-          window.location.reload();
+        if (applied) {
+          return;
         }
+        return clearAllCaches().then(function () {
+          window.location.reload();
+        });
       })
       .catch(function () {
         window.location.reload();
@@ -122,6 +167,10 @@
 
     return serverPromise
       .then(function (serverResult) {
+        if (serverResult && serverResult.ok === false && !serverResult.offline) {
+          window.__cloudcramDeleteInProgress = false;
+          throw new Error('SERVER_DELETE_FAILED');
+        }
         var offlineNote = null;
         if (serverResult && serverResult.offline && reminderApi) {
           offlineNote = reminderApi.OFFLINE_PURGE_MESSAGE;
@@ -138,27 +187,42 @@
         } else {
           localStorage.clear();
         }
-        return deleteIndexedDatabases().then(function () {
-          return offlineNote;
+        return deleteIndexedDatabases().then(function (idbOk) {
+          return { offlineNote: offlineNote, idbOk: idbOk };
         });
       })
-      .then(function (offlineNote) {
+      .then(function (state) {
         return clearAllCaches().then(function () {
-          return offlineNote;
+          return state;
         });
       })
-      .then(function (offlineNote) {
+      .then(function (state) {
         return unregisterAllServiceWorkers().then(function () {
-          return offlineNote;
+          return state;
         });
       })
-      .then(function (offlineNote) {
-        if (offlineNote && !options.suppressOfflineMessage) {
-          try {
-            sessionStorage.setItem('cloudcram_delete_offline_note', offlineNote);
-          } catch (e) {}
+      .then(function (state) {
+        if (state.idbOk === false) {
+          window.__cloudcramDeleteInProgress = false;
+          throw new Error('IDB_DELETE_BLOCKED');
         }
-        window.location.href = 'index.html?deleted=1';
+        showDeleteCompletePage(
+          !options.suppressOfflineMessage ? state.offlineNote : null
+        );
+      })
+      .catch(function (err) {
+        window.__cloudcramDeleteInProgress = false;
+        if (err && err.message === 'SERVER_DELETE_FAILED') {
+          window.alert(
+            'Could not remove your reminder record on the server. Your data was not deleted. Try again when you are online.'
+          );
+          return;
+        }
+        if (err && err.message === 'IDB_DELETE_BLOCKED') {
+          window.alert(
+            'Could not fully clear stored notes. Close other Study Sessions tabs and try Delete all my data again.'
+          );
+        }
       });
   }
 
@@ -179,5 +243,7 @@
     initUpdateButton();
   }
 
-  setupDeleteBroadcastListener();
+  window.cloudCramStorageWritesBlocked = function () {
+    return window.__cloudcramDeleteInProgress === true;
+  };
 })();

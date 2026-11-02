@@ -13,6 +13,17 @@
   let nextCardFn = null;
   let quizId = '';
 
+  function writesBlocked() {
+    return window.cloudCramStorageWritesBlocked && window.cloudCramStorageWritesBlocked();
+  }
+
+  function closeConnection() {
+    if (db) {
+      try { db.close(); } catch (e) {}
+      db = null;
+    }
+  }
+
   function injectStyles() {
     if (document.getElementById('brain-dump-styles')) return;
     const style = document.createElement('style');
@@ -89,6 +100,7 @@
       });
     }
     record.id = 'ls_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    if (writesBlocked()) return Promise.resolve();
     const list = JSON.parse(localStorage.getItem(LS_FALLBACK_KEY) || '[]');
     list.push(record);
     localStorage.setItem(LS_FALLBACK_KEY, JSON.stringify(list));
@@ -106,6 +118,7 @@
         req.onerror = () => reject(req.error);
       });
     }
+    if (writesBlocked()) return Promise.resolve();
     const list = JSON.parse(localStorage.getItem(LS_FALLBACK_KEY) || '[]').filter(function (d) { return d.id !== id; });
     localStorage.setItem(LS_FALLBACK_KEY, JSON.stringify(list));
     return Promise.resolve();
@@ -121,6 +134,7 @@
         req.onerror = () => reject(req.error);
       });
     }
+    if (writesBlocked()) return Promise.resolve();
     localStorage.setItem(LS_FALLBACK_KEY, '[]');
     return Promise.resolve();
   }
@@ -142,6 +156,7 @@
         getReq.onerror = () => reject(getReq.error);
       });
     }
+    if (writesBlocked()) return Promise.resolve();
     const list = JSON.parse(localStorage.getItem(LS_FALLBACK_KEY) || '[]');
     const idx = list.findIndex(function (d) { return d.id === id; });
     if (idx >= 0 && updates.dumpText !== undefined) list[idx].dumpText = updates.dumpText;
@@ -168,7 +183,7 @@
       }
       return d;
     });
-    if (changed) localStorage.setItem(LS_FALLBACK_KEY, JSON.stringify(list));
+    if (changed && !writesBlocked()) localStorage.setItem(LS_FALLBACK_KEY, JSON.stringify(list));
     return Promise.resolve(list);
   }
 
@@ -484,6 +499,7 @@
   }
 
   window.BrainDump = {
+    closeConnection: closeConnection,
     init: function (options) {
       options = options || {};
       nextCardFn = options.nextCard || null;

@@ -23,7 +23,8 @@ const SCAN_FILES = [
   'reminder-server.js',
   'sw-register.js',
   'motivation.js',
-  'quiz-nav.js'
+  'quiz-nav.js',
+  'storage-write-guard.js'
 ];
 
 const IGNORE_KEY_LITERALS = new Set([
