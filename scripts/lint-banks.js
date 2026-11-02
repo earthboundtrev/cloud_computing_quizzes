@@ -69,7 +69,7 @@ const BANK_FILES = {
   'aws_dea': ['data/aws-data-engineering-questions.js', 'data/aws-dea-extra-questions.js', 'data/aws-dea-case-studies.js', 'data/aws-dea-scenario-questions.js'],
   'aws_genai': ['data/aws-genai-questions.js', 'data/aws-genai-extra-questions.js', 'data/aws-genai-case-studies.js', 'data/aws-genai-scenario-questions.js'],
   'terraform': ['data/terraform-questions.js', 'data/terraform-extra-questions.js', 'data/terraform-ramp-questions.js'],
-  'cissp': ['data/cissp-questions.js', 'data/cissp-case-studies.js', 'data/cissp-scenario-questions.js'],
+  'cissp': ['data/cissp-questions.js', 'data/cissp-ramp-questions.js', 'data/cissp-case-studies.js', 'data/cissp-scenario-questions.js'],
   'secai': ['data/secai-questions.js', 'data/secai-case-studies.js', 'data/secai-scenario-questions.js'],
   'rhcsa9': ['data/rhcsa9-questions.js', 'data/rhcsa9-extra-questions.js'],
   'rhcsa10': ['data/rhcsa10-questions.js', 'data/rhcsa10-extra-questions.js'],
@@ -175,7 +175,7 @@ function loadObjectives(file) {
     global.window = global;
     delete require.cache[require.resolve(path.resolve(file))];
     require(path.resolve(file));
-    return global.window.OBJECTIVES_RHCSA10 || global.window.OBJECTIVES || null;
+    return global.window.OBJECTIVES_RHCSA10 || global.window.OBJECTIVES_CISSP || global.window.OBJECTIVES || null;
   } catch (e) {
     warn(`Failed to load objectives from ${file}: ${e.message}`);
     return null;

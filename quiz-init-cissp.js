@@ -1,5 +1,7 @@
 (function () {
-  var bank = (window.QUESTION_BANK_CISSP || []).concat(window.QUESTION_BANK_CISSP_SCENARIOS || []);
+  var bank = (window.QUESTION_BANK_CISSP || [])
+    .concat(window.QUESTION_BANK_CISSP_RAMP || [])
+    .concat(window.QUESTION_BANK_CISSP_SCENARIOS || []);
   QuizEngine.run({
     quizId: 'cissp',
     questionBank: bank,
