@@ -135,7 +135,7 @@
       maybeShowBanner();
       return false;
     }
-    var waiting = pendingWaitingWorker || getWaitingWorker();
+    var waiting = getWaitingWorker() || pendingWaitingWorker;
     if (!waiting) {
       updatePending = false;
       pendingWaitingWorker = null;

@@ -370,8 +370,8 @@
       exitBtn.addEventListener('click', exitQuiz);
       navRow.insertBefore(exitBtn, navRow.firstChild);
     }
-    renderQuestion();
     setQuizSessionActive(true);
+    renderQuestion();
   }
 
   function orderMatches(a, b) {

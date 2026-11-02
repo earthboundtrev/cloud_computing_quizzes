@@ -394,8 +394,8 @@ body.app-update-banner-visible {
   border: 1px solid transparent;
 }
 .app-update-banner-reload {
-  background: var(--accent, #38bdf8);
-  color: var(--bg, #0f172a);
+  background: #38bdf8;
+  color: #0f172a;
   font-weight: 600;
 }
 .app-update-banner-reload:hover {
