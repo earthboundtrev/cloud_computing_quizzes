@@ -7,6 +7,15 @@
 const fs = require('fs');
 const path = require('path');
 
+const CI = process.argv.includes('--ci');
+const TRACK_FILES = [
+  'data/aws-genai-questions.js',
+  'data/aws-genai-extra-questions.js',
+  'data/aws-genai-scenario-questions.js',
+  'data/aws-genai-ramp-questions.js'
+];
+const DOMAIN_TARGET = { '1': 93, '2': 78, '3': 60, '4': 36, '5': 33 };
+
 const STRICT_FILES = [
   'data/aws-genai-ramp-questions.js',
   'data/aws-genai-scenario-questions.js'
@@ -90,6 +99,97 @@ function longestLeak(questions) {
   return total ? (leak / total) * 100 : 0;
 }
 
+function wordCount(s) {
+  return String(s || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+}
+
+function loadTrack() {
+  const all = [];
+  TRACK_FILES.forEach(function (file) {
+    if (!fs.existsSync(file)) {
+      return;
+    }
+    const bank = loadBank(file);
+    all.push.apply(all, bank);
+  });
+  return all;
+}
+
+function validateFullTrack(all) {
+  const total = all.length;
+  if (total < 285 || total > 315) {
+    fail('#13 pool size ' + total + ' (target ~300 ±5%)');
+  }
+  let missingMeta = 0;
+  let d3plus = 0;
+  let multi = 0;
+  let scen100 = 0;
+  let evalTrouble = 0;
+  const by = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 };
+  all.forEach(function (q) {
+    if (!q.obj || q.level == null) {
+      missingMeta++;
+    }
+    if (q.level >= 3) {
+      d3plus++;
+    }
+    if ((q.type || 'single') === 'multi') {
+      multi++;
+    }
+    if (wordCount(q.q) >= 100) {
+      scen100++;
+    }
+    if (q.obj === '5' || /troubleshoot|evaluat|validation|debug|diagnos/i.test((q.topic || '') + (q.q || ''))) {
+      evalTrouble++;
+    }
+    if (q.obj) {
+      by[q.obj] = (by[q.obj] || 0) + 1;
+    }
+  });
+  if (missingMeta) {
+    fail('#13 missing obj/level on ' + missingMeta + ' questions');
+  }
+  const multiPct = (multi / total) * 100;
+  if (multiPct < 20) {
+    fail('#13 multi-response ' + multiPct.toFixed(1) + '% (need ≥20%)');
+  }
+  const lo = longestLeak(all);
+  if (lo > 40) {
+    fail('#13 longest-key ' + lo.toFixed(1) + '% on singles (need ≤40%)');
+  }
+  if (d3plus / total < 0.5) {
+    fail('#13 level≥3 ' + ((d3plus / total) * 100).toFixed(1) + '% (need ≥50%)');
+  }
+  if (scen100 / total < 0.6) {
+    fail('#13 scenario stems (100+ words) ' + ((scen100 / total) * 100).toFixed(1) + '% (need ≥60%)');
+  }
+  if (evalTrouble < 25) {
+    fail('#13 eval/troubleshooting items ' + evalTrouble + ' (need ≥25)');
+  }
+  Object.keys(DOMAIN_TARGET).forEach(function (k) {
+    const t = DOMAIN_TARGET[k];
+    const n = by[k] || 0;
+    if (n < t * 0.95 || n > t * 1.05) {
+      fail('#13 domain ' + k + ' count ' + n + ' (target ' + t + ' ±5%)');
+    }
+  });
+  console.log(
+    'Full track #13: ' +
+      total +
+      ' Q; multi ' +
+      multiPct.toFixed(1) +
+      '%; longest-key ' +
+      lo.toFixed(1) +
+      '%; 100+ word stems ' +
+      ((scen100 / total) * 100).toFixed(1) +
+      '%; eval/trouble ' +
+      evalTrouble
+  );
+}
+
 function main() {
   const objectives = loadObjectives();
   const validObj = new Set(objectives.map(function (o) {
@@ -152,13 +252,21 @@ function main() {
       console.warn('⚠ ' + w);
     });
   }
+  if (CI) {
+    const track = loadTrack();
+    track.forEach(function (q, idx) {
+      validateQ(q, 'track', idx, validObj);
+    });
+    validateFullTrack(track);
+  }
+
   if (errors.length) {
     errors.forEach(function (e) {
       console.error('✗ ' + e);
     });
     process.exit(1);
   }
-  console.log('✅ AWS GenAI ramp lint passed');
+  console.log('✅ AWS GenAI ramp lint passed' + (CI ? ' (#13 full track)' : ''));
 }
 
 main();
