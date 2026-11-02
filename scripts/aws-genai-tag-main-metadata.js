@@ -24,7 +24,7 @@ const FILES = [
 
 function domainFromTopic(topic, q) {
   const t = (topic || '').toLowerCase();
-  const blob = ((q.q || '') + ' ' + (q.explain || '')).toLowerCase();
+  const blob = [t, q.q || '', q.explain || ''].join(' ').toLowerCase();
   if (/troubleshoot|evaluat|test|validat|observ|monitor|debug|throttl|latency/.test(t + blob)) {
     return '5';
   }
@@ -62,40 +62,16 @@ function guessLevel(q) {
   return 2;
 }
 
-function padDistractors(q) {
-  const t = q.type || 'single';
-  if (t !== 'single' || !q.options || typeof q.correct !== 'number') {
+/** Strip legacy confession-style padding (Bugbot blocker); do not re-pad. */
+function stripConfessionPadding(q) {
+  if (!q.options) {
     return;
   }
-  let longestIdx = 0;
-  let longestLen = 0;
-  q.options.forEach(function (opt, i) {
-    if (opt.length > longestLen) {
-      longestLen = opt.length;
-      longestIdx = i;
-    }
-  });
-  if (longestIdx !== q.correct) {
-    return;
-  }
-  const target = Math.max(longestLen, 44);
-  const fillers = [
-    ' — not the recommended Bedrock approach here',
-    ' — increases risk or cost for this GenAI workload',
-    ' — a common distractor on AIP-C01 scenarios',
-    ' — does not meet the stated professional requirement'
-  ];
-  q.options = q.options.map(function (opt, i) {
-    if (i === q.correct) {
-      return opt;
-    }
-    if (opt.length >= target - 4) {
-      return opt;
-    }
+  const tail = / — (not the recommended Bedrock approach here|increases risk or cost for this GenAI workload|a common distractor on AIP-C01 scenarios|does not meet the stated professional requirement|does not fix retrieval or orchestration for this case|increases risk, cost, or violates the stated requirement|a distractor; Bedrock docs recommend a different primary action|incomplete or wrong for AIP-C01 professional scenarios)( — .*)?$/;
+  q.options = q.options.map(function (opt) {
     let out = opt;
-    let f = 0;
-    while (out.length < target - 6 && f < fillers.length) {
-      out += fillers[f++];
+    while (tail.test(out)) {
+      out = out.replace(tail, '');
     }
     return out;
   });
@@ -119,11 +95,15 @@ function writeBank(filePath, varName, bank) {
 FILES.forEach(function (file) {
   const bank = loadBank(file.path, file.varName);
   bank.forEach(function (q, idx) {
-    q.obj = domainFromTopic(q.topic, q);
-    q.level = guessLevel(q);
-    q.ref = q.ref || REF[q.obj];
+    if (!q.obj) {
+      q.obj = domainFromTopic(q.topic, q);
+    }
+    q.level = q.level || guessLevel(q);
+    if (!q.ref) {
+      q.ref = REF[q.obj];
+    }
     q.id = q.id || (file.idPrefix + '-' + String(idx + 1).padStart(4, '0'));
-    padDistractors(q);
+    stripConfessionPadding(q);
   });
   writeBank(file.path, file.varName, bank);
   console.log('Tagged', bank.length, 'questions in', file.path);

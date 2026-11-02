@@ -87,7 +87,7 @@ Continuing branch: merge `origin/main` (not rebase unless the user asks). Resolv
 ### 4. During implementation
 
 - Work on the feature branch only — never commit directly to `main` unless the user explicitly asks.
-- Do not open the PR until §5a and §5b are complete.
+- Do not open the PR until §5a and §5b are complete. **Cloud Agent:** same rule — `.cursor/rules/cloud-agent-ticket-pipeline.mdc`.
 - **Never** commit secrets, API keys, or user quiz exports with PII.
 
 ### 5a. BUGBOT & TESTS stages

@@ -98,12 +98,21 @@ git fetch --prune origin
 
 PR body must include `Closes #N` on its own line (title alone does not close the issue).
 
+## Cloud Agent parent runs
+
+Cloud Agents on the repo VM use the **same** stage order and models as Desktop. See **`.cursor/rules/cloud-agent-ticket-pipeline.mdc`**.
+
+- Task subagents for Bugbot/Architect: **`environment: "local"`** on the VM; **`model: "cursor-grok-4.6-high-fast"`** on checks.
+- **No merge / no “done”** until BUGBOT clean, TESTS pass, and ARCHITECT merge-ready — even when the user asks to merge early.
+- Work merged without pipeline: **retro audit** (`.cursor/pipeline/issue-{N}-retro.md`), pointer starts at **BUGBOT**.
+
 ## Session resume
 
 1. Sync git + read issue/PR.
 2. If the branch diff changed since last **clean Bugbot**, set pointer to **BUGBOT**.
 3. Report: `Pipeline pointer: <STAGE>`.
 4. Merged PR but issue still OPEN → close issue before new work on that ticket.
+5. Cloud Agent + active ticket → check `.cursor/pipeline/issue-*-retro.md` if merges preceded Bugbot.
 
 ## Standalone `/review-bugbot` or `/review-architect`
 

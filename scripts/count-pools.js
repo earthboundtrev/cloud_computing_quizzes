@@ -26,7 +26,8 @@ for (const [id, files] of Object.entries(banks)) {
   for (const f of files) {
     const p = path.join(dataDir, f);
     if (!fs.existsSync(p)) continue;
-    n += (fs.readFileSync(p, 'utf8').match(/\{ mode:/g) || []).length;
+    const text = fs.readFileSync(p, 'utf8');
+    n += (text.match(/"mode":\s*"/g) || []).length + (text.match(/\{ mode:/g) || []).length;
   }
   console.log(id + ':', n);
 }

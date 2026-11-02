@@ -2,459 +2,1154 @@
  * AWS GenAI Developer (AIP-C01) ramp — scenarios, multi-response, thin concepts (#13).
  */
 window.QUESTION_BANK_AWS_GENAI_RAMP = [
-  { id: "genai-ramp-001", mode: "exam", topic: "Troubleshooting", obj: "5", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base.html",
-    q: "A Bedrock Knowledge Base chatbot answers policy FAQs well, but queries with internal part numbers (PN-44817-B) return irrelevant passages. Embeddings use a general model. What is the MOST effective fix?",
-    options: ["Raise temperature to 1.0 — increases risk, cost, or violates the stated requirement","Enable hybrid search (semantic + keyword) on the knowledge base","Switch to the largest generation model only — incomplete or wrong for AIP-C01 professional scenarios","Set retrieval results to 1 — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Exact IDs are lexical; hybrid search adds keyword recall. Temperature and generation model do not fix retrieval; fewer results hurts recall."
-  },
-  { id: "genai-ramp-002", mode: "exam", topic: "Cost", type: "multi", obj: "4", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/prompt-caching.html",
-    q: "An app sends the same 6,000-token system prompt and tool schema on every Bedrock request at ~40 RPS steady. Leadership wants lower cost and latency without changing answer quality. Which TWO help MOST? (Pick 2)",
-    options: ["Enable prompt caching for the static prefix","Purchase Provisioned Throughput for baseline volume","Move all traffic to asynchronous batch inference","Increase max_tokens to 8192","Disable Guardrails entirely"],
-    correct: [0,1],
-    explain: "Caching reduces billed input tokens and latency on repeated prefixes. Steady RPS suits provisioned capacity. Batch is async; max_tokens and removing Guardrails change behavior or safety."
-  },
-  { id: "genai-ramp-003", mode: "exam", topic: "Prompt Management", obj: "2", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/prompt-management.html",
-    q: "Teams need versioned prompts shared across dev/stage/prod with IAM-controlled updates. What should you use?",
-    options: ["Hard-code prompts in Lambda only — increases risk, cost, or violates the stated requirement","Amazon Bedrock Prompt Management with versions and aliases","Store prompts in public S3 buckets — incomplete or wrong for AIP-C01 professional scenarios","Embed prompts only in client mobile apps — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Prompt Management centralizes versioning, testing, and IAM for prompt assets used by applications and flows."
-  },
-  { id: "genai-ramp-004", mode: "exam", topic: "Flows", obj: "2", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/flows.html",
-    q: "You must orchestrate prompt → knowledge base retrieval → model invocation with branching on confidence. Which Bedrock feature fits?",
-    options: ["A single InvokeModel call only — increases risk, cost, or violates the stated requirement","Bedrock Flows visual workflow with nodes and conditions","S3 lifecycle rules — incomplete or wrong for AIP-C01 professional scenarios","EC2 Auto Scaling groups — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Flows compose multi-step generative workflows (prompts, KB, agents, conditions) without custom orchestration code for every path."
-  },
-  { id: "genai-ramp-005", mode: "exam", topic: "Evaluation", obj: "5", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/model-evaluation.html",
-    q: "Before promoting a new RAG prompt to production, you need automated quality scores against a golden Q&A set. What should you use?",
-    options: ["Manual spot checks only — increases risk, cost, or violates the stated requirement","Bedrock model evaluation jobs (built-in or custom metrics)","CloudWatch alarm on CPU — incomplete or wrong for AIP-C01 professional scenarios","Disable retrieval to simplify testing — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Model evaluation runs batch comparisons with metrics (accuracy, toxicity, etc.) on curated datasets."
-  },
-  { id: "genai-ramp-006", mode: "exam", topic: "Fine-Tuning", obj: "1", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models.html",
-    q: "A legal team needs consistent tone and domain terminology on a supported FM; few-shot prompts are insufficient. BEST approach?",
-    options: ["Increase temperature — increases risk, cost, or violates the stated requirement","Fine-tune a supported model with labeled examples in S3 (Custom Model)","Delete the knowledge base — incomplete or wrong for AIP-C01 professional scenarios","Use Guardrails word filter only — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Customization/fine-tuning adapts model weights for domain style when prompting alone plateaus."
-  },
-  { id: "genai-ramp-007", mode: "exam", topic: "Agents", obj: "2", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/agents.html",
-    q: "An agent must call an internal REST API to create tickets, then summarize results to the user. Which component defines the OpenAPI tool schema?",
-    options: ["Knowledge Base only — increases risk, cost, or violates the stated requirement","Action group with API schema attached to the Bedrock Agent","S3 bucket policy — incomplete or wrong for AIP-C01 professional scenarios","IAM user access keys in the prompt — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Agents use action groups (OpenAPI) for tool calling; KB supplies retrieval, not arbitrary API execution."
-  },
-  { id: "genai-ramp-008", mode: "exam", topic: "Troubleshooting", obj: "5", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_InvokeModelWithResponseStream.html",
-    q: "Users report timeouts on long answers though the model keeps generating. Client uses synchronous InvokeModel. FIRST change to try?",
-    options: ["Disable Guardrails — increases risk, cost, or violates the stated requirement","Switch to InvokeModelWithResponseStream and increase client read timeout","Reduce max_tokens to 10 — incomplete or wrong for AIP-C01 professional scenarios","Move KB to another region randomly — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Streaming improves time-to-first-token and avoids single large blocking response; tune timeouts accordingly."
-  },
-  { id: "genai-ramp-009", mode: "exam", topic: "Governance", obj: "3", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html",
-    q: "Compliance requires blocking SSN patterns and denying off-topic medical advice in a HR chatbot. What should you configure?",
-    options: ["Only S3 encryption — increases risk, cost, or violates the stated requirement","Bedrock Guardrails with PII filters and topic policies on input/output","Public API Gateway without auth — incomplete or wrong for AIP-C01 professional scenarios","Raise temperature — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Guardrails apply content, PII, and topic controls at inference time for both prompts and responses."
-  },
-  { id: "genai-ramp-010", mode: "exam", topic: "Data", obj: "1", level: 3,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/kb-data-source-sync.html",
-    q: "New PDFs land in S3 hourly for a Knowledge Base. How do you keep vectors fresh with minimal ops?",
-    options: ["Manual re-create KB daily — increases risk, cost, or violates the stated requirement","Scheduled or event-driven ingestion sync on the data source","Copy PDFs to EBS volumes — incomplete or wrong for AIP-C01 professional scenarios","Store PDFs in CloudFront only — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Data source sync re-chunks and re-embeds when source documents change."
-  },
-  { id: "genai-ramp-011", mode: "exam", topic: "Security", type: "multi", obj: "3", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/vpc-interface-endpoints.html",
-    q: "A regulated workload must keep Bedrock traffic off the public internet and restrict who can invoke models. Which TWO controls apply? (Pick 2)",
-    options: ["Interface VPC endpoint for Bedrock with private subnets","IAM least-privilege policies on InvokeModel","Disable all logging","Store API keys in git","Use root account access keys"],
-    correct: [0,1],
-    explain: "VPC endpoints keep traffic private; IAM enforces caller authorization. Logging aids audit; never embed long-lived keys in code."
-  },
-  { id: "genai-ramp-012", mode: "exam", topic: "RAG", obj: "1", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/kb-chunking.html",
-    q: "Retrieved chunks are too large and answers miss details buried mid-document. FIRST tuning step?",
-    options: ["Increase temperature — increases risk, cost, or violates the stated requirement","Adjust chunk size/overlap or hierarchical chunking strategy","Remove Guardrails — incomplete or wrong for AIP-C01 professional scenarios","Use only one embedding dimension — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Chunking strategy directly affects retrieval precision; smaller targeted chunks improve detail recall."
-  },
-  { id: "genai-ramp-013", mode: "exam", topic: "Optimization", obj: "4", level: 3,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/provisioned-throughput.html",
-    q: "Traffic is steady 24/7 at high TPS and throttling occurs on on-demand inference. BEST cost/latency tradeoff?",
-    options: ["Randomly retry without backoff — increases risk, cost, or violates the stated requirement","Provisioned Throughput units sized to baseline demand","Delete the model access — incomplete or wrong for AIP-C01 professional scenarios","Use only batch inference for chat — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Provisioned Throughput reserves capacity for predictable high-volume workloads."
-  },
-  { id: "genai-ramp-014", mode: "exam", topic: "Troubleshooting", obj: "5", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/troubleshooting.html",
-    q: "Agent action calls fail with 403 from API Gateway though the agent plan looks correct. MOST likely cause?",
-    options: ["Wrong embedding model — increases risk, cost, or violates the stated requirement — a distractor; Bedrock docs recommend a different primary action","Agent execution role lacks invoke permission on the API or authorizer misconfigured","KB ingestion incomplete — incomplete or wrong for AIP-C01 professional scenarios — does not fix retrieval or orchestration for this case","Temperature too low — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Agents assume an execution role; API Gateway resource policies/IAM and auth must allow the role."
-  },
-  { id: "genai-ramp-015", mode: "exam", topic: "Compliance", obj: "1", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/data-protection.html",
-    q: "Customer contracts require encryption of prompts/responses at rest in your logging pipeline. What should you implement?",
-    options: ["Plaintext logs in open S3 — increases risk, cost, or violates the stated requirement","KMS-encrypted CloudWatch Logs/S3 and minimize sensitive fields in logs","Disable audit trails — incomplete or wrong for AIP-C01 professional scenarios","Email transcripts externally — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Use KMS for log/storage encryption; apply data minimization and retention policies for compliance."
-  },
-  { id: "genai-ramp-016", mode: "exam", topic: "Evaluation", obj: "5", level: 3,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-evaluation.html",
-    q: "You need to measure retrieval precision/recall for a new KB configuration before launch. What should you run?",
-    options: ["Only load test EC2 — increases risk, cost, or violates the stated requirement","Evaluation job comparing retrieved passages to labeled relevant documents","Change region — incomplete or wrong for AIP-C01 professional scenarios — does not fix retrieval or orchestration for this case","Turn off embeddings — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "KB evaluation metrics quantify retrieval quality separate from generation quality."
-  },
-  { id: "genai-ramp-017", mode: "exam", topic: "Integration", obj: "2", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/agents-alias.html",
-    q: "Blue/green deployment for a Bedrock Agent serving production traffic requires:",
-    options: ["Deleting the agent each release — increases risk, cost, or violates the stated requirement","Agent aliases pointing to tested agent versions with weighted routing","Hard-coded version in mobile app only — incomplete or wrong for AIP-C01 professional scenarios","Single shared root credential — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Aliases and versions support staged rollout and rollback for agents."
-  },
-  { id: "genai-ramp-018", mode: "exam", topic: "Models", obj: "1", level: 3,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/models-regions.html",
-    q: "You must invoke a model in us-east-1 but it is only enabled in us-west-2. FIRST step?",
-    options: ["Enable model access in the target Region and ensure inference profile/region match","Copy IAM user password — incomplete or wrong for AIP-C01 professional scenarios — does not fix retrieval or orchestration for this case","Use Guardrails instead of a model — a distractor; Bedrock docs recommend a different primary action","Disable CloudTrail — increases risk, cost, or violates the stated requirement — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 0,
-    explain: "Model access is per-Region; clients must call the Region where access and model IDs are valid."
-  },
-  { id: "genai-ramp-019", mode: "exam", topic: "Cost", obj: "4", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/batch-inference.html",
-    q: "Nightly job generates summaries for 2M archived tickets; latency can be hours. MOST cost-effective pattern?",
-    options: ["Real-time InvokeModel at max TPS — increases risk, cost, or violates the stated requirement","Batch inference job with input/output in S3","Provisioned Throughput for chat UI — incomplete or wrong for AIP-C01 professional scenarios","Manual copy/paste — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Batch inference optimizes cost for large offline workloads without interactive latency needs."
-  },
-  { id: "genai-ramp-020", mode: "exam", topic: "Guardrails", type: "multi", obj: "3", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-components.html",
-    q: "Reduce hallucinated financial advice in outputs while keeping helpful answers. Which TWO Guardrails features help? (Pick 2)",
-    options: ["Topic policy denying unauthorized financial advice category","Contextual grounding check against KB sources","Disable all logging","Set temperature to 2.0","Remove KB retrieval"],
-    correct: [0,1],
-    explain: "Topic policies constrain categories; grounding checks compare responses to retrieved context. Extreme temperature increases randomness."
-  },
-  { id: "genai-ramp-021", mode: "exam", topic: "Observability", obj: "5", level: 3,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/monitoring.html",
-    q: "Ops needs dashboards for model latency, token usage, and throttling. PRIMARY service?",
-    options: ["Amazon CloudWatch metrics and logs for Bedrock","Route 53 health checks only — incomplete or wrong for AIP-C01 professional scenarios","S3 access logs only — a distractor; Bedrock docs recommend a different primary action","AWS Budgets only — increases risk, cost, or violates the stated requirement"],
-    correct: 0,
-    explain: "CloudWatch captures Bedrock invocation metrics; combine with X-Ray for traces."
-  },
-  { id: "genai-ramp-022", mode: "exam", topic: "RAG", obj: "1", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/kb-metadata.html",
-    q: "Multi-tenant SaaS must filter KB retrieval per customer_id metadata. How should you implement?",
-    options: ["One giant shared index without filters — increases risk, cost, or violates the stated requirement","Attach metadata filters on retrieve API calls per tenant","Disable embeddings — incomplete or wrong for AIP-C01 professional scenarios","Store all tenants in one prompt — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Metadata filtering scopes vector search to authorized tenant documents."
-  },
-  { id: "genai-ramp-023", mode: "exam", topic: "Troubleshooting", obj: "5", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/service-quotas.html",
-    q: "Sudden ThrottlingException spikes during marketing launch. FIRST mitigation while keeping quality?",
-    options: ["Remove Guardrails — increases risk, cost, or violates the stated requirement — a distractor; Bedrock docs recommend a different primary action","Request quota increase and add exponential backoff/retry; consider provisioned capacity","Delete KB — incomplete or wrong for AIP-C01 professional scenarios — does not fix retrieval or orchestration for this case","Switch to smallest model regardless of task — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Throttling indicates quota/capacity limits; backoff plus quota or provisioned throughput addresses sustained spikes."
-  },
-  { id: "genai-ramp-024", mode: "exam", topic: "Implementation", obj: "2", level: 3,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/inference-profiles.html",
-    q: "You need cross-Region resilience for Claude model invocation with a single model ID in code. Use:",
-    options: ["Hard-code one Region endpoint — increases risk, cost, or violates the stated requirement","Inference profile that routes across Regions per AWS configuration","Local laptop model — incomplete or wrong for AIP-C01 professional scenarios","DynamoDB streams — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Inference profiles abstract Region routing for supported models."
-  },
-  { id: "genai-ramp-025", mode: "exam", topic: "Safety", obj: "3", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/responsible-use.html",
-    q: "Product policy bans generating instructions for weapons. Besides Guardrails, what governance practice is REQUIRED?",
-    options: ["Ignore abuse reports — increases risk, cost, or violates the stated requirement","Human review process, abuse monitoring, and documented acceptable use policies","Publish admin keys — incomplete or wrong for AIP-C01 professional scenarios — does not fix retrieval or orchestration for this case","Disable encryption — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Responsible AI combines technical controls with policy, monitoring, and human oversight."
-  },
-  { id: "genai-ramp-026", mode: "exam", topic: "Prompt Engineering", obj: "2", level: 3,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/prompt-engineering.html",
-    q: "Model returns JSON but often adds markdown fences. MOST reliable fix?",
-    options: ["Ask politely in one word — increases risk, cost, or violates the stated requirement — a distractor; Bedrock docs recommend a different primary action","Use tool/structured output or response schema features where supported; validate with post-processing","Set temperature to maximum — incomplete or wrong for AIP-C01 professional scenarios — does not fix retrieval or orchestration for this case","Remove system prompt — a distractor; Bedrock docs recommend a different primary action — incomplete or wrong for AIP-C01 professional scenarios"],
-    correct: 1,
-    explain: "Structured output constraints and validation reduce format drift versus hope-based prompting."
-  },
-  { id: "genai-ramp-027", mode: "exam", topic: "Testing", type: "multi", obj: "5", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/model-evaluation.html",
-    q: "Regression testing before prompt change should include which TWO? (Pick 2)",
-    options: ["Golden dataset automated evaluation","Chaos deletion of KB in production","Safety/toxicity metrics on sample prompts","Disabling IAM","Turning off CloudWatch"],
-    correct: [0,2],
-    explain: "Golden sets with automated metrics catch quality/safety regressions; destructive chaos belongs in controlled tests only."
-  },
-  { id: "genai-ramp-028", mode: "exam", topic: "Vectors", obj: "1", level: 3,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-setup.html",
-    q: "You change embedding model for an existing Knowledge Base. Required action?",
-    options: ["Nothing; embeddings auto-migrate silently — increases risk, cost, or violates the stated requirement","Re-run ingestion to re-embed all documents with the new model","Only change Guardrails — incomplete or wrong for AIP-C01 professional scenarios","Delete IAM roles — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Vectors are model-specific; changing embedding model requires re-ingestion."
-  },
-  { id: "genai-ramp-029", mode: "exam", topic: "Agents", obj: "2", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/agents-prepare.html",
-    q: "After updating agent instructions and action schemas, what must you do before testing in console?",
-    options: ["Prepare the agent to rebuild internal orchestration state","Delete the AWS account — incomplete or wrong for AIP-C01 professional scenarios","Disable CloudTrail — a distractor; Bedrock docs recommend a different primary action","Remove KB — increases risk, cost, or violates the stated requirement"],
-    correct: 0,
-    explain: "Prepare compiles agent configuration after instruction/tool changes."
-  },
-  { id: "genai-ramp-030", mode: "exam", topic: "Optimization", obj: "4", level: 3,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-retrieval.html",
-    q: "Answers cite too many irrelevant passages increasing cost. FIRST knob to turn?",
-    options: ["Increase numberOfResults and max tokens always — increases risk, cost, or violates the stated requirement","Tune retrieval count, score threshold, and reranking if enabled","Disable streaming — incomplete or wrong for AIP-C01 professional scenarios","Remove encryption — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Retrieval parameters control context size and relevance, directly affecting token cost."
-  },
-  { id: "genai-ramp-031", mode: "exam", topic: "Compliance", obj: "1", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/logging.html",
-    q: "Audit requires retaining model invocation logs with sensitive fields redacted. BEST pattern?",
-    options: ["No logging for privacy — increases risk, cost, or violates the stated requirement — a distractor; Bedrock docs recommend a different primary action","Model invocation logging to encrypted S3/CloudWatch with Guardrails + log filtering","Tweet request IDs — incomplete or wrong for AIP-C01 professional scenarios — does not fix retrieval or orchestration for this case","Log full prompts to public repo — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Enable invocation logging with encryption and redaction/minimization aligned to policy."
-  },
-  { id: "genai-ramp-032", mode: "exam", topic: "Troubleshooting", obj: "5", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-troubleshooting.html",
-    q: "KB answers 'I don't know' despite document containing answer. Retrieval shows low scores. NEXT step?",
-    options: ["Increase temperature only — increases risk, cost, or violates the stated requirement — a distractor; Bedrock docs recommend a different primary action","Inspect chunking, metadata filters, and query reformulation; verify ingestion succeeded","Delete S3 bucket — incomplete or wrong for AIP-C01 professional scenarios — does not fix retrieval or orchestration for this case","Disable hybrid search always — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Low retrieval scores indicate ingestion, chunking, filtering, or query mismatch—not generation temperature."
-  },
-  { id: "genai-ramp-033", mode: "exam", topic: "Integration", obj: "2", level: 3,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/agents-kb.html",
-    q: "Agent should answer from private docs AND call tools. Combine:",
-    options: ["Knowledge base association plus action groups on the same agent","Only Guardrails — incomplete or wrong for AIP-C01 professional scenarios","Only S3 static website — a distractor; Bedrock docs recommend a different primary action","EC2 user data scripts only — increases risk, cost, or violates the stated requirement"],
-    correct: 0,
-    explain: "Agents can attach KB for RAG and action groups for API tools concurrently."
-  },
-  { id: "genai-ramp-034", mode: "exam", topic: "Models", obj: "1", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters.html",
-    q: "Creative marketing copy needs variety; compliance summaries need determinism. How should you configure?",
-    options: ["Same temperature for all use cases — increases risk, cost, or violates the stated requirement","Lower temperature/top-p for factual tasks; higher for creative tasks with evaluation gates","Max tokens = 1 for everything — incomplete or wrong for AIP-C01 professional scenarios — does not fix retrieval or orchestration for this case","Disable all Guardrails globally — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Tune inference parameters per use case; validate factual workloads with eval and grounding."
-  },
-  { id: "genai-ramp-035", mode: "exam", topic: "Security", obj: "3", level: 4,
-    ref: "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html",
-    q: "Lambda calls Bedrock and retrieves from KB in VPC. Credentials should come from:",
-    options: ["Long-lived IAM user keys in environment variables — increases risk, cost, or violates the stated requirement","Execution role with least privilege for bedrock:InvokeModel and KB retrieve","Root access key — incomplete or wrong for AIP-C01 professional scenarios — does not fix retrieval or orchestration for this case","Hard-coded in frontend JavaScript — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Use IAM roles for AWS compute; scope policies to required Bedrock actions and resources."
-  },
-  { id: "genai-ramp-036", mode: "exam", topic: "Data residency", obj: "1", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/bedrock-regions.html",
-    q: "EU customer data must stay in eu-central-1 for Bedrock and KB storage. What must you verify FIRST?",
-    options: ["Model access and KB/data sources exist in eu-central-1","Use us-east-1 for cheaper tokens — incomplete or wrong for AIP-C01 professional scenarios","Disable KMS — a distractor; Bedrock docs recommend a different primary action","Run inference from on-prem only — increases risk, cost, or violates the stated requirement"],
-    correct: 0,
-    explain: "Bedrock model availability and KB resources are Region-specific; residency requires aligned Region deployment."
-  },
-  { id: "genai-ramp-037", mode: "exam", topic: "Custom models", obj: "1", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models.html",
-    q: "After custom model training completes, how do you invoke it in applications?",
-    options: ["Use the custom model ARN with InvokeModel in the training Region","Copy weights to EBS manually — incomplete or wrong for AIP-C01 professional scenarios","Only via SageMaker exclusively — a distractor; Bedrock docs recommend a different primary action","Publish to public S3 — increases risk, cost, or violates the stated requirement"],
-    correct: 0,
-    explain: "Custom models appear as Bedrock model IDs/ARNs in the Region where training was provisioned."
-  },
-  { id: "genai-ramp-038", mode: "exam", topic: "RAG", obj: "1", level: 3,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/kb-how-data.html",
-    q: "Structured product specs live in DynamoDB; manuals are PDFs in S3. BEST retrieval design?",
-    options: ["Ignore structured data — increases risk, cost, or violates the stated requirement — a distractor; Bedrock docs recommend a different primary action","Combine KB over S3 PDFs with application-side DynamoDB lookup or structured retrieval in the flow","Email CSV exports daily — incomplete or wrong for AIP-C01 professional scenarios — does not fix retrieval or orchestration for this case","Single prompt without tools — a distractor; Bedrock docs recommend a different primary action — incomplete or wrong for AIP-C01 professional scenarios"],
-    correct: 1,
-    explain: "Hybrid designs use KB for unstructured docs and app/flow logic for structured stores."
-  },
-  { id: "genai-ramp-039", mode: "exam", topic: "Compliance", obj: "1", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/data-protection.html",
-    q: "Contracts require customer content is not used to improve base FMs. Which Bedrock default applies?",
-    options: ["AWS does not train base models on customer content by default for Bedrock service","All prompts are shared publicly — incomplete or wrong for AIP-C01 professional scenarios","Disable encryption to prove isolation — a distractor; Bedrock docs recommend a different primary action","Use root account — increases risk, cost, or violates the stated requirement — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 0,
-    explain: "Bedrock data protection policies address customer content separation from base model training (see current service terms/docs)."
-  },
-  { id: "genai-ramp-040", mode: "exam", topic: "Embeddings", obj: "1", level: 3,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/titan-embedding-models.html",
-    q: "You need semantic search over support tickets in English only. FIRST model choice?",
-    options: ["Largest text generation model — increases risk, cost, or violates the stated requirement","Bedrock embedding model suited to semantic search (e.g., Titan Embeddings)","Speech-to-text model — incomplete or wrong for AIP-C01 professional scenarios","Image generation model — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Embeddings map text to vectors for retrieval; generation models are not used for indexing."
-  },
-  { id: "genai-ramp-041", mode: "exam", topic: "Prompt Management", obj: "2", level: 3,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/prompt-management.html",
-    q: "Engineers want to A/B test two prompt versions in staging without redeploying Lambda. Use:",
-    options: ["Prompt Management versions/aliases referenced by the app","Hard-code v1 only — incomplete or wrong for AIP-C01 professional scenarios","Delete production alias — a distractor; Bedrock docs recommend a different primary action","Store prompts in git without access control — increases risk, cost, or violates the stated requirement"],
-    correct: 0,
-    explain: "Versioned prompts and aliases enable controlled rollout and testing."
-  },
-  { id: "genai-ramp-042", mode: "exam", topic: "Flows", obj: "2", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/flows.html",
-    q: "A Flow must call Lambda for enrichment, then KB retrieve, then model. Where is Lambda invoked?",
-    options: ["As a Flow node integrated in the Bedrock Flow definition","Only from the user browser — incomplete or wrong for AIP-C01 professional scenarios","Via S3 event alone without Flow — a distractor; Bedrock docs recommend a different primary action","CloudFront function only — increases risk, cost, or violates the stated requirement"],
-    correct: 0,
-    explain: "Flows support multiple node types including Lambda and KB retrieval in one workflow."
-  },
-  { id: "genai-ramp-043", mode: "exam", topic: "Agents", type: "multi", obj: "2", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/agents.html",
-    q: "Production agent with tools needs reliable releases. Which TWO practices apply? (Pick 2)",
-    options: ["Use agent aliases with versioned agent definitions","Prepare agent after instruction/tool changes","Embed IAM user keys in instructions","Skip testing in lower environments","Disable execution role"],
-    correct: [0,1],
-    explain: "Aliases/versions and Prepare after config changes are standard agent lifecycle steps."
-  },
-  { id: "genai-ramp-044", mode: "exam", topic: "Integration", obj: "2", level: 3,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-api.html",
-    q: "Mobile app should not hold Bedrock credentials. Recommended pattern?",
-    options: ["Backend API (Lambda/API Gateway) assumes role to call Bedrock","Long-lived keys in the app — incomplete or wrong for AIP-C01 professional scenarios","Public InvokeModel from browser — a distractor; Bedrock docs recommend a different primary action","Shared password — increases risk, cost, or violates the stated requirement"],
-    correct: 0,
-    explain: "Server-side proxy with IAM roles keeps credentials off client devices."
-  },
-  { id: "genai-ramp-045", mode: "exam", topic: "Guardrails", obj: "3", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-create.html",
-    q: "Different apps need different safety policies on the same account. How do you scope Guardrails?",
-    options: ["One global Guardrail only forever — increases risk, cost, or violates the stated requirement","Create Guardrail versions and associate the appropriate ID per application/API call","Disable Guardrails on production — incomplete or wrong for AIP-C01 professional scenarios","Use S3 bucket names as policy — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 1,
-    explain: "Guardrails are resources you attach per request or application configuration."
-  },
-  { id: "genai-ramp-046", mode: "exam", topic: "Security", type: "multi", obj: "3", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/security.html",
-    q: "Reduce prompt injection risk for a RAG assistant. Which TWO help MOST? (Pick 2)",
-    options: ["Ground responses with retrieved context and grounding checks","Separate untrusted user content from system instructions in the prompt structure","Publish system prompt publicly","Disable authentication","Log full secrets to CloudWatch unencrypted"],
-    correct: [0,1],
-    explain: "Prompt structure and grounding mitigate injection; logging secrets and open prompts increase risk."
-  },
-  { id: "genai-ramp-047", mode: "exam", topic: "Governance", obj: "3", level: 3,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/logging.html",
-    q: "Security team needs who invoked which model and when. Enable:",
-    options: ["AWS CloudTrail management events for Bedrock control plane and invocation logging as configured","Only S3 access logs — incomplete or wrong for AIP-C01 professional scenarios — does not fix retrieval or orchestration for this case","Disable all audit — a distractor; Bedrock docs recommend a different primary action — incomplete or wrong for AIP-C01 professional scenarios","Twitter alerts — increases risk, cost, or violates the stated requirement — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 0,
-    explain: "CloudTrail and optional model invocation logging support governance and forensics."
-  },
-  { id: "genai-ramp-048", mode: "exam", topic: "Cost", obj: "4", level: 3,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/on-demand-throughput.html",
-    q: "Spiky chat traffic with long idle periods overnight. DEFAULT capacity model?",
-    options: ["On-demand inference with autoscaling app tier","Maximum provisioned throughput 24/7 always — incomplete or wrong for AIP-C01 professional scenarios","Buy EC2 GPU fleet manually — a distractor; Bedrock docs recommend a different primary action","Disable autoscaling — increases risk, cost, or violates the stated requirement"],
-    correct: 0,
-    explain: "On-demand fits variable traffic; provisioned suits steady high volume."
-  },
-  { id: "genai-ramp-049", mode: "exam", topic: "Optimization", obj: "4", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-retrieval.html",
-    q: "Context window fills with low-relevance chunks, increasing cost. FIRST fix?",
-    options: ["Raise temperature — increases risk, cost, or violates the stated requirement — a distractor; Bedrock docs recommend a different primary action","Reduce numberOfResults, add reranking/metadata filters, tighten score thresholds","Remove Guardrails — incomplete or wrong for AIP-C01 professional scenarios — does not fix retrieval or orchestration for this case","Duplicate KB — a distractor; Bedrock docs recommend a different primary action — incomplete or wrong for AIP-C01 professional scenarios"],
-    correct: 1,
-    explain: "Smaller, relevant context cuts input tokens without sacrificing answer quality."
-  },
-  { id: "genai-ramp-050", mode: "exam", topic: "Caching", obj: "4", level: 3,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/prompt-caching.html",
-    q: "Repeated tool definitions and system policies dominate input tokens. Enable:",
-    options: ["Prompt caching for stable prefixes where supported","max_tokens = 1 — incomplete or wrong for AIP-C01 professional scenarios","Delete system prompt — a distractor; Bedrock docs recommend a different primary action","Disable streaming — increases risk, cost, or violates the stated requirement"],
-    correct: 0,
-    explain: "Caching bills fewer tokens for repeated static prompt segments."
-  },
-  { id: "genai-ramp-051", mode: "exam", topic: "Evaluation", obj: "5", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/model-evaluation.html",
-    q: "Leadership wants regression gates in CI before prompt promotion. Implement:",
-    options: ["Automated evaluation job against golden dataset with pass/fail thresholds","Manual hope — incomplete or wrong for AIP-C01 professional scenarios — does not fix retrieval or orchestration for this case","Chaos in prod only — a distractor; Bedrock docs recommend a different primary action","Disable tests — increases risk, cost, or violates the stated requirement — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 0,
-    explain: "Model evaluation jobs integrate with release pipelines for measurable quality gates."
-  },
-  { id: "genai-ramp-052", mode: "exam", topic: "Troubleshooting", obj: "5", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/troubleshooting.html",
-    q: "InvokeModel returns AccessDeniedException though IAM policy looks broad. NEXT check?",
-    options: ["Model access enabled in Region, SCPs, and resource ARN in policy matches model/KB","Increase temperature — incomplete or wrong for AIP-C01 professional scenarios — does not fix retrieval or orchestration for this case","Delete VPC — a distractor; Bedrock docs recommend a different primary action — incomplete or wrong for AIP-C01 professional scenarios","Disable CloudWatch — increases risk, cost, or violates the stated requirement — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 0,
-    explain: "AccessDenied often comes from model access, Region mismatch, SCP, or resource scope—not generation params."
-  },
-  { id: "genai-ramp-053", mode: "exam", topic: "Testing", obj: "5", level: 3,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-evaluation.html",
-    q: "After changing chunk size, what should you re-run BEFORE launch?",
-    options: ["KB retrieval evaluation on labeled Q&A pairs","Only EC2 CPU stress test — incomplete or wrong for AIP-C01 professional scenarios","Delete indexes — a distractor; Bedrock docs recommend a different primary action","Turn off hybrid search always — increases risk, cost, or violates the stated requirement"],
-    correct: 0,
-    explain: "Retrieval metrics validate chunking changes independently from generation."
-  },
-  { id: "genai-ramp-054", mode: "exam", topic: "Observability", obj: "5", level: 3,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/monitoring.html",
-    q: "P95 latency SLO breaches during peak. Which metrics pinpoint Bedrock vs app issues?",
-    options: ["CloudWatch Bedrock invocation latency/throttle metrics plus app trace spans","S3 Glacier inventory — incomplete or wrong for AIP-C01 professional scenarios","Route 53 only — a distractor; Bedrock docs recommend a different primary action","IAM credential report only — increases risk, cost, or violates the stated requirement"],
-    correct: 0,
-    explain: "Split metrics between Bedrock service and application orchestration layers."
-  },
-  { id: "genai-ramp-055", mode: "exam", topic: "Troubleshooting", obj: "5", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/agents.html",
-    q: "Agent returns hallucinated API parameters though OpenAPI schema is attached. FIRST fix?",
-    options: ["Validate action group schema, Prepare agent, and tighten instructions to use schema fields only","Remove Guardrails — incomplete or wrong for AIP-C01 professional scenarios — does not fix retrieval or orchestration for this case","Delete KB — a distractor; Bedrock docs recommend a different primary action — incomplete or wrong for AIP-C01 professional scenarios","Switch Region randomly — increases risk, cost, or violates the stated requirement — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 0,
-    explain: "Schema mismatches and stale agent state often cause bad tool arguments; Prepare refreshes compiled config."
-  },
-  { id: "genai-ramp-056", mode: "exam", topic: "RAG", obj: "1", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/kb-datasource-sync.html",
-    q: "Ingestion jobs fail on encrypted PDFs in S3. MOST likely missing piece?",
-    options: ["KB service role granted kms:Decrypt on the CMK and s3:GetObject on prefixes","Higher temperature — incomplete or wrong for AIP-C01 professional scenarios — does not fix retrieval or orchestration for this case","Public bucket ACL — a distractor; Bedrock docs recommend a different primary action","Disable versioning — increases risk, cost, or violates the stated requirement"],
-    correct: 0,
-    explain: "Ingestion roles need S3 and KMS permissions for encrypted sources."
-  },
-  { id: "genai-ramp-057", mode: "exam", topic: "Implementation", type: "multi", obj: "2", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/inference-profiles.html",
-    q: "Multi-Region active-active chat with one codebase model identifier. Use which TWO? (Pick 2)",
-    options: ["Inference profile configured for cross-Region routing","Identical Guardrail and KB Region strategy aligned to data residency","Hard-coded laptop IP","Single Region ignore failover","Root access keys in env"],
-    correct: [0,1],
-    explain: "Inference profiles simplify multi-Region routing; data/guardrail placement must still respect residency."
-  },
-  { id: "genai-ramp-058", mode: "exam", topic: "Safety", obj: "3", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-components.html",
-    q: "Users attempt jailbreaks via encoded instructions. Add:",
-    options: ["Guardrails with prompt attack filters and monitor blocked invocations","Higher temperature — incomplete or wrong for AIP-C01 professional scenarios","Remove logging — a distractor; Bedrock docs recommend a different primary action","Public admin panel — increases risk, cost, or violates the stated requirement"],
-    correct: 0,
-    explain: "Guardrails include filters aimed at prompt attacks; monitor blocks for abuse patterns."
-  },
-  { id: "genai-ramp-059", mode: "exam", topic: "Fine-Tuning", obj: "1", level: 3,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models-training.html",
-    q: "Training data for customization must be stored where for Bedrock fine-tuning jobs?",
-    options: ["Amazon S3 in the same Region as the training job","Local USB drives — incomplete or wrong for AIP-C01 professional scenarios","Public HTTP without TLS — a distractor; Bedrock docs recommend a different primary action","DynamoDB streams only — increases risk, cost, or violates the stated requirement"],
-    correct: 0,
-    explain: "Custom model jobs read labeled datasets from S3 with appropriate IAM/KMS."
-  },
-  { id: "genai-ramp-060", mode: "exam", topic: "Flows", obj: "2", level: 3,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/flows.html",
-    q: "Non-technical reviewers need to adjust branching logic without redeploying Java. Prefer:",
-    options: ["Bedrock Flows managed in console with versioned deployments","Recompile monolith weekly — incomplete or wrong for AIP-C01 professional scenarios","Edit minified JS in prod — a distractor; Bedrock docs recommend a different primary action","Disable change control — increases risk, cost, or violates the stated requirement"],
-    correct: 0,
-    explain: "Flows expose visual orchestration with lifecycle management separate from app binaries."
-  },
-  { id: "genai-ramp-061", mode: "exam", topic: "Cost", type: "multi", obj: "4", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/batch-inference.html",
-    q: "Reduce spend on offline summarization AND interactive chat. Which TWO pairings fit? (Pick 2)",
-    options: ["Batch inference for bulk archive summarization","On-demand or provisioned for interactive chat per traffic shape","Batch for real-time chat UI","Max tokens on every call","Disable monitoring"],
-    correct: [0,1],
-    explain: "Batch for offline bulk; on-demand/provisioned for latency-sensitive interactive paths."
-  },
-  { id: "genai-ramp-062", mode: "exam", topic: "Evaluation", type: "multi", obj: "5", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/model-evaluation.html",
-    q: "Holistic release checklist for a RAG app includes which TWO automated tests? (Pick 2)",
-    options: ["Retrieval quality evaluation on labeled sets","Generation quality/safety metrics on golden prompts","Delete production KB","Disable IAM","Turn off encryption"],
-    correct: [0,1],
-    explain: "Retrieval and generation/safety evals cover the two-stage RAG failure modes."
-  },
-  { id: "genai-ramp-063", mode: "exam", topic: "Vectors", obj: "1", level: 3,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-setup.html",
-    q: "OpenSearch Serverless backs your KB. Index capacity errors appear at peak ingest. FIRST step?",
-    options: ["Adjust OpenSearch Serverless capacity/OCU settings and stagger sync jobs","Disable encryption — incomplete or wrong for AIP-C01 professional scenarios","Remove all metadata — a distractor; Bedrock docs recommend a different primary action","Switch to plaintext HTTP — increases risk, cost, or violates the stated requirement"],
-    correct: 0,
-    explain: "Vector store capacity and ingestion scheduling affect KB sync success."
-  },
-  { id: "genai-ramp-064", mode: "exam", topic: "Integration", obj: "2", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/agents-action-group.html",
-    q: "Tool calls must hit a private API in your VPC. Recommended network path?",
-    options: ["Lambda in VPC integrated with API Gateway private endpoint or internal ALB via action group","Public internet without auth — incomplete or wrong for AIP-C01 professional scenarios — does not fix retrieval or orchestration for this case","Store JWT in prompt — a distractor; Bedrock docs recommend a different primary action — incomplete or wrong for AIP-C01 professional scenarios","Disable TLS — increases risk, cost, or violates the stated requirement — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 0,
-    explain: "Agents invoke Lambda; Lambda reaches private APIs inside VPC securely."
-  },
-  { id: "genai-ramp-065", mode: "exam", topic: "Troubleshooting", obj: "5", level: 4,
-    ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/service-quotas.html",
-    q: "Streaming responses stall mid-generation with no error in app logs. Check:",
-    options: ["Client/proxy idle timeouts vs InvokeModelWithResponseStream duration and network path","S3 lifecycle only — incomplete or wrong for AIP-C01 professional scenarios — does not fix retrieval or orchestration for this case","Delete Guardrails first — a distractor; Bedrock docs recommend a different primary action","Change embedding model — increases risk, cost, or violates the stated requirement — a distractor; Bedrock docs recommend a different primary action"],
-    correct: 0,
-    explain: "Streaming can be cut by intermediary timeouts while the model continues generating."
+  {
+    "id": "genai-ramp-001",
+    "mode": "exam",
+    "topic": "Troubleshooting",
+    "obj": "5",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base.html",
+    "q": "A Bedrock Knowledge Base chatbot answers policy FAQs well, but queries with internal part numbers (PN-44817-B) return irrelevant passages. Embeddings use a general model. What is the MOST effective fix?",
+    "options": [
+      "Raise temperature to 1.0",
+      "Enable hybrid search (semantic + keyword) on the knowledge base",
+      "Switch to the largest generation model only",
+      "Set retrieval results to 1"
+    ],
+    "correct": 1,
+    "explain": "Exact IDs are lexical; hybrid search adds keyword recall. Temperature and generation model do not fix retrieval; fewer results hurts recall."
+  },
+  {
+    "id": "genai-ramp-002",
+    "mode": "exam",
+    "topic": "Cost",
+    "type": "multi",
+    "obj": "4",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/prompt-caching.html",
+    "q": "An app sends the same 6,000-token system prompt and tool schema on every Bedrock request at ~40 RPS steady. Leadership wants lower cost and latency without changing answer quality. Which TWO help MOST? (Pick 2)",
+    "options": [
+      "Enable prompt caching for the static prefix",
+      "Purchase Provisioned Throughput for baseline volume",
+      "Move all traffic to asynchronous batch inference",
+      "Increase max_tokens to 8192",
+      "Disable Guardrails entirely"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "Caching reduces billed input tokens and latency on repeated prefixes. Steady RPS suits provisioned capacity. Batch is async; max_tokens and removing Guardrails change behavior or safety."
+  },
+  {
+    "id": "genai-ramp-003",
+    "mode": "exam",
+    "topic": "Prompt Management",
+    "obj": "2",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/prompt-management.html",
+    "q": "Teams need versioned prompts shared across dev/stage/prod with IAM-controlled updates. What should you use?",
+    "options": [
+      "Hard-code prompts in Lambda only",
+      "Amazon Bedrock Prompt Management with versions and aliases",
+      "Store prompts in public S3 buckets",
+      "Embed prompts only in client mobile apps"
+    ],
+    "correct": 1,
+    "explain": "Prompt Management centralizes versioning, testing, and IAM for prompt assets used by applications and flows."
+  },
+  {
+    "id": "genai-ramp-004",
+    "mode": "exam",
+    "topic": "Flows",
+    "obj": "2",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/flows.html",
+    "q": "You must orchestrate prompt → knowledge base retrieval → model invocation with branching on confidence. Which Bedrock feature fits?",
+    "options": [
+      "A single InvokeModel call only",
+      "Bedrock Flows visual workflow with nodes and conditions",
+      "S3 lifecycle rules",
+      "EC2 Auto Scaling groups"
+    ],
+    "correct": 1,
+    "explain": "Flows compose multi-step generative workflows (prompts, KB, agents, conditions) without custom orchestration code for every path."
+  },
+  {
+    "id": "genai-ramp-005",
+    "mode": "exam",
+    "topic": "Evaluation",
+    "obj": "5",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-evaluation.html",
+    "q": "Before promoting a new RAG prompt to production, you need automated quality scores against a golden Q&A set. What should you use?",
+    "options": [
+      "Manual spot checks only",
+      "Bedrock model evaluation jobs (built-in or custom metrics)",
+      "CloudWatch alarm on CPU",
+      "Disable retrieval to simplify testing"
+    ],
+    "correct": 1,
+    "explain": "Model evaluation runs batch comparisons with metrics (accuracy, toxicity, etc.) on curated datasets."
+  },
+  {
+    "id": "genai-ramp-006",
+    "mode": "exam",
+    "topic": "Fine-Tuning",
+    "obj": "1",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models.html",
+    "q": "A legal team needs consistent tone and domain terminology on a supported FM; few-shot prompts are insufficient. BEST approach?",
+    "options": [
+      "Increase temperature",
+      "Fine-tune a supported model with labeled examples in S3 (Custom Model)",
+      "Delete the knowledge base",
+      "Use Guardrails word filter only"
+    ],
+    "correct": 1,
+    "explain": "Customization/fine-tuning adapts model weights for domain style when prompting alone plateaus."
+  },
+  {
+    "id": "genai-ramp-007",
+    "mode": "exam",
+    "topic": "Agents",
+    "obj": "2",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/agents.html",
+    "q": "An agent must call an internal REST API to create tickets, then summarize results to the user. Which component defines the OpenAPI tool schema?",
+    "options": [
+      "Knowledge Base only",
+      "Action group with API schema attached to the Bedrock Agent",
+      "S3 bucket policy",
+      "IAM user access keys in the prompt"
+    ],
+    "correct": 1,
+    "explain": "Agents use action groups (OpenAPI) for tool calling; KB supplies retrieval, not arbitrary API execution."
+  },
+  {
+    "id": "genai-ramp-008",
+    "mode": "exam",
+    "topic": "Troubleshooting",
+    "obj": "5",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_InvokeModelWithResponseStream.html",
+    "q": "Users report timeouts on long answers though the model keeps generating. Client uses synchronous InvokeModel. FIRST change to try?",
+    "options": [
+      "Disable Guardrails",
+      "Switch to InvokeModelWithResponseStream and increase client read timeout",
+      "Reduce max_tokens to 10",
+      "Move KB to another region randomly"
+    ],
+    "correct": 1,
+    "explain": "Streaming improves time-to-first-token and avoids single large blocking response; tune timeouts accordingly."
+  },
+  {
+    "id": "genai-ramp-009",
+    "mode": "exam",
+    "topic": "Governance",
+    "obj": "3",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html",
+    "q": "Compliance requires blocking SSN patterns and denying off-topic medical advice in a HR chatbot. What should you configure?",
+    "options": [
+      "Only S3 encryption",
+      "Bedrock Guardrails with PII filters and topic policies on input/output",
+      "Public API Gateway without auth",
+      "Raise temperature"
+    ],
+    "correct": 1,
+    "explain": "Guardrails apply content, PII, and topic controls at inference time for both prompts and responses."
+  },
+  {
+    "id": "genai-ramp-010",
+    "mode": "exam",
+    "topic": "Data",
+    "obj": "1",
+    "level": 3,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/kb-data-source-sync.html",
+    "q": "New PDFs land in S3 hourly for a Knowledge Base. How do you keep vectors fresh with minimal ops?",
+    "options": [
+      "Manual re-create KB daily",
+      "Scheduled or event-driven ingestion sync on the data source",
+      "Copy PDFs to EBS volumes",
+      "Store PDFs in CloudFront only"
+    ],
+    "correct": 1,
+    "explain": "Data source sync re-chunks and re-embeds when source documents change."
+  },
+  {
+    "id": "genai-ramp-011",
+    "mode": "exam",
+    "topic": "Security",
+    "type": "multi",
+    "obj": "3",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/vpc-interface-endpoints.html",
+    "q": "A regulated workload must keep Bedrock traffic off the public internet and restrict who can invoke models. Which TWO controls apply? (Pick 2)",
+    "options": [
+      "Interface VPC endpoint for Bedrock with private subnets",
+      "IAM least-privilege policies on InvokeModel",
+      "Disable all logging",
+      "Store API keys in git",
+      "Use root account access keys"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "VPC endpoints keep traffic private; IAM enforces caller authorization. Logging aids audit; never embed long-lived keys in code."
+  },
+  {
+    "id": "genai-ramp-012",
+    "mode": "exam",
+    "topic": "RAG",
+    "obj": "1",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/kb-chunking.html",
+    "q": "Retrieved chunks are too large and answers miss details buried mid-document. FIRST tuning step?",
+    "options": [
+      "Increase temperature",
+      "Adjust chunk size/overlap or hierarchical chunking strategy",
+      "Remove Guardrails",
+      "Use only one embedding dimension"
+    ],
+    "correct": 1,
+    "explain": "Chunking strategy directly affects retrieval precision; smaller targeted chunks improve detail recall."
+  },
+  {
+    "id": "genai-ramp-013",
+    "mode": "exam",
+    "topic": "Optimization",
+    "obj": "4",
+    "level": 3,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/provisioned-throughput.html",
+    "q": "Traffic is steady 24/7 at high TPS and throttling occurs on on-demand inference. BEST cost/latency tradeoff?",
+    "options": [
+      "Randomly retry without backoff",
+      "Provisioned Throughput units sized to baseline demand",
+      "Delete the model access",
+      "Use only batch inference for chat"
+    ],
+    "correct": 1,
+    "explain": "Provisioned Throughput reserves capacity for predictable high-volume workloads."
+  },
+  {
+    "id": "genai-ramp-014",
+    "mode": "exam",
+    "topic": "Troubleshooting",
+    "obj": "5",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/troubleshooting.html",
+    "q": "Agent action calls fail with 403 from API Gateway though the agent plan looks correct. MOST likely cause?",
+    "options": [
+      "Wrong embedding model",
+      "Agent execution role lacks invoke permission on the API or authorizer misconfigured",
+      "KB ingestion incomplete",
+      "Temperature too low"
+    ],
+    "correct": 1,
+    "explain": "Agents assume an execution role; API Gateway resource policies/IAM and auth must allow the role."
+  },
+  {
+    "id": "genai-ramp-015",
+    "mode": "exam",
+    "topic": "Compliance",
+    "obj": "1",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/data-protection.html",
+    "q": "Customer contracts require encryption of prompts/responses at rest in your logging pipeline. What should you implement?",
+    "options": [
+      "Plaintext logs in open S3",
+      "KMS-encrypted CloudWatch Logs/S3 and minimize sensitive fields in logs",
+      "Disable audit trails",
+      "Email transcripts externally"
+    ],
+    "correct": 1,
+    "explain": "Use KMS for log/storage encryption; apply data minimization and retention policies for compliance."
+  },
+  {
+    "id": "genai-ramp-016",
+    "mode": "exam",
+    "topic": "Evaluation",
+    "obj": "5",
+    "level": 3,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-evaluation.html",
+    "q": "You need to measure retrieval precision/recall for a new KB configuration before launch. What should you run?",
+    "options": [
+      "Only load test EC2",
+      "Evaluation job comparing retrieved passages to labeled relevant documents",
+      "Change region",
+      "Turn off embeddings"
+    ],
+    "correct": 1,
+    "explain": "KB evaluation metrics quantify retrieval quality separate from generation quality."
+  },
+  {
+    "id": "genai-ramp-017",
+    "mode": "exam",
+    "topic": "Integration",
+    "obj": "2",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/agents-alias.html",
+    "q": "Blue/green deployment for a Bedrock Agent serving production traffic requires:",
+    "options": [
+      "Deleting the agent each release",
+      "Agent aliases pointing to tested agent versions with weighted routing",
+      "Hard-coded version in mobile app only",
+      "Single shared root credential"
+    ],
+    "correct": 1,
+    "explain": "Aliases and versions support staged rollout and rollback for agents."
+  },
+  {
+    "id": "genai-ramp-018",
+    "mode": "exam",
+    "topic": "Models",
+    "obj": "1",
+    "level": 3,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/models-regions.html",
+    "q": "You must invoke a model in us-east-1 but it is only enabled in us-west-2. FIRST step?",
+    "options": [
+      "Enable model access in the target Region and ensure inference profile/region match",
+      "Copy IAM user password",
+      "Use Guardrails instead of a model",
+      "Disable CloudTrail"
+    ],
+    "correct": 0,
+    "explain": "Model access is per-Region; clients must call the Region where access and model IDs are valid."
+  },
+  {
+    "id": "genai-ramp-019",
+    "mode": "exam",
+    "topic": "Cost",
+    "obj": "4",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/batch-inference.html",
+    "q": "Nightly job generates summaries for 2M archived tickets; latency can be hours. MOST cost-effective pattern?",
+    "options": [
+      "Real-time InvokeModel at max TPS",
+      "Batch inference job with input/output in S3",
+      "Provisioned Throughput for chat UI",
+      "Manual copy/paste"
+    ],
+    "correct": 1,
+    "explain": "Batch inference optimizes cost for large offline workloads without interactive latency needs."
+  },
+  {
+    "id": "genai-ramp-020",
+    "mode": "exam",
+    "topic": "Guardrails",
+    "type": "multi",
+    "obj": "3",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-components.html",
+    "q": "Reduce hallucinated financial advice in outputs while keeping helpful answers. Which TWO Guardrails features help? (Pick 2)",
+    "options": [
+      "Topic policy denying unauthorized financial advice category",
+      "Contextual grounding check against KB sources",
+      "Disable all logging",
+      "Set temperature to 2.0",
+      "Remove KB retrieval"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "Topic policies constrain categories; grounding checks compare responses to retrieved context. Extreme temperature increases randomness."
+  },
+  {
+    "id": "genai-ramp-021",
+    "mode": "exam",
+    "topic": "Observability",
+    "obj": "5",
+    "level": 3,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/monitoring.html",
+    "q": "Ops needs dashboards for model latency, token usage, and throttling. PRIMARY service?",
+    "options": [
+      "Amazon CloudWatch metrics and logs for Bedrock",
+      "Route 53 health checks only",
+      "S3 access logs only",
+      "AWS Budgets only"
+    ],
+    "correct": 0,
+    "explain": "CloudWatch captures Bedrock invocation metrics; combine with X-Ray for traces."
+  },
+  {
+    "id": "genai-ramp-022",
+    "mode": "exam",
+    "topic": "RAG",
+    "obj": "1",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/kb-metadata.html",
+    "q": "Multi-tenant SaaS must filter KB retrieval per customer_id metadata. How should you implement?",
+    "options": [
+      "One giant shared index without filters",
+      "Attach metadata filters on retrieve API calls per tenant",
+      "Disable embeddings",
+      "Store all tenants in one prompt"
+    ],
+    "correct": 1,
+    "explain": "Metadata filtering scopes vector search to authorized tenant documents."
+  },
+  {
+    "id": "genai-ramp-023",
+    "mode": "exam",
+    "topic": "Troubleshooting",
+    "obj": "5",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/service-quotas.html",
+    "q": "Sudden ThrottlingException spikes during marketing launch. FIRST mitigation while keeping quality?",
+    "options": [
+      "Remove Guardrails",
+      "Request quota increase and add exponential backoff/retry; consider provisioned capacity",
+      "Delete KB",
+      "Switch to smallest model regardless of task"
+    ],
+    "correct": 1,
+    "explain": "Throttling indicates quota/capacity limits; backoff plus quota or provisioned throughput addresses sustained spikes."
+  },
+  {
+    "id": "genai-ramp-024",
+    "mode": "exam",
+    "topic": "Implementation",
+    "obj": "2",
+    "level": 3,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/inference-profiles.html",
+    "q": "You need cross-Region resilience for Claude model invocation with a single model ID in code. Use:",
+    "options": [
+      "Hard-code one Region endpoint",
+      "Inference profile that routes across Regions per AWS configuration",
+      "Local laptop model",
+      "DynamoDB streams"
+    ],
+    "correct": 1,
+    "explain": "Inference profiles abstract Region routing for supported models."
+  },
+  {
+    "id": "genai-ramp-025",
+    "mode": "exam",
+    "topic": "Safety",
+    "obj": "3",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/responsible-use.html",
+    "q": "Product policy bans generating instructions for weapons. Besides Guardrails, what governance practice is REQUIRED?",
+    "options": [
+      "Ignore abuse reports",
+      "Human review process, abuse monitoring, and documented acceptable use policies",
+      "Publish admin keys",
+      "Disable encryption"
+    ],
+    "correct": 1,
+    "explain": "Responsible AI combines technical controls with policy, monitoring, and human oversight."
+  },
+  {
+    "id": "genai-ramp-026",
+    "mode": "exam",
+    "topic": "Prompt Engineering",
+    "obj": "2",
+    "level": 3,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/prompt-engineering.html",
+    "q": "Model returns JSON but often adds markdown fences. MOST reliable fix?",
+    "options": [
+      "Ask politely in one word",
+      "Use tool/structured output or response schema features where supported; validate with post-processing",
+      "Set temperature to maximum",
+      "Remove system prompt"
+    ],
+    "correct": 1,
+    "explain": "Structured output constraints and validation reduce format drift versus hope-based prompting."
+  },
+  {
+    "id": "genai-ramp-027",
+    "mode": "exam",
+    "topic": "Testing",
+    "type": "multi",
+    "obj": "5",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-evaluation.html",
+    "q": "Regression testing before prompt change should include which TWO? (Pick 2)",
+    "options": [
+      "Golden dataset automated evaluation",
+      "Chaos deletion of KB in production",
+      "Safety/toxicity metrics on sample prompts",
+      "Disabling IAM",
+      "Turning off CloudWatch"
+    ],
+    "correct": [
+      0,
+      2
+    ],
+    "explain": "Golden sets with automated metrics catch quality/safety regressions; destructive chaos belongs in controlled tests only."
+  },
+  {
+    "id": "genai-ramp-028",
+    "mode": "exam",
+    "topic": "Vectors",
+    "obj": "1",
+    "level": 3,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-setup.html",
+    "q": "You change embedding model for an existing Knowledge Base. Required action?",
+    "options": [
+      "Nothing; embeddings auto-migrate silently",
+      "Re-run ingestion to re-embed all documents with the new model",
+      "Only change Guardrails",
+      "Delete IAM roles"
+    ],
+    "correct": 1,
+    "explain": "Vectors are model-specific; changing embedding model requires re-ingestion."
+  },
+  {
+    "id": "genai-ramp-029",
+    "mode": "exam",
+    "topic": "Agents",
+    "obj": "2",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/agents-prepare.html",
+    "q": "After updating agent instructions and action schemas, what must you do before testing in console?",
+    "options": [
+      "Prepare the agent to rebuild internal orchestration state",
+      "Delete the AWS account",
+      "Disable CloudTrail",
+      "Remove KB"
+    ],
+    "correct": 0,
+    "explain": "Prepare compiles agent configuration after instruction/tool changes."
+  },
+  {
+    "id": "genai-ramp-030",
+    "mode": "exam",
+    "topic": "Optimization",
+    "obj": "4",
+    "level": 3,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-retrieval.html",
+    "q": "Answers cite too many irrelevant passages increasing cost. FIRST knob to turn?",
+    "options": [
+      "Increase numberOfResults and max tokens always",
+      "Tune retrieval count, score threshold, and reranking if enabled",
+      "Disable streaming",
+      "Remove encryption"
+    ],
+    "correct": 1,
+    "explain": "Retrieval parameters control context size and relevance, directly affecting token cost."
+  },
+  {
+    "id": "genai-ramp-031",
+    "mode": "exam",
+    "topic": "Compliance",
+    "obj": "1",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/logging.html",
+    "q": "Audit requires retaining model invocation logs with sensitive fields redacted. BEST pattern?",
+    "options": [
+      "No logging for privacy",
+      "Model invocation logging to encrypted S3/CloudWatch with Guardrails + log filtering",
+      "Tweet request IDs",
+      "Log full prompts to public repo"
+    ],
+    "correct": 1,
+    "explain": "Enable invocation logging with encryption and redaction/minimization aligned to policy."
+  },
+  {
+    "id": "genai-ramp-032",
+    "mode": "exam",
+    "topic": "Troubleshooting",
+    "obj": "5",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-troubleshooting.html",
+    "q": "KB answers 'I don't know' despite document containing answer. Retrieval shows low scores. NEXT step?",
+    "options": [
+      "Increase temperature only",
+      "Inspect chunking, metadata filters, and query reformulation; verify ingestion succeeded",
+      "Delete S3 bucket",
+      "Disable hybrid search always"
+    ],
+    "correct": 1,
+    "explain": "Low retrieval scores indicate ingestion, chunking, filtering, or query mismatch—not generation temperature."
+  },
+  {
+    "id": "genai-ramp-033",
+    "mode": "exam",
+    "topic": "Integration",
+    "obj": "2",
+    "level": 3,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/agents-kb.html",
+    "q": "Agent should answer from private docs AND call tools. Combine:",
+    "options": [
+      "Knowledge base association plus action groups on the same agent",
+      "Only Guardrails",
+      "Only S3 static website",
+      "EC2 user data scripts only"
+    ],
+    "correct": 0,
+    "explain": "Agents can attach KB for RAG and action groups for API tools concurrently."
+  },
+  {
+    "id": "genai-ramp-034",
+    "mode": "exam",
+    "topic": "Models",
+    "obj": "1",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters.html",
+    "q": "Creative marketing copy needs variety; compliance summaries need determinism. How should you configure?",
+    "options": [
+      "Same temperature for all use cases",
+      "Lower temperature/top-p for factual tasks; higher for creative tasks with evaluation gates",
+      "Max tokens = 1 for everything",
+      "Disable all Guardrails globally"
+    ],
+    "correct": 1,
+    "explain": "Tune inference parameters per use case; validate factual workloads with eval and grounding."
+  },
+  {
+    "id": "genai-ramp-035",
+    "mode": "exam",
+    "topic": "Security",
+    "obj": "3",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html",
+    "q": "Lambda calls Bedrock and retrieves from KB in VPC. Credentials should come from:",
+    "options": [
+      "Long-lived IAM user keys in environment variables",
+      "Execution role with least privilege for bedrock:InvokeModel and KB retrieve",
+      "Root access key",
+      "Hard-coded in frontend JavaScript"
+    ],
+    "correct": 1,
+    "explain": "Use IAM roles for AWS compute; scope policies to required Bedrock actions and resources."
+  },
+  {
+    "id": "genai-ramp-036",
+    "mode": "exam",
+    "topic": "Data residency",
+    "obj": "1",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/bedrock-regions.html",
+    "q": "EU customer data must stay in eu-central-1 for Bedrock and KB storage. What must you verify FIRST?",
+    "options": [
+      "Model access and KB/data sources exist in eu-central-1",
+      "Use us-east-1 for cheaper tokens",
+      "Disable KMS",
+      "Run inference from on-prem only"
+    ],
+    "correct": 0,
+    "explain": "Bedrock model availability and KB resources are Region-specific; residency requires aligned Region deployment."
+  },
+  {
+    "id": "genai-ramp-037",
+    "mode": "exam",
+    "topic": "Custom models",
+    "obj": "1",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models.html",
+    "q": "After custom model training completes, how do you invoke it in applications?",
+    "options": [
+      "Use the custom model ARN with InvokeModel in the training Region",
+      "Copy weights to EBS manually",
+      "Only via SageMaker exclusively",
+      "Publish to public S3"
+    ],
+    "correct": 0,
+    "explain": "Custom models appear as Bedrock model IDs/ARNs in the Region where training was provisioned."
+  },
+  {
+    "id": "genai-ramp-038",
+    "mode": "exam",
+    "topic": "RAG",
+    "obj": "1",
+    "level": 3,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/kb-how-data.html",
+    "q": "Structured product specs live in DynamoDB; manuals are PDFs in S3. BEST retrieval design?",
+    "options": [
+      "Ignore structured data",
+      "Combine KB over S3 PDFs with application-side DynamoDB lookup or structured retrieval in the flow",
+      "Email CSV exports daily",
+      "Single prompt without tools"
+    ],
+    "correct": 1,
+    "explain": "Hybrid designs use KB for unstructured docs and app/flow logic for structured stores."
+  },
+  {
+    "id": "genai-ramp-039",
+    "mode": "exam",
+    "topic": "Compliance",
+    "obj": "1",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/data-protection.html",
+    "q": "Contracts require customer content is not used to improve base FMs. Which Bedrock default applies?",
+    "options": [
+      "AWS does not train base models on customer content by default for Bedrock service",
+      "All prompts are shared publicly",
+      "Disable encryption to prove isolation",
+      "Use root account"
+    ],
+    "correct": 0,
+    "explain": "Bedrock data protection policies address customer content separation from base model training (see current service terms/docs)."
+  },
+  {
+    "id": "genai-ramp-040",
+    "mode": "exam",
+    "topic": "Embeddings",
+    "obj": "1",
+    "level": 3,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/titan-embedding-models.html",
+    "q": "You need semantic search over support tickets in English only. FIRST model choice?",
+    "options": [
+      "Largest text generation model",
+      "Bedrock embedding model suited to semantic search (e.g., Titan Embeddings)",
+      "Speech-to-text model",
+      "Image generation model"
+    ],
+    "correct": 1,
+    "explain": "Embeddings map text to vectors for retrieval; generation models are not used for indexing."
+  },
+  {
+    "id": "genai-ramp-041",
+    "mode": "exam",
+    "topic": "Prompt Management",
+    "obj": "2",
+    "level": 3,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/prompt-management.html",
+    "q": "Engineers want to A/B test two prompt versions in staging without redeploying Lambda. Use:",
+    "options": [
+      "Prompt Management versions/aliases referenced by the app",
+      "Hard-code v1 only",
+      "Delete production alias",
+      "Store prompts in git without access control"
+    ],
+    "correct": 0,
+    "explain": "Versioned prompts and aliases enable controlled rollout and testing."
+  },
+  {
+    "id": "genai-ramp-042",
+    "mode": "exam",
+    "topic": "Flows",
+    "obj": "2",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/flows.html",
+    "q": "A Flow must call Lambda for enrichment, then KB retrieve, then model. Where is Lambda invoked?",
+    "options": [
+      "As a Flow node integrated in the Bedrock Flow definition",
+      "Only from the user browser",
+      "Via S3 event alone without Flow",
+      "CloudFront function only"
+    ],
+    "correct": 0,
+    "explain": "Flows support multiple node types including Lambda and KB retrieval in one workflow."
+  },
+  {
+    "id": "genai-ramp-043",
+    "mode": "exam",
+    "topic": "Agents",
+    "type": "multi",
+    "obj": "2",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/agents.html",
+    "q": "Production agent with tools needs reliable releases. Which TWO practices apply? (Pick 2)",
+    "options": [
+      "Use agent aliases with versioned agent definitions",
+      "Prepare agent after instruction/tool changes",
+      "Embed IAM user keys in instructions",
+      "Skip testing in lower environments",
+      "Disable execution role"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "Aliases/versions and Prepare after config changes are standard agent lifecycle steps."
+  },
+  {
+    "id": "genai-ramp-044",
+    "mode": "exam",
+    "topic": "Integration",
+    "obj": "2",
+    "level": 3,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-api.html",
+    "q": "Mobile app should not hold Bedrock credentials. Recommended pattern?",
+    "options": [
+      "Backend API (Lambda/API Gateway) assumes role to call Bedrock",
+      "Long-lived keys in the app",
+      "Public InvokeModel from browser",
+      "Shared password"
+    ],
+    "correct": 0,
+    "explain": "Server-side proxy with IAM roles keeps credentials off client devices."
+  },
+  {
+    "id": "genai-ramp-045",
+    "mode": "exam",
+    "topic": "Guardrails",
+    "obj": "3",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-create.html",
+    "q": "Different apps need different safety policies on the same account. How do you scope Guardrails?",
+    "options": [
+      "One global Guardrail only forever",
+      "Create Guardrail versions and associate the appropriate ID per application/API call",
+      "Disable Guardrails on production",
+      "Use S3 bucket names as policy"
+    ],
+    "correct": 1,
+    "explain": "Guardrails are resources you attach per request or application configuration."
+  },
+  {
+    "id": "genai-ramp-046",
+    "mode": "exam",
+    "topic": "Security",
+    "type": "multi",
+    "obj": "3",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/security.html",
+    "q": "Reduce prompt injection risk for a RAG assistant. Which TWO help MOST? (Pick 2)",
+    "options": [
+      "Ground responses with retrieved context and grounding checks",
+      "Separate untrusted user content from system instructions in the prompt structure",
+      "Publish system prompt publicly",
+      "Disable authentication",
+      "Log full secrets to CloudWatch unencrypted"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "Prompt structure and grounding mitigate injection; logging secrets and open prompts increase risk."
+  },
+  {
+    "id": "genai-ramp-047",
+    "mode": "exam",
+    "topic": "Governance",
+    "obj": "3",
+    "level": 3,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/logging.html",
+    "q": "Security team needs who invoked which model and when. Enable:",
+    "options": [
+      "AWS CloudTrail management events for Bedrock control plane and invocation logging as configured",
+      "Only S3 access logs",
+      "Disable all audit",
+      "Twitter alerts"
+    ],
+    "correct": 0,
+    "explain": "CloudTrail and optional model invocation logging support governance and forensics."
+  },
+  {
+    "id": "genai-ramp-048",
+    "mode": "exam",
+    "topic": "Cost",
+    "obj": "4",
+    "level": 3,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/on-demand-throughput.html",
+    "q": "Spiky chat traffic with long idle periods overnight. DEFAULT capacity model?",
+    "options": [
+      "On-demand inference with autoscaling app tier",
+      "Maximum provisioned throughput 24/7 always",
+      "Buy EC2 GPU fleet manually",
+      "Disable autoscaling"
+    ],
+    "correct": 0,
+    "explain": "On-demand fits variable traffic; provisioned suits steady high volume."
+  },
+  {
+    "id": "genai-ramp-049",
+    "mode": "exam",
+    "topic": "Optimization",
+    "obj": "4",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-retrieval.html",
+    "q": "Context window fills with low-relevance chunks, increasing cost. FIRST fix?",
+    "options": [
+      "Raise temperature",
+      "Reduce numberOfResults, add reranking/metadata filters, tighten score thresholds",
+      "Remove Guardrails",
+      "Duplicate KB"
+    ],
+    "correct": 1,
+    "explain": "Smaller, relevant context cuts input tokens without sacrificing answer quality."
+  },
+  {
+    "id": "genai-ramp-050",
+    "mode": "exam",
+    "topic": "Caching",
+    "obj": "4",
+    "level": 3,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/prompt-caching.html",
+    "q": "Repeated tool definitions and system policies dominate input tokens. Enable:",
+    "options": [
+      "Prompt caching for stable prefixes where supported",
+      "max_tokens = 1",
+      "Delete system prompt",
+      "Disable streaming"
+    ],
+    "correct": 0,
+    "explain": "Caching bills fewer tokens for repeated static prompt segments."
+  },
+  {
+    "id": "genai-ramp-051",
+    "mode": "exam",
+    "topic": "Evaluation",
+    "obj": "5",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-evaluation.html",
+    "q": "Leadership wants regression gates in CI before prompt promotion. Implement:",
+    "options": [
+      "Automated evaluation job against golden dataset with pass/fail thresholds",
+      "Manual hope",
+      "Chaos in prod only",
+      "Disable tests"
+    ],
+    "correct": 0,
+    "explain": "Model evaluation jobs integrate with release pipelines for measurable quality gates."
+  },
+  {
+    "id": "genai-ramp-052",
+    "mode": "exam",
+    "topic": "Troubleshooting",
+    "obj": "5",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/troubleshooting.html",
+    "q": "InvokeModel returns AccessDeniedException though IAM policy looks broad. NEXT check?",
+    "options": [
+      "Model access enabled in Region, SCPs, and resource ARN in policy matches model/KB",
+      "Increase temperature",
+      "Delete VPC",
+      "Disable CloudWatch"
+    ],
+    "correct": 0,
+    "explain": "AccessDenied often comes from model access, Region mismatch, SCP, or resource scope—not generation params."
+  },
+  {
+    "id": "genai-ramp-053",
+    "mode": "exam",
+    "topic": "Testing",
+    "obj": "5",
+    "level": 3,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-evaluation.html",
+    "q": "After changing chunk size, what should you re-run BEFORE launch?",
+    "options": [
+      "KB retrieval evaluation on labeled Q&A pairs",
+      "Only EC2 CPU stress test",
+      "Delete indexes",
+      "Turn off hybrid search always"
+    ],
+    "correct": 0,
+    "explain": "Retrieval metrics validate chunking changes independently from generation."
+  },
+  {
+    "id": "genai-ramp-054",
+    "mode": "exam",
+    "topic": "Observability",
+    "obj": "5",
+    "level": 3,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/monitoring.html",
+    "q": "P95 latency SLO breaches during peak. Which metrics pinpoint Bedrock vs app issues?",
+    "options": [
+      "CloudWatch Bedrock invocation latency/throttle metrics plus app trace spans",
+      "S3 Glacier inventory",
+      "Route 53 only",
+      "IAM credential report only"
+    ],
+    "correct": 0,
+    "explain": "Split metrics between Bedrock service and application orchestration layers."
+  },
+  {
+    "id": "genai-ramp-055",
+    "mode": "exam",
+    "topic": "Troubleshooting",
+    "obj": "5",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/agents.html",
+    "q": "Agent returns hallucinated API parameters though OpenAPI schema is attached. FIRST fix?",
+    "options": [
+      "Validate action group schema, Prepare agent, and tighten instructions to use schema fields only",
+      "Remove Guardrails",
+      "Delete KB",
+      "Switch Region randomly"
+    ],
+    "correct": 0,
+    "explain": "Schema mismatches and stale agent state often cause bad tool arguments; Prepare refreshes compiled config."
+  },
+  {
+    "id": "genai-ramp-056",
+    "mode": "exam",
+    "topic": "RAG",
+    "obj": "1",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/kb-datasource-sync.html",
+    "q": "Ingestion jobs fail on encrypted PDFs in S3. MOST likely missing piece?",
+    "options": [
+      "KB service role granted kms:Decrypt on the CMK and s3:GetObject on prefixes",
+      "Higher temperature",
+      "Public bucket ACL",
+      "Disable versioning"
+    ],
+    "correct": 0,
+    "explain": "Ingestion roles need S3 and KMS permissions for encrypted sources."
+  },
+  {
+    "id": "genai-ramp-057",
+    "mode": "exam",
+    "topic": "Implementation",
+    "type": "multi",
+    "obj": "2",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/inference-profiles.html",
+    "q": "Multi-Region active-active chat with one codebase model identifier. Use which TWO? (Pick 2)",
+    "options": [
+      "Inference profile configured for cross-Region routing",
+      "Identical Guardrail and KB Region strategy aligned to data residency",
+      "Hard-coded laptop IP",
+      "Single Region ignore failover",
+      "Root access keys in env"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "Inference profiles simplify multi-Region routing; data/guardrail placement must still respect residency."
+  },
+  {
+    "id": "genai-ramp-058",
+    "mode": "exam",
+    "topic": "Safety",
+    "obj": "3",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-components.html",
+    "q": "Users attempt jailbreaks via encoded instructions. Add:",
+    "options": [
+      "Guardrails with prompt attack filters and monitor blocked invocations",
+      "Higher temperature",
+      "Remove logging",
+      "Public admin panel"
+    ],
+    "correct": 0,
+    "explain": "Guardrails include filters aimed at prompt attacks; monitor blocks for abuse patterns."
+  },
+  {
+    "id": "genai-ramp-059",
+    "mode": "exam",
+    "topic": "Fine-Tuning",
+    "obj": "1",
+    "level": 3,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models-training.html",
+    "q": "Training data for customization must be stored where for Bedrock fine-tuning jobs?",
+    "options": [
+      "Amazon S3 in the same Region as the training job",
+      "Local USB drives",
+      "Public HTTP without TLS",
+      "DynamoDB streams only"
+    ],
+    "correct": 0,
+    "explain": "Custom model jobs read labeled datasets from S3 with appropriate IAM/KMS."
+  },
+  {
+    "id": "genai-ramp-060",
+    "mode": "exam",
+    "topic": "Flows",
+    "obj": "2",
+    "level": 3,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/flows.html",
+    "q": "Non-technical reviewers need to adjust branching logic without redeploying Java. Prefer:",
+    "options": [
+      "Bedrock Flows managed in console with versioned deployments",
+      "Recompile monolith weekly",
+      "Edit minified JS in prod",
+      "Disable change control"
+    ],
+    "correct": 0,
+    "explain": "Flows expose visual orchestration with lifecycle management separate from app binaries."
+  },
+  {
+    "id": "genai-ramp-061",
+    "mode": "exam",
+    "topic": "Cost",
+    "type": "multi",
+    "obj": "4",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/batch-inference.html",
+    "q": "Reduce spend on offline summarization AND interactive chat. Which TWO pairings fit? (Pick 2)",
+    "options": [
+      "Batch inference for bulk archive summarization",
+      "On-demand or provisioned for interactive chat per traffic shape",
+      "Batch for real-time chat UI",
+      "Max tokens on every call",
+      "Disable monitoring"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "Batch for offline bulk; on-demand/provisioned for latency-sensitive interactive paths."
+  },
+  {
+    "id": "genai-ramp-062",
+    "mode": "exam",
+    "topic": "Evaluation",
+    "type": "multi",
+    "obj": "5",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-evaluation.html",
+    "q": "Holistic release checklist for a RAG app includes which TWO automated tests? (Pick 2)",
+    "options": [
+      "Retrieval quality evaluation on labeled sets",
+      "Generation quality/safety metrics on golden prompts",
+      "Delete production KB",
+      "Disable IAM",
+      "Turn off encryption"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "Retrieval and generation/safety evals cover the two-stage RAG failure modes."
+  },
+  {
+    "id": "genai-ramp-063",
+    "mode": "exam",
+    "topic": "Vectors",
+    "obj": "1",
+    "level": 3,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-setup.html",
+    "q": "OpenSearch Serverless backs your KB. Index capacity errors appear at peak ingest. FIRST step?",
+    "options": [
+      "Adjust OpenSearch Serverless capacity/OCU settings and stagger sync jobs",
+      "Disable encryption",
+      "Remove all metadata",
+      "Switch to plaintext HTTP"
+    ],
+    "correct": 0,
+    "explain": "Vector store capacity and ingestion scheduling affect KB sync success."
+  },
+  {
+    "id": "genai-ramp-064",
+    "mode": "exam",
+    "topic": "Integration",
+    "obj": "2",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/agents-action-group.html",
+    "q": "Tool calls must hit a private API in your VPC. Recommended network path?",
+    "options": [
+      "Lambda in VPC integrated with API Gateway private endpoint or internal ALB via action group",
+      "Public internet without auth",
+      "Store JWT in prompt",
+      "Disable TLS"
+    ],
+    "correct": 0,
+    "explain": "Agents invoke Lambda; Lambda reaches private APIs inside VPC securely."
+  },
+  {
+    "id": "genai-ramp-065",
+    "mode": "exam",
+    "topic": "Troubleshooting",
+    "obj": "5",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/service-quotas.html",
+    "q": "Streaming responses stall mid-generation with no error in app logs. Check:",
+    "options": [
+      "Client/proxy idle timeouts vs InvokeModelWithResponseStream duration and network path",
+      "S3 lifecycle only",
+      "Delete Guardrails first",
+      "Change embedding model"
+    ],
+    "correct": 0,
+    "explain": "Streaming can be cut by intermediary timeouts while the model continues generating."
   }
 ];
