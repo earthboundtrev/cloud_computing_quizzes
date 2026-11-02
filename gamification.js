@@ -224,7 +224,10 @@
     var base = normalizeState(a);
     var other = normalizeState(b);
     var out = normalizeState(base);
-    out.streak = Math.max(base.streak, other.streak);
+    out.streak =
+      base.hadStreakBreak || other.hadStreakBreak
+        ? Math.min(base.streak, other.streak)
+        : Math.max(base.streak, other.streak);
     out.best = Math.max(base.best, other.best, out.streak);
     out.freezes = Math.min(base.freezes, other.freezes);
     out.freezeEarnProgress = Math.max(base.freezeEarnProgress, other.freezeEarnProgress);
