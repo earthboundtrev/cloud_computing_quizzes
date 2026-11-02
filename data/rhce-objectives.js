@@ -2,6 +2,8 @@
  * Red Hat Certified Engineer (RHCE) EX294
  * Ansible Automation
  */
+window.OBJECTIVES_SOURCE = 'https://www.redhat.com/en/services/training/ex294-red-hat-certified-engineer-rhce-exam';
+window.OBJECTIVES_VERIFIED = '2026-11-02';
 window.OBJECTIVES = [
   { id: '1a', domain: 1, title: 'Be able to perform all RHCSA tasks', weight: 0.15 },
   { id: '2a', domain: 2, title: 'Understand core components of Ansible', weight: 0.15 },

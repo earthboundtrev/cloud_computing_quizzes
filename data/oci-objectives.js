@@ -2,6 +2,8 @@
  * OCI Foundations Associate Exam Objectives
  * 1Z0-1085-26
  */
+window.OBJECTIVES_SOURCE = 'https://education.oracle.com/oracle-cloud-infrastructure-2025-certified-foundations-associate/pexam_1Z0-1085';
+window.OBJECTIVES_VERIFIED = '2026-11-02';
 window.OBJECTIVES = [
   { id: '1', domain: 1, title: 'Cloud Concepts', weight: 0.10 },
   { id: '2a', domain: 2, title: 'Getting Started with OCI', weight: 0.15 },

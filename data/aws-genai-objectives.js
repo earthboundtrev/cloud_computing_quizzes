@@ -3,6 +3,8 @@
  * Exam guide domains (effective 2026-10-14 vendor audit).
  * https://docs.aws.amazon.com/aws-certification/latest/examguides/gen-ai-developer-professional-01.html
  */
+window.OBJECTIVES_SOURCE = 'https://docs.aws.amazon.com/aws-certification/latest/examguides/gen-ai-developer-professional-01.html';
+window.OBJECTIVES_VERIFIED = '2026-11-02';
 window.OBJECTIVES_AWS_GENAI = [
   { id: '1', domain: 1, title: 'Foundation model integration, data management, and compliance', weight: 0.31 },
   { id: '2', domain: 2, title: 'Implementation and integration', weight: 0.26 },

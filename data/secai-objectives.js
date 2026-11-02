@@ -1,6 +1,8 @@
 /**
  * CompTIA SecAI+ CY0-001 Exam Objectives
  */
+window.OBJECTIVES_SOURCE = 'https://www.comptia.org/certifications/secai';
+window.OBJECTIVES_VERIFIED = '2026-11-02';
 window.OBJECTIVES = [
   { id: '1a', domain: 1, title: 'AI Security Fundamentals', weight: 0.18 },
   { id: '2a', domain: 2, title: 'Securing AI Systems', weight: 0.28 },

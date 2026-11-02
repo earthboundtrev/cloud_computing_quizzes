@@ -7,6 +7,8 @@
  * 
  * Performance-based exam (hands-on tasks). All configurations must persist after reboot.
  */
+window.OBJECTIVES_SOURCE = 'https://www.redhat.com/en/services/training/ex200-red-hat-certified-system-administrator-rhcsa-exam';
+window.OBJECTIVES_VERIFIED = '2026-11-02';
 window.OBJECTIVES_RHCSA10 = [
   // Domain 1: Understand and use essential tools (20%)
   { id: '1.1', domain: 1, title: 'Shell commands and syntax', weight: null },

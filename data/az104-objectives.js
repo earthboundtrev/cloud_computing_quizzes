@@ -1,6 +1,8 @@
 /**
  * Microsoft Azure Administrator AZ-104 Exam Objectives
  */
+window.OBJECTIVES_SOURCE = 'https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104';
+window.OBJECTIVES_VERIFIED = '2026-11-02';
 window.OBJECTIVES = [
   { id: '1a', domain: 1, title: 'Manage Azure identities and governance', weight: 0.20 },
   { id: '2a', domain: 2, title: 'Implement and manage storage', weight: 0.15 },

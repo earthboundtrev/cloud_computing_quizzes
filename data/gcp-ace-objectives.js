@@ -1,6 +1,8 @@
 /**
  * GCP Associate Cloud Engineer Exam Objectives
  */
+window.OBJECTIVES_SOURCE = 'https://cloud.google.com/learn/certification/cloud-engineer';
+window.OBJECTIVES_VERIFIED = '2026-11-02';
 window.OBJECTIVES = [
   { id: '1a', domain: 1, title: 'Setting up a cloud solution environment', weight: 0.16 },
   { id: '2a', domain: 2, title: 'Planning and configuring a cloud solution', weight: 0.18 },

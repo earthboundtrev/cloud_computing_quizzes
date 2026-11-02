@@ -2,6 +2,8 @@
  * Microsoft Azure AI Fundamentals AI-901 Exam Objectives
  * (Updated from AI-900)
  */
+window.OBJECTIVES_SOURCE = 'https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-900';
+window.OBJECTIVES_VERIFIED = '2026-11-02';
 window.OBJECTIVES = [
   { id: '1a', domain: 1, title: 'Describe Artificial Intelligence workloads and considerations', weight: 0.20 },
   { id: '2a', domain: 2, title: 'Describe fundamental principles of machine learning on Azure', weight: 0.25 },

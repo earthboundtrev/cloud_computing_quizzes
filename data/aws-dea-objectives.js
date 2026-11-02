@@ -1,6 +1,8 @@
 /**
  * AWS Certified Data Engineer - Associate DEA-C01 Exam Objectives
  */
+window.OBJECTIVES_SOURCE = 'https://aws.amazon.com/certification/certified-data-engineer-associate/';
+window.OBJECTIVES_VERIFIED = '2026-11-02';
 window.OBJECTIVES = [
   { id: '1a', domain: 1, title: 'Data Ingestion and Transformation', weight: 0.34 },
   { id: '2a', domain: 2, title: 'Data Store Management', weight: 0.26 },

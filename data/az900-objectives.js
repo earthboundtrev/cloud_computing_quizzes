@@ -1,6 +1,8 @@
 /**
  * Microsoft Azure Fundamentals AZ-900 Exam Objectives
  */
+window.OBJECTIVES_SOURCE = 'https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-900';
+window.OBJECTIVES_VERIFIED = '2026-11-02';
 window.OBJECTIVES = [
   { id: '1a', domain: 1, title: 'Describe cloud concepts', weight: 0.25 },
   { id: '2a', domain: 2, title: 'Describe Azure architecture and services', weight: 0.35 },

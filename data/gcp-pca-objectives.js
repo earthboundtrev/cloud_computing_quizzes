@@ -1,6 +1,8 @@
 /**
  * GCP Professional Cloud Architect Exam Objectives
  */
+window.OBJECTIVES_SOURCE = 'https://cloud.google.com/learn/certification/cloud-architect';
+window.OBJECTIVES_VERIFIED = '2026-11-02';
 window.OBJECTIVES = [
   { id: '1a', domain: 1, title: 'Designing and Planning', weight: 0.24 },
   { id: '1b', domain: 1, title: 'Business Requirements Analysis', weight: 0.10 },

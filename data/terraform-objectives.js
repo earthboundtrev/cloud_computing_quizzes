@@ -3,6 +3,8 @@
  * Terraform 1.12 • Verified: developer.hashicorp.com (2026-10-18)
  * https://developer.hashicorp.com/terraform/tutorials/certification-004/associate-review-004
  */
+window.OBJECTIVES_SOURCE = 'https://developer.hashicorp.com/certifications/infrastructure-automation';
+window.OBJECTIVES_VERIFIED = '2026-11-02';
 window.OBJECTIVES = [
   // Domain 1 — Infrastructure as Code (IaC) with Terraform
   { id: '1a', domain: 1, title: 'Explain what IaC is', weight: null },

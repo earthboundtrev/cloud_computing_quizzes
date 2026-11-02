@@ -1,6 +1,8 @@
 /**
  * GCP Cloud Digital Leader Exam Objectives
  */
+window.OBJECTIVES_SOURCE = 'https://cloud.google.com/learn/certification/cloud-digital-leader';
+window.OBJECTIVES_VERIFIED = '2026-11-02';
 window.OBJECTIVES = [
   { id: '1a', domain: 1, title: 'Digital Transformation with Google Cloud', weight: 0.10 },
   { id: '1b', domain: 1, title: 'Cloud Concepts', weight: 0.10 },

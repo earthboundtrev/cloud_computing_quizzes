@@ -1,6 +1,8 @@
 /**
  * Microsoft Azure Solutions Architect Expert AZ-305 Exam Objectives
  */
+window.OBJECTIVES_SOURCE = 'https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-305';
+window.OBJECTIVES_VERIFIED = '2026-11-02';
 window.OBJECTIVES = [
   { id: '1a', domain: 1, title: 'Design identity, governance, and monitoring solutions', weight: 0.25 },
   { id: '2a', domain: 2, title: 'Design data storage solutions', weight: 0.20 },

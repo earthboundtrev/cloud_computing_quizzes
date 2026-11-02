@@ -30,9 +30,9 @@ const CI_MODE = process.argv.includes('--ci');
 // Expected exam codes per track (issue #6)
 const EXPECTED_EXAM_CODES = {
   'oci': '1Z0-1085-26',
-  'gcp': null,  // GCP CDL has no exam code
-  'gcp_pca': null,  // Professional Cloud Architect
-  'gcp_ace': null,  // Associate Cloud Engineer
+  'gcp': 'Cloud Digital Leader',
+  'gcp_pca': 'Professional Cloud Architect',
+  'gcp_ace': 'Associate Cloud Engineer',
   'az900': 'AZ-900',
   'az104': 'AZ-104',
   'az305': 'AZ-305',
@@ -41,7 +41,7 @@ const EXPECTED_EXAM_CODES = {
   'aws_dea': 'DEA-C01',
   'aws_genai': 'AIP-C01',
   'terraform': '004',
-  'cissp': null,  // No single exam code
+  'cissp': 'CISSP',
   'secai': 'CY0-001',
   'rhcsa10': 'EX200',  // RHEL 10 (current)
   'rhce': 'EX294'
@@ -182,7 +182,15 @@ function loadObjectives(file) {
     delete require.cache[require.resolve(path.resolve(file))];
     require(path.resolve(file));
     const w = global.window;
-    return w.OBJECTIVES_AWS_GENAI || w.OBJECTIVES_CISSP || w.OBJECTIVES_RHCSA10 || w.OBJECTIVES || null;
+    const items = w.OBJECTIVES_AWS_GENAI || w.OBJECTIVES_CISSP || w.OBJECTIVES_RHCSA10 || w.OBJECTIVES || null;
+    if (!items) {
+      return null;
+    }
+    return {
+      items: items,
+      source: w.OBJECTIVES_SOURCE || null,
+      verified: w.OBJECTIVES_VERIFIED || null
+    };
   } catch (e) {
     warn(`Failed to load objectives from ${file}: ${e.message}`);
     return null;
@@ -360,18 +368,86 @@ function analyzeLongestOption(questions, trackId) {
   return percentage;
 }
 
-function validateObjectives(questions, trackId, objectives) {
+function objectiveItems(objectives) {
   if (!objectives) {
-    // Objectives not yet required for all tracks
+    return null;
+  }
+  if (Array.isArray(objectives)) {
+    return objectives;
+  }
+  return objectives.items || null;
+}
+
+function validateObjectiveMetadata(trackId, objectivesFile, objectives) {
+  if (!objectives || !objectivesFile) {
     return;
   }
-  
-  const validObjIds = new Set();
-  if (Array.isArray(objectives)) {
-    objectives.forEach(obj => {
-      if (obj.id) validObjIds.add(obj.id);
-    });
+  if (!objectives.source) {
+    error(`${objectivesFile}: missing OBJECTIVES_SOURCE`);
   }
+  if (!objectives.verified) {
+    error(`${objectivesFile}: missing OBJECTIVES_VERIFIED`);
+  }
+  validateObjectiveWeights(trackId, objectivesFile, objectiveItems(objectives));
+}
+
+function validateObjectiveWeights(trackId, objectivesFile, items) {
+  if (!Array.isArray(items) || items.length === 0) {
+    return;
+  }
+
+  var sumNumeric = 0;
+  var sumMin = 0;
+  var sumMax = 0;
+  var hasNumeric = false;
+  var hasRange = false;
+  var hasNull = false;
+
+  items.forEach(function (obj) {
+    var w = obj.weight;
+    if (w == null) {
+      hasNull = true;
+      return;
+    }
+    if (typeof w === 'number' && !isNaN(w)) {
+      hasNumeric = true;
+      sumNumeric += w;
+      return;
+    }
+    if (typeof w === 'object' && w.min != null && w.max != null) {
+      hasRange = true;
+      sumMin += Number(w.min);
+      sumMax += Number(w.max);
+      return;
+    }
+    error(`${objectivesFile}: objective '${obj.id}' has invalid weight`);
+  });
+
+  if (hasNull && !hasNumeric && !hasRange) {
+    return;
+  }
+  if (hasNumeric && Math.abs(sumNumeric - 1.0) > 0.01) {
+    error(`${trackId}: objective weights sum to ${sumNumeric.toFixed(4)}, expected 1.0 ± 0.01 (${objectivesFile})`);
+  }
+  if (hasRange && (sumMin > 1.01 || sumMax < 0.99)) {
+    error(`${trackId}: objective weight ranges do not bracket 1.0 (min sum ${sumMin}, max sum ${sumMax}) (${objectivesFile})`);
+  }
+}
+
+function validateObjectives(questions, trackId, objectives) {
+  if (!objectives) {
+    return;
+  }
+
+  const list = objectiveItems(objectives);
+  if (!list) {
+    return;
+  }
+
+  const validObjIds = new Set();
+  list.forEach(obj => {
+    if (obj.id) validObjIds.add(obj.id);
+  });
   
   questions.forEach((q, idx) => {
     if (q.obj && !validObjIds.has(q.obj)) {
@@ -441,15 +517,26 @@ function validateExamCodes() {
       const expectedCode = EXPECTED_EXAM_CODES[quiz.id];
       
       // Check if examCode field exists
-      if (!quiz.examCode && expectedCode !== null) {
-        warn(`quiz-config.js: ${quiz.id} missing 'examCode' field (expected: ${expectedCode})`);
-      } else if (quiz.examCode !== expectedCode && expectedCode !== null) {
+      if (!quiz.examCode && expectedCode != null && expectedCode !== '') {
+        error(`quiz-config.js: ${quiz.id} missing 'examCode' field (expected: ${expectedCode})`);
+      } else if (quiz.examCode !== expectedCode && expectedCode != null) {
         error(`quiz-config.js: ${quiz.id} has examCode '${quiz.examCode}', expected '${expectedCode}'`);
       }
     });
   } catch (e) {
     error(`Failed to validate exam codes: ${e.message}`);
   }
+}
+
+function resolveRepoPath(urlPath) {
+  if (!urlPath) {
+    return null;
+  }
+  const cleanUrl = urlPath.split('?')[0].split('#')[0];
+  if (cleanUrl.startsWith('/')) {
+    return path.join(process.cwd(), cleanUrl.slice(1));
+  }
+  return cleanUrl;
 }
 
 function checkLinksExist() {
@@ -498,9 +585,9 @@ function checkLinksExist() {
       srcMatches.forEach(match => {
         const url = match.match(/=["']([^"']+)["']/)[1];
         if (!url.startsWith('http') && !url.startsWith('//') && !url.startsWith('#') && !url.startsWith('data:')) {
-          const cleanUrl = url.split('?')[0].split('#')[0];
-          if (cleanUrl && !fs.existsSync(cleanUrl)) {
-            warn(`${file}: local resource '${cleanUrl}' not found`);
+          const resolved = resolveRepoPath(url.split('?')[0].split('#')[0]);
+          if (resolved && !fs.existsSync(resolved)) {
+            warn(`${file}: local resource '${url.split('?')[0].split('#')[0]}' not found`);
           }
         }
       });
@@ -574,6 +661,10 @@ function main() {
     const objectivesFile = OBJECTIVES_FILES[trackId];
     const objectives = objectivesFile ? loadObjectives(objectivesFile) : null;
     
+    if (objectivesFile && objectives) {
+      validateObjectiveMetadata(trackId, objectivesFile, objectives);
+    }
+
     if (trackQuestions.length > 0) {
       checkDuplicateStems(trackQuestions, trackId);
       validateObjectives(trackQuestions, trackId, objectives);
@@ -671,7 +762,33 @@ function main() {
 }
 
 if (require.main === module) {
+  const objFlag = process.argv.indexOf('--objectives-file');
+  if (objFlag !== -1) {
+    const file = process.argv[objFlag + 1];
+    const trackId = process.argv[objFlag + 2] || 'fixture';
+    if (!file) {
+      console.error('Usage: node scripts/lint-banks.js --objectives-file <path> [trackId]');
+      process.exit(1);
+    }
+    const data = loadObjectives(path.resolve(file));
+    validateObjectiveMetadata(trackId, file, data);
+    if (errors.length > 0) {
+      errors.forEach(function (err) {
+        console.error(err);
+      });
+      process.exit(1);
+    }
+    process.exit(0);
+  }
   main();
 }
 
-module.exports = { normalize, checkSyntax, loadQuestionBank };
+module.exports = {
+  normalize,
+  checkSyntax,
+  loadQuestionBank,
+  loadObjectives,
+  validateObjectiveWeights,
+  validateObjectiveMetadata,
+  objectiveItems
+};

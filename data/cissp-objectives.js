@@ -2,6 +2,8 @@
  * CISSP Exam Objectives
  * 8 Domains from (ISC)² CISSP CBK
  */
+window.OBJECTIVES_SOURCE = 'https://www.isc2.org/certifications/cissp/cissp-certification-exam-outline';
+window.OBJECTIVES_VERIFIED = '2026-11-02';
 window.OBJECTIVES_CISSP = [
   { id: '1', domain: 1, title: 'Security and Risk Management', weight: 0.16 },
   { id: '2', domain: 2, title: 'Asset Security', weight: 0.10 },
