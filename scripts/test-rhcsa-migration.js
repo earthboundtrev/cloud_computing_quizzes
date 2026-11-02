@@ -237,6 +237,54 @@ function testScenarioC2WithV10_2OverlapSum() {
   assert(p.mergedFrom.indexOf('rhcsa9') !== -1, 'mergedFrom set');
 }
 
+function testV10_2IdenticalCopyNotDoubled() {
+  const localStorage = new LocalStorageMock();
+  localStorage.setItem(LEGACY_FLAG_V2, 'true');
+  localStorage.setItem(
+    'study_sessions_profile_rhcsa9',
+    JSON.stringify({
+      quizId: 'rhcsa9',
+      topicStats: { Storage: { correct: 14, total: 20 } },
+      topicMissesFromImports: {}
+    })
+  );
+  localStorage.setItem(
+    'study_sessions_profile_rhcsa10',
+    JSON.stringify({
+      quizId: 'rhcsa10',
+      topicStats: { Storage: { correct: 14, total: 20 } },
+      topicMissesFromImports: {}
+    })
+  );
+  executeMigrationWithLocalStorage(localStorage);
+  const p = JSON.parse(localStorage.getItem('study_sessions_profile_rhcsa10'));
+  assertDeepEqual(p.topicStats.Storage, { correct: 14, total: 20 }, 'identical copy not doubled');
+}
+
+function testMergedFromSkips() {
+  const localStorage = new LocalStorageMock();
+  localStorage.setItem(
+    'study_sessions_profile_rhcsa9',
+    JSON.stringify({
+      quizId: 'rhcsa9',
+      topicStats: { Storage: { correct: 99, total: 99 } },
+      topicMissesFromImports: {}
+    })
+  );
+  localStorage.setItem(
+    'study_sessions_profile_rhcsa10',
+    JSON.stringify({
+      quizId: 'rhcsa10',
+      topicStats: { Storage: { correct: 5, total: 10 } },
+      topicMissesFromImports: {},
+      mergedFrom: ['rhcsa9']
+    })
+  );
+  executeMigrationWithLocalStorage(localStorage);
+  const p = JSON.parse(localStorage.getItem('study_sessions_profile_rhcsa10'));
+  assertDeepEqual(p.topicStats.Storage, { correct: 5, total: 10 }, 'mergedFrom skips merge');
+}
+
 function testAlreadyMergedWithV10_2Flag() {
   const localStorage = new LocalStorageMock();
   localStorage.setItem(LEGACY_FLAG_V2, 'true');
@@ -254,15 +302,14 @@ function testAlreadyMergedWithV10_2Flag() {
     JSON.stringify({
       quizId: 'rhcsa10',
       topicStats: { Storage: { correct: 20, total: 30 } },
-      topicMissesFromImports: {},
-      mergedFrom: ['rhcsa9']
+      topicMissesFromImports: {}
     })
   );
 
   executeMigrationWithLocalStorage(localStorage);
 
   const p = JSON.parse(localStorage.getItem('study_sessions_profile_rhcsa10'));
-  assertDeepEqual(p.topicStats.Storage, { correct: 20, total: 30 }, 'P: no double-count');
+  assertDeepEqual(p.topicStats.Storage, { correct: 20, total: 30 }, 'P: no double-count without mergedFrom');
   assert(localStorage.getItem(MIGRATION_FLAG) === 'true', 'v10_3 set');
 }
 
@@ -376,7 +423,9 @@ const tests = [
   ['Merge sums overlapping topic stats (#41)', testMergeExistingDataSums],
   ['Scenario C2 overlap sums', testScenarioC2],
   ['Scenario C2 with v10_2 — overlap sum only', testScenarioC2WithV10_2OverlapSum],
-  ['Scenario P: mergedFrom — no double count', testAlreadyMergedWithV10_2Flag],
+  ['Scenario P: v10_2 studied profile — no double count', testAlreadyMergedWithV10_2Flag],
+  ['v10_2 identical copy not doubled', testV10_2IdenticalCopyNotDoubled],
+  ['mergedFrom marker skips re-merge', testMergedFromSkips],
   ['Idempotent second run', testIdempotent],
   ['Both rhcsa9 and rhcsa10 in quizCompleted', testBothInCompleted],
   ['Missing topicStats on rhcsa10', testMissingFieldsOnRhcsa10],

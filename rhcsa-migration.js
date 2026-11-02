@@ -99,7 +99,13 @@
             }
             var oldStat = oldProfile.topicStats[topic];
             if (newProfile.topicStats[topic]) {
-              newProfile.topicStats[topic] = sumTopicStats(newProfile.topicStats[topic], oldStat);
+              var curStat = newProfile.topicStats[topic];
+              var shouldSumOverlap = !v10_2Ran ||
+                (curStat.total || 0) < (oldStat.total || 0) ||
+                (curStat.correct || 0) < (oldStat.correct || 0);
+              if (shouldSumOverlap) {
+                newProfile.topicStats[topic] = sumTopicStats(curStat, oldStat);
+              }
             } else if (!v10_2Ran) {
               newProfile.topicStats[topic] = oldStat;
             }
@@ -115,10 +121,12 @@
             var hasNewMiss = newProfile.topicMissesFromImports[topic] !== undefined &&
               newProfile.topicMissesFromImports[topic] !== null;
             if (hasNewMiss) {
-              newProfile.topicMissesFromImports[topic] = sumMissCounts(
-                newProfile.topicMissesFromImports[topic],
-                oldMiss
-              );
+              var curMiss = missCount(newProfile.topicMissesFromImports[topic]);
+              var oldMissN = missCount(oldMiss);
+              var shouldSumMiss = !v10_2Ran || curMiss < oldMissN;
+              if (shouldSumMiss) {
+                newProfile.topicMissesFromImports[topic] = curMiss + oldMissN;
+              }
             } else if (!v10_2Ran) {
               newProfile.topicMissesFromImports[topic] = missCount(oldMiss);
             }
