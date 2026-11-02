@@ -205,6 +205,21 @@
     } catch (e) {}
   }
 
+  function dedupeNumericList(list) {
+    var seen = Object.create(null);
+    var out = [];
+    (list || []).forEach(function (item) {
+      var key =
+        typeof item === 'object' && item !== null
+          ? String(item.at) + ':' + String(item.days || '')
+          : String(item);
+      if (seen[key]) return;
+      seen[key] = true;
+      out.push(item);
+    });
+    return out;
+  }
+
   function mergeStates(a, b) {
     var base = normalizeState(a);
     var other = normalizeState(b);
@@ -241,7 +256,6 @@
       out.repair = base.repair || other.repair || null;
     }
     if (other.vacation) out.vacation = other.vacation;
-    out.vacationUses = (base.vacationUses || []).concat(other.vacationUses || []);
     out.notices = Object.assign({}, base.notices, other.notices);
     if (other.migratedFrom && !out.migratedFrom) {
       out.migratedFrom = other.migratedFrom;
@@ -255,7 +269,8 @@
     } else if (other.lastProcessedDate) {
       out.lastProcessedDate = other.lastProcessedDate;
     }
-    out.repairUses = (base.repairUses || []).concat(other.repairUses || []);
+    out.repairUses = dedupeNumericList((base.repairUses || []).concat(other.repairUses || []));
+    out.vacationUses = dedupeNumericList((base.vacationUses || []).concat(other.vacationUses || []));
     out.hadStreakBreak = base.hadStreakBreak || other.hadStreakBreak;
     return out;
   }

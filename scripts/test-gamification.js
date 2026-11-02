@@ -306,6 +306,14 @@ test('unknown version keeps corrupt blob once', function () {
   assert(ls.getItem('cloudcram_game_v1_corrupt'), 'corrupt stored');
 });
 
+test('mergeStates does not double repairUses when merging identical state', function () {
+  const game = loadGame();
+  const s = game.defaultState();
+  s.repairUses = [1000];
+  const m = game.mergeStates(s, s);
+  assert(m.repairUses.length === 1, 'repairUses length 1');
+});
+
 test('lint scans gamification.js', function () {
   const lintSrc = fs.readFileSync(path.join(ROOT, 'scripts/lint-storage-keys.js'), 'utf8');
   assert(lintSrc.indexOf('gamification.js') >= 0, 'lint scans gamification.js');
