@@ -1492,5 +1492,195 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
       1
     ],
     "explain": "Managed evaluation jobs plus retrieval checks on labeled sets catch regressions before full rollout."
+  },
+  {
+    "id": "genai-ramp-084",
+    "mode": "exam",
+    "topic": "Observability",
+    "obj": "4",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/monitoring.html",
+    "q": "SREs need token counts, latency, and throttling per model for a multi-tenant Bedrock API. FIRST observability step?",
+    "options": [
+      "Enable Amazon CloudWatch metrics and logs for Bedrock with dashboards on Invocations and OutputTokenCount",
+      "Disable logging to reduce overhead during peak marketing events across all Regions and accounts",
+      "Sample one request per day manually from browser devtools without storing timestamps centrally",
+      "Store metrics only in the user session cookie on the client device without server-side aggregation"
+    ],
+    "correct": 0,
+    "explain": "Bedrock publishes CloudWatch metrics for invocation, tokens, and errors; dashboards support capacity planning."
+  },
+  {
+    "id": "genai-ramp-085",
+    "mode": "exam",
+    "topic": "RAG",
+    "type": "multi",
+    "obj": "1",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base.html",
+    "q": "A RAG app hallucinates when retrieved chunks are stale after nightly catalog updates. Which TWO changes reduce stale answers? (Pick 2)",
+    "options": [
+      "Schedule incremental knowledge base sync after catalog ETL completes",
+      "Add metadata filters so retrieval prefers current catalog version fields",
+      "Disable retrieval and rely on model parametric memory only",
+      "Set temperature to zero and remove the system prompt entirely",
+      "Delete the vector index weekly without re-sync"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "Fresh sync plus version metadata keeps retrieval aligned with current catalog rows."
+  },
+  {
+    "id": "genai-ramp-086",
+    "mode": "exam",
+    "topic": "Agents",
+    "type": "multi",
+    "obj": "2",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/agents-trace.html",
+    "q": "Debug an agent that loops on the same tool call. Which TWO tools help? (Pick 2)",
+    "options": [
+      "Enable agent trace to inspect rationale and tool invocation sequence",
+      "Review action group OpenAPI schema for ambiguous required parameters",
+      "Disable all tools so the model answers from memory only",
+      "Increase max_tokens to maximum on every turn",
+      "Remove IAM from the Lambda backing the action group"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "Trace shows planning loops; schema clarity reduces malformed tool inputs."
+  },
+  {
+    "id": "genai-ramp-087",
+    "mode": "exam",
+    "topic": "Safety",
+    "obj": "3",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-contextual-grounding.html",
+    "q": "Answers must cite retrieved passages and refuse when grounding score is low. Which Guardrail feature applies?",
+    "options": [
+      "Contextual grounding check comparing model output to retrieved sources",
+      "Word filter that blocks every verb longer than eight characters in all languages supported",
+      "Denied topic list that removes all healthcare terms globally from every user utterance",
+      "Sensitive information filter that deletes all numbers from output including dates and dosages"
+    ],
+    "correct": 0,
+    "explain": "Contextual grounding evaluates whether responses stay faithful to provided context."
+  },
+  {
+    "id": "genai-ramp-088",
+    "mode": "exam",
+    "topic": "Latency",
+    "obj": "5",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/inference.html",
+    "q": "Users report high time-to-first-token on streaming chat. Retrieval is fast; generation model is large. FIRST tuning knob?",
+    "options": [
+      "Profile model latency per FM and consider a smaller model or region colocation for interactive paths",
+      "Disable streaming so users wait for the full response silently without partial token delivery",
+      "Remove Guardrails entirely to skip policy evaluation latency on every production InvokeModel call",
+      "Double the number of retrieved chunks on every request regardless of prompt length or cost"
+    ],
+    "correct": 0,
+    "explain": "Model size and network path dominate TTFT; streaming still benefits from right-sized models."
+  },
+  {
+    "id": "genai-ramp-089",
+    "mode": "exam",
+    "topic": "Fine-Tuning",
+    "obj": "1",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/custom-model-job.html",
+    "q": "A custom model job failed with insufficient training data format errors. What should you verify FIRST in S3?",
+    "options": [
+      "JSONL or specified format matches Bedrock customization requirements for the chosen base model",
+      "The S3 bucket is in a different Region than the training job for cost savings without replication",
+      "Training files are gzip-compressed with random file extensions and no manifest metadata",
+      "Labels are stored only in CloudWatch log streams instead of structured training objects in S3"
+    ],
+    "correct": 0,
+    "explain": "Customization jobs validate schema and record layout before training starts."
+  },
+  {
+    "id": "genai-ramp-090",
+    "mode": "exam",
+    "topic": "Cost",
+    "type": "multi",
+    "obj": "4",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/on-demand.html",
+    "q": "Finance asks which TWO levers reduce on-demand spend without removing Guardrails from production chat? (Pick 2)",
+    "options": [
+      "Right-size models for each use case instead of using the largest FM everywhere",
+      "Cache static prompt prefixes where supported on the chosen models",
+      "Disable all CloudWatch alarms to avoid notification costs",
+      "Send duplicate identical requests to two models and pick the longer answer",
+      "Store embeddings on every request even when the user message is empty"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "Model selection and prompt caching directly reduce billed tokens; duplicate invocations increase cost."
+  },
+  {
+    "id": "genai-ramp-091",
+    "mode": "exam",
+    "topic": "Integration",
+    "obj": "2",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/kb-api.html",
+    "q": "A mobile app must query a knowledge base without exposing database credentials. Recommended pattern?",
+    "options": [
+      "Call a backend API that uses IAM role credentials to RetrieveAndGenerate on Bedrock",
+      "Embed long-lived IAM user keys in the mobile app binary for direct Bedrock access in production",
+      "Expose the knowledge base data source connection string in the app config file signed by the store",
+      "Disable TLS between the app and API to reduce CPU usage on phones during peak commute hours"
+    ],
+    "correct": 0,
+    "explain": "Bedrock calls belong on the server with IAM roles; clients never hold data-plane secrets."
+  },
+  {
+    "id": "genai-ramp-092",
+    "mode": "exam",
+    "topic": "Troubleshooting",
+    "obj": "5",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/troubleshooting-api-error-codes.html",
+    "q": "InvokeModel returns AccessDeniedException after a model rename in the console. Most likely cause?",
+    "options": [
+      "IAM policy still references the previous foundation model ID or ARN after access was re-requested",
+      "Temperature was set below zero in the request body JSON payload according to the API schema",
+      "The user switched browsers without clearing cookies on the marketing site landing page",
+      "CloudWatch log group retention was reduced from 30 to 7 days for unrelated Lambda functions"
+    ],
+    "correct": 0,
+    "explain": "Model identifiers and access flags change; IAM must match currently enabled model resources."
+  },
+  {
+    "id": "genai-ramp-093",
+    "mode": "exam",
+    "topic": "Evaluation",
+    "type": "multi",
+    "obj": "5",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-evaluation.html",
+    "q": "Which TWO metrics belong in a Bedrock RAG release scorecard? (Pick 2)",
+    "options": [
+      "Retrieval precision/recall on labeled questions",
+      "Helpfulness or correctness scores from model evaluation jobs",
+      "Number of S3 buckets in the account regardless of KB use",
+      "EC2 CPU utilization for unrelated web servers",
+      "Social media follower count for the product brand"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "RAG quality combines retrieval metrics and generation evaluation on curated prompts."
   }
 ];

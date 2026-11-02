@@ -4,10 +4,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Bedrock",
     "q": "Amazon Bedrock provides access to foundation models (FMs) through which model delivery option?",
     "options": [
-      "Only bring-your-own model",
+      "Only bring-your-own model for accounts that already enabled model access in the console",
       "API access to FMs from Amazon and third parties (no infrastructure to manage)",
-      "Only Amazon Titan",
-      "Only open-source models"
+      "Only Amazon Titan if the knowledge base completed an incremental sync recently",
+      "Only open-source models for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Bedrock = fully managed; access FMs from Amazon and third-party providers via API; no servers to manage.",
@@ -21,10 +21,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Bedrock",
     "q": "To use a foundation model in Bedrock for the first time, you must:",
     "options": [
-      "Deploy the model to EC2",
+      "Deploy the model to EC2 for accounts that already enabled model access in the console",
       "Enable model access in the Bedrock console (Model Access in the left menu)",
-      "Use only default models",
-      "Request a custom fine-tune"
+      "Use only default models if the knowledge base completed an incremental sync recently",
+      "Request a custom fine-tune for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Model access must be enabled per model (and per region) before you can invoke it.",
@@ -38,10 +38,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Bedrock",
     "q": "Bedrock Inference supports which invocation patterns?",
     "options": [
-      "Synchronous only",
+      "Synchronous only for accounts that already enabled model access in the console",
       "Synchronous (InvokeModel) and asynchronous (InvokeModelWithResponseStream)",
-      "Batch only",
-      "Only streaming"
+      "Batch only if the knowledge base completed an incremental sync recently for batch jobs that do not require streaming responses",
+      "Only streaming for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "InvokeModel = sync; InvokeModelWithResponseStream = stream tokens; async for long-running inference.",
@@ -55,10 +55,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Bedrock",
     "q": "Amazon Bedrock Serverless Inference is best for:",
     "options": [
-      "Only high-throughput batch",
+      "Only high-throughput batch for accounts that already enabled model access in the console",
       "Variable or unpredictable traffic; pay per request",
-      "Only reserved capacity",
-      "Only real-time always-on"
+      "Only reserved capacity if the knowledge base completed an incremental sync recently",
+      "Only real-time always-on for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Serverless = no capacity to manage; pay per request; good for variable traffic.",
@@ -72,10 +72,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Bedrock",
     "q": "Provisioned Throughput in Bedrock is used when you need:",
     "options": [
-      "Only serverless",
+      "Only serverless for accounts that already enabled model access in the console",
       "Predictable capacity and guaranteed throughput (dedicated model units)",
-      "Only on-demand",
-      "Only batch"
+      "Only on-demand if the knowledge base completed an incremental sync recently",
+      "Only batch for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Provisioned Throughput = reserve model units for predictable performance; commit to capacity.",
@@ -89,10 +89,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "RAG",
     "q": "A RAG (Retrieval-Augmented Generation) solution on AWS typically uses Bedrock with:",
     "options": [
-      "Only the base model",
+      "Only the base model for accounts that already enabled model access in the console",
       "Bedrock Knowledge Bases (retrieve from your data, then generate)",
-      "Only Lambda",
-      "Only S3 without retrieval"
+      "Only Lambda if the knowledge base completed an incremental sync recently",
+      "Only S3 without retrieval for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Knowledge Bases = ingest your data (S3, etc.), create embeddings, retrieve relevant chunks for context in prompts.",
@@ -106,10 +106,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "RAG",
     "q": "Bedrock Knowledge Bases can use which vector store?",
     "options": [
-      "Only OpenSearch",
+      "Only OpenSearch for accounts that already enabled model access in the console",
       "Amazon OpenSearch Serverless, Pinecone, or Redis Enterprise Cloud",
-      "Only DynamoDB",
-      "Only RDS"
+      "Only DynamoDB if the knowledge base completed an incremental sync recently",
+      "Only RDS for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Knowledge Bases support OpenSearch Serverless, Pinecone, Redis Enterprise as vector stores.",
@@ -123,10 +123,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "RAG",
     "q": "When building RAG, embedding models in Bedrock are used to:",
     "options": [
-      "Only generate text",
+      "Only generate text for accounts that already enabled model access in the console",
       "Convert text to vector embeddings for retrieval",
-      "Only summarize",
-      "Only translate"
+      "Only summarize if the knowledge base completed an incremental sync recently",
+      "Only translate for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Embedding models (e.g., Titan Embeddings) convert text to vectors for similarity search in the vector store.",
@@ -140,10 +140,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "RAG",
     "q": "Chunking strategy in RAG affects:",
     "options": [
-      "Only cost",
+      "Only cost for accounts that already enabled model access in the console",
       "Retrieval quality and relevance (size, overlap, semantics)",
-      "Only latency",
-      "Only model choice"
+      "Only latency if the knowledge base completed an incremental sync recently",
+      "Only model choice for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Chunk size and overlap affect what gets retrieved; too large or too small can hurt answer quality.",
@@ -157,10 +157,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Agents",
     "q": "Bedrock Agents are used to:",
     "options": [
-      "Only run batch jobs",
+      "Only run batch jobs for accounts that already enabled model access in the console",
       "Orchestrate multi-step tasks with tools and knowledge bases",
-      "Only invoke a single model",
-      "Only store embeddings"
+      "Only invoke a single model if the knowledge base completed an incremental sync recently",
+      "Only store embeddings for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Agents = orchestrate FMs with action groups (APIs, Lambda) and optional knowledge bases; multi-step reasoning.",
@@ -174,10 +174,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Agents",
     "q": "An action group in a Bedrock Agent typically:",
     "options": [
-      "Only returns static text",
+      "Only returns static text for accounts that already enabled model access in the console",
       "Defines APIs or Lambda functions the agent can call to perform actions",
-      "Only retrieves from Knowledge Base",
-      "Only streams tokens"
+      "Only retrieves from Knowledge Base if the knowledge base completed an incremental sync recently",
+      "Only streams tokens for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Action groups = define tools (OpenAPI schema + Lambda or API) the agent can invoke.",
@@ -191,10 +191,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Agents",
     "q": "To keep agent behavior consistent and controllable, you should:",
     "options": [
-      "Only use the default system prompt",
+      "Only use the default system prompt for accounts that already enabled model access in the console",
       "Configure instructions (system prompt) and guardrails",
-      "Only use one action group",
-      "Only use streaming"
+      "Only use one action group if the knowledge base completed an incremental sync recently",
+      "Only use streaming for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Instructions and guardrails shape agent behavior; use them for consistency and safety.",
@@ -208,10 +208,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Guardrails",
     "q": "Bedrock Guardrails help with:",
     "options": [
-      "Only cost control",
+      "Only cost control for accounts that already enabled model access in the console",
       "Content filtering and safety (deny harmful or off-topic content)",
-      "Only scaling",
-      "Only logging"
+      "Only scaling if the knowledge base completed an incremental sync recently",
+      "Only logging for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Guardrails = apply content filters (hate, violence, PII, etc.) and topic policies on input/output.",
@@ -225,10 +225,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Guardrails",
     "q": "Guardrails can be applied at:",
     "options": [
-      "Model level only",
+      "Model level only for accounts that already enabled model access in the console",
       "Input (prompt) and/or output (response) stages",
-      "Only output",
-      "Only in Knowledge Base"
+      "Only output if the knowledge base completed an incremental sync recently",
+      "Only in Knowledge Base for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Guardrails evaluate and block/filter at input and/or output; configurable per stage.",
@@ -242,10 +242,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Security",
     "q": "To run Bedrock inference inside your VPC without internet, you would use:",
     "options": [
-      "Only public Bedrock endpoints",
+      "Only public Bedrock endpoints for accounts that already enabled model access in the console",
       "VPC endpoints for Bedrock (and optionally PrivateLink)",
-      "Only NAT Gateway",
-      "Only VPN"
+      "Only NAT Gateway if the knowledge base completed an incremental sync recently",
+      "Only VPN for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Use VPC endpoints (interface endpoints) for Bedrock so traffic stays on the AWS network; optional PrivateLink for private access.",
@@ -259,10 +259,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Security",
     "q": "Bedrock supports encryption of model data:",
     "options": [
-      "Only in transit",
+      "Only in transit for accounts that already enabled model access in the console",
       "At rest (AWS managed or customer-managed keys in KMS) and in transit",
-      "Only at rest",
-      "No encryption"
+      "Only at rest if the knowledge base completed an incremental sync recently",
+      "No encryption for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Encryption at rest with KMS (default or CMK); TLS in transit.",
@@ -276,10 +276,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Deployment",
     "q": "For a production GenAI app that must scale with traffic, a common pattern is:",
     "options": [
-      "Single EC2 instance only",
+      "Single EC2 instance only for accounts that already enabled model access in the console",
       "API Gateway + Lambda (or container) invoking Bedrock",
-      "Only SageMaker real-time",
-      "Only batch"
+      "Only SageMaker real-time if the knowledge base completed an incremental sync recently",
+      "Only batch for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "API Gateway + Lambda/container calling Bedrock = serverless, scalable; add caching and throttling as needed.",
@@ -293,10 +293,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Deployment",
     "q": "Amazon SageMaker JumpStart can be used for GenAI to:",
     "options": [
-      "Only Bedrock",
+      "Only Bedrock for accounts that already enabled model access in the console",
       "Deploy and fine-tune open-source FMs (e.g., Llama) on SageMaker",
-      "Only Knowledge Bases",
-      "Only agents"
+      "Only Knowledge Bases if the knowledge base completed an incremental sync recently",
+      "Only agents for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "JumpStart = deploy pre-built models (including LLMs) and fine-tune; alternative to Bedrock for bring-your-own.",
@@ -310,10 +310,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Cost",
     "q": "To optimize cost when using Bedrock with variable traffic, you should consider:",
     "options": [
-      "Only Provisioned Throughput",
+      "Only Provisioned Throughput for accounts that already enabled model access in the console",
       "On-Demand or Serverless for variable load; Provisioned Throughput for steady high load",
-      "Only On-Demand",
-      "Only custom models"
+      "Only On-Demand if the knowledge base completed an incremental sync recently for batch jobs that do not require streaming responses",
+      "Only custom models for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "On-Demand/Serverless = pay per use; Provisioned = commit for predictable, high throughput; match to traffic pattern.",
@@ -327,10 +327,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Cost",
     "q": "Bedrock pricing is typically based on:",
     "options": [
-      "Only API calls",
+      "Only API calls for accounts that already enabled model access in the console when the workload runs entirely inside a single Availability Zone",
       "Input and output tokens (and optionally model units for Provisioned Throughput)",
-      "Only storage",
-      "Only requests"
+      "Only storage if the knowledge base completed an incremental sync recently for batch jobs that do not require streaming responses",
+      "Only requests for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Pay per input token and output token (varies by model); Provisioned Throughput adds model unit pricing.",
@@ -344,10 +344,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Bedrock",
     "q": "Which Bedrock feature allows you to fine-tune a model on your own data?",
     "options": [
-      "Only base model invocation",
+      "Only base model invocation for accounts that already enabled model access in the console",
       "Bedrock Custom Model (fine-tune supported models with your dataset)",
-      "Only Knowledge Base",
-      "Only Guardrails"
+      "Only Knowledge Base if the knowledge base completed an incremental sync recently",
+      "Only Guardrails for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Custom Model = fine-tune supported FMs (e.g., Cohere, Amazon Titan) with your data in S3.",
@@ -361,10 +361,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "RAG",
     "q": "In RAG, the purpose of the retrieval step is to:",
     "options": [
-      "Replace the model",
+      "Replace the model for accounts that already enabled model access in the console",
       "Fetch relevant context from your data to add to the prompt",
-      "Only cache responses",
-      "Only validate output"
+      "Only cache responses if the knowledge base completed an incremental sync recently",
+      "Only validate output for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Retrieve relevant documents/chunks; concatenate with user prompt so the FM has context to answer accurately.",
@@ -378,10 +378,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Agents",
     "q": "When a Bedrock Agent uses a Knowledge Base, it:",
     "options": [
-      "Only calls action groups",
+      "Only calls action groups for accounts that already enabled model access in the console",
       "Can retrieve from the Knowledge Base and optionally call action groups",
-      "Only streams",
-      "Only uses one model"
+      "Only streams if the knowledge base completed an incremental sync recently",
+      "Only uses one model for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Agent can use both Knowledge Base (retrieval) and action groups (tools); configured in the agent.",
@@ -395,10 +395,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Guardrails",
     "q": "A guardrail topic policy is used to:",
     "options": [
-      "Only filter PII",
+      "Only filter PII for accounts that already enabled model access in the console",
       "Restrict conversation to approved topics or deny prohibited topics",
-      "Only filter violence",
-      "Only log requests"
+      "Only filter violence if the knowledge base completed an incremental sync recently",
+      "Only log requests for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Topic policies = allow list or deny list of topics; keep the model on-topic.",
@@ -412,10 +412,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Security",
     "q": "To allow only specific IAM principals to call Bedrock, you should:",
     "options": [
-      "Only use VPC",
+      "Only use VPC for accounts that already enabled model access in the console when the workload runs entirely inside a single Availability Zone",
       "Use IAM policies (and optionally resource policies) on the Bedrock resources",
-      "Only use Guardrails",
-      "Only use encryption"
+      "Only use Guardrails if the knowledge base completed an incremental sync recently",
+      "Only use encryption for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "IAM policies control who can invoke models; use least privilege; resource policies for cross-account if needed.",
@@ -429,10 +429,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Deployment",
     "q": "For low-latency inference at high scale, a suitable option is:",
     "options": [
-      "Only Lambda with no concurrency",
+      "Only Lambda with no concurrency for accounts that already enabled model access in the console",
       "Provisioned Throughput (dedicated capacity) or SageMaker real-time endpoint",
-      "Only on-demand with no cache",
-      "Only batch"
+      "Only on-demand with no cache if the knowledge base completed an incremental sync recently",
+      "Only batch for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Provisioned Throughput = dedicated capacity, predictable latency; SageMaker = custom models with dedicated instances.",
@@ -446,10 +446,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Monitoring",
     "q": "To trace and debug Bedrock invocations in production, you can use:",
     "options": [
-      "Only CloudWatch Logs",
+      "Only CloudWatch Logs for accounts that already enabled model access in the console",
       "AWS X-Ray (and CloudWatch) for tracing and metrics",
-      "Only Guardrails",
-      "Only Knowledge Base logs"
+      "Only Guardrails if the knowledge base completed an incremental sync recently",
+      "Only Knowledge Base logs for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "X-Ray = trace requests across services; CloudWatch = logs and metrics; use both for observability.",
@@ -463,10 +463,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Bedrock",
     "q": "InvokeModelWithResponseStream returns:",
     "options": [
-      "Only a single block of text",
+      "Only a single block of text for accounts that already enabled model access in the console",
       "A stream of response chunks (e.g., for real-time UX)",
-      "Only metadata",
-      "Only embeddings"
+      "Only metadata if the knowledge base completed an incremental sync recently",
+      "Only embeddings for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Streaming API = receive chunks as the model generates; better UX for chat and long responses.",
@@ -480,10 +480,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "RAG",
     "q": "Hybrid search in a RAG context typically combines:",
     "options": [
-      "Only two embedding models",
+      "Only two embedding models for accounts that already enabled model access in the console",
       "Keyword (e.g., BM25) and semantic (vector) search",
-      "Only vector search",
-      "Only keyword search"
+      "Only vector search if the knowledge base completed an incremental sync recently",
+      "Only keyword search for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Hybrid = keyword + vector; improves retrieval when exact terms or semantics matter.",
@@ -497,10 +497,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Agents",
     "q": "Agent memory (session state) in Bedrock Agents is used to:",
     "options": [
-      "Only store embeddings",
+      "Only store embeddings for accounts that already enabled model access in the console",
       "Persist conversation context across turns",
-      "Only cache model output",
-      "Only log actions"
+      "Only cache model output if the knowledge base completed an incremental sync recently",
+      "Only log actions for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Session state = store conversation history and context so the agent has memory across turns.",
@@ -514,10 +514,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Guardrails",
     "q": "PII filter in Guardrails can:",
     "options": [
-      "Only log PII",
+      "Only log PII for accounts that already enabled model access in the console",
       "Detect and redact or block PII in input/output",
-      "Only block all text",
-      "Only allow PII"
+      "Only block all text if the knowledge base completed an incremental sync recently",
+      "Only allow PII for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "PII filters = detect and redact or block (e.g., SSN, names) to meet compliance.",
@@ -531,10 +531,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Security",
     "q": "Cross-account access to Bedrock can be granted via:",
     "options": [
-      "Only same-account IAM",
+      "Only same-account IAM for accounts that already enabled model access in the console",
       "Resource-based policies (e.g., on Bedrock) and IAM in the other account",
-      "Only VPC peering",
-      "Only Guardrails"
+      "Only VPC peering if the knowledge base completed an incremental sync recently",
+      "Only Guardrails for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Use resource policy on the Bedrock resource to allow another account; other account needs IAM to call.",
@@ -548,10 +548,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Cost",
     "q": "Caching Bedrock model responses is useful when:",
     "options": [
-      "Traffic is always unique",
+      "Traffic is always unique for accounts that already enabled model access in the console",
       "Similar prompts repeat (reduce cost and latency)",
-      "Only for batch",
-      "Only for streaming"
+      "Only for batch if the knowledge base completed an incremental sync recently",
+      "Only for streaming for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Cache repeated or similar prompts (e.g., prompt cache in Bedrock or application-level cache) to save tokens and latency.",
@@ -565,10 +565,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Deployment",
     "q": "AWS Lambda is a good fit for Bedrock invocation when:",
     "options": [
-      "Only long-running batch",
+      "Only long-running batch for accounts that already enabled model access in the console",
       "Event-driven, variable load, and invocation fits within Lambda timeout",
-      "Only real-time 24/7",
-      "Only Provisioned Throughput"
+      "Only real-time 24/7 if the knowledge base completed an incremental sync recently",
+      "Only Provisioned Throughput for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Lambda = event-driven, scales automatically; ensure inference fits within 15 min timeout and memory limits.",
@@ -582,10 +582,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Bedrock",
     "q": "Model ID in Bedrock (e.g., anthropic.claude-3-sonnet) identifies:",
     "options": [
-      "Only the region",
+      "Only the region for accounts that already enabled model access in the console",
       "The specific foundation model and variant to invoke",
-      "Only the account",
-      "Only the endpoint"
+      "Only the account if the knowledge base completed an incremental sync recently",
+      "Only the endpoint for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Model ID = provider.model-name (e.g., amazon.titan-text-express); required for InvokeModel.",
@@ -599,10 +599,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "RAG",
     "q": "Metadata filtering in a Knowledge Base query allows you to:",
     "options": [
-      "Only filter by date",
+      "Only filter by date for accounts that already enabled model access in the console",
       "Restrict retrieval to documents matching metadata (e.g., department, locale)",
-      "Only filter by size",
-      "Only filter by model"
+      "Only filter by size if the knowledge base completed an incremental sync recently",
+      "Only filter by model for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Metadata filters = narrow retrieval to chunks that match key-value filters; improves relevance.",
@@ -616,10 +616,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Agents",
     "q": "Prepared prompts (prompt templates) in Bedrock Agents help with:",
     "options": [
-      "Only logging",
+      "Only logging for accounts that already enabled model access in the console",
       "Consistent, reusable prompt structure and variables",
-      "Only streaming",
-      "Only action groups"
+      "Only streaming if the knowledge base completed an incremental sync recently",
+      "Only action groups for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Prepared prompts = templates with placeholders; standardize and reuse prompt structure.",
@@ -633,10 +633,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Guardrails",
     "q": "Word filters in Guardrails can:",
     "options": [
-      "Only allow all words",
+      "Only allow all words for accounts that already enabled model access in the console",
       "Block or replace specific words/phrases (e.g., profanity, competitors)",
-      "Only log words",
-      "Only for PII"
+      "Only log words if the knowledge base completed an incremental sync recently",
+      "Only for PII for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Word filters = block list or replace list for specific terms; configurable.",
@@ -650,10 +650,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Monitoring",
     "q": "CloudWatch metrics for Bedrock can include:",
     "options": [
-      "Only cost",
+      "Only cost for accounts that already enabled model access in the console",
       "Invocation count, latency, errors (by model, account)",
-      "Only tokens",
-      "Only streaming"
+      "Only tokens if the knowledge base completed an incremental sync recently",
+      "Only streaming for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Bedrock emits metrics (Invocations, InvocationLatency, etc.); use for monitoring and alarms.",
@@ -667,10 +667,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Bedrock",
     "q": "Bedrock supports which type of models for text generation?",
     "options": [
-      "Only Amazon models",
+      "Only Amazon models for accounts that already enabled model access in the console",
       "Amazon (Titan, etc.) and third-party (Anthropic, Cohere, Meta, etc.)",
-      "Only open-source",
-      "Only custom"
+      "Only open-source if the knowledge base completed an incremental sync recently",
+      "Only custom for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Bedrock = multi-provider; Amazon Titan, Anthropic Claude, Cohere, Meta Llama, etc.; enable per model.",
@@ -684,10 +684,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "RAG",
     "q": "When ingestion runs for a Bedrock Knowledge Base, it:",
     "options": [
-      "Only deletes data",
+      "Only deletes data for accounts that already enabled model access in the console when the workload runs entirely inside a single Availability Zone",
       "Syncs data source (e.g., S3), chunks, generates embeddings, writes to vector store",
-      "Only invokes the model",
-      "Only updates Guardrails"
+      "Only invokes the model if the knowledge base completed an incremental sync recently",
+      "Only updates Guardrails for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Ingestion = read from data source, chunk, embed, store in vector store; run on schedule or on-demand.",
@@ -701,10 +701,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Agents",
     "q": "Agent validation in Bedrock helps:",
     "options": [
-      "Only with cost",
+      "Only with cost for accounts that already enabled model access in the console",
       "Test the agent (e.g., test cases) before deployment",
-      "Only with streaming",
-      "Only with action groups"
+      "Only with streaming if the knowledge base completed an incremental sync recently",
+      "Only with action groups for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Validation = run test cases against the agent; ensure it behaves as expected before release.",
@@ -718,10 +718,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Security",
     "q": "To meet compliance, you should for Bedrock:",
     "options": [
-      "Only use default settings",
+      "Only use default settings for accounts that already enabled model access in the console",
       "Use encryption (KMS), VPC, IAM least privilege, and Guardrails as appropriate",
-      "Only use Guardrails",
-      "Only use public endpoints"
+      "Only use Guardrails if the knowledge base completed an incremental sync recently",
+      "Only use public endpoints for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Encryption, network isolation (VPC), least privilege IAM, and content controls (Guardrails) support compliance.",
@@ -735,10 +735,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Deployment",
     "q": "Blue/green or canary deployment for a GenAI API is useful to:",
     "options": [
-      "Only reduce cost",
+      "Only reduce cost for accounts that already enabled model access in the console",
       "Roll out model or prompt changes with reduced risk",
-      "Only increase latency",
-      "Only for batch"
+      "Only increase latency if the knowledge base completed an incremental sync recently",
+      "Only for batch for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Blue/green or canary = release new version to a subset; validate before full rollout.",
@@ -752,10 +752,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Cost",
     "q": "Choosing a smaller or more efficient model in Bedrock can:",
     "options": [
-      "Only increase latency",
+      "Only increase latency for accounts that already enabled model access in the console",
       "Reduce cost and often latency for suitable tasks",
-      "Only reduce accuracy",
-      "Only increase tokens"
+      "Only reduce accuracy if the knowledge base completed an incremental sync recently",
+      "Only increase tokens for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Smaller models (e.g., Titan Text Express vs. Claude) can be cheaper and faster for simpler tasks.",
@@ -769,10 +769,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Bedrock",
     "q": "Converse API in Bedrock provides:",
     "options": [
-      "Only single-turn invoke",
+      "Only single-turn invoke for accounts that already enabled model access in the console",
       "Unified chat interface (messages, tool use, streaming) for supported models",
-      "Only embeddings",
-      "Only batch"
+      "Only embeddings if the knowledge base completed an incremental sync recently",
+      "Only batch for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Converse API = multi-turn chat; send message history, optional tool config; simpler than raw InvokeModel for chat.",
@@ -786,10 +786,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "RAG",
     "q": "Re-ranking retrieved chunks before adding to the prompt can:",
     "options": [
-      "Only increase cost",
+      "Only increase cost for accounts that already enabled model access in the console",
       "Improve relevance by scoring and selecting the best chunks",
-      "Only decrease latency",
-      "Only reduce tokens"
+      "Only decrease latency if the knowledge base completed an incremental sync recently",
+      "Only reduce tokens for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Re-ranking = score retrieved chunks (e.g., with a cross-encoder) and keep top-k; better context for the FM.",
@@ -803,10 +803,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Agents",
     "q": "Orchestration in a Bedrock Agent refers to:",
     "options": [
-      "Only streaming",
+      "Only streaming for accounts that already enabled model access in the console",
       "Coordinating model calls, retrieval, and tool use in a loop",
-      "Only one action",
-      "Only logging"
+      "Only one action if the knowledge base completed an incremental sync recently",
+      "Only logging for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Orchestration = agent loop: reason, retrieve (if KB), call tools, reason again until final response.",
@@ -820,10 +820,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Guardrails",
     "q": "Sensitive content filters in Guardrails typically cover:",
     "options": [
-      "Only topics",
+      "Only topics for accounts that already enabled model access in the console",
       "Hate, violence, sexual content, insults, etc. (configurable)",
-      "Only PII",
-      "Only words"
+      "Only PII if the knowledge base completed an incremental sync recently",
+      "Only words for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Content filters = hate, violence, sexual, insults, etc.; set threshold (none, low, medium, high) or block.",
@@ -837,10 +837,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Monitoring",
     "q": "Evaluating a GenAI application in production should include:",
     "options": [
-      "Only latency",
+      "Only latency for accounts that already enabled model access in the console",
       "Relevance, safety, and user feedback (and latency/cost)",
-      "Only cost",
-      "Only token count"
+      "Only cost if the knowledge base completed an incremental sync recently",
+      "Only token count for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Evaluate quality (relevance, correctness), safety (guardrails), and operational metrics (latency, cost).",
@@ -854,10 +854,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Bedrock",
     "q": "Batch inference in Bedrock is suited for:",
     "options": [
-      "Only real-time chat",
+      "Only real-time chat for accounts that already enabled model access in the console",
       "Large volumes of non-urgent requests (e.g., overnight processing)",
-      "Only streaming",
-      "Only single request"
+      "Only streaming if the knowledge base completed an incremental sync recently",
+      "Only single request for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Batch = process many inputs asynchronously; lower priority, cost-effective for bulk workloads.",
@@ -871,10 +871,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "RAG",
     "q": "Source attribution in RAG responses helps with:",
     "options": [
-      "Only cost",
+      "Only cost for accounts that already enabled model access in the console",
       "Showing which documents supported the answer (trust, compliance)",
-      "Only latency",
-      "Only embedding"
+      "Only latency if the knowledge base completed an incremental sync recently",
+      "Only embedding for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Source attribution = cite retrieved chunks; improves trust and allows users to verify.",
@@ -888,10 +888,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Security",
     "q": "Data sent to Bedrock for inference:",
     "options": [
-      "Is always stored by AWS for training",
+      "Is always stored by AWS for training for accounts that already enabled model access in the console",
       "Is not used to train AWS models (by default; check data governance)",
-      "Is only in CloudWatch",
-      "Is only in Guardrails"
+      "Is only in CloudWatch if the knowledge base completed an incremental sync recently",
+      "Is only in Guardrails for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "AWS does not use your inference data to train foundation models; review data governance and compliance docs.",
@@ -905,10 +905,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Deployment",
     "q": "Containerizing a GenAI app that calls Bedrock allows:",
     "options": [
-      "Only Lambda",
+      "Only Lambda for accounts that already enabled model access in the console",
       "Consistent runtime and deployment (e.g., ECS, EKS, SageMaker)",
-      "Only EC2",
-      "Only serverless"
+      "Only EC2 if the knowledge base completed an incremental sync recently",
+      "Only serverless for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Containers = portable; run on ECS, EKS, SageMaker, or Lambda (container support) for consistent deployment.",
@@ -922,10 +922,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Cost",
     "q": "Prompt caching (e.g., for repeated system prompts) in Bedrock can reduce:",
     "options": [
-      "Only latency",
+      "Only latency for accounts that already enabled model access in the console",
       "Input token cost and latency for repeated prefix",
-      "Only output tokens",
-      "Only storage"
+      "Only output tokens if the knowledge base completed an incremental sync recently",
+      "Only storage for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Caching repeated prompt prefix = fewer input tokens billed and faster inference for the cached part.",
@@ -939,10 +939,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Bedrock",
     "q": "Which Bedrock API is used for embedding text into vectors?",
     "options": [
-      "InvokeModel with a text FM",
+      "InvokeModel with a text FM for accounts that already enabled model access in the console",
       "InvokeModel with an embedding model (e.g., Titan Embeddings)",
-      "Only Converse API",
-      "Only batch API"
+      "Only Converse API if the knowledge base completed an incremental sync recently",
+      "Only batch API for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Embedding models are invoked via InvokeModel; they take text input and return a vector array.",
@@ -956,10 +956,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Bedrock",
     "q": "Region availability for Bedrock models means:",
     "options": [
-      "All models are in all regions",
+      "All models are in all regions for accounts that already enabled model access in the console",
       "You must enable and use models in each region where they are offered",
-      "Only us-east-1 has models",
-      "Region does not matter"
+      "Only us-east-1 has models if the knowledge base completed an incremental sync recently",
+      "Region does not matter for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Model availability varies by region; enable and invoke in the region where the model is available.",
@@ -973,10 +973,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Bedrock",
     "q": "What is the main benefit of using the Converse API instead of raw InvokeModel for chat?",
     "options": [
-      "Lower cost",
+      "Lower cost for accounts that already enabled model access in the console when the workload runs entirely inside a single Availability Zone",
       "Simpler message format and built-in support for multi-turn, tools, and streaming",
-      "Faster only",
-      "Only for batch"
+      "Faster only if the knowledge base completed an incremental sync recently for batch jobs that do not require streaming responses",
+      "Only for batch for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Converse API uses a unified message format and handles history, tools, and streaming more easily.",
@@ -990,10 +990,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Bedrock",
     "q": "Bedrock On-Demand Inference differs from Provisioned Throughput in that:",
     "options": [
-      "On-Demand requires a contract",
+      "On-Demand requires a contract for accounts that already enabled model access in the console",
       "On-Demand has no capacity to reserve; you pay per token",
-      "On-Demand is only for batch",
-      "There is no difference"
+      "On-Demand is only for batch if the knowledge base completed an incremental sync recently",
+      "There is no difference for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "On-Demand = pay per use, no commitment; Provisioned = reserve capacity for predictable throughput.",
@@ -1007,10 +1007,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Bedrock",
     "q": "When invoking a model with streaming, the client should:",
     "options": [
-      "Wait for the full response",
+      "Wait for the full response for accounts that already enabled model access in the console",
       "Process response chunks as they arrive for lower perceived latency",
-      "Only use for batch",
-      "Disable Guardrails"
+      "Only use for batch if the knowledge base completed an incremental sync recently",
+      "Disable Guardrails for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Streaming = process chunks as they arrive; improves perceived latency and UX for long answers.",
@@ -1024,10 +1024,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Bedrock",
     "q": "A model alias in Bedrock allows you to:",
     "options": [
-      "Only change region",
+      "Only change region for accounts that already enabled model access in the console",
       "Point to a specific model version and swap without changing client code",
-      "Only for custom models",
-      "Only for embeddings"
+      "Only for custom models if the knowledge base completed an incremental sync recently",
+      "Only for embeddings for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Aliases let you pin to a version and update the backing model without changing application code.",
@@ -1041,10 +1041,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Bedrock",
     "q": "Which parameter typically controls randomness in Bedrock text generation?",
     "options": [
-      "Only model ID",
+      "Only model ID for accounts that already enabled model access in the console",
       "Temperature (and optionally top_p, top_k) in inference config",
-      "Only region",
-      "Only timeout"
+      "Only region if the knowledge base completed an incremental sync recently",
+      "Only timeout for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Temperature (and top_p/top_k) control sampling; higher = more random, lower = more deterministic.",
@@ -1058,10 +1058,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Bedrock",
     "q": "Bedrock asynchronous inference is best for:",
     "options": [
-      "Single quick requests",
+      "Single quick requests for accounts that already enabled model access in the console",
       "Large or long-running jobs (e.g., summarization of long docs) without blocking",
-      "Only streaming",
-      "Only embeddings"
+      "Only streaming if the knowledge base completed an incremental sync recently for batch jobs that do not require streaming responses",
+      "Only embeddings for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Async = submit job, get result later; good for large inputs or batch-style workloads.",
@@ -1075,10 +1075,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Bedrock",
     "q": "Amazon Titan Multimodal Embeddings can embed:",
     "options": [
-      "Only text",
+      "Only text for accounts that already enabled model access in the console",
       "Text and images (multimodal)",
-      "Only images",
-      "Only audio"
+      "Only images if the knowledge base completed an incremental sync recently",
+      "Only audio for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Titan Multimodal Embeddings = embed both text and images for multimodal RAG or search.",
@@ -1092,10 +1092,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Bedrock",
     "q": "To reduce latency for repeated prompts, you can use:",
     "options": [
-      "Only larger models",
+      "Only larger models for accounts that already enabled model access in the console",
       "Prompt caching (cache common prefix) where supported",
-      "Only batch",
-      "Only async"
+      "Only batch if the knowledge base completed an incremental sync recently",
+      "Only async for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Prompt caching stores a repeated prefix; subsequent requests reuse it for lower latency and cost.",
@@ -1109,10 +1109,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "RAG",
     "q": "A Knowledge Base data source can be:",
     "options": [
-      "Only DynamoDB",
+      "Only DynamoDB for accounts that already enabled model access in the console",
       "S3, or other supported connectors (e.g., web crawler)",
-      "Only RDS",
-      "Only Lambda"
+      "Only RDS if the knowledge base completed an incremental sync recently",
+      "Only Lambda for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Knowledge Bases support S3 and other data sources; sync and chunk during ingestion.",
@@ -1126,10 +1126,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "RAG",
     "q": "Number of documents retrieved (top-k) in RAG affects:",
     "options": [
-      "Only cost",
+      "Only cost for accounts that already enabled model access in the console when the workload runs entirely inside a single Availability Zone",
       "Relevance and context size (too few = missing context; too many = noise)",
-      "Only latency",
-      "Only embedding model"
+      "Only latency if the knowledge base completed an incremental sync recently",
+      "Only embedding model for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Top-k = how many chunks to pass to the model; tune for relevance vs. context window and noise.",
@@ -1143,10 +1143,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "RAG",
     "q": "Semantic chunking vs. fixed-size chunking:",
     "options": [
-      "Only fixed-size is supported",
+      "Only fixed-size is supported for accounts that already enabled model access in the console",
       "Semantic respects boundaries (e.g., paragraphs); fixed-size is simpler",
-      "Only semantic",
-      "They are the same"
+      "Only semantic if the knowledge base completed an incremental sync recently",
+      "They are the same for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Semantic = split by meaning/paragraphs; fixed-size = by character/token count; both have tradeoffs.",
@@ -1160,10 +1160,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "RAG",
     "q": "To improve RAG answer quality when retrieval returns irrelevant chunks, you should:",
     "options": [
-      "Only use a larger model",
+      "Only use a larger model for accounts that already enabled model access in the console",
       "Improve chunking, embeddings, or add re-ranking/metadata filters",
-      "Only increase top-k",
-      "Only use one chunk"
+      "Only increase top-k if the knowledge base completed an incremental sync recently",
+      "Only use one chunk for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Better chunking, better embeddings, re-ranking, and metadata filters improve retrieval quality.",
@@ -1177,10 +1177,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "RAG",
     "q": "Knowledge Base sync (ingestion) can be triggered:",
     "options": [
-      "Only manually once",
+      "Only manually once for accounts that already enabled model access in the console",
       "On a schedule or on-demand (e.g., when S3 data changes)",
-      "Only at deploy time",
-      "Only by Lambda"
+      "Only at deploy time if the knowledge base completed an incremental sync recently",
+      "Only by Lambda for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Ingestion can run on schedule or on-demand; some connectors support event-driven sync.",
@@ -1194,10 +1194,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "RAG",
     "q": "Vector similarity search returns chunks that:",
     "options": [
-      "Match keywords only",
+      "Match keywords only for accounts that already enabled model access in the console",
       "Are closest in embedding space to the query embedding",
-      "Are random",
-      "Are largest"
+      "Are random if the knowledge base completed an incremental sync recently",
+      "Are largest for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Similarity search = compare query embedding to stored vectors; return nearest neighbors.",
@@ -1211,10 +1211,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "RAG",
     "q": "Using the same embedding model at ingest and query time is important because:",
     "options": [
-      "It reduces cost only",
+      "It reduces cost only for accounts that already enabled model access in the console",
       "Embeddings must be in the same space for meaningful similarity",
-      "Only for speed",
-      "Only for Guardrails"
+      "Only for speed if the knowledge base completed an incremental sync recently",
+      "Only for Guardrails for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Query and document embeddings must come from the same (or compatible) model for correct similarity.",
@@ -1228,10 +1228,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "RAG",
     "q": "RAG hallucination can be reduced by:",
     "options": [
-      "Only using a larger model",
+      "Only using a larger model for accounts that already enabled model access in the console",
       "Retrieving relevant context and asking the model to cite sources",
-      "Only increasing temperature",
-      "Only using one document"
+      "Only increasing temperature if the knowledge base completed an incremental sync recently",
+      "Only using one document for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Strong retrieval + source attribution and “answer only from context” prompts reduce hallucination.",
@@ -1245,10 +1245,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "RAG",
     "q": "OpenSearch Serverless as a vector store for Knowledge Bases provides:",
     "options": [
-      "Only keyword search",
+      "Only keyword search for accounts that already enabled model access in the console",
       "Vector search and optionally hybrid (keyword + vector)",
-      "Only logging",
-      "Only caching"
+      "Only logging if the knowledge base completed an incremental sync recently",
+      "Only caching for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "OpenSearch Serverless supports vector and hybrid search for RAG.",
@@ -1262,10 +1262,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "RAG",
     "q": "A RAG pipeline typically sends to the FM:",
     "options": [
-      "Only the user question",
+      "Only the user question for accounts that already enabled model access in the console",
       "User question plus retrieved context (e.g., in system or user message)",
-      "Only embeddings",
-      "Only metadata"
+      "Only embeddings if the knowledge base completed an incremental sync recently",
+      "Only metadata for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Prompt = user question + retrieved text as context so the model can ground its answer.",
@@ -1279,10 +1279,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Agents",
     "q": "An agent's action group is linked to:",
     "options": [
-      "Only the Knowledge Base",
+      "Only the Knowledge Base for accounts that already enabled model access in the console",
       "An OpenAPI schema and a Lambda or API endpoint",
-      "Only streaming",
-      "Only one model"
+      "Only streaming if the knowledge base completed an incremental sync recently",
+      "Only one model for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Action group = OpenAPI schema (parameters, paths) + Lambda or API backend for the agent to call.",
@@ -1296,10 +1296,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Agents",
     "q": "When the agent decides to call a tool, it:",
     "options": [
-      "Ignores the result",
+      "Ignores the result for accounts that already enabled model access in the console",
       "Sends the tool result back to the model for the next reasoning step",
-      "Only logs it",
-      "Only streams it"
+      "Only logs it if the knowledge base completed an incremental sync recently",
+      "Only streams it for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Tool output is fed back into the model so it can reason and optionally call more tools or respond.",
@@ -1313,10 +1313,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Agents",
     "q": "Bedrock Agent vs. single InvokeModel call:",
     "options": [
-      "No difference",
+      "No difference for accounts that already enabled model access in the console",
       "Agent can do multi-step reasoning, retrieval, and tool use",
-      "Only Agent streams",
-      "Only InvokeModel supports tools"
+      "Only Agent streams if the knowledge base completed an incremental sync recently",
+      "Only InvokeModel supports tools for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Agents orchestrate multiple steps (reason, retrieve, call tools); single invoke is one call.",
@@ -1330,10 +1330,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Agents",
     "q": "Agent versioning and aliases help with:",
     "options": [
-      "Only cost",
+      "Only cost for accounts that already enabled model access in the console when the workload runs entirely inside a single Availability Zone",
       "Promoting a tested agent version (e.g., DRAFT to LIVE) without code change",
-      "Only logging",
-      "Only streaming"
+      "Only logging if the knowledge base completed an incremental sync recently for batch jobs that do not require streaming responses",
+      "Only streaming for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Version and alias let you test in DRAFT then point LIVE to the new version for safe rollout.",
@@ -1347,10 +1347,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Agents",
     "q": "If an action group Lambda throws an error, the agent typically:",
     "options": [
-      "Ignores it",
+      "Ignores it for accounts that already enabled model access in the console",
       "Receives the error and can reason or retry or inform the user",
-      "Only stops",
-      "Only logs"
+      "Only stops if the knowledge base completed an incremental sync recently",
+      "Only logs for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Tool errors are returned to the model; it can adapt the response or try another action.",
@@ -1364,10 +1364,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Agents",
     "q": "Agent instructions (system prompt) should include:",
     "options": [
-      "Only the model name",
+      "Only the model name for accounts that already enabled model access in the console",
       "Role, constraints, and how to use tools and knowledge",
-      "Only action group names",
-      "Only region"
+      "Only action group names if the knowledge base completed an incremental sync recently",
+      "Only region for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Instructions define the agent's role, rules, and how to use tools/KB for consistent behavior.",
@@ -1381,10 +1381,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Agents",
     "q": "Prepared data sources for an agent refer to:",
     "options": [
-      "Only Lambda",
+      "Only Lambda for accounts that already enabled model access in the console",
       "Knowledge Bases (or other data sources) the agent can query",
-      "Only S3",
-      "Only APIs"
+      "Only S3 if the knowledge base completed an incremental sync recently",
+      "Only APIs for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Prepared data sources = Knowledge Bases (or similar) attached to the agent for retrieval.",
@@ -1398,10 +1398,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Agents",
     "q": "To limit what an agent can do, you should:",
     "options": [
-      "Only use one model",
+      "Only use one model for accounts that already enabled model access in the console",
       "Restrict action groups and use Guardrails + instructions",
-      "Only use streaming",
-      "Only use one Knowledge Base"
+      "Only use streaming if the knowledge base completed an incremental sync recently",
+      "Only use one Knowledge Base for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Limit tools (action groups), scope instructions, and apply Guardrails to keep agent in bounds.",
@@ -1415,10 +1415,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Agents",
     "q": "Agentic workflow means:",
     "options": [
-      "Only one API call",
+      "Only one API call for accounts that already enabled model access in the console",
       "The agent autonomously plans and uses tools/KB over multiple steps",
-      "Only batch",
-      "Only streaming"
+      "Only batch if the knowledge base completed an incremental sync recently",
+      "Only streaming for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Agentic = agent decides when to retrieve, call tools, and respond over multiple turns.",
@@ -1432,10 +1432,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Guardrails",
     "q": "Applying a guardrail at both input and output:",
     "options": [
-      "Only at output is allowed",
+      "Only at output is allowed for accounts that already enabled model access in the console",
       "Filters prompt and response (e.g., block harmful input and output)",
-      "Only at input",
-      "Only for PII"
+      "Only at input if the knowledge base completed an incremental sync recently",
+      "Only for PII for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "You can apply guardrails to input only, output only, or both for full coverage.",
@@ -1449,10 +1449,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Guardrails",
     "q": "Guardrail content filter thresholds (e.g., for violence) let you:",
     "options": [
-      "Only block everything",
+      "Only block everything for accounts that already enabled model access in the console",
       "Set none/low/medium/high to tune sensitivity",
-      "Only allow everything",
-      "Only for topics"
+      "Only allow everything if the knowledge base completed an incremental sync recently",
+      "Only for topics for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Thresholds control how sensitive the filter is; higher = more strict.",
@@ -1466,10 +1466,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Guardrails",
     "q": "Denied topics in a guardrail:",
     "options": [
-      "Only log",
+      "Only log for accounts that already enabled model access in the console",
       "Cause the guardrail to block or filter content about those topics",
-      "Only at input",
-      "Only for PII"
+      "Only at input if the knowledge base completed an incremental sync recently",
+      "Only for PII for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Denied topics = content matching those topics can be blocked or filtered.",
@@ -1483,10 +1483,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Guardrails",
     "q": "To redact PII in model output before showing the user, you use:",
     "options": [
-      "Only encryption",
+      "Only encryption for accounts that already enabled model access in the console",
       "Guardrails PII filter with redact action",
-      "Only IAM",
-      "Only VPC"
+      "Only IAM if the knowledge base completed an incremental sync recently",
+      "Only VPC for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Guardrails PII filter can detect and redact (e.g., mask) PII in input/output.",
@@ -1500,10 +1500,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Guardrails",
     "q": "Guardrails can be attached to:",
     "options": [
-      "Only one model",
+      "Only one model for accounts that already enabled model access in the console",
       "Bedrock model invocations and/or agents (configurable per use case)",
-      "Only agents",
-      "Only Knowledge Base"
+      "Only agents if the knowledge base completed an incremental sync recently",
+      "Only Knowledge Base for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Guardrails are applied when invoking models or when using agents; attach per flow.",
@@ -1517,10 +1517,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Guardrails",
     "q": "Blocked word lists in Guardrails:",
     "options": [
-      "Only log",
+      "Only log for accounts that already enabled model access in the console",
       "Block input or output containing those phrases",
-      "Only for topics",
-      "Only at ingest"
+      "Only for topics if the knowledge base completed an incremental sync recently",
+      "Only at ingest for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Word filters = block (or replace) specific words/phrases in content.",
@@ -1534,10 +1534,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Guardrails",
     "q": "Allowed topics in a guardrail:",
     "options": [
-      "Only log",
+      "Only log for accounts that already enabled model access in the console when the workload runs entirely inside a single Availability Zone",
       "Restrict conversation to only those topics; other content can be blocked",
-      "Only for PII",
-      "Only at output"
+      "Only for PII if the knowledge base completed an incremental sync recently",
+      "Only at output for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Allowed topics = allowlist; content outside can be blocked to keep the model on-topic.",
@@ -1551,10 +1551,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Guardrails",
     "q": "Using multiple guardrails (e.g., one for PII, one for content):",
     "options": [
-      "Not supported",
+      "Not supported for accounts that already enabled model access in the console",
       "Supported; you can chain or apply multiple guardrails",
-      "Only one guardrail per account",
-      "Only for agents"
+      "Only one guardrail per account if the knowledge base completed an incremental sync recently",
+      "Only for agents for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "You can use multiple guardrails for different concerns (PII, content, topics).",
@@ -1568,10 +1568,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Guardrails",
     "q": "Guardrail versioning allows:",
     "options": [
-      "Only one version",
+      "Only one version for accounts that already enabled model access in the console",
       "Test changes (e.g., new version) before promoting to production",
-      "Only for word filters",
-      "Only for topics"
+      "Only for word filters if the knowledge base completed an incremental sync recently",
+      "Only for topics for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Create new versions of a guardrail, test, then point invocations to the new version.",
@@ -1585,10 +1585,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Security",
     "q": "To ensure Bedrock traffic does not go over the public internet, use:",
     "options": [
-      "Only IAM",
+      "Only IAM for accounts that already enabled model access in the console",
       "VPC endpoint for Bedrock (private DNS) so traffic stays in AWS",
-      "Only Guardrails",
-      "Only KMS"
+      "Only Guardrails if the knowledge base completed an incremental sync recently",
+      "Only KMS for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "VPC endpoint + private DNS = Bedrock calls stay on the AWS network, not internet.",
@@ -1602,10 +1602,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Security",
     "q": "Customer-managed keys (CMK) for Bedrock encryption:",
     "options": [
-      "Not supported",
+      "Not supported for accounts that already enabled model access in the console",
       "Allow you to control key lifecycle and access in KMS",
-      "Only for S3",
-      "Only for agents"
+      "Only for S3 if the knowledge base completed an incremental sync recently",
+      "Only for agents for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "You can use a CMK in KMS for Bedrock encryption at rest; you manage key policy.",
@@ -1619,10 +1619,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Security",
     "q": "Least privilege for Bedrock usually means:",
     "options": [
-      "Grant bedrock:* to all",
+      "Grant bedrock:* to all for accounts that already enabled model access in the console",
       "IAM policies that allow only needed actions (e.g., InvokeModel for specific models)",
-      "Only VPC",
-      "Only Guardrails"
+      "Only VPC if the knowledge base completed an incremental sync recently for batch jobs that do not require streaming responses",
+      "Only Guardrails for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Limit IAM to specific models and actions (e.g., invoke only required model IDs).",
@@ -1636,10 +1636,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Security",
     "q": "PrivateLink for Bedrock enables:",
     "options": [
-      "Only public access",
+      "Only public access for accounts that already enabled model access in the console",
       "Private connectivity from your VPC to Bedrock without internet",
-      "Only cross-account",
-      "Only logging"
+      "Only cross-account if the knowledge base completed an incremental sync recently",
+      "Only logging for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "PrivateLink = private endpoint in your VPC; traffic stays within AWS network.",
@@ -1653,10 +1653,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Security",
     "q": "To audit who invoked which Bedrock model, use:",
     "options": [
-      "Only Guardrails",
+      "Only Guardrails for accounts that already enabled model access in the console",
       "CloudTrail (Bedrock API calls are logged)",
-      "Only X-Ray",
-      "Only CloudWatch"
+      "Only X-Ray if the knowledge base completed an incremental sync recently",
+      "Only CloudWatch for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "CloudTrail logs API calls (who, what, when) for audit and compliance.",
@@ -1670,10 +1670,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Security",
     "q": "Data residency for Bedrock inference:",
     "options": [
-      "Data always leaves the region",
+      "Data always leaves the region for accounts that already enabled model access in the console",
       "Data stays in the region where you invoke (by design)",
-      "Only in us-east-1",
-      "Only with CMK"
+      "Only in us-east-1 if the knowledge base completed an incremental sync recently",
+      "Only with CMK for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Invoke in the region where you need residency; data is processed in that region.",
@@ -1687,10 +1687,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Security",
     "q": "Service control policies (SCPs) can restrict Bedrock:",
     "options": [
-      "Only in one account",
+      "Only in one account for accounts that already enabled model access in the console",
       "Across an OU (e.g., deny Bedrock in certain accounts)",
-      "Only for IAM",
-      "Only for VPC"
+      "Only for IAM if the knowledge base completed an incremental sync recently",
+      "Only for VPC for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "SCPs in Organizations can allow/deny Bedrock (or regions) for member accounts.",
@@ -1704,10 +1704,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Security",
     "q": "To allow a Lambda in account A to invoke Bedrock in account B:",
     "options": [
-      "Only IAM in A",
+      "Only IAM in A for accounts that already enabled model access in the console",
       "Resource policy on Bedrock in B allowing A + IAM in A allowing invoke",
-      "Only VPC peering",
-      "Only Guardrails"
+      "Only VPC peering if the knowledge base completed an incremental sync recently",
+      "Only Guardrails for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Cross-account: resource policy on Bedrock (B) allows A; IAM in A allows Lambda to call Bedrock.",
@@ -1721,10 +1721,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Security",
     "q": "Bedrock and PCI-DSS:",
     "options": [
-      "Bedrock is never used for PCI",
+      "Bedrock is never used for PCI for accounts that already enabled model access in the console",
       "Use encryption, VPC, IAM, Guardrails; validate with AWS compliance docs",
-      "Only encryption",
-      "Only Guardrails"
+      "Only encryption if the knowledge base completed an incremental sync recently",
+      "Only Guardrails for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Use security controls and refer to AWS compliance documentation for PCI scope.",
@@ -1738,10 +1738,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Deployment",
     "q": "API Gateway in front of Lambda that calls Bedrock helps with:",
     "options": [
-      "Only cost",
+      "Only cost for accounts that already enabled model access in the console",
       "Throttling, auth, and a stable API for clients",
-      "Only streaming",
-      "Only batch"
+      "Only streaming if the knowledge base completed an incremental sync recently",
+      "Only batch for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "API Gateway = rate limiting, API keys/auth, and a single endpoint for your GenAI API.",
@@ -1755,10 +1755,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Deployment",
     "q": "For inference that exceeds Lambda timeout, use:",
     "options": [
-      "Only Lambda",
+      "Only Lambda for accounts that already enabled model access in the console",
       "Step Functions + Lambda (or ECS/Fargate) to orchestrate long runs",
-      "Only API Gateway",
-      "Only on-demand"
+      "Only API Gateway if the knowledge base completed an incremental sync recently",
+      "Only on-demand for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Step Functions can orchestrate multi-step or long-running inference beyond Lambda limits.",
@@ -1772,10 +1772,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Deployment",
     "q": "SageMaker vs. Bedrock for GenAI:",
     "options": [
-      "No difference",
+      "No difference for accounts that already enabled model access in the console when the workload runs entirely inside a single Availability Zone",
       "Bedrock = managed FMs; SageMaker = bring your own model, fine-tune, full control",
-      "Only SageMaker has streaming",
-      "Only Bedrock has embeddings"
+      "Only SageMaker has streaming if the knowledge base completed an incremental sync recently",
+      "Only Bedrock has embeddings for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Bedrock = managed multi-tenant FMs; SageMaker = your infrastructure, your model, more control.",
@@ -1789,10 +1789,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Deployment",
     "q": "To A/B test two models in production, you can:",
     "options": [
-      "Only deploy one",
+      "Only deploy one for accounts that already enabled model access in the console",
       "Route a percentage of traffic to each model (e.g., Lambda or API Gateway)",
-      "Only use batch",
-      "Only use Provisioned Throughput"
+      "Only use batch if the knowledge base completed an incremental sync recently",
+      "Only use Provisioned Throughput for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Route by % traffic (e.g., 90% model A, 10% model B) to compare quality or latency.",
@@ -1806,10 +1806,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Deployment",
     "q": "Infrastructure as Code for a Bedrock-based app might include:",
     "options": [
-      "Only Bedrock console",
+      "Only Bedrock console for accounts that already enabled model access in the console",
       "Terraform or CloudFormation for Lambda, API Gateway, IAM, Bedrock access",
-      "Only IAM",
-      "Only CloudWatch"
+      "Only IAM if the knowledge base completed an incremental sync recently for batch jobs that do not require streaming responses",
+      "Only CloudWatch for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Define API Gateway, Lambda, IAM roles, and Bedrock permissions in IaC for reproducibility.",
@@ -1823,10 +1823,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Deployment",
     "q": "Cold start for Lambda calling Bedrock is reduced by:",
     "options": [
-      "Only increasing memory",
+      "Only increasing memory for accounts that already enabled model access in the console",
       "Provisioned concurrency or keeping Lambda warm (e.g., periodic pings)",
-      "Only streaming",
-      "Only batch"
+      "Only streaming if the knowledge base completed an incremental sync recently",
+      "Only batch for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Provisioned concurrency or warm-up keeps runtimes ready; reduces cold start latency.",
@@ -1840,10 +1840,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Deployment",
     "q": "To run your own fine-tuned model (e.g., from SageMaker) in production, you would typically:",
     "options": [
-      "Only use Bedrock",
+      "Only use Bedrock for accounts that already enabled model access in the console",
       "Deploy on SageMaker real-time endpoint or in a container (ECS/EKS)",
-      "Only Lambda",
-      "Only Knowledge Base"
+      "Only Lambda if the knowledge base completed an incremental sync recently",
+      "Only Knowledge Base for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Custom/fine-tuned models run on SageMaker endpoints or in your own containers.",
@@ -1857,10 +1857,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Deployment",
     "q": "Canary deployment for a GenAI API means:",
     "options": [
-      "Only one version",
+      "Only one version for accounts that already enabled model access in the console",
       "Route a small % of traffic to new version, then increase if healthy",
-      "Only batch",
-      "Only async"
+      "Only batch if the knowledge base completed an incremental sync recently",
+      "Only async for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Canary = send a fraction of traffic to new version; monitor; then roll out fully.",
@@ -1874,10 +1874,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Deployment",
     "q": "When to use ECS/Fargate vs. Lambda for Bedrock invocation:",
     "options": [
-      "Always Lambda",
+      "Always Lambda for accounts that already enabled model access in the console when the workload runs entirely inside a single Availability Zone",
       "Lambda for event-driven, short runs; ECS for long-running or stateful workers",
-      "Always ECS",
-      "Only for batch"
+      "Always ECS if the knowledge base completed an incremental sync recently for batch jobs that do not require streaming responses",
+      "Only for batch for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Lambda = event-driven, < 15 min; ECS = long-running, more control, stateful.",
@@ -1891,10 +1891,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Cost",
     "q": "Input tokens are typically cheaper than output tokens for many Bedrock models because:",
     "options": [
-      "They are the same",
+      "They are the same for accounts that already enabled model access in the console",
       "Generation (output) is more compute-intensive",
-      "Only output is billed",
-      "Only for streaming"
+      "Only output is billed if the knowledge base completed an incremental sync recently",
+      "Only for streaming for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Output token pricing is often higher than input; check the model's pricing page.",
@@ -1908,10 +1908,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Cost",
     "q": "To minimize cost for a high-volume, steady workload, consider:",
     "options": [
-      "Only on-demand",
+      "Only on-demand for accounts that already enabled model access in the console",
       "Provisioned Throughput if committed use is cheaper than on-demand",
-      "Only serverless",
-      "Only batch"
+      "Only serverless if the knowledge base completed an incremental sync recently",
+      "Only batch for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "At high, steady volume, Provisioned Throughput can be more cost-effective than on-demand.",
@@ -1925,10 +1925,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Cost",
     "q": "Token counting before calling Bedrock helps with:",
     "options": [
-      "Only latency",
+      "Only latency for accounts that already enabled model access in the console",
       "Cost estimation and staying under context limits",
-      "Only streaming",
-      "Only batch"
+      "Only streaming if the knowledge base completed an incremental sync recently",
+      "Only batch for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Count tokens to estimate cost and avoid exceeding model context window.",
@@ -1942,10 +1942,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Cost",
     "q": "Using a smaller context window when possible:",
     "options": [
-      "Only increases cost",
+      "Only increases cost for accounts that already enabled model access in the console",
       "Reduces cost (fewer input tokens) and can reduce latency",
-      "Only for batch",
-      "Only for streaming"
+      "Only for batch if the knowledge base completed an incremental sync recently",
+      "Only for streaming for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Send only needed context to reduce input tokens and cost.",
@@ -1959,10 +1959,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Cost",
     "q": "Reserved capacity or committed use for Bedrock:",
     "options": [
-      "Not available",
+      "Not available for accounts that already enabled model access in the console when the workload runs entirely inside a single Availability Zone",
       "Provisioned Throughput provides committed capacity (model units) with pricing terms",
-      "Only for Lambda",
-      "Only for SageMaker"
+      "Only for Lambda if the knowledge base completed an incremental sync recently for batch jobs that do not require streaming responses",
+      "Only for SageMaker for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Provisioned Throughput = commit to model units; can have discount vs. on-demand at scale.",
@@ -1976,10 +1976,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Cost",
     "q": "Cost allocation for Bedrock by project is easier with:",
     "options": [
-      "Only one IAM user",
+      "Only one IAM user for accounts that already enabled model access in the console",
       "Tags on resources and IAM roles (and Cost Allocation Tags)",
-      "Only Guardrails",
-      "Only VPC"
+      "Only Guardrails if the knowledge base completed an incremental sync recently",
+      "Only VPC for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Tag roles/resources and enable cost allocation tags to attribute Bedrock cost by project.",
@@ -1993,10 +1993,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Cost",
     "q": "Stopping unnecessary inference (e.g., duplicate or invalid requests) helps:",
     "options": [
-      "Only latency",
+      "Only latency for accounts that already enabled model access in the console",
       "Cost and latency (fewer tokens billed)",
-      "Only accuracy",
-      "Only security"
+      "Only accuracy if the knowledge base completed an incremental sync recently",
+      "Only security for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Validate and deduplicate before calling Bedrock to avoid wasting tokens.",
@@ -2010,10 +2010,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Cost",
     "q": "Bedrock model pricing varies by:",
     "options": [
-      "Only region",
+      "Only region for accounts that already enabled model access in the console",
       "Model (provider and size) and often input vs. output tokens",
-      "Only account",
-      "Only invocation type"
+      "Only account if the knowledge base completed an incremental sync recently",
+      "Only invocation type for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Each model has its own price per token (input/output); compare models for cost.",
@@ -2027,10 +2027,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Cost",
     "q": "For a proof-of-concept with low traffic, the most cost-effective option is usually:",
     "options": [
-      "Provisioned Throughput",
+      "Provisioned Throughput for accounts that already enabled model access in the console",
       "On-Demand or Serverless (pay per use, no commitment)",
-      "Only batch",
-      "Only custom model"
+      "Only batch if the knowledge base completed an incremental sync recently",
+      "Only custom model for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "POC = low volume; on-demand/serverless avoids upfront commitment.",
@@ -2044,10 +2044,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Monitoring",
     "q": "Key metrics to monitor for a Bedrock-based API include:",
     "options": [
-      "Only cost",
+      "Only cost for accounts that already enabled model access in the console",
       "Latency, error rate, token usage, and throttling",
-      "Only tokens",
-      "Only Guardrails"
+      "Only tokens if the knowledge base completed an incremental sync recently",
+      "Only Guardrails for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Monitor InvocationLatency, errors, token counts, and throttles for health and cost.",
@@ -2061,10 +2061,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Monitoring",
     "q": "To detect when a model response is off-topic or low quality, you can:",
     "options": [
-      "Only use more tokens",
+      "Only use more tokens for accounts that already enabled model access in the console",
       "Log inputs/outputs (redacted) and use evaluation or Guardrails metrics",
-      "Only use one model",
-      "Only use batch"
+      "Only use one model if the knowledge base completed an incremental sync recently",
+      "Only use batch for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Evaluate outputs (relevance, safety) and use Guardrails; log for analysis (with PII redaction).",
@@ -2078,10 +2078,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Monitoring",
     "q": "X-Ray tracing for a GenAI request can show:",
     "options": [
-      "Only Bedrock",
+      "Only Bedrock for accounts that already enabled model access in the console",
       "API Gateway → Lambda → Bedrock and latency per segment",
-      "Only Lambda",
-      "Only errors"
+      "Only Lambda if the knowledge base completed an incremental sync recently",
+      "Only errors for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "X-Ray traces the full request path and segment latency across services.",
@@ -2095,10 +2095,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Monitoring",
     "q": "CloudWatch Logs for Bedrock invocations:",
     "options": [
-      "Always log full prompts by default",
+      "Always log full prompts by default for accounts that already enabled model access in the console",
       "Can be enabled; ensure PII/sensitive data is not logged or is redacted",
-      "Only for batch",
-      "Only for agents"
+      "Only for batch if the knowledge base completed an incremental sync recently",
+      "Only for agents for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Logging can include request/response; redact or restrict for compliance.",
@@ -2112,10 +2112,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Monitoring",
     "q": "To set an alarm when Bedrock error rate exceeds a threshold, use:",
     "options": [
-      "Only X-Ray",
+      "Only X-Ray for accounts that already enabled model access in the console",
       "CloudWatch alarm on Bedrock metrics (e.g., InvocationClientError)",
-      "Only Guardrails",
-      "Only CloudTrail"
+      "Only Guardrails if the knowledge base completed an incremental sync recently",
+      "Only CloudTrail for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Create a CloudWatch alarm on the appropriate Bedrock metric (e.g., client errors).",
@@ -2129,10 +2129,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Monitoring",
     "q": "Evaluating RAG quality might include:",
     "options": [
-      "Only latency",
+      "Only latency for accounts that already enabled model access in the console",
       "Relevance of retrieved chunks and faithfulness of the answer to context",
-      "Only token count",
-      "Only cost"
+      "Only token count if the knowledge base completed an incremental sync recently",
+      "Only cost for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Measure retrieval relevance and whether the answer is grounded in the retrieved context.",
@@ -2146,10 +2146,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Monitoring",
     "q": "A/B test results for two models should compare:",
     "options": [
-      "Only cost",
+      "Only cost for accounts that already enabled model access in the console",
       "Quality (e.g., relevance), latency, and cost",
-      "Only latency",
-      "Only tokens"
+      "Only latency if the knowledge base completed an incremental sync recently",
+      "Only tokens for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Compare quality metrics, latency, and cost to choose the best model or prompt.",
@@ -2163,10 +2163,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Monitoring",
     "q": "Dashboard for a production GenAI app should include:",
     "options": [
-      "Only score",
+      "Only score for accounts that already enabled model access in the console",
       "Request count, latency (p50/p99), error rate, token usage, cost",
-      "Only Guardrails",
-      "Only model ID"
+      "Only Guardrails if the knowledge base completed an incremental sync recently",
+      "Only model ID for batch jobs that do not require streaming responses"
     ],
     "correct": 1,
     "explain": "Operational dashboard = traffic, latency, errors, tokens, and cost for capacity and health.",
@@ -2180,10 +2180,10 @@ window.QUESTION_BANK_AWS_GENAI = [
     "topic": "Monitoring",
     "q": "Bedrock throttling (rate limits) means:",
     "options": [
-      "Only cost",
+      "Only cost for accounts that already enabled model access in the console when the workload runs entirely inside a single Availability Zone",
       "Requests may be limited per second; use exponential backoff or Provisioned Throughput",
-      "Only for batch",
-      "Only for streaming"
+      "Only for batch if the knowledge base completed an incremental sync recently for batch jobs that do not require streaming responses",
+      "Only for streaming for batch jobs that do not require streaming responses when IAM roles already include broad Amazon S3 permissions"
     ],
     "correct": 1,
     "explain": "Bedrock has TPS limits; handle throttling with backoff or reserve capacity with Provisioned Throughput.",
