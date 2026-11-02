@@ -333,10 +333,7 @@
     out.best = Math.max(base.best, other.best, base.streak, other.streak);
     out.freezes = Math.min(base.freezes, other.freezes);
     out.freezeEarnProgress = Math.max(base.freezeEarnProgress, other.freezeEarnProgress);
-    out.dailyGoal = base.dailyGoal;
-    if (other.pendingGoal && compareDateStr(other.pendingGoal.fromDate, todayStr(new Date(deps.now()))) > 0) {
-      out.dailyGoal = Math.max(base.dailyGoal, other.dailyGoal);
-    }
+    out.dailyGoal = Math.max(base.dailyGoal, other.dailyGoal);
     if (base.pendingGoal && other.pendingGoal) {
       out.pendingGoal =
         compareDateStr(base.pendingGoal.fromDate, other.pendingGoal.fromDate) >= 0
@@ -416,7 +413,11 @@
         out.streak = Math.max(base.streak, other.streak);
         out.repair = null;
       } else if (out.repair) {
-        out.streak = Math.max(base.streak, other.streak);
+        if (outMissed && (base.streak === 0 || other.streak === 0)) {
+          out.streak = Math.min(base.streak, other.streak);
+        } else {
+          out.streak = Math.max(base.streak, other.streak);
+        }
       } else if (outMissed) {
         var baseMiss = unmetMissedDays(base).length;
         var otherMiss = unmetMissedDays(other).length;
