@@ -13,6 +13,17 @@
   let nextCardFn = null;
   let quizId = '';
 
+  function writesBlocked() {
+    return window.cloudCramStorageWritesBlocked && window.cloudCramStorageWritesBlocked();
+  }
+
+  function closeConnection() {
+    if (db) {
+      try { db.close(); } catch (e) {}
+      db = null;
+    }
+  }
+
   function injectStyles() {
     if (document.getElementById('brain-dump-styles')) return;
     const style = document.createElement('style');
@@ -61,6 +72,9 @@
       req.onerror = function () { resolve(null); };
       req.onsuccess = function () {
         db = req.result;
+        db.onversionchange = function () {
+          closeConnection();
+        };
         resolve(db);
       };
       req.onupgradeneeded = function (e) {
@@ -73,6 +87,7 @@
   }
 
   function addDump(dump) {
+    if (writesBlocked()) return Promise.resolve();
     const record = {
       questionText: dump.questionText,
       dumpText: dump.dumpText,
@@ -96,6 +111,7 @@
   }
 
   function deleteDump(id) {
+    if (writesBlocked()) return Promise.resolve();
     if (db) {
       var key = /^\d+$/.test(String(id)) ? parseInt(id, 10) : id;
       return new Promise(function (resolve, reject) {
@@ -112,6 +128,7 @@
   }
 
   function clearAllDumps() {
+    if (writesBlocked()) return Promise.resolve();
     if (db) {
       return new Promise(function (resolve, reject) {
         const tx = db.transaction(STORE_NAME, 'readwrite');
@@ -126,6 +143,7 @@
   }
 
   function updateDump(id, updates) {
+    if (writesBlocked()) return Promise.resolve();
     if (db) {
       var key = /^\d+$/.test(String(id)) ? parseInt(id, 10) : id;
       return new Promise(function (resolve, reject) {
@@ -168,7 +186,7 @@
       }
       return d;
     });
-    if (changed) localStorage.setItem(LS_FALLBACK_KEY, JSON.stringify(list));
+    if (changed && !writesBlocked()) localStorage.setItem(LS_FALLBACK_KEY, JSON.stringify(list));
     return Promise.resolve(list);
   }
 
@@ -484,6 +502,7 @@
   }
 
   window.BrainDump = {
+    closeConnection: closeConnection,
     init: function (options) {
       options = options || {};
       nextCardFn = options.nextCard || null;

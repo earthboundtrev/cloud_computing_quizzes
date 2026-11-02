@@ -11,8 +11,9 @@
   <link rel="icon" href="/favicon.ico">
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
   <title>AI-900 Azure AI Fundamentals Practice Quiz</title>
-  <link rel="stylesheet" href="css/quiz-common.css?v=4">
+  <link rel="stylesheet" href="css/quiz-common.css?v=5">
   <style>:root { --accent: #0078d4; --accent-dim: #106ebe; }</style>
+  <script src="storage-write-guard.js?v=1"></script>
   <script src="quiz-config.js?v=2"></script>
   <script src="sw-register.js?v=3"></script>
   <script src="brain-dump.js?v=2"></script>
@@ -22,7 +23,8 @@
   <script src="data/ai900-questions.js?v=2"></script>
   <script src="quiz-init-ai900.js?v=2"></script>
   <script src="quiz-nav.js?v=2"></script>
-  <script src="app-reset.js?v=2"></script>
+  <script src="storage-keys.js?v=1"></script>
+  <script src="app-reset.js?v=3"></script>
 </head>
 <body>
   <header class="site-nav">
@@ -39,7 +41,8 @@
       <a href="rhcsa10_quiz.html">RHCSA (RHEL 10)</a>
       <a href="rhce_quiz.html">RHCE</a>
       <button type="button" class="nav-dumps-btn" id="review-dumps-btn">Review Dumps</button>
-      <button type="button" class="nav-reset-btn" id="reset-app-btn">Reset app</button>
+      <button type="button" class="nav-update-btn" id="update-app-btn" aria-describedby="nav-update-help">Update app</button>
+      <span id="nav-update-help" class="visually-hidden">Update app keeps your progress and reminders</span>
     </nav>
   </header>
   <div class="container">

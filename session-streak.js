@@ -55,6 +55,7 @@
       streak = 1;
     }
 
+    if (window.cloudCramStorageWritesBlocked && window.cloudCramStorageWritesBlocked()) return streak;
     try {
       localStorage.setItem(STORAGE_KEY_LAST, today);
       localStorage.setItem(STORAGE_KEY_STREAK, String(streak));

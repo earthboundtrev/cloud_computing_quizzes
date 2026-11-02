@@ -7,6 +7,12 @@
 (function migrateRHCSA9toRHCSA10() {
   'use strict';
 
+  if (typeof window !== 'undefined' &&
+    window.cloudCramStorageWritesBlocked &&
+    window.cloudCramStorageWritesBlocked()) {
+    return;
+  }
+
   const MIGRATION_FLAG = 'rhcsa_migrated_to_v10_3';
   const LEGACY_FLAG_V2 = 'rhcsa_migrated_to_v10_2';
   const OLD_PROFILE_KEY = 'study_sessions_profile_rhcsa9';

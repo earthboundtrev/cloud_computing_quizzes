@@ -63,6 +63,7 @@
   }
 
   function saveProfile(profile) {
+    if (window.cloudCramStorageWritesBlocked && window.cloudCramStorageWritesBlocked()) return;
     try {
       localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
     } catch (e) {}

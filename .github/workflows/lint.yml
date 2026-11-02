@@ -47,6 +47,12 @@ jobs:
 
     - name: Service worker update flow (#71)
       run: node scripts/test-sw-update-flow.js
+
+    - name: Storage keys registry (#70)
+      run: node scripts/lint-storage-keys.js
+
+    - name: Update app / Delete all my data (#70)
+      run: node scripts/test-app-data-lifecycle.js
     
     - name: Check question bank integrity
       run: node scripts/check-page-banks.js
