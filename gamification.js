@@ -331,9 +331,9 @@
       !!openRepair &&
       out.lastRepairCompletedAt >= (openRepair.openedAt || 0);
     out.best = Math.max(base.best, other.best, base.streak, other.streak);
-    out.freezes = Math.min(base.freezes, other.freezes);
+    out.freezes = Math.max(base.freezes, other.freezes);
     out.freezeEarnProgress = Math.max(base.freezeEarnProgress, other.freezeEarnProgress);
-    out.dailyGoal = Math.max(base.dailyGoal, other.dailyGoal);
+    out.dailyGoal = base.dailyGoal;
     if (base.pendingGoal && other.pendingGoal) {
       out.pendingGoal =
         compareDateStr(base.pendingGoal.fromDate, other.pendingGoal.fromDate) >= 0
@@ -425,6 +425,8 @@
           out.streak = base.streak;
         } else if (otherMiss && !baseMiss) {
           out.streak = other.streak;
+        } else if (baseMiss && otherMiss) {
+          out.streak = Math.max(base.streak, other.streak);
         } else if (base.streak === 0 || other.streak === 0) {
           out.streak = Math.min(base.streak, other.streak);
         } else {
