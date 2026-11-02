@@ -181,10 +181,11 @@ function loadObjectives(file) {
     return null;  // Objectives not required yet for all tracks
   }
   try {
-    global.window = global;
+    global.window = {};
     delete require.cache[require.resolve(path.resolve(file))];
     require(path.resolve(file));
-    return global.window.OBJECTIVES_RHCSA10 || global.window.OBJECTIVES_CISSP || global.window.OBJECTIVES_AWS_GENAI || global.window.OBJECTIVES || null;
+    const w = global.window;
+    return w.OBJECTIVES_AWS_GENAI || w.OBJECTIVES_CISSP || w.OBJECTIVES_RHCSA10 || w.OBJECTIVES || null;
   } catch (e) {
     warn(`Failed to load objectives from ${file}: ${e.message}`);
     return null;
@@ -218,17 +219,18 @@ function validateSchema(questions, trackId, fileName) {
     if (!q.q) {
       error(`${qId}: missing question stem 'q' field`);
     }
-    
-    if (!q.options || !Array.isArray(q.options) || q.options.length < 2) {
+
+    const qType = q.type || 'single';
+
+    if (qType !== 'tf' && (!q.options || !Array.isArray(q.options) || q.options.length < 2)) {
       error(`${qId}: 'options' must be an array with at least 2 items`);
     }
-    
+
     if (!q.explain) {
       warn(`${qId}: missing 'explain' field`);
     }
-    
+
     // Validate correct answer
-    const qType = q.type || 'single';
     trackStats.byType[qType] = (trackStats.byType[qType] || 0) + 1;
     
     if (qType === 'multi' || qType === 'order') {
@@ -386,17 +388,17 @@ function checkUniqueIds(allQuestions, trackId) {
   const duplicateIds = [];
   
   allQuestions.forEach((q, idx) => {
-    if (!q.id) return;  // IDs not yet required
-    
-    // Validate ID format (lowercase alphanumeric + hyphens)
-    if (!q.id.match(/^[a-z0-9-]+$/)) {
-      error(`${trackId}[${idx}]: ID '${q.id}' must be lowercase alphanumeric with hyphens only`);
+    if (q.id == null || q.id === '') return;  // IDs not yet required
+
+    const idStr = String(q.id);
+    if (!idStr.match(/^[a-z0-9-]+$/)) {
+      error(`${trackId}[${idx}]: ID '${idStr}' must be lowercase alphanumeric with hyphens only`);
     }
-    
-    if (idMap.has(q.id)) {
-      duplicateIds.push({ id: q.id, indices: [idMap.get(q.id), idx] });
+
+    if (idMap.has(idStr)) {
+      duplicateIds.push({ id: idStr, indices: [idMap.get(idStr), idx] });
     } else {
-      idMap.set(q.id, idx);
+      idMap.set(idStr, idx);
     }
   });
   

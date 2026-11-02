@@ -35,6 +35,8 @@ There is no dedicated `bugbot` subagent_type in all environments — use **`gene
 
 Human merge/sign-off still required per `core.mdc`. Any code fix → rewind pointer to **BUGBOT**.
 
+**One Bugbot per diff:** a clean Bugbot on diff *D* covers fixes for *D*; no second Bugbot before merge unless the diff changed (new commits). **TESTS** must pass on the commit being merged.
+
 ## TESTS on Cloud Agent
 
 Run the same commands as CI (see `ticket-lifecycle-loop.mdc`). When AWS GenAI / Terraform / CISSP ramps change, also run:
