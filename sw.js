@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE_NAME = 'cloudcram-v31';
+const CACHE_NAME = 'cloudcram-v32';
 
 const PRECACHE_PATHS = [
   '/index.html',
