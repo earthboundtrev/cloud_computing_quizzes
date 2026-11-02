@@ -17,7 +17,7 @@
 | BUGBOT | **FINDINGS → fixes in PR** | 2026-11-02 ET: Grok 4.6 — blocker confession padding; major obj/dup/CI gaps |
 | TESTS | **Pass** (after strip + lint-banks window fix) | Full lint.yml + genai ramp |
 | ARCHITECT | **Merge-ready (phase)** | Grok 4.6 retro — #13 AC still open |
-| DEPLOY | Partial | #49/#50 merged early; this PR = rules + pipeline fixes |
+| DEPLOY | **#51 merged** | Cloud rules + Bugbot fixes; TESTS green |
 
 ## Commands (TESTS)
 
@@ -47,5 +47,7 @@ node scripts/lint-cissp-questions.js
 
 ## Follow-up PRs
 
-- Cloud rules + pipeline retro + Bugbot-driven fixes (confession strip, lint-banks load isolation, exam copy, ramp lint guards)
+- **#51** — cloud rules + confession strip + lint-banks fixes (pipeline complete for retro)
 - Future: real distractor rewrite, dedupe extra bank, strict metadata on full GenAI pool
+
+See also: [README.md](./README.md) for #14 / #15 / #31 retro status.
