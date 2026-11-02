@@ -27,4 +27,4 @@
 
 ## Follow-up PRs
 
-_(TBD — distractor rewrite + lint scope)_
+- **fix-retro-priority** — strip confession suffixes; disable padDistractors; dedupe ramp-007 stem

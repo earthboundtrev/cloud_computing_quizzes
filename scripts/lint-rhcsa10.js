@@ -48,8 +48,8 @@ function main() {
   }));
   const questions = loadBanks();
 
-  const padRe = /\((alternative method|limited scope)\)/i;
-  const rhel9Re = /\bmodule (install|stream)|type team\b/i;
+  const padRe = /\((alternative method|limited scope|incorrect for this task)\)/i;
+  const rhel9Re = /\bmodule (install|stream)|type team\b|teamd\b/i;
 
   questions.forEach(function (q, idx) {
     const label = 'q id ' + q.id;
@@ -58,8 +58,8 @@ function main() {
         fail(label + ' option[' + oi + '] still has padded distractor text');
       }
     });
-    const stemBlob = (q.q || '') + ' ' + (q.explain || '');
-    if (rhel9Re.test(stemBlob)) {
+    const blob = (q.q || '') + ' ' + (q.explain || '') + ' ' + (q.options || []).join(' ');
+    if (rhel9Re.test(blob)) {
       fail(label + ' stem/explain references removed RHEL 9-only content (modularity/teamd)');
     }
     if (q.obj && !objIds.has(q.obj)) {

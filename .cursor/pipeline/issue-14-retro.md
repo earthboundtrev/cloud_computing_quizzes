@@ -28,4 +28,4 @@ Increment **merge-ready**; do not close #14 on #44. Follow-up: real distractors,
 
 ## Follow-up PRs
 
-_(none yet for #14 retro fixes)_
+- **fix-retro-priority** — strip confession suffixes; disable padDistractors in tagger

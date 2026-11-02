@@ -329,8 +329,8 @@ bank.forEach(function (q, idx) {
   if (!q.id) {
     q.id = 'tf-legacy-' + String(idx + 1).padStart(4, '0');
   }
-  padDistractors(q);
 });
+
 
 const header = fs.readFileSync('data/terraform-questions.js', 'utf8').split('window.QUESTION_BANK_TERRAFORM = [')[0];
 const body = 'window.QUESTION_BANK_TERRAFORM = ' + JSON.stringify(bank, null, 2)

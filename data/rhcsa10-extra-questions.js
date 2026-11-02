@@ -11,8 +11,8 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "options": [
       "Edit /usr/lib/systemd directly",
       "systemctl edit service (drop-in under /etc/systemd/system)",
-      "kill -9 (incorrect for this task)",
-      "rpm -e (incorrect for this task)"
+      "kill -9",
+      "rpm -e"
     ],
     "correct": 1,
     "explain": "systemctl edit creates .d/override.conf drop-in.",
@@ -27,8 +27,8 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "options": [
       "cat /var/log/messages",
       "journalctl -u sshd --since today",
-      "dmesg (incorrect for this task)",
-      "last (incorrect for this task)"
+      "dmesg",
+      "last"
     ],
     "correct": 1,
     "explain": "journalctl filters by unit, time, priority.",
@@ -41,9 +41,9 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "topic": "systemd",
     "q": "Set persistent system hostname to server1.example.com:",
     "options": [
-      "timedatectl set-timezone UTC",
-      "timedatectl set-timezone UTC",
-      "ip link set dev eth0 down",
+      "hostname only (non-persistent)",
+      "hostnamectl set-hostname server1.example.com",
+      "nmcli delete",
       "lvremove"
     ],
     "correct": 1,
@@ -60,7 +60,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
       "iptables -F",
       "firewall-cmd --permanent --add-service=https; firewall-cmd --reload",
       "setsebool -P",
-      "userdel (incorrect for this task)"
+      "userdel"
     ],
     "correct": 1,
     "explain": "--permanent survives reboot; --reload applies.",
@@ -74,8 +74,8 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "q": "Assign interface eth0 to internal zone:",
     "options": [
       "firewall-cmd --zone=internal --change-interface=eth0 --permanent",
-      "ip link set dev eth0 down",
-      "parted /dev/sdb print only",
+      "nmcli con mod",
+      "fdisk",
       "chcon -t"
     ],
     "correct": 0,
@@ -106,7 +106,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "q": "Restore default SELinux contexts on /web recursively:",
     "options": [
       "chmod -R 777",
-      "chcon -t unlabeled_t on the path",
+      "restorecon -Rv /web",
       "pvcreate",
       "timedatectl"
     ],
@@ -124,7 +124,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
       "journalctl -t setroubleshoot or ausearch -m avc -ts today",
       "podman logs",
       "vgdisplay",
-      "useradd (incorrect for this task)"
+      "useradd"
     ],
     "correct": 0,
     "explain": "ausearch/journal show AVC; sealert may suggest fixes.",
@@ -138,7 +138,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "q": "Configure static IP 192.168.1.10/24 on connection eth0 with nmcli:",
     "options": [
       "ifconfig",
-      "ip link set dev eth0 down",
+      "nmcli con mod eth0 ipv4.addresses 192.168.1.10/24 ipv4.method manual",
       "route add default",
       "lvchange"
     ],
@@ -153,7 +153,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "topic": "Networking",
     "q": "Set default gateway 192.168.1.1 via nmcli on eth0:",
     "options": [
-      "ip link set dev eth0 down",
+      "nmcli con mod eth0 ipv4.gateway 192.168.1.1",
       "echo only to /etc/hosts",
       "mkfs.xfs",
       "systemctl mask firewalld"
@@ -169,7 +169,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "topic": "Networking",
     "q": "Configure system to use DNS 10.0.0.53 via nmcli:",
     "options": [
-      "ip link set dev eth0 down",
+      "nmcli con mod eth0 ipv4.dns 10.0.0.53",
       "modprobe bridge",
       "lvcreate",
       "semanage port"
@@ -236,7 +236,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
       "visudo: dev ALL=(root) NOPASSWD: /usr/bin/systemctl restart httpd",
       "chmod 777 sudo",
       "chage -M",
-      "ip link set dev eth0 down"
+      "nmcli"
     ],
     "correct": 0,
     "explain": "/etc/sudoers.d/ fragments; visudo validates syntax.",
@@ -251,7 +251,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "options": [
       "chattr +i file",
       "chown root",
-      "chmod 777 on the path",
+      "setfacl -x",
       "swapoff -a"
     ],
     "correct": 0,
@@ -266,12 +266,12 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "q": "Install the Node.js runtime from RHEL 10 AppStream repositories:",
     "options": [
       "dnf install nodejs",
-      "rpm -ivh unrelated.rpm without dependencies",
-      "subscription-manager unregister",
-      "lvcreate on /dev/sdb without a VG"
+      "rpm -ivh random.rpm",
+      "subscription-manager register only",
+      "lvconvert without a snapshot"
     ],
     "correct": 0,
-    "explain": "RHEL 10 AppStream ships Node.js as normal RPMs; dnf install nodejs. Modularity streams were removed after RHEL 9.",
+    "explain": "RHEL 10 AppStream ships Node.js as normal RPMs; use dnf install nodejs (no modularity streams).",
     "obj": "2.2",
     "level": 2
   },
@@ -283,8 +283,8 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "options": [
       "dnf versionlock add kernel*",
       "rpm -e kernel",
-      "mkswap on the block device",
-      "chcon -t unlabeled_t on the path"
+      "mkfs.ext4",
+      "restorecon"
     ],
     "correct": 0,
     "explain": "versionlock plugin pins versions; or exclude= in repo config.",
@@ -300,7 +300,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
       "systemctl rescue or systemd.unit=rescue.target on kernel line",
       "poweroff",
       "lvremove -f",
-      "groupadd without options"
+      "useradd -D"
     ],
     "correct": 0,
     "explain": "rescue.target = single-user; emergency.target stricter.",
@@ -315,8 +315,8 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "options": [
       "dracut -f --regenerate-all",
       "grub2-mkconfig",
-      "ip link set dev eth0 down",
-      "buildah bud using a Containerfile"
+      "nmcli",
+      "podman build"
     ],
     "correct": 0,
     "explain": "dracut -f rebuilds initrd; needed if root FS modules missing.",
@@ -330,7 +330,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "q": "Schedule daily script /usr/local/bin/backup at 02:30 for root:",
     "options": [
       "crontab -e for root: 30 2 * * * /usr/local/bin/backup",
-      "at now (incorrect for this task)",
+      "at now",
       "lvcreate",
       "firewall-cmd --panic"
     ],
@@ -347,8 +347,8 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "options": [
       "systemctl list-timers --all",
       "crontab -l",
-      "parted /dev/sdb print only",
-      "sestatus -b only"
+      "fdisk",
+      "getenforce"
     ],
     "correct": 0,
     "explain": "Timers replace some cron use cases; systemctl status timer.",
@@ -362,9 +362,9 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "q": "Add physical volume and extend volume group vg0:",
     "options": [
       "pvcreate /dev/sdd; vgextend vg0 /dev/sdd",
-      "vgremove vg0 without backup",
-      "passwd -l on the account",
-      "timedatectl set-timezone UTC"
+      "lvremove vg0",
+      "chage -E",
+      "hostname"
     ],
     "correct": 0,
     "explain": "pvcreate → vgextend → lvextend → growfs.",
@@ -377,10 +377,10 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "topic": "Storage",
     "q": "All extents on /dev/sdb in vg0 must move to /dev/sdc in the same volume group. What is the correct sequence?",
     "options": [
-      "pvcreate /dev/sdc; vgextend vg0 /dev/sdc; pvmove /dev/sdb /dev/sdc; vgreduce vg0 /dev/sdb",
-      "lvconvert --merge mylv into vg1",
-      "vgmerge vg0 vg1 without moving extents",
-      "mkfs.xfs /dev/sdb then delete the PV"
+      "pvmove /dev/sdX vg1 after vgextend; or lvconvert move",
+      "mkfs",
+      "setfacl",
+      "podman pod"
     ],
     "correct": 0,
     "explain": "pvmove migrates extents between PVs in one VG. There is no lvconvert move for cross-VG LV moves.",
@@ -393,13 +393,13 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "topic": "Networking",
     "q": "Configure active-backup bond bond0 with enp1s0 and enp2s0 using NetworkManager:",
     "options": [
-      "Create bond connection mode=active-backup; add slave connections with master=bond0",
-      "nmcli con add type team con-name team0",
-      "ifconfig bond0 up without a connection profile",
-      "Disable NetworkManager and edit ifcfg files only"
+      "nmcli con add type bond con-name bond0 mode active-backup; enslave interfaces",
+      "ifdown -a on all links",
+      "lvrename without unmounting",
+      "audit2allow -M without logs"
     ],
     "correct": 0,
-    "explain": "RHEL 10 uses NetworkManager bonding; legacy team drivers are not used.",
+    "explain": "RHEL 10 uses NetworkManager bonding (type bond); legacy teamed NIC drivers are not used.",
     "obj": "8.3",
     "level": 3
   },
@@ -409,10 +409,10 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "topic": "Networking",
     "q": "Disable IPv6 on connection eth0 via nmcli:",
     "options": [
-      "nmcli con mod eth0 ipv6.method disabled; nmcli con up eth0",
+      "nmcli con mod eth0 ipv6.method disabled",
       "echo 1 > /proc/sys/net/ipv4/ip_forward",
-      "vgcfgrestore on vg0",
-      "chpasswd for root"
+      "vgcfgrestore",
+      "chpasswd"
     ],
     "correct": 0,
     "explain": "ipv6.method ignore/disabled on connection profile.",
@@ -441,7 +441,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "topic": "SELinux",
     "q": "Change type of /custom/html to httpd_sys_content_t persistently:",
     "options": [
-      "chcon (incorrect for this task)",
+      "chcon",
       "semanage fcontext -a -t httpd_sys_content_t '/custom/html(/.*)?'; restorecon -Rv",
       "pvcreate",
       "timedatectl set-time"
@@ -459,8 +459,8 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "options": [
       "systemctl mask httpd",
       "systemctl disable",
-      "rpm -q (incorrect for this task)",
-      "parted /dev/sdb print only"
+      "rpm -q",
+      "fdisk -l"
     ],
     "correct": 0,
     "explain": "mask links to /dev/null; unmask before enable.",
@@ -474,7 +474,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "q": "Change default target to multi-user (no GUI):",
     "options": [
       "systemctl set-default multi-user.target",
-      "init 5 (incorrect for this task)",
+      "init 5",
       "lvchange -a n",
       "podman stop -a"
     ],
@@ -489,10 +489,10 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "topic": "Packages",
     "q": "Register system with subscription-manager and attach pool:",
     "options": [
-      "rpm -Uvh from local path only",
+      "subscription-manager register; subscription-manager attach --auto",
       "dnf groupinstall",
       "mkfs.vfat",
-      "chcon -t unlabeled_t on the path"
+      "restorecon"
     ],
     "correct": 0,
     "explain": "RHSM for repos; subscription-manager repos --list-enabled.",
@@ -507,8 +507,8 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "options": [
       "grub2-setpassword",
       "passwd grub",
-      "ip link set dev eth0 down",
-      "stratis (incorrect for this task)"
+      "nmcli",
+      "stratis"
     ],
     "correct": 0,
     "explain": "grub2-setpassword encrypts grub.cfg user; BIOS/UEFI password also recommended.",
@@ -522,8 +522,8 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "q": "Find which process is using deleted file (disk full):",
     "options": [
       "lsof | grep deleted or lsof +L1",
-      "df -h (incorrect for this task)",
-      "useradd (incorrect for this task)",
+      "df -h",
+      "useradd",
       "firewall-cmd --list-all"
     ],
     "correct": 0,
@@ -540,7 +540,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
       "mkswap /dev/vg0/swaplv; swapon; add to fstab",
       "mkfs.xfs",
       "podman volume",
-      "chcon (incorrect for this task)"
+      "chcon"
     ],
     "correct": 0,
     "explain": "mkswap + swapon -a; /etc/fstab type swap pri.",
@@ -572,7 +572,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
       "chage -M 90 -W 7 sam",
       "usermod -s",
       "pvcreate",
-      "ip link set dev eth0 down"
+      "nmcli radio"
     ],
     "correct": 0,
     "explain": "chage -M max days; -W warn; -m min days between changes.",
@@ -588,7 +588,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
       "Users deleting others' files in world-writable dir",
       "All writes",
       "Root access",
-      "SELinux (incorrect for this task)"
+      "SELinux"
     ],
     "correct": 0,
     "explain": "chmod +t /tmp (1777); sticky = only owner deletes own files.",
@@ -603,7 +603,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "options": [
       "systemd-analyze blame",
       "journalctl -k",
-      "parted /dev/sdb print only",
+      "fdisk",
       "dnf history"
     ],
     "correct": 0,
@@ -620,7 +620,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
       "firewall-cmd --add-forward-port=port=8080:proto=tcp:toport=80:toaddr=192.168.1.50 --permanent",
       "rich rule",
       "lvchange",
-      "chage (incorrect for this task)"
+      "chage"
     ],
     "correct": 0,
     "explain": "Forward port for DNAT; enable ip_forward if needed.",
@@ -636,7 +636,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
       "createrepo /mnt/dvd/AppStream; .repo file baseurl=file:///mnt/dvd/...",
       "podman run",
       "lvmdiskscan",
-      "chcon -t unlabeled_t on the path"
+      "restorecon"
     ],
     "correct": 0,
     "explain": "BaseOS + AppStream repos; gpgcheck per org policy.",
@@ -651,7 +651,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "options": [
       "tune2fs -C 0 /dev/mapper/vg-root or touch /forcefsck",
       "xfs_repair -n",
-      "ip link set dev eth0 down",
+      "nmcli",
       "setsebool"
     ],
     "correct": 0,
@@ -665,10 +665,10 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "topic": "Networking",
     "q": "Bring connection eth0 down with nmcli:",
     "options": [
-      "ip link set dev eth0 down",
+      "nmcli con down eth0",
       "ip addr flush",
       "vgreduce",
-      "userdel (incorrect for this task)"
+      "userdel"
     ],
     "correct": 0,
     "explain": "nmcli con down/up; device disconnect vs connection.",
@@ -698,7 +698,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "q": "Reload systemd after unit file change:",
     "options": [
       "systemctl daemon-reload",
-      "reboot (incorrect for this task)",
+      "reboot",
       "lvcreate",
       "firewall-cmd --complete-reload"
     ],
@@ -715,8 +715,8 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "options": [
       "UUID=xxx /mount xfs defaults 0 0",
       "LABEL= only required",
-      "ip link set dev eth0 down",
-      "podman (incorrect for this task)"
+      "nmcli",
+      "podman"
     ],
     "correct": 0,
     "explain": "blkid shows UUID; UUID= in fstab survives device rename.",
@@ -732,7 +732,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
       "usermod -aG wheel user",
       "groupdel wheel",
       "pvresize",
-      "chattr (incorrect for this task)"
+      "chattr"
     ],
     "correct": 0,
     "explain": "-aG append groups; -G replaces all supplementary groups.",
@@ -747,8 +747,8 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "options": [
       "dnf remove httpd",
       "rpm -ivh",
-      "mkfs (incorrect for this task)",
-      "chcon -t unlabeled_t on the path"
+      "mkfs",
+      "restorecon"
     ],
     "correct": 0,
     "explain": "dnf remove; autoremove cleans orphans.",
@@ -762,9 +762,9 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "q": "Reset root password from rescue mode (high level):",
     "options": [
       "Boot rescue; mount sysroot; chroot /sysroot; passwd root; touch /.autorelabel",
-      "ip link set dev eth0 down",
+      "nmcli con add",
       "lvcreate",
-      "podman (incorrect for this task)"
+      "podman"
     ],
     "correct": 0,
     "explain": "rd.break or rescue image; relabel if SELinux contexts broken.",
@@ -779,8 +779,8 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "options": [
       "ip route show or route -n",
       "ss -tlnp",
-      "lvs (incorrect for this task)",
-      "getfacl (incorrect for this task)"
+      "lvs",
+      "getfacl"
     ],
     "correct": 0,
     "explain": "ip route; nmcli shows profiles not full table.",
@@ -794,8 +794,8 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "q": "Default zone for interfaces not explicitly assigned:",
     "options": [
       "Defined in /etc/firewalld/firewalld.conf (often public)",
-      "No zone (incorrect for this task)",
-      "block (incorrect for this task)",
+      "No zone",
+      "block",
       "trusted always"
     ],
     "correct": 0,
@@ -811,7 +811,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "options": [
       "vgchange -ay vg0",
       "vgremove",
-      "useradd (incorrect for this task)",
+      "useradd",
       "firewall-offline-cmd"
     ],
     "correct": 0,
@@ -844,7 +844,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
       "dnf download nginx",
       "rpm -e nginx",
       "mkfs.xfs",
-      "chcon -t unlabeled_t on the path"
+      "restorecon -R"
     ],
     "correct": 0,
     "explain": "dnf download gets RPMs; install with dnf install ./package.rpm.",
@@ -875,7 +875,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "options": [
       "audit2allow -M mymod -i log; semodule -i mymod.pp",
       "setenforce 0 forever",
-      "parted /dev/sdb print only",
+      "fdisk",
       "useradd -o"
     ],
     "correct": 0,
@@ -889,8 +889,8 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "topic": "Storage",
     "q": "Display block device hierarchy:",
     "options": [
-      "lsblk (incorrect for this task)",
-      "only df (incorrect for this task)",
+      "lsblk",
+      "only df",
       "journalctl",
       "firewall-cmd"
     ],
@@ -906,9 +906,9 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "q": "Allow user mike to use at jobs:",
     "options": [
       "Ensure mike in /etc/at.allow or not in at.deny",
-      "crontab (incorrect for this task)",
+      "crontab",
       "lvremove",
-      "ip link set dev eth0 down"
+      "nmcli"
     ],
     "correct": 0,
     "explain": "at.allow whitelist; atq lists queue; atrm removes job.",
@@ -939,8 +939,8 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "options": [
       "dnf groupinstall 'Development Tools'",
       "rpm -Uvh",
-      "mkfs (incorrect for this task)",
-      "chcon -t unlabeled_t on the path"
+      "mkfs",
+      "restorecon"
     ],
     "correct": 0,
     "explain": "dnf group list; groupinstall installs package set.",
@@ -954,9 +954,9 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "q": "Verify boot loader config after editing /etc/default/grub:",
     "options": [
       "grub2-mkconfig -o /boot/grub2/grub.cfg (BIOS) or grub.cfg under EFI",
-      "dracut (incorrect for this task)",
-      "ip link set dev eth0 down",
-      "podman (incorrect for this task)"
+      "dracut",
+      "nmcli",
+      "podman"
     ],
     "correct": 0,
     "explain": "UEFI path under /boot/efi/EFI/redhat/; BIOS /boot/grub2/.",
@@ -1148,7 +1148,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
       "balanced",
       "virtual-guest",
       "throughput-performance",
-      "desktop (incorrect for this task)"
+      "desktop"
     ],
     "correct": 1,
     "explain": "virtual-guest optimizes for VMs. virtual-host for hypervisors. tuned-adm recommend suggests a profile.",
@@ -1227,7 +1227,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "options": [
       "systemctl list-timers",
       "crontab -l",
-      "at -l (incorrect for this task)",
+      "at -l",
       "timedatectl list"
     ],
     "correct": 0,
@@ -1387,7 +1387,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "options": [
       "mount server:/export /mnt/nfs then reboot",
       "echo 'server:/export /mnt/nfs nfs defaults 0 0' >> /etc/fstab",
-      "ip link set dev eth0 down",
+      "nmcli con add nfs server:/export",
       "systemctl enable nfs-mount"
     ],
     "correct": 1,
@@ -1401,7 +1401,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "topic": "NFS",
     "q": "To show currently mounted NFS shares:",
     "options": [
-      "nfsstat (incorrect for this task)",
+      "nfsstat",
       "mount | grep nfs",
       "showmount -e",
       "Both A and B"
@@ -1435,8 +1435,8 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "options": [
       "hard (default, retries indefinitely)",
       "soft (returns error after timeout)",
-      "async (incorrect for this task)",
-      "nolock (incorrect for this task)"
+      "async",
+      "nolock"
     ],
     "correct": 1,
     "explain": "soft returns I/O error after timeout. hard (default) hangs until server responds. Use soft with caution.",
@@ -1803,7 +1803,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "options": [
       "FTP protocols",
       "SSH keys or passwords (SSH protocol)",
-      "Telnet (incorrect for this task)",
+      "Telnet",
       "HTTP Basic Auth"
     ],
     "correct": 1,
@@ -2044,7 +2044,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
       "systemctl restart systemd-journald",
       "systemctl daemon-reload",
       "journalctl --reload",
-      "reboot (incorrect for this task)"
+      "reboot"
     ],
     "correct": 0,
     "explain": "systemctl restart systemd-journald applies journald.conf changes. Existing logs preserved.",
@@ -2075,7 +2075,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "options": [
       "parted /dev/sdc mklabel gpt",
       "gdisk /dev/sdc (then 'o' for new GPT)",
-      "parted /dev/sdb print only",
+      "fdisk /dev/sdc (then 'g' for GPT)",
       "All of the above"
     ],
     "correct": 3,
@@ -2106,7 +2106,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "q": "GPT supports up to how many partitions without extended partitions?",
     "options": [
       "4 (like MBR)",
-      "16 (incorrect for this task)",
+      "16",
       "128 (default)",
       "Unlimited"
     ],
@@ -2122,7 +2122,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "q": "To list partitions on GPT disk /dev/sdd:",
     "options": [
       "parted /dev/sdd print",
-      "parted /dev/sdb print only",
+      "fdisk -l /dev/sdd",
       "lsblk /dev/sdd",
       "All of the above"
     ],

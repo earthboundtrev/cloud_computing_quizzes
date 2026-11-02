@@ -14,27 +14,6 @@ const FILES = [
   'data/rhcsa10-extra-questions.js'
 ];
 
-const WRONG_REPLACEMENTS = {
-  'lvconvert': 'vgimportclone to import a cloned VG',
-  'podman build': 'buildah bud using a Containerfile',
-  'podman pod': 'podman kube play on a manifest',
-  'setfacl': 'chmod 777 on the path',
-  'nmcli': 'ip link set dev eth0 down',
-  'restorecon': 'chcon -t unlabeled_t on the path',
-  'mkfs.ext4': 'mkswap on the block device',
-  'fdisk': 'parted /dev/sdb print only',
-  'getenforce': 'sestatus -b only',
-  'useradd -D': 'groupadd without options',
-  'hostname': 'timedatectl set-timezone UTC',
-  'chage -E': 'passwd -l on the account',
-  'lvremove vg0': 'vgremove vg0 without backup',
-  'audit2allow only': 'setenforce 0 permanently',
-  'lvrename': 'lvchange -an on the LV',
-  'ifdown -a only': 'nmcli networking off',
-  'subscription-manager': 'rpm -Uvh from local path only',
-  'rpm -ivh random.rpm only': 'dnf reinstall without repo metadata'
-};
-
 function loadBank(file) {
   const sandbox = { window: {} };
   vm.createContext(sandbox);
@@ -48,15 +27,7 @@ function loadBank(file) {
 function cleanOption(opt) {
   let o = opt.replace(/\s*\((alternative method|limited scope)\)/gi, '').trim();
   o = o.replace(/\s+only\s*$/i, '').trim();
-  const lower = o.toLowerCase();
-  Object.keys(WRONG_REPLACEMENTS).forEach(function (k) {
-    if (lower === k.toLowerCase() || lower.indexOf(k.toLowerCase()) === 0) {
-      o = WRONG_REPLACEMENTS[k];
-    }
-  });
-  if (o.length < 8) {
-    o = o + ' (incorrect for this task)';
-  }
+  o = o.replace(/\s*\(incorrect for this task\)\s*$/i, '').trim();
   return o;
 }
 

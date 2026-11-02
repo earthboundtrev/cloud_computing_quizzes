@@ -51,6 +51,9 @@ function validateQ(q, file, idx, validObj) {
   if (!q.ref || !String(q.ref).match(/^https:\/\//)) {
     fail(label + ": missing ref URL");
   }
+  if (/ — (less appropriate|not the best managerial|unlikely best practice)/i.test((q.options || []).join(' '))) {
+    fail(label + ': confession-style distractor suffix detected');
+  }
 }
 
 function longestLeak(questions) {

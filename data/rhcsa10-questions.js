@@ -5,10 +5,10 @@ window.QUESTION_BANK_RHCSA10 = [
     "topic": "Storage",
     "q": "To create an XFS file system on /dev/sdb1, which command?",
     "options": [
-      "mkswap on the block device",
+      "mkfs.ext4 /dev/sdb1",
       "mkfs.xfs /dev/sdb1",
       "mkswap /dev/sdb1",
-      "parted /dev/sdb print only"
+      "fdisk /dev/sdb1"
     ],
     "correct": 1,
     "explain": "mkfs.xfs /dev/sdb1 creates XFS. mkfs.ext4 for ext4.",
@@ -56,7 +56,7 @@ window.QUESTION_BANK_RHCSA10 = [
       "tail /var/log/messages",
       "journalctl -u service",
       "cat /var/log/service",
-      "dmesg (incorrect for this task)"
+      "dmesg"
     ],
     "correct": 1,
     "explain": "journalctl -u <unit> - logs for that unit. journalctl -xe for recent.",
@@ -102,9 +102,9 @@ window.QUESTION_BANK_RHCSA10 = [
     "q": "To check SELinux status:",
     "options": [
       "cat /etc/selinux/config",
-      "sestatus -b only",
+      "getenforce",
       "selinux --status",
-      "chcon (incorrect for this task)"
+      "chcon"
     ],
     "correct": 1,
     "explain": "getenforce shows Enforcing/Permissive/Disabled. sestatus for details.",
@@ -120,7 +120,7 @@ window.QUESTION_BANK_RHCSA10 = [
       "edit /etc/selinux/config",
       "setenforce 0",
       "chcon -t",
-      "chcon -t unlabeled_t on the path"
+      "restorecon"
     ],
     "correct": 1,
     "explain": "setenforce 0 = permissive. setenforce 1 = enforcing. Does not persist across reboot.",
@@ -136,7 +136,7 @@ window.QUESTION_BANK_RHCSA10 = [
       "pvcreate",
       "vgcreate",
       "lvcreate",
-      "parted /dev/sdb print only"
+      "fdisk"
     ],
     "correct": 1,
     "explain": "pvcreate /dev/sdX - create PV. vgcreate - VG. lvcreate - LV.",
@@ -165,10 +165,10 @@ window.QUESTION_BANK_RHCSA10 = [
     "topic": "Scheduling",
     "q": "To schedule a recurring job for a user, which is used?",
     "options": [
-      "at (incorrect for this task)",
+      "at",
       "cron (crontab -e)",
       "systemd timer",
-      "anacron (incorrect for this task)"
+      "anacron"
     ],
     "correct": 1,
     "explain": "crontab -e for user cron. /etc/crontab for system. at for one-time.",
@@ -182,9 +182,9 @@ window.QUESTION_BANK_RHCSA10 = [
     "q": "To configure a static IP using nmcli:",
     "options": [
       "ifconfig eth0 192.168.1.10",
-      "ip link set dev eth0 down",
+      "nmcli con mod \"connection\" ipv4.addresses 192.168.1.10/24",
       "route add",
-      "netstat (incorrect for this task)"
+      "netstat"
     ],
     "correct": 1,
     "explain": "nmcli con mod \"conn\" ipv4.addresses 192.168.1.10/24 ipv4.method manual",
@@ -198,9 +198,9 @@ window.QUESTION_BANK_RHCSA10 = [
     "q": "To see active NetworkManager connections:",
     "options": [
       "ifconfig",
-      "ip link set dev eth0 down",
+      "nmcli con show",
       "netstat -i",
-      "ip link (incorrect for this task)"
+      "ip link"
     ],
     "correct": 1,
     "explain": "nmcli con show - connections. nmcli con show --active for active.",
@@ -232,7 +232,7 @@ window.QUESTION_BANK_RHCSA10 = [
       "/etc/fstab",
       "/etc/mtab",
       "/proc/mounts",
-      "parted /dev/sdb print only"
+      "fdisk"
     ],
     "correct": 1,
     "explain": "/etc/fstab = persistent mounts. Use UUID=... for stability (UUID=xxx /mount xfs defaults 0 0).",
@@ -245,7 +245,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "topic": "Filesystems",
     "q": "To find files by name:",
     "options": [
-      "grep (incorrect for this task)",
+      "grep",
       "find / -name filename",
       "locate (if updatedb run)",
       "Both B and C"
@@ -341,9 +341,9 @@ window.QUESTION_BANK_RHCSA10 = [
     "topic": "Packages",
     "q": "To list installed packages:",
     "options": [
-      "rpm -qa (incorrect for this task)",
+      "rpm -qa",
       "dnf list installed",
-      "Both (incorrect for this task)",
+      "Both",
       "apt list"
     ],
     "correct": 2,
@@ -360,7 +360,7 @@ window.QUESTION_BANK_RHCSA10 = [
       "edit /etc/inittab",
       "systemctl set-default multi-user.target",
       "chkconfig 3",
-      "init 3 (incorrect for this task)"
+      "init 3"
     ],
     "correct": 1,
     "explain": "systemctl set-default multi-user.target. graphical.target for GUI.",
@@ -392,7 +392,7 @@ window.QUESTION_BANK_RHCSA10 = [
       "Cannot use file for swap",
       "dd + mkswap + chmod 600 + swapon",
       "mkfs.swap file",
-      "swapoff (incorrect for this task)"
+      "swapoff"
     ],
     "correct": 1,
     "explain": "dd if=/dev/zero of=swapfile bs=1M count=1024; mkswap swapfile; chmod 600; swapon swapfile.",
@@ -437,10 +437,10 @@ window.QUESTION_BANK_RHCSA10 = [
     "topic": "Storage",
     "q": "To display disk usage by directory:",
     "options": [
-      "ls -la (incorrect for this task)",
+      "ls -la",
       "du -sh /path",
-      "df -h (incorrect for this task)",
-      "parted /dev/sdb print only"
+      "df -h",
+      "fdisk -l"
     ],
     "correct": 1,
     "explain": "du -sh /path - disk usage. df -h - filesystem usage.",
@@ -455,7 +455,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "options": [
       "edit /etc/hosts",
       "edit /etc/resolv.conf",
-      "ip link set dev eth0 down",
+      "nmcli",
       "systemd-resolve"
     ],
     "correct": 1,
@@ -485,7 +485,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "topic": "Filesystems",
     "q": "To create an ext4 filesystem:",
     "options": [
-      "mkswap on the block device",
+      "mkfs.ext4 /dev/sdX",
       "mkfs.xfs /dev/sdX",
       "mke2fs -t ext4",
       "Both A and C"
@@ -504,7 +504,7 @@ window.QUESTION_BANK_RHCSA10 = [
       "lvdisplay",
       "vgdisplay or vgs",
       "pvdisplay",
-      "parted /dev/sdb print only"
+      "fdisk -l"
     ],
     "correct": 1,
     "explain": "vgdisplay, vgs - volume groups. pvdisplay, pvs - physical. lvdisplay, lvs - logical.",
@@ -549,10 +549,10 @@ window.QUESTION_BANK_RHCSA10 = [
     "topic": "Users/Groups",
     "q": "To change a user's primary group:",
     "options": [
-      "chgrp (incorrect for this task)",
+      "chgrp",
       "usermod -g group user",
       "groupmod",
-      "chown (incorrect for this task)"
+      "chown"
     ],
     "correct": 1,
     "explain": "usermod -g = primary group. -G = supplementary (replace list).",
@@ -598,9 +598,9 @@ window.QUESTION_BANK_RHCSA10 = [
     "q": "To set DNS via nmcli:",
     "options": [
       "Only /etc/resolv.conf",
-      "ip link set dev eth0 down",
+      "nmcli con mod \"conn\" ipv4.dns \"8.8.8.8\"",
       "route add",
-      "timedatectl set-timezone UTC"
+      "hostname"
     ],
     "correct": 1,
     "explain": "nmcli con mod \"conn\" ipv4.dns \"8.8.8.8 8.8.4.4\" ipv4.ignore-auto-dns yes",
@@ -629,7 +629,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "topic": "Filesystems",
     "q": "To check filesystem (ext4):",
     "options": [
-      "fsck (incorrect for this task)",
+      "fsck",
       "Unmount first; e2fsck /dev/sdX or fsck.ext4",
       "Only when mounted",
       "Only xfs_repair"
@@ -677,10 +677,10 @@ window.QUESTION_BANK_RHCSA10 = [
     "topic": "Packages",
     "q": "To remove a package and its unused dependencies:",
     "options": [
-      "rpm -e (incorrect for this task)",
+      "rpm -e",
       "dnf remove package or dnf autoremove",
       "Only autoremove",
-      "yum (incorrect for this task)"
+      "yum"
     ],
     "correct": 1,
     "explain": "dnf remove pkg. dnf autoremove = remove orphaned deps.",
@@ -742,7 +742,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "q": "To add a static route persistently (RHEL 9):",
     "options": [
       "Only route add",
-      "ip link set dev eth0 down",
+      "nmcli con mod \"conn\" ipv4.routes \"192.168.2.0/24 10.0.0.1\"",
       "Only ip route",
       "Only /etc/sysconfig/network"
     ],
@@ -773,10 +773,10 @@ window.QUESTION_BANK_RHCSA10 = [
     "topic": "Storage",
     "q": "To see which process is using a file:",
     "options": [
-      "Only ls (incorrect for this task)",
+      "Only ls",
       "lsof /path or fuser -v /path",
       "Only fuser",
-      "Only ps (incorrect for this task)"
+      "Only ps"
     ],
     "correct": 1,
     "explain": "lsof /path or fuser -v /path. fuser -k to kill processes using file.",
@@ -808,7 +808,7 @@ window.QUESTION_BANK_RHCSA10 = [
       "dnf install",
       "dnf install --enablerepo=repo name",
       "Only --disablerepo",
-      "rpm (incorrect for this task)"
+      "rpm"
     ],
     "correct": 1,
     "explain": "dnf install --enablerepo=epel package. repolist to see repos.",
@@ -854,7 +854,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "q": "To expire a user account on a date:",
     "options": [
       "Only usermod -L",
-      "passwd -l on the account",
+      "chage -E YYYY-MM-DD user",
       "Only passwd",
       "Only delete"
     ],
@@ -1237,10 +1237,10 @@ window.QUESTION_BANK_RHCSA10 = [
     "topic": "Permissions",
     "q": "Default umask 022 means new file permission:",
     "options": [
-      "022 (incorrect for this task)",
+      "022",
       "File 644, dir 755 (777 - 022)",
-      "777 (incorrect for this task)",
-      "600 (incorrect for this task)"
+      "777",
+      "600"
     ],
     "correct": 1,
     "explain": "umask = bits to remove. 022 = file 644, dir 755. 077 = 600/700.",
@@ -1304,7 +1304,7 @@ window.QUESTION_BANK_RHCSA10 = [
       "Only hourly",
       "Jobs that must run daily/weekly even if machine was off",
       "Only cron",
-      "Only at (incorrect for this task)"
+      "Only at"
     ],
     "correct": 1,
     "explain": "anacron = run jobs by day; if machine was off, run when it boots. Cron = fixed time.",
@@ -1319,7 +1319,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "options": [
       "Only /etc/group",
       "getent group groupname or grep group /etc/group",
-      "Only id (incorrect for this task)",
+      "Only id",
       "Only groups"
     ],
     "correct": 1,
@@ -1350,7 +1350,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "q": "To configure a bridge (br0) with nmcli:",
     "options": [
       "Only ip link",
-      "ip link set dev eth0 down",
+      "nmcli con add type bridge con-name br0",
       "Only brctl",
       "Only /etc/sysconfig"
     ],
@@ -1381,7 +1381,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "topic": "Storage",
     "q": "To see disk and partition layout:",
     "options": [
-      "Only df (incorrect for this task)",
+      "Only df",
       "lsblk or fdisk -l",
       "Only mount",
       "Only /proc/partitions"
@@ -1494,7 +1494,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "q": "To set hostname persistently:",
     "options": [
       "Only hostname cmd",
-      "timedatectl set-timezone UTC",
+      "hostnamectl set-hostname name",
       "Only /etc/hostname",
       "Only nmcli"
     ],
@@ -1573,7 +1573,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "topic": "Boot",
     "q": "rescue.target vs emergency.target:",
     "options": [
-      "Same (incorrect for this task)",
+      "Same",
       "rescue = single-user with mounts; emergency = minimal, no mounts",
       "Only emergency",
       "Only rescue"
@@ -1638,7 +1638,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "q": "To bring down an interface with nmcli:",
     "options": [
       "Only ifconfig down",
-      "ip link set dev eth0 down",
+      "nmcli con down \"connection\" or nmcli device disconnect eth0",
       "Only ip link down",
       "Only reboot"
     ],
@@ -1752,7 +1752,7 @@ window.QUESTION_BANK_RHCSA10 = [
       "chmod 1777",
       "chmod g+s /shared; ensure group ownership on directory",
       "setenforce permissive",
-      "ip link set dev eth0 down"
+      "nmcli"
     ],
     "correct": 1,
     "explain": "setgid directory forces new files to inherit directory group.",

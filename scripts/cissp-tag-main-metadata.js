@@ -104,8 +104,8 @@ bank.forEach(function (q, idx) {
   q.level = guessLevel(q);
   q.ref = q.ref || REF[q.obj];
   q.id = q.id || ('cissp-legacy-' + String(idx + 1).padStart(4, '0'));
-  padDistractors(q);
 });
+
 
 const header = fs.readFileSync('data/cissp-questions.js', 'utf8').split('window.QUESTION_BANK_CISSP = [')[0];
 const body = bank.map(function (q) {
