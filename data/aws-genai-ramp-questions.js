@@ -1682,5 +1682,239 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
       1
     ],
     "explain": "RAG quality combines retrieval metrics and generation evaluation on curated prompts."
+  },
+  {
+    "id": "genai-ramp-094",
+    "mode": "exam",
+    "topic": "Integration",
+    "type": "multi",
+    "obj": "2",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/agents.html",
+    "q": "You are wiring a Bedrock Agent to Salesforce and an internal Postgres via separate action groups. Security wants least privilege and auditable tool calls. Which TWO designs fit? (Pick 2)",
+    "options": [
+      "One Lambda per action group with IAM roles scoped to each backend API",
+      "OpenAPI schemas with explicit parameters; secrets in Secrets Manager",
+      "Single Lambda with admin IAM role shared by all CRM and database tools",
+      "Long-lived access keys embedded in agent instructions for OAuth refresh",
+      "Public API Gateway endpoints without authorizers for faster agent loops"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "Scoped Lambdas and schema-driven tools limit blast radius; secrets stay out of prompts."
+  },
+  {
+    "id": "genai-ramp-095",
+    "mode": "exam",
+    "topic": "Data sources",
+    "obj": "1",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/kb-ds-create.html",
+    "q": "Legal requires deletion of a customer's files from the knowledge base within 24 hours of an erasure request. The KB ingests from a shared S3 prefix. BEST operational approach?",
+    "options": [
+      "Tag objects with customer IDs; delete or exclude tagged keys and run targeted sync jobs",
+      "Disable the entire knowledge base for all tenants until manual review completes each quarter",
+      "Wait for the next full re-embed of all buckets regardless of tenant scope or legal deadline",
+      "Remove Guardrails so the model refuses fewer deletion-related questions from end users"
+    ],
+    "correct": 0,
+    "explain": "Per-customer tagging plus targeted sync/removal supports erasure without wiping unrelated data."
+  },
+  {
+    "id": "genai-ramp-096",
+    "mode": "exam",
+    "topic": "Knowledge Bases",
+    "type": "multi",
+    "obj": "1",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-setup.html",
+    "q": "A global retailer adds PDFs, HTML help, and CSV price feeds to one knowledge base. Search quality varies by format. Which TWO ingestion choices improve retrieval? (Pick 2)",
+    "options": [
+      "Use format-aware chunking and metadata (product ID, locale) on each source type",
+      "Enable hybrid search when SKUs and prose appear in the same questions",
+      "Store all sources as one plaintext file without structure to simplify parsing",
+      "Use one fixed 32-token chunk size for every document type and language",
+      "Skip embeddings and pass entire S3 buckets into the prompt each time"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "Structure-aware chunking plus hybrid recall helps mixed catalog and narrative content."
+  },
+  {
+    "id": "genai-ramp-097",
+    "mode": "exam",
+    "topic": "Model access",
+    "obj": "2",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html",
+    "q": "CI pipelines in a shared services account must invoke only approved Claude and Titan models in us-west-2. Developers use assumed roles. What prevents accidental use of other FMs?",
+    "options": [
+      "IAM policy Allow on bedrock:InvokeModel with Resource ARNs listing approved models only",
+      "Attach AdministratorAccess to the CI role so deployments never fail on permissions during releases",
+      "Disable CloudTrail for Bedrock in the account to reduce log storage charges across all Regions",
+      "Hard-code model IDs in public GitHub workflows without IAM conditions or approval gates"
+    ],
+    "correct": 0,
+    "explain": "Resource-scoped Allow lists enforce which foundation models CI may invoke."
+  },
+  {
+    "id": "genai-ramp-098",
+    "mode": "exam",
+    "topic": "Responsible AI",
+    "type": "multi",
+    "obj": "3",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html",
+    "q": "An internal HR assistant must block requests for individual salary data and toxic language while allowing policy FAQs. Which TWO Guardrail controls combine? (Pick 2)",
+    "options": [
+      "Sensitive information filters for PII patterns on input and output",
+      "Denied topics or phrases for individual compensation inquiries",
+      "Word filter that removes every noun longer than six characters",
+      "Disable all logging so HR chats never appear in audit systems",
+      "Set temperature to 2.0 on all InvokeModel calls company-wide"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "PII filters plus topic denial target HR-specific risks without breaking legitimate policy answers."
+  },
+  {
+    "id": "genai-ramp-099",
+    "mode": "exam",
+    "topic": "Throughput",
+    "obj": "4",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/provisioned-throughput.html",
+    "q": "Burst traffic hits 3× baseline for two hours daily; otherwise load is flat. On-demand costs are acceptable off-peak but throttling occurs at peak. BEST blend?",
+    "options": [
+      "Provisioned Throughput for baseline plus on-demand for burst with backoff and quotas",
+      "Provisioned Throughput sized only to peak with zero on-demand fallback ever for chat traffic",
+      "Batch inference for all interactive chat during the two-hour peak window without polling",
+      "Disable Guardrails during peak solely to reduce billed output tokens on every request"
+    ],
+    "correct": 0,
+    "explain": "Baseline provisioned capacity plus on-demand overflow matches mixed steady/burst patterns."
+  },
+  {
+    "id": "genai-ramp-100",
+    "mode": "exam",
+    "topic": "Optimization",
+    "type": "multi",
+    "obj": "4",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/inference-request-response.html",
+    "q": "Latency SLO is 800 ms to first token; answers average 120 tokens. Which TWO request settings help? (Pick 2)",
+    "options": [
+      "Set max_tokens near expected answer length instead of model maximum",
+      "Use streaming InvokeModelWithResponseStream for progressive UI rendering",
+      "Always request 8k max_tokens so the model never stops early on long answers",
+      "Attach five Guardrails sequentially on every call for defense in depth",
+      "Send the entire 200k-token policy PDF inline on each user message"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "Right-sized generation limits and streaming improve perceived latency without extra work per token."
+  },
+  {
+    "id": "genai-ramp-101",
+    "mode": "exam",
+    "topic": "Compliance",
+    "obj": "1",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/logging-using-cloudtrail.html",
+    "q": "Auditors need who invoked which model and when for a regulated workload. Which logging approach satisfies traceability?",
+    "options": [
+      "Enable AWS CloudTrail data events or management events for Bedrock API calls with retention",
+      "Turn off all account logging to minimize storage cost in the compliance OU for all services",
+      "Log only failed requests in application stdout on developer laptops without central aggregation",
+      "Rely on users to self-report model usage in a shared spreadsheet weekly for auditor review"
+    ],
+    "correct": 0,
+    "explain": "CloudTrail captures API identity, time, and model resource for Bedrock invocations."
+  },
+  {
+    "id": "genai-ramp-102",
+    "mode": "exam",
+    "topic": "Flows",
+    "type": "multi",
+    "obj": "2",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/flows.html",
+    "q": "Product wants a visual workflow: classify intent → retrieve from KB → invoke model → branch on confidence score. Which TWO components are native? (Pick 2)",
+    "options": [
+      "Bedrock Flows nodes for prompt, knowledge base retrieval, and conditions",
+      "Prompt Management templates referenced from flow nodes",
+      "AWS Step Functions Standard workflows as the only supported orchestrator",
+      "Manual cron on EC2 to chain shell scripts calling curl to InvokeModel",
+      "S3 event notifications alone without any generative orchestration layer"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "Flows orchestrates generative steps; Prompt Management supplies versioned templates inside flows."
+  },
+  {
+    "id": "genai-ramp-103",
+    "mode": "exam",
+    "topic": "Governance",
+    "obj": "3",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/security.html",
+    "q": "A vendor model processes customer prompts. Legal requires encryption in transit and at rest for prompts stored briefly in your account. Which combination applies?",
+    "options": [
+      "TLS for Bedrock API calls plus SSE-KMS on any S3 prompt archives you control",
+      "HTTP InvokeModel for lower latency inside the corporate network only without certificate pinning",
+      "Store prompts unencrypted in ElastiCache for faster replay during debugging in shared environments",
+      "Disable KMS so Bedrock can read prompts without key policy updates in the data account"
+    ],
+    "correct": 0,
+    "explain": "Bedrock APIs use TLS; customer-managed storage should use KMS-backed encryption."
+  },
+  {
+    "id": "genai-ramp-104",
+    "mode": "exam",
+    "topic": "Vectors",
+    "type": "multi",
+    "obj": "1",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-setup.html",
+    "q": "You must support 10 million vectors with managed scaling and IAM integration for a new knowledge base. Which TWO vector store choices fit Bedrock KB? (Pick 2)",
+    "options": [
+      "Amazon OpenSearch Serverless collection configured as the KB vector store",
+      "Amazon Aurora PostgreSQL with pgvector when configured as supported storage",
+      "A spreadsheet on a developer laptop synced over email attachments",
+      "Unencrypted local SQLite file mounted on a single t2.micro instance",
+      "Public Redis cluster with no AUTH token for faster prototyping"
+    ],
+    "correct": [
+      0,
+      1
+    ],
+    "explain": "Bedrock integrates with supported managed vector backends such as OpenSearch Serverless and Aurora pgvector."
+  },
+  {
+    "id": "genai-ramp-105",
+    "mode": "exam",
+    "topic": "Implementation",
+    "obj": "2",
+    "level": 4,
+    "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/kb-api-retrieve.html",
+    "q": "An existing search UI already ranks internal documents. You want Bedrock only for generation while keeping your retriever. Recommended API pattern?",
+    "options": [
+      "Retrieve API for your custom search results, then InvokeModel or Converse with retrieved passages",
+      "RetrieveAndGenerate only, replacing your search tier entirely on day one without A/B testing",
+      "Batch inference on the whole corpus nightly instead of online retrieval for interactive chat",
+      "Disable retrieval and increase temperature so answers sound more creative for factual queries"
+    ],
+    "correct": 0,
+    "explain": "Retrieve decouples search from generation when you already own ranking logic."
   }
 ];
