@@ -11,10 +11,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base.html",
     "q": "A Bedrock Knowledge Base chatbot answers policy FAQs well, but queries with internal part numbers (PN-44817-B) return irrelevant passages. Embeddings use a general model. What is the MOST effective fix?",
     "options": [
-      "Raise temperature to 1.0",
+      "Raise temperature to 1.0 while leaving retrieval and chunking unchanged",
       "Enable hybrid search (semantic + keyword) on the knowledge base",
-      "Switch to the largest generation model only",
-      "Set retrieval results to 1"
+      "Switch to the largest generation model only by disabling Guardrails instead of tuning retrieval parameters",
+      "Set retrieval results to 1 using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Exact IDs are lexical; hybrid search adds keyword recall. Temperature and generation model do not fix retrieval; fewer results hurts recall."
@@ -50,10 +50,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/prompt-management.html",
     "q": "Teams need versioned prompts shared across dev/stage/prod with IAM-controlled updates. What should you use?",
     "options": [
-      "Hard-code prompts in Lambda only",
+      "Hard-code prompts in Lambda only while leaving retrieval and chunking unchanged",
       "Amazon Bedrock Prompt Management with versions and aliases",
-      "Store prompts in public S3 buckets",
-      "Embed prompts only in client mobile apps"
+      "Store prompts in public S3 buckets by disabling Guardrails instead of tuning retrieval parameters",
+      "Embed prompts only in client mobile apps using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Prompt Management centralizes versioning, testing, and IAM for prompt assets used by applications and flows."
@@ -67,10 +67,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/flows.html",
     "q": "You must orchestrate prompt → knowledge base retrieval → model invocation with branching on confidence. Which Bedrock feature fits?",
     "options": [
-      "A single InvokeModel call only",
+      "A single InvokeModel call only while leaving retrieval and chunking unchanged",
       "Bedrock Flows visual workflow with nodes and conditions",
-      "S3 lifecycle rules",
-      "EC2 Auto Scaling groups"
+      "S3 lifecycle rules by disabling Guardrails instead of tuning retrieval parameters",
+      "EC2 Auto Scaling groups using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Flows compose multi-step generative workflows (prompts, KB, agents, conditions) without custom orchestration code for every path."
@@ -84,10 +84,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-evaluation.html",
     "q": "Before promoting a new RAG prompt to production, you need automated quality scores against a golden Q&A set. What should you use?",
     "options": [
-      "Manual spot checks only",
+      "Manual spot checks only while leaving retrieval and chunking unchanged",
       "Bedrock model evaluation jobs (built-in or custom metrics)",
-      "CloudWatch alarm on CPU",
-      "Disable retrieval to simplify testing"
+      "CloudWatch alarm on CPU by disabling Guardrails instead of tuning retrieval parameters",
+      "Disable retrieval to simplify testing using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Model evaluation runs batch comparisons with metrics (accuracy, toxicity, etc.) on curated datasets."
@@ -101,10 +101,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models.html",
     "q": "A legal team needs consistent tone and domain terminology on a supported FM; few-shot prompts are insufficient. BEST approach?",
     "options": [
-      "Increase temperature",
+      "Increase temperature while leaving retrieval and chunking unchanged without updating IAM roles or model access in the target Region",
       "Fine-tune a supported model with labeled examples in S3 (Custom Model)",
-      "Delete the knowledge base",
-      "Use Guardrails word filter only"
+      "Delete the knowledge base by disabling Guardrails instead of tuning retrieval parameters",
+      "Use Guardrails word filter only using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Customization/fine-tuning adapts model weights for domain style when prompting alone plateaus."
@@ -118,10 +118,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/agents.html",
     "q": "An agent must call an internal REST API to create tickets, then summarize results to the user. Which component defines the OpenAPI tool schema?",
     "options": [
-      "Knowledge Base only",
+      "Knowledge Base only while leaving retrieval and chunking unchanged",
       "Action group with API schema attached to the Bedrock Agent",
-      "S3 bucket policy",
-      "IAM user access keys in the prompt"
+      "S3 bucket policy by disabling Guardrails instead of tuning retrieval parameters",
+      "IAM user access keys in the prompt using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Agents use action groups (OpenAPI) for tool calling; KB supplies retrieval, not arbitrary API execution."
@@ -135,10 +135,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_InvokeModelWithResponseStream.html",
     "q": "Users report timeouts on long answers though the model keeps generating. Client uses synchronous InvokeModel. FIRST change to try?",
     "options": [
-      "Disable Guardrails",
+      "Disable Guardrails while leaving retrieval and chunking unchanged without updating IAM roles or model access in the target Region",
       "Switch to InvokeModelWithResponseStream and increase client read timeout",
-      "Reduce max_tokens to 10",
-      "Move KB to another region randomly"
+      "Reduce max_tokens to 10 by disabling Guardrails instead of tuning retrieval parameters",
+      "Move KB to another region randomly using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Streaming improves time-to-first-token and avoids single large blocking response; tune timeouts accordingly."
@@ -152,10 +152,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html",
     "q": "Compliance requires blocking SSN patterns and denying off-topic medical advice in a HR chatbot. What should you configure?",
     "options": [
-      "Only S3 encryption",
+      "Only S3 encryption while leaving retrieval and chunking unchanged without updating IAM roles or model access in the target Region",
       "Bedrock Guardrails with PII filters and topic policies on input/output",
-      "Public API Gateway without auth",
-      "Raise temperature"
+      "Public API Gateway without auth by disabling Guardrails instead of tuning retrieval parameters",
+      "Raise temperature using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Guardrails apply content, PII, and topic controls at inference time for both prompts and responses."
@@ -169,10 +169,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/kb-data-source-sync.html",
     "q": "New PDFs land in S3 hourly for a Knowledge Base. How do you keep vectors fresh with minimal ops?",
     "options": [
-      "Manual re-create KB daily",
+      "Manual re-create KB daily while leaving retrieval and chunking unchanged",
       "Scheduled or event-driven ingestion sync on the data source",
-      "Copy PDFs to EBS volumes",
-      "Store PDFs in CloudFront only"
+      "Copy PDFs to EBS volumes by disabling Guardrails instead of tuning retrieval parameters",
+      "Store PDFs in CloudFront only using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Data source sync re-chunks and re-embeds when source documents change."
@@ -208,10 +208,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/kb-chunking.html",
     "q": "Retrieved chunks are too large and answers miss details buried mid-document. FIRST tuning step?",
     "options": [
-      "Increase temperature",
+      "Increase temperature while leaving retrieval and chunking unchanged",
       "Adjust chunk size/overlap or hierarchical chunking strategy",
-      "Remove Guardrails",
-      "Use only one embedding dimension"
+      "Remove Guardrails by disabling Guardrails instead of tuning retrieval parameters",
+      "Use only one embedding dimension using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Chunking strategy directly affects retrieval precision; smaller targeted chunks improve detail recall."
@@ -225,10 +225,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/provisioned-throughput.html",
     "q": "Traffic is steady 24/7 at high TPS and throttling occurs on on-demand inference. BEST cost/latency tradeoff?",
     "options": [
-      "Randomly retry without backoff",
+      "Randomly retry without backoff while leaving retrieval and chunking unchanged",
       "Provisioned Throughput units sized to baseline demand",
-      "Delete the model access",
-      "Use only batch inference for chat"
+      "Delete the model access by disabling Guardrails instead of tuning retrieval parameters",
+      "Use only batch inference for chat using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Provisioned Throughput reserves capacity for predictable high-volume workloads."
@@ -242,10 +242,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/troubleshooting.html",
     "q": "Agent action calls fail with 403 from API Gateway though the agent plan looks correct. MOST likely cause?",
     "options": [
-      "Wrong embedding model",
+      "Wrong embedding model while leaving retrieval and chunking unchanged without updating IAM roles or model access in the target Region",
       "Agent execution role lacks invoke permission on the API or authorizer misconfigured",
-      "KB ingestion incomplete",
-      "Temperature too low"
+      "KB ingestion incomplete by disabling Guardrails instead of tuning retrieval parameters",
+      "Temperature too low using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Agents assume an execution role; API Gateway resource policies/IAM and auth must allow the role."
@@ -259,10 +259,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/data-protection.html",
     "q": "Customer contracts require encryption of prompts/responses at rest in your logging pipeline. What should you implement?",
     "options": [
-      "Plaintext logs in open S3",
+      "Plaintext logs in open S3 while leaving retrieval and chunking unchanged",
       "KMS-encrypted CloudWatch Logs/S3 and minimize sensitive fields in logs",
-      "Disable audit trails",
-      "Email transcripts externally"
+      "Disable audit trails by disabling Guardrails instead of tuning retrieval parameters",
+      "Email transcripts externally using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Use KMS for log/storage encryption; apply data minimization and retention policies for compliance."
@@ -276,10 +276,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-evaluation.html",
     "q": "You need to measure retrieval precision/recall for a new KB configuration before launch. What should you run?",
     "options": [
-      "Only load test EC2",
+      "Only load test EC2 while leaving retrieval and chunking unchanged without updating IAM roles or model access in the target Region",
       "Evaluation job comparing retrieved passages to labeled relevant documents",
-      "Change region",
-      "Turn off embeddings"
+      "Change region by disabling Guardrails instead of tuning retrieval parameters",
+      "Turn off embeddings using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "KB evaluation metrics quantify retrieval quality separate from generation quality."
@@ -293,10 +293,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/agents-alias.html",
     "q": "Blue/green deployment for a Bedrock Agent serving production traffic requires:",
     "options": [
-      "Deleting the agent each release",
+      "Deleting the agent each release while leaving retrieval and chunking unchanged",
       "Agent aliases pointing to tested agent versions with weighted routing",
-      "Hard-coded version in mobile app only",
-      "Single shared root credential"
+      "Hard-coded version in mobile app only by disabling Guardrails instead of tuning retrieval parameters",
+      "Single shared root credential using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Aliases and versions support staged rollout and rollback for agents."
@@ -311,9 +311,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "You must invoke a model in us-east-1 but it is only enabled in us-west-2. FIRST step?",
     "options": [
       "Enable model access in the target Region and ensure inference profile/region match",
-      "Copy IAM user password",
-      "Use Guardrails instead of a model",
-      "Disable CloudTrail"
+      "Copy IAM user password without updating IAM roles or model access in the target Region",
+      "Use Guardrails instead of a model by disabling Guardrails instead of tuning retrieval parameters",
+      "Disable CloudTrail using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 0,
     "explain": "Model access is per-Region; clients must call the Region where access and model IDs are valid."
@@ -327,10 +327,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/batch-inference.html",
     "q": "Nightly job generates summaries for 2M archived tickets; latency can be hours. MOST cost-effective pattern?",
     "options": [
-      "Real-time InvokeModel at max TPS",
+      "Real-time InvokeModel at max TPS while leaving retrieval and chunking unchanged",
       "Batch inference job with input/output in S3",
-      "Provisioned Throughput for chat UI",
-      "Manual copy/paste"
+      "Provisioned Throughput for chat UI by disabling Guardrails instead of tuning retrieval parameters",
+      "Manual copy/paste using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Batch inference optimizes cost for large offline workloads without interactive latency needs."
@@ -367,9 +367,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "Ops needs dashboards for model latency, token usage, and throttling. PRIMARY service?",
     "options": [
       "Amazon CloudWatch metrics and logs for Bedrock",
-      "Route 53 health checks only",
-      "S3 access logs only",
-      "AWS Budgets only"
+      "Route 53 health checks only without updating IAM roles or model access in the target Region",
+      "S3 access logs only by disabling Guardrails instead of tuning retrieval parameters",
+      "AWS Budgets only using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 0,
     "explain": "CloudWatch captures Bedrock invocation metrics; combine with X-Ray for traces."
@@ -383,10 +383,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/kb-metadata.html",
     "q": "Multi-tenant SaaS must filter KB retrieval per customer_id metadata. How should you implement?",
     "options": [
-      "One giant shared index without filters",
+      "One giant shared index without filters while leaving retrieval and chunking unchanged",
       "Attach metadata filters on retrieve API calls per tenant",
-      "Disable embeddings",
-      "Store all tenants in one prompt"
+      "Disable embeddings by disabling Guardrails instead of tuning retrieval parameters",
+      "Store all tenants in one prompt using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Metadata filtering scopes vector search to authorized tenant documents."
@@ -400,10 +400,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/service-quotas.html",
     "q": "Sudden ThrottlingException spikes during marketing launch. FIRST mitigation while keeping quality?",
     "options": [
-      "Remove Guardrails",
+      "Remove Guardrails while leaving retrieval and chunking unchanged without updating IAM roles or model access in the target Region",
       "Request quota increase and add exponential backoff/retry; consider provisioned capacity",
-      "Delete KB",
-      "Switch to smallest model regardless of task"
+      "Delete KB by disabling Guardrails instead of tuning retrieval parameters using only client-side JavaScript to hold long-lived credentials",
+      "Switch to smallest model regardless of task using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Throttling indicates quota/capacity limits; backoff plus quota or provisioned throughput addresses sustained spikes."
@@ -417,10 +417,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/inference-profiles.html",
     "q": "You need cross-Region resilience for Claude model invocation with a single model ID in code. Use:",
     "options": [
-      "Hard-code one Region endpoint",
+      "Hard-code one Region endpoint while leaving retrieval and chunking unchanged",
       "Inference profile that routes across Regions per AWS configuration",
-      "Local laptop model",
-      "DynamoDB streams"
+      "Local laptop model by disabling Guardrails instead of tuning retrieval parameters",
+      "DynamoDB streams using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Inference profiles abstract Region routing for supported models."
@@ -434,10 +434,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/responsible-use.html",
     "q": "Product policy bans generating instructions for weapons. Besides Guardrails, what governance practice is REQUIRED?",
     "options": [
-      "Ignore abuse reports",
+      "Ignore abuse reports while leaving retrieval and chunking unchanged without updating IAM roles or model access in the target Region",
       "Human review process, abuse monitoring, and documented acceptable use policies",
-      "Publish admin keys",
-      "Disable encryption"
+      "Publish admin keys by disabling Guardrails instead of tuning retrieval parameters",
+      "Disable encryption using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Responsible AI combines technical controls with policy, monitoring, and human oversight."
@@ -451,10 +451,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/prompt-engineering.html",
     "q": "Model returns JSON but often adds markdown fences. MOST reliable fix?",
     "options": [
-      "Ask politely in one word",
+      "Ask politely in one word while leaving retrieval and chunking unchanged without updating IAM roles or model access in the target Region",
       "Use tool/structured output or response schema features where supported; validate with post-processing",
-      "Set temperature to maximum",
-      "Remove system prompt"
+      "Set temperature to maximum by disabling Guardrails instead of tuning retrieval parameters using only client-side JavaScript to hold long-lived credentials",
+      "Remove system prompt using only client-side JavaScript to hold long-lived credentials and relying on a single synchronous InvokeModel call for all traffic"
     ],
     "correct": 1,
     "explain": "Structured output constraints and validation reduce format drift versus hope-based prompting."
@@ -490,10 +490,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-setup.html",
     "q": "You change embedding model for an existing Knowledge Base. Required action?",
     "options": [
-      "Nothing; embeddings auto-migrate silently",
+      "Nothing; embeddings auto-migrate silently while leaving retrieval and chunking unchanged",
       "Re-run ingestion to re-embed all documents with the new model",
-      "Only change Guardrails",
-      "Delete IAM roles"
+      "Only change Guardrails by disabling Guardrails instead of tuning retrieval parameters",
+      "Delete IAM roles using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Vectors are model-specific; changing embedding model requires re-ingestion."
@@ -508,9 +508,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "After updating agent instructions and action schemas, what must you do before testing in console?",
     "options": [
       "Prepare the agent to rebuild internal orchestration state",
-      "Delete the AWS account",
-      "Disable CloudTrail",
-      "Remove KB"
+      "Delete the AWS account without updating IAM roles or model access in the target Region",
+      "Disable CloudTrail by disabling Guardrails instead of tuning retrieval parameters",
+      "Remove KB using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 0,
     "explain": "Prepare compiles agent configuration after instruction/tool changes."
@@ -524,10 +524,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-retrieval.html",
     "q": "Answers cite too many irrelevant passages increasing cost. FIRST knob to turn?",
     "options": [
-      "Increase numberOfResults and max tokens always",
+      "Increase numberOfResults and max tokens always while leaving retrieval and chunking unchanged",
       "Tune retrieval count, score threshold, and reranking if enabled",
-      "Disable streaming",
-      "Remove encryption"
+      "Disable streaming by disabling Guardrails instead of tuning retrieval parameters",
+      "Remove encryption using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Retrieval parameters control context size and relevance, directly affecting token cost."
@@ -541,10 +541,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/logging.html",
     "q": "Audit requires retaining model invocation logs with sensitive fields redacted. BEST pattern?",
     "options": [
-      "No logging for privacy",
+      "No logging for privacy while leaving retrieval and chunking unchanged without updating IAM roles or model access in the target Region",
       "Model invocation logging to encrypted S3/CloudWatch with Guardrails + log filtering",
-      "Tweet request IDs",
-      "Log full prompts to public repo"
+      "Tweet request IDs by disabling Guardrails instead of tuning retrieval parameters using only client-side JavaScript to hold long-lived credentials",
+      "Log full prompts to public repo using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Enable invocation logging with encryption and redaction/minimization aligned to policy."
@@ -558,10 +558,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-troubleshooting.html",
     "q": "KB answers 'I don't know' despite document containing answer. Retrieval shows low scores. NEXT step?",
     "options": [
-      "Increase temperature only",
+      "Increase temperature only while leaving retrieval and chunking unchanged without updating IAM roles or model access in the target Region",
       "Inspect chunking, metadata filters, and query reformulation; verify ingestion succeeded",
-      "Delete S3 bucket",
-      "Disable hybrid search always"
+      "Delete S3 bucket by disabling Guardrails instead of tuning retrieval parameters using only client-side JavaScript to hold long-lived credentials",
+      "Disable hybrid search always using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Low retrieval scores indicate ingestion, chunking, filtering, or query mismatch—not generation temperature."
@@ -576,9 +576,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "Agent should answer from private docs AND call tools. Combine:",
     "options": [
       "Knowledge base association plus action groups on the same agent",
-      "Only Guardrails",
-      "Only S3 static website",
-      "EC2 user data scripts only"
+      "Only Guardrails without updating IAM roles or model access in the target Region",
+      "Only S3 static website by disabling Guardrails instead of tuning retrieval parameters",
+      "EC2 user data scripts only using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 0,
     "explain": "Agents can attach KB for RAG and action groups for API tools concurrently."
@@ -592,10 +592,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters.html",
     "q": "Creative marketing copy needs variety; compliance summaries need determinism. How should you configure?",
     "options": [
-      "Same temperature for all use cases",
+      "Same temperature for all use cases while leaving retrieval and chunking unchanged without updating IAM roles or model access in the target Region",
       "Lower temperature/top-p for factual tasks; higher for creative tasks with evaluation gates",
-      "Max tokens = 1 for everything",
-      "Disable all Guardrails globally"
+      "Max tokens = 1 for everything by disabling Guardrails instead of tuning retrieval parameters",
+      "Disable all Guardrails globally using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Tune inference parameters per use case; validate factual workloads with eval and grounding."
@@ -609,10 +609,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html",
     "q": "Lambda calls Bedrock and retrieves from KB in VPC. Credentials should come from:",
     "options": [
-      "Long-lived IAM user keys in environment variables",
+      "Long-lived IAM user keys in environment variables while leaving retrieval and chunking unchanged",
       "Execution role with least privilege for bedrock:InvokeModel and KB retrieve",
-      "Root access key",
-      "Hard-coded in frontend JavaScript"
+      "Root access key by disabling Guardrails instead of tuning retrieval parameters",
+      "Hard-coded in frontend JavaScript using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Use IAM roles for AWS compute; scope policies to required Bedrock actions and resources."
@@ -627,9 +627,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "EU customer data must stay in eu-central-1 for Bedrock and KB storage. What must you verify FIRST?",
     "options": [
       "Model access and KB/data sources exist in eu-central-1",
-      "Use us-east-1 for cheaper tokens",
-      "Disable KMS",
-      "Run inference from on-prem only"
+      "Use us-east-1 for cheaper tokens without updating IAM roles or model access in the target Region",
+      "Disable KMS by disabling Guardrails instead of tuning retrieval parameters",
+      "Run inference from on-prem only using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 0,
     "explain": "Bedrock model availability and KB resources are Region-specific; residency requires aligned Region deployment."
@@ -644,9 +644,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "After custom model training completes, how do you invoke it in applications?",
     "options": [
       "Use the custom model ARN with InvokeModel in the training Region",
-      "Copy weights to EBS manually",
-      "Only via SageMaker exclusively",
-      "Publish to public S3"
+      "Copy weights to EBS manually without updating IAM roles or model access in the target Region",
+      "Only via SageMaker exclusively by disabling Guardrails instead of tuning retrieval parameters",
+      "Publish to public S3 using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 0,
     "explain": "Custom models appear as Bedrock model IDs/ARNs in the Region where training was provisioned."
@@ -660,10 +660,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/kb-how-data.html",
     "q": "Structured product specs live in DynamoDB; manuals are PDFs in S3. BEST retrieval design?",
     "options": [
-      "Ignore structured data",
+      "Ignore structured data while leaving retrieval and chunking unchanged without updating IAM roles or model access in the target Region",
       "Combine KB over S3 PDFs with application-side DynamoDB lookup or structured retrieval in the flow",
-      "Email CSV exports daily",
-      "Single prompt without tools"
+      "Email CSV exports daily by disabling Guardrails instead of tuning retrieval parameters using only client-side JavaScript to hold long-lived credentials",
+      "Single prompt without tools using only client-side JavaScript to hold long-lived credentials and relying on a single synchronous InvokeModel call for all traffic"
     ],
     "correct": 1,
     "explain": "Hybrid designs use KB for unstructured docs and app/flow logic for structured stores."
@@ -678,9 +678,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "Contracts require customer content is not used to improve base FMs. Which Bedrock default applies?",
     "options": [
       "AWS does not train base models on customer content by default for Bedrock service",
-      "All prompts are shared publicly",
-      "Disable encryption to prove isolation",
-      "Use root account"
+      "All prompts are shared publicly without updating IAM roles or model access in the target Region",
+      "Disable encryption to prove isolation by disabling Guardrails instead of tuning retrieval parameters",
+      "Use root account using only client-side JavaScript to hold long-lived credentials and relying on a single synchronous InvokeModel call for all traffic"
     ],
     "correct": 0,
     "explain": "Bedrock data protection policies address customer content separation from base model training (see current service terms/docs)."
@@ -694,10 +694,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/titan-embedding-models.html",
     "q": "You need semantic search over support tickets in English only. FIRST model choice?",
     "options": [
-      "Largest text generation model",
+      "Largest text generation model while leaving retrieval and chunking unchanged",
       "Bedrock embedding model suited to semantic search (e.g., Titan Embeddings)",
-      "Speech-to-text model",
-      "Image generation model"
+      "Speech-to-text model by disabling Guardrails instead of tuning retrieval parameters",
+      "Image generation model using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Embeddings map text to vectors for retrieval; generation models are not used for indexing."
@@ -712,9 +712,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "Engineers want to A/B test two prompt versions in staging without redeploying Lambda. Use:",
     "options": [
       "Prompt Management versions/aliases referenced by the app",
-      "Hard-code v1 only",
-      "Delete production alias",
-      "Store prompts in git without access control"
+      "Hard-code v1 only without updating IAM roles or model access in the target Region",
+      "Delete production alias by disabling Guardrails instead of tuning retrieval parameters",
+      "Store prompts in git without access control using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 0,
     "explain": "Versioned prompts and aliases enable controlled rollout and testing."
@@ -729,9 +729,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "A Flow must call Lambda for enrichment, then KB retrieve, then model. Where is Lambda invoked?",
     "options": [
       "As a Flow node integrated in the Bedrock Flow definition",
-      "Only from the user browser",
-      "Via S3 event alone without Flow",
-      "CloudFront function only"
+      "Only from the user browser without updating IAM roles or model access in the target Region",
+      "Via S3 event alone without Flow by disabling Guardrails instead of tuning retrieval parameters",
+      "CloudFront function only using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 0,
     "explain": "Flows support multiple node types including Lambda and KB retrieval in one workflow."
@@ -768,9 +768,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "Mobile app should not hold Bedrock credentials. Recommended pattern?",
     "options": [
       "Backend API (Lambda/API Gateway) assumes role to call Bedrock",
-      "Long-lived keys in the app",
-      "Public InvokeModel from browser",
-      "Shared password"
+      "Long-lived keys in the app without updating IAM roles or model access in the target Region",
+      "Public InvokeModel from browser by disabling Guardrails instead of tuning retrieval parameters",
+      "Shared password using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 0,
     "explain": "Server-side proxy with IAM roles keeps credentials off client devices."
@@ -784,10 +784,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-create.html",
     "q": "Different apps need different safety policies on the same account. How do you scope Guardrails?",
     "options": [
-      "One global Guardrail only forever",
+      "One global Guardrail only forever while leaving retrieval and chunking unchanged without updating IAM roles or model access in the target Region",
       "Create Guardrail versions and associate the appropriate ID per application/API call",
-      "Disable Guardrails on production",
-      "Use S3 bucket names as policy"
+      "Disable Guardrails on production by disabling Guardrails instead of tuning retrieval parameters",
+      "Use S3 bucket names as policy using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Guardrails are resources you attach per request or application configuration."
@@ -824,9 +824,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "Security team needs who invoked which model and when. Enable:",
     "options": [
       "AWS CloudTrail management events for Bedrock control plane and invocation logging as configured",
-      "Only S3 access logs",
-      "Disable all audit",
-      "Twitter alerts"
+      "Only S3 access logs without updating IAM roles or model access in the target Region by disabling Guardrails instead of tuning retrieval parameters",
+      "Disable all audit by disabling Guardrails instead of tuning retrieval parameters using only client-side JavaScript to hold long-lived credentials",
+      "Twitter alerts using only client-side JavaScript to hold long-lived credentials and relying on a single synchronous InvokeModel call for all traffic"
     ],
     "correct": 0,
     "explain": "CloudTrail and optional model invocation logging support governance and forensics."
@@ -841,9 +841,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "Spiky chat traffic with long idle periods overnight. DEFAULT capacity model?",
     "options": [
       "On-demand inference with autoscaling app tier",
-      "Maximum provisioned throughput 24/7 always",
-      "Buy EC2 GPU fleet manually",
-      "Disable autoscaling"
+      "Maximum provisioned throughput 24/7 always without updating IAM roles or model access in the target Region",
+      "Buy EC2 GPU fleet manually by disabling Guardrails instead of tuning retrieval parameters",
+      "Disable autoscaling using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 0,
     "explain": "On-demand fits variable traffic; provisioned suits steady high volume."
@@ -857,10 +857,10 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "ref": "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-retrieval.html",
     "q": "Context window fills with low-relevance chunks, increasing cost. FIRST fix?",
     "options": [
-      "Raise temperature",
+      "Raise temperature while leaving retrieval and chunking unchanged without updating IAM roles or model access in the target Region",
       "Reduce numberOfResults, add reranking/metadata filters, tighten score thresholds",
-      "Remove Guardrails",
-      "Duplicate KB"
+      "Remove Guardrails by disabling Guardrails instead of tuning retrieval parameters using only client-side JavaScript to hold long-lived credentials",
+      "Duplicate KB using only client-side JavaScript to hold long-lived credentials and relying on a single synchronous InvokeModel call for all traffic"
     ],
     "correct": 1,
     "explain": "Smaller, relevant context cuts input tokens without sacrificing answer quality."
@@ -875,9 +875,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "Repeated tool definitions and system policies dominate input tokens. Enable:",
     "options": [
       "Prompt caching for stable prefixes where supported",
-      "max_tokens = 1",
-      "Delete system prompt",
-      "Disable streaming"
+      "max_tokens = 1 without updating IAM roles or model access in the target Region",
+      "Delete system prompt by disabling Guardrails instead of tuning retrieval parameters",
+      "Disable streaming using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 0,
     "explain": "Caching bills fewer tokens for repeated static prompt segments."
@@ -892,9 +892,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "Leadership wants regression gates in CI before prompt promotion. Implement:",
     "options": [
       "Automated evaluation job against golden dataset with pass/fail thresholds",
-      "Manual hope",
-      "Chaos in prod only",
-      "Disable tests"
+      "Manual hope without updating IAM roles or model access in the target Region",
+      "Chaos in prod only by disabling Guardrails instead of tuning retrieval parameters",
+      "Disable tests using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 0,
     "explain": "Model evaluation jobs integrate with release pipelines for measurable quality gates."
@@ -909,9 +909,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "InvokeModel returns AccessDeniedException though IAM policy looks broad. NEXT check?",
     "options": [
       "Model access enabled in Region, SCPs, and resource ARN in policy matches model/KB",
-      "Increase temperature",
-      "Delete VPC",
-      "Disable CloudWatch"
+      "Increase temperature without updating IAM roles or model access in the target Region",
+      "Delete VPC by disabling Guardrails instead of tuning retrieval parameters using only client-side JavaScript to hold long-lived credentials",
+      "Disable CloudWatch using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 0,
     "explain": "AccessDenied often comes from model access, Region mismatch, SCP, or resource scope—not generation params."
@@ -926,9 +926,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "After changing chunk size, what should you re-run BEFORE launch?",
     "options": [
       "KB retrieval evaluation on labeled Q&A pairs",
-      "Only EC2 CPU stress test",
-      "Delete indexes",
-      "Turn off hybrid search always"
+      "Only EC2 CPU stress test without updating IAM roles or model access in the target Region",
+      "Delete indexes by disabling Guardrails instead of tuning retrieval parameters",
+      "Turn off hybrid search always using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 0,
     "explain": "Retrieval metrics validate chunking changes independently from generation."
@@ -943,9 +943,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "P95 latency SLO breaches during peak. Which metrics pinpoint Bedrock vs app issues?",
     "options": [
       "CloudWatch Bedrock invocation latency/throttle metrics plus app trace spans",
-      "S3 Glacier inventory",
-      "Route 53 only",
-      "IAM credential report only"
+      "S3 Glacier inventory without updating IAM roles or model access in the target Region",
+      "Route 53 only by disabling Guardrails instead of tuning retrieval parameters",
+      "IAM credential report only using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 0,
     "explain": "Split metrics between Bedrock service and application orchestration layers."
@@ -960,9 +960,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "Agent returns hallucinated API parameters though OpenAPI schema is attached. FIRST fix?",
     "options": [
       "Validate action group schema, Prepare agent, and tighten instructions to use schema fields only",
-      "Remove Guardrails",
-      "Delete KB",
-      "Switch Region randomly"
+      "Remove Guardrails without updating IAM roles or model access in the target Region by disabling Guardrails instead of tuning retrieval parameters",
+      "Delete KB by disabling Guardrails instead of tuning retrieval parameters using only client-side JavaScript to hold long-lived credentials",
+      "Switch Region randomly using only client-side JavaScript to hold long-lived credentials and relying on a single synchronous InvokeModel call for all traffic"
     ],
     "correct": 0,
     "explain": "Schema mismatches and stale agent state often cause bad tool arguments; Prepare refreshes compiled config."
@@ -977,9 +977,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "Ingestion jobs fail on encrypted PDFs in S3. MOST likely missing piece?",
     "options": [
       "KB service role granted kms:Decrypt on the CMK and s3:GetObject on prefixes",
-      "Higher temperature",
-      "Public bucket ACL",
-      "Disable versioning"
+      "Higher temperature without updating IAM roles or model access in the target Region",
+      "Public bucket ACL by disabling Guardrails instead of tuning retrieval parameters",
+      "Disable versioning using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 0,
     "explain": "Ingestion roles need S3 and KMS permissions for encrypted sources."
@@ -1016,9 +1016,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "Users attempt jailbreaks via encoded instructions. Add:",
     "options": [
       "Guardrails with prompt attack filters and monitor blocked invocations",
-      "Higher temperature",
-      "Remove logging",
-      "Public admin panel"
+      "Higher temperature without updating IAM roles or model access in the target Region",
+      "Remove logging by disabling Guardrails instead of tuning retrieval parameters",
+      "Public admin panel using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 0,
     "explain": "Guardrails include filters aimed at prompt attacks; monitor blocks for abuse patterns."
@@ -1033,9 +1033,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "Training data for customization must be stored where for Bedrock fine-tuning jobs?",
     "options": [
       "Amazon S3 in the same Region as the training job",
-      "Local USB drives",
-      "Public HTTP without TLS",
-      "DynamoDB streams only"
+      "Local USB drives without updating IAM roles or model access in the target Region",
+      "Public HTTP without TLS by disabling Guardrails instead of tuning retrieval parameters",
+      "DynamoDB streams only using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 0,
     "explain": "Custom model jobs read labeled datasets from S3 with appropriate IAM/KMS."
@@ -1050,9 +1050,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "Non-technical reviewers need to adjust branching logic without redeploying Java. Prefer:",
     "options": [
       "Bedrock Flows managed in console with versioned deployments",
-      "Recompile monolith weekly",
-      "Edit minified JS in prod",
-      "Disable change control"
+      "Recompile monolith weekly without updating IAM roles or model access in the target Region",
+      "Edit minified JS in prod by disabling Guardrails instead of tuning retrieval parameters",
+      "Disable change control using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 0,
     "explain": "Flows expose visual orchestration with lifecycle management separate from app binaries."
@@ -1111,9 +1111,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "OpenSearch Serverless backs your KB. Index capacity errors appear at peak ingest. FIRST step?",
     "options": [
       "Adjust OpenSearch Serverless capacity/OCU settings and stagger sync jobs",
-      "Disable encryption",
-      "Remove all metadata",
-      "Switch to plaintext HTTP"
+      "Disable encryption without updating IAM roles or model access in the target Region",
+      "Remove all metadata by disabling Guardrails instead of tuning retrieval parameters",
+      "Switch to plaintext HTTP using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 0,
     "explain": "Vector store capacity and ingestion scheduling affect KB sync success."
@@ -1128,9 +1128,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "Tool calls must hit a private API in your VPC. Recommended network path?",
     "options": [
       "Lambda in VPC integrated with API Gateway private endpoint or internal ALB via action group",
-      "Public internet without auth",
-      "Store JWT in prompt",
-      "Disable TLS"
+      "Public internet without auth without updating IAM roles or model access in the target Region",
+      "Store JWT in prompt by disabling Guardrails instead of tuning retrieval parameters using only client-side JavaScript to hold long-lived credentials",
+      "Disable TLS using only client-side JavaScript to hold long-lived credentials and relying on a single synchronous InvokeModel call for all traffic"
     ],
     "correct": 0,
     "explain": "Agents invoke Lambda; Lambda reaches private APIs inside VPC securely."
@@ -1145,9 +1145,9 @@ window.QUESTION_BANK_AWS_GENAI_RAMP = [
     "q": "Streaming responses stall mid-generation with no error in app logs. Check:",
     "options": [
       "Client/proxy idle timeouts vs InvokeModelWithResponseStream duration and network path",
-      "S3 lifecycle only",
-      "Delete Guardrails first",
-      "Change embedding model"
+      "S3 lifecycle only without updating IAM roles or model access in the target Region by disabling Guardrails instead of tuning retrieval parameters",
+      "Delete Guardrails first by disabling Guardrails instead of tuning retrieval parameters",
+      "Change embedding model using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 0,
     "explain": "Streaming can be cut by intermediary timeouts while the model continues generating."
