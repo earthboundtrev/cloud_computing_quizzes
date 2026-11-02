@@ -74,35 +74,35 @@
 
   function tick() {
     var timerEl = document.getElementById('session-timer');
+    var showTimer = isQuizAreaVisible() && timeLimitMinutes > 0;
+    if (timerEl) {
+      timerEl.style.display = showTimer ? '' : 'none';
+    }
     if (isQuizAreaVisible()) {
       if (timerStart === null) {
         timerStart = Date.now();
         timeUp = false;
         renderGoalBar();
       }
-      if (timerEl && timerStart !== null) {
+      if (timerEl && timerStart !== null && timeLimitMinutes > 0) {
         if (timeUp) {
           timerEl.textContent = 'Time\'s up!';
           return;
         }
         var secs = Math.floor((Date.now() - timerStart) / 1000);
-        if (timeLimitMinutes > 0) {
-          var totalLimitSecs = timeLimitMinutes * 60;
-          var remaining = totalLimitSecs - secs;
-          if (remaining <= 0) {
-            timeUp = true;
-            timerEl.textContent = 'Time\'s up!';
-            return;
-          }
-          timerEl.textContent = 'Time left: ' + formatTime(remaining);
-        } else {
-          timerEl.textContent = 'Session: ' + formatTime(secs);
+        var totalLimitSecs = timeLimitMinutes * 60;
+        var remaining = totalLimitSecs - secs;
+        if (remaining <= 0) {
+          timeUp = true;
+          timerEl.textContent = 'Time\'s up!';
+          return;
         }
+        timerEl.textContent = 'Time left: ' + formatTime(remaining);
       }
     } else {
       timerStart = null;
       timeUp = false;
-      if (timerEl) timerEl.textContent = 'Session: 00:00';
+      if (timerEl && timeLimitMinutes > 0) timerEl.textContent = 'Session: 00:00';
       renderGoalBar();
     }
   }

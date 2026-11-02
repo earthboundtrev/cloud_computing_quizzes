@@ -98,7 +98,10 @@
       repairUses: [],
       vacationUses: [],
       hadStreakBreak: false,
-      lastProcessWallMs: 0
+      lastProcessWallMs: 0,
+      lastRepairCompletedAt: 0,
+      vacationStartedAt: 0,
+      vacationEndedAt: 0
     };
   }
 
@@ -136,7 +139,12 @@
       });
     }
     s.answerDedup = raw.answerDedup && typeof raw.answerDedup === 'object' ? Object.assign({}, raw.answerDedup) : {};
-    s.repair = raw.repair && typeof raw.repair === 'object' ? Object.assign({}, raw.repair) : null;
+    if (raw.repair && typeof raw.repair === 'object') {
+      s.repair = Object.assign({ metDays: [] }, raw.repair);
+      if (!Array.isArray(s.repair.metDays)) s.repair.metDays = [];
+    } else {
+      s.repair = null;
+    }
     s.vacation = raw.vacation && typeof raw.vacation === 'object' ? Object.assign({}, raw.vacation) : null;
     s.notices = raw.notices && typeof raw.notices === 'object' ? Object.assign({}, raw.notices) : {};
     s.migratedFrom = raw.migratedFrom || null;
@@ -147,6 +155,9 @@
     s.vacationUses = Array.isArray(raw.vacationUses) ? raw.vacationUses.slice() : [];
     s.hadStreakBreak = !!raw.hadStreakBreak;
     s.lastProcessWallMs = parseInt(raw.lastProcessWallMs, 10) || 0;
+    s.lastRepairCompletedAt = parseInt(raw.lastRepairCompletedAt, 10) || 0;
+    s.vacationStartedAt = parseInt(raw.vacationStartedAt, 10) || 0;
+    s.vacationEndedAt = parseInt(raw.vacationEndedAt, 10) || 0;
     return s;
   }
 
@@ -205,6 +216,91 @@
     } catch (e) {}
   }
 
+  var DAY_KIND_RANK = { normal: 0, missed: 1, frozen: 2, vacation: 2, repaired: 3 };
+
+  function hasMissedDayRecord(state) {
+    return unmetMissedDays(state).length > 0;
+  }
+
+  function unmetMissedDays(state) {
+    var days = state.dayRecords || {};
+    return Object.keys(days).filter(function (k) {
+      var r = days[k];
+      return r.kind === 'missed' && !r.met;
+    });
+  }
+
+  function mergeDayKind(a, b) {
+    var ra = DAY_KIND_RANK[a] || 0;
+    var rb = DAY_KIND_RANK[b] || 0;
+    return ra >= rb ? a : b;
+  }
+
+  function mergeRepairState(base, other) {
+    var br = base.repair;
+    var or = other.repair;
+    var completedAt = Math.max(base.lastRepairCompletedAt || 0, other.lastRepairCompletedAt || 0);
+    if (br && or) {
+      var pick = (or.openedAt || 0) >= (br.openedAt || 0) ? or : br;
+      if (completedAt >= (pick.openedAt || 0)) return null;
+      var metDays = pick.metDays || [];
+      if ((br.openedAt || 0) === (or.openedAt || 0) || br.missedDay === or.missedDay) {
+        metDays = dedupeNumericList((br.metDays || []).concat(or.metDays || []));
+      }
+      return Object.assign({}, pick, { metDays: metDays });
+    }
+    var open = br || or;
+    if (!open) return null;
+    if (completedAt >= (open.openedAt || 0)) return null;
+    return open;
+  }
+
+  function mergeVacationState(base, other) {
+    var endedAt = Math.max(base.vacationEndedAt || 0, other.vacationEndedAt || 0);
+    var startedAt = Math.max(base.vacationStartedAt || 0, other.vacationStartedAt || 0);
+    if (endedAt > 0 && startedAt > 0 && endedAt >= startedAt) return null;
+    if (!base.vacation && !other.vacation) return null;
+    if (base.vacation && other.vacation) {
+      return compareDateStr(base.vacation.start, other.vacation.start) >= 0 ? base.vacation : other.vacation;
+    }
+    return base.vacation || other.vacation;
+  }
+
+  function countAnswersForDay(state, day) {
+    return Object.keys(state.answerDedup || {}).filter(function (k) {
+      return k.indexOf(day + ':') === 0;
+    }).length;
+  }
+
+  function reconcileAnswersFromDedup(state) {
+    var now = deps.now();
+    var today = effectiveToday(state, now);
+    Object.keys(state.answerDedup).forEach(function (key) {
+      var day = key.split(':')[0];
+      if (day.length === 10) ensureDay(state, day);
+    });
+    Object.keys(state.dayRecords).forEach(function (day) {
+      var rec = ensureDay(state, day);
+      rec.answers = Math.max(rec.answers, countAnswersForDay(state, day));
+    });
+    var recToday = ensureDay(state, today);
+    var goalToday = goalForDate(state, today);
+    if (recToday.answers >= goalToday && !recToday.met) {
+      onGoalMet(state, today);
+    }
+    if (
+      state.lastProcessedDate &&
+      compareDateStr(state.lastProcessedDate, today) < 0
+    ) {
+      var closing = state.lastProcessedDate;
+      var recClose = ensureDay(state, closing);
+      var goalClose = goalForDate(state, closing);
+      if (recClose.answers >= goalClose && !recClose.met) {
+        onGoalMet(state, closing);
+      }
+    }
+  }
+
   function dedupeNumericList(list) {
     var seen = Object.create(null);
     var out = [];
@@ -224,15 +320,28 @@
     var base = normalizeState(a);
     var other = normalizeState(b);
     var out = normalizeState(base);
-    out.streak =
-      base.hadStreakBreak || other.hadStreakBreak
-        ? Math.min(base.streak, other.streak)
-        : Math.max(base.streak, other.streak);
-    out.best = Math.max(base.best, other.best, out.streak);
+    out.lastRepairCompletedAt = Math.max(base.lastRepairCompletedAt || 0, other.lastRepairCompletedAt || 0);
+    out.vacationStartedAt = Math.max(base.vacationStartedAt || 0, other.vacationStartedAt || 0);
+    out.vacationEndedAt = Math.max(base.vacationEndedAt || 0, other.vacationEndedAt || 0);
+    var mergedRepair = mergeRepairState(base, other);
+    out.repair = mergedRepair;
+    var openRepair = base.repair || other.repair;
+    var resolvedStaleRepair =
+      !mergedRepair &&
+      !!openRepair &&
+      out.lastRepairCompletedAt >= (openRepair.openedAt || 0);
+    out.best = Math.max(base.best, other.best, base.streak, other.streak);
     out.freezes = Math.min(base.freezes, other.freezes);
     out.freezeEarnProgress = Math.max(base.freezeEarnProgress, other.freezeEarnProgress);
-    if (other.dailyGoal) out.dailyGoal = other.dailyGoal;
-    if (other.pendingGoal) out.pendingGoal = other.pendingGoal;
+    out.dailyGoal = Math.max(base.dailyGoal, other.dailyGoal);
+    if (base.pendingGoal && other.pendingGoal) {
+      out.pendingGoal =
+        compareDateStr(base.pendingGoal.fromDate, other.pendingGoal.fromDate) >= 0
+          ? base.pendingGoal
+          : other.pendingGoal;
+    } else {
+      out.pendingGoal = base.pendingGoal || other.pendingGoal || null;
+    }
     out.maxTimestampSeen = Math.max(base.maxTimestampSeen, other.maxTimestampSeen);
     if (other.lastSeenDate && (!out.lastSeenDate || compareDateStr(other.lastSeenDate, out.lastSeenDate) > 0)) {
       out.lastSeenDate = other.lastSeenDate;
@@ -240,25 +349,29 @@
     Object.keys(other.dayRecords).forEach(function (day) {
       var da = normalizeDayRecord(out.dayRecords[day]);
       var db = normalizeDayRecord(other.dayRecords[day]);
+      var met = da.met || db.met;
+      var kind = mergeDayKind(da.kind, db.kind);
+      if (met && kind === 'missed') {
+        kind = da.met && da.kind !== 'missed' ? da.kind : db.kind !== 'missed' ? db.kind : 'normal';
+      }
       out.dayRecords[day] = {
         answers: Math.max(da.answers, db.answers),
-        met: da.met || db.met,
+        met: met,
         celebrated: da.celebrated || db.celebrated,
         streakAwarded: da.streakAwarded || db.streakAwarded,
-        kind: da.kind !== 'normal' ? da.kind : db.kind
+        kind: kind
       };
     });
+    Object.keys(base.dayRecords).forEach(function (day) {
+      if (!out.dayRecords[day]) out.dayRecords[day] = normalizeDayRecord(base.dayRecords[day]);
+    });
     out.answerDedup = Object.assign({}, base.answerDedup, other.answerDedup);
+    Object.keys(out.dayRecords).forEach(function (day) {
+      out.dayRecords[day].answers = Math.max(out.dayRecords[day].answers, countAnswersForDay(out, day));
+    });
     out.firstRunDone = base.firstRunDone || other.firstRunDone;
     out.soundOn = base.soundOn && other.soundOn;
-    if (other.pendingGoal) out.pendingGoal = other.pendingGoal;
-    if (base.repair && other.repair) {
-      out.repair =
-        (other.repair.openedAt || 0) >= (base.repair.openedAt || 0) ? other.repair : base.repair;
-    } else {
-      out.repair = base.repair || other.repair || null;
-    }
-    if (other.vacation) out.vacation = other.vacation;
+    out.vacation = mergeVacationState(base, other);
     out.notices = Object.assign({}, base.notices, other.notices);
     if (other.migratedFrom && !out.migratedFrom) {
       out.migratedFrom = other.migratedFrom;
@@ -274,13 +387,55 @@
     }
     out.repairUses = dedupeNumericList((base.repairUses || []).concat(other.repairUses || []));
     out.vacationUses = dedupeNumericList((base.vacationUses || []).concat(other.vacationUses || []));
-    out.hadStreakBreak = base.hadStreakBreak || other.hadStreakBreak;
+    var outMissed = hasMissedDayRecord(out);
+    var repairMergedComplete = false;
+    if (
+      out.repair &&
+      out.repair.missedDay &&
+      out.dayRecords[out.repair.missedDay] &&
+      out.dayRecords[out.repair.missedDay].met
+    ) {
+      out.repair = null;
+      outMissed = hasMissedDayRecord(out);
+    }
+    if (out.repair && out.repair.metDays && out.repair.metDays.length >= 2) {
+      out.streak = out.repair.streakAtBreak || 0;
+      if (out.repair.missedDay) {
+        markDayKind(out, out.repair.missedDay, 'repaired');
+      }
+      out.lastRepairCompletedAt = Math.max(out.lastRepairCompletedAt || 0, deps.now());
+      out.repair = null;
+      outMissed = hasMissedDayRecord(out);
+      repairMergedComplete = true;
+    }
+    if (!repairMergedComplete) {
+      if (resolvedStaleRepair && !outMissed) {
+        out.streak = Math.max(base.streak, other.streak);
+        out.repair = null;
+      } else if (out.repair) {
+        out.streak = Math.min(base.streak, other.streak);
+      } else if (outMissed) {
+        var baseMiss = unmetMissedDays(base).length;
+        var otherMiss = unmetMissedDays(other).length;
+        if (baseMiss && !otherMiss) {
+          out.streak = base.streak;
+        } else if (otherMiss && !baseMiss) {
+          out.streak = other.streak;
+        } else {
+          out.streak = Math.max(base.streak, other.streak);
+        }
+      } else {
+        out.streak = Math.max(base.streak, other.streak);
+      }
+    }
+    out.best = Math.max(out.best, out.streak);
+    out.hadStreakBreak = !!out.repair || (outMissed && out.streak === 0);
     return out;
   }
 
   var writeQueue = Promise.resolve();
 
-  function runWrite(mutator) {
+  function loadMergedState() {
     var current = loadState();
     var fresh = readRaw();
     if (fresh) {
@@ -291,16 +446,62 @@
         }
       } catch (e) {}
     }
-    var next = mutator(current);
-    if (next) persistState(next);
-    return next;
+    return current;
+  }
+
+  function stateFromRaw(raw) {
+    if (!raw) {
+      var s = loadState();
+      return s;
+    }
+    try {
+      var parsed = JSON.parse(raw);
+      if (!parsed || parsed.v !== STATE_VERSION) {
+        storeCorruptOnce(raw);
+        return defaultState();
+      }
+      return normalizeState(parsed);
+    } catch (e) {
+      storeCorruptOnce(raw);
+      return defaultState();
+    }
+  }
+
+  function runWrite(mutator) {
+    var lastNext = null;
+    for (var attempt = 0; attempt < 8; attempt++) {
+      var diskBefore = readRaw();
+      var current = stateFromRaw(diskBefore);
+      reconcileAnswersFromDedup(current);
+      processCalendar(current, deps.now());
+      var next = mutator(current);
+      if (!next) return null;
+      reconcileAnswersFromDedup(next);
+      lastNext = next;
+      var serialized = JSON.stringify(next);
+      var diskMid = readRaw();
+      if (diskMid !== diskBefore) {
+        next = mergeStates(next, stateFromRaw(diskMid));
+        reconcileAnswersFromDedup(next);
+        processCalendar(next, deps.now());
+        serialized = JSON.stringify(next);
+      }
+      persistState(next);
+      var diskAfter = readRaw();
+      if (diskAfter === serialized) return next;
+    }
+    return lastNext;
   }
 
   function withLockedWrite(mutator) {
     function enqueue() {
-      writeQueue = writeQueue.then(function () {
-        return Promise.resolve(runWrite(mutator));
-      });
+      writeQueue = writeQueue
+        .then(function () {
+          return Promise.resolve(runWrite(mutator));
+        })
+        .catch(function () {
+          writeQueue = Promise.resolve();
+        });
       return writeQueue;
     }
     if (deps.locks && deps.locks.request) {
@@ -379,8 +580,8 @@
   function expireRepairIfNeeded(state, now) {
     if (!state.repair || !state.repair.openedAt) return;
     var opened = state.repair.openedAt;
-    var elapsed = effectiveNow(state, now) - opened;
-    if (elapsed > REPAIR_OFFER_MS + REPAIR_WINDOW_MS) {
+    now = now || deps.now();
+    if (effectiveNow(state, now) - opened > REPAIR_OFFER_MS + REPAIR_WINDOW_MS) {
       state.repair = null;
     }
   }
@@ -438,6 +639,10 @@
         d = addDaysStr(d, 1);
       }
     }
+    if (state.vacation && compareDateStr(today, state.vacation.end) > 0) {
+      state.vacationEndedAt = Math.max(state.vacationEndedAt || 0, now);
+      state.vacation = null;
+    }
     state.lastProcessedDate = today;
     state.lastProcessWallMs = now;
     return today;
@@ -450,42 +655,51 @@
     }
   }
 
+  function trackRepairProgress(state, dateStr) {
+    if (!state.repair || !state.repair.openedAt) return;
+    if (isVacationDay(state, dateStr)) return;
+    var opened = state.repair.openedAt;
+    var elapsed = effectiveNow(state, deps.now()) - opened;
+    if (elapsed > REPAIR_WINDOW_MS) return;
+    if (state.repair.metDays.indexOf(dateStr) < 0) {
+      state.repair.metDays.push(dateStr);
+    }
+    if (state.repair.metDays.length >= 2) {
+      var restore = state.repair.streakAtBreak || 0;
+      state.streak = restore;
+      if (state.streak > state.best) state.best = state.streak;
+      if (state.repair.missedDay) {
+        markDayKind(state, state.repair.missedDay, 'repaired');
+      }
+      state.hadStreakBreak = false;
+      state.lastRepairCompletedAt = effectiveNow(state, deps.now());
+      state.repairUses.push(state.lastRepairCompletedAt);
+      state.repair = null;
+    }
+  }
+
   function onGoalMet(state, dateStr) {
     var rec = ensureDay(state, dateStr);
-    if (rec.met) return;
-    rec.met = true;
-    if (isVacationDay(state, dateStr)) {
-      markDayKind(state, dateStr, 'vacation');
+    if (rec.met) {
+      trackRepairProgress(state, dateStr);
       return;
     }
-    if (!rec.streakAwarded) {
+    rec.met = true;
+    var onVacation = isVacationDay(state, dateStr);
+    if (onVacation) {
+      markDayKind(state, dateStr, 'vacation');
+    }
+    if (!onVacation && !rec.streakAwarded) {
       rec.streakAwarded = true;
       state.streak += 1;
       if (state.streak > state.best) state.best = state.streak;
+      state.hadStreakBreak = false;
       if (rec.kind === 'normal' || rec.kind === 'repaired' || rec.kind === 'missed') {
         state.freezeEarnProgress += 1;
         awardFreezeIfEarned(state);
       }
     }
-    if (state.repair && state.repair.openedAt) {
-      var opened = state.repair.openedAt;
-      var elapsed = effectiveNow(state, deps.now()) - opened;
-      if (elapsed <= REPAIR_WINDOW_MS) {
-        if (state.repair.metDays.indexOf(dateStr) < 0) {
-          state.repair.metDays.push(dateStr);
-        }
-        if (state.repair.metDays.length >= 2) {
-          var restore = state.repair.streakAtBreak || 0;
-          state.streak = restore;
-          if (state.streak > state.best) state.best = state.streak;
-          if (state.repair.missedDay) {
-            markDayKind(state, state.repair.missedDay, 'repaired');
-          }
-          state.repairUses.push(effectiveNow(state, deps.now()));
-          state.repair = null;
-        }
-      }
-    }
+    trackRepairProgress(state, dateStr);
   }
 
   function migrateFromLegacy(state) {
@@ -648,6 +862,8 @@
       }
       var end = addDaysStr(today, days - 1);
       state.vacation = { start: today, end: end, days: days };
+      state.vacationStartedAt = now;
+      state.vacationEndedAt = 0;
       state.vacationUses = uses.concat([{ at: now, days: days }]);
       return state;
     }).then(function (state) {
@@ -662,6 +878,7 @@
       if (!state.vacation) return state;
       var today = observeDate(state, deps.now());
       state.vacation.end = addDaysStr(today, -1);
+      state.vacationEndedAt = deps.now();
       if (compareDateStr(state.vacation.end, state.vacation.start) < 0) {
         state.vacation = null;
       }
@@ -670,8 +887,9 @@
   }
 
   function getSnapshot() {
-    var state = loadState();
+    var state = normalizeState(JSON.parse(JSON.stringify(loadState())));
     processCalendar(state, deps.now());
+    reconcileAnswersFromDedup(state);
     var prog = getTodayProgress(state, deps.now());
     return {
       streak: state.streak,
@@ -830,11 +1048,12 @@
     container.appendChild(wrap);
   }
 
-  function renderLauncher() {
+  function renderLauncher(stateView) {
     if (typeof document === 'undefined') return;
     var host = document.getElementById('game-launcher');
     if (!host) return;
     var snap = getSnapshot();
+    if (!stateView) stateView = snap;
     host.textContent = '';
     var row = document.createElement('div');
     row.className = 'game-launcher';
@@ -870,21 +1089,21 @@
     row.appendChild(chip);
     host.appendChild(row);
     host.appendChild(expand);
-    renderWeekDots(expand, snap);
-    renderBanners(host, snap);
+    renderWeekDots(expand, snap, stateView);
+    renderBanners(host, snap, stateView);
   }
 
-  function renderWeekDots(container, snap) {
+  function renderWeekDots(container, snap, stateView) {
     container.textContent = '';
     var list = document.createElement('ul');
     list.className = 'game-week-dots';
     list.setAttribute('aria-label', 'Last 7 days');
     var today = snap.today;
+    var days = (stateView && stateView.dayRecords) || {};
     for (var i = 6; i >= 0; i--) {
       var d = addDaysStr(today, -i);
       var li = document.createElement('li');
-      var state = loadState();
-      var rec = state.dayRecords[d] || {};
+      var rec = days[d] || {};
       if (rec.kind === 'frozen' || rec.kind === 'repaired' || rec.kind === 'vacation') li.className = 'ice';
       else if (rec.met) li.className = 'met';
       list.appendChild(li);
@@ -892,7 +1111,8 @@
     container.appendChild(list);
   }
 
-  function renderBanners(host, snap) {
+  function renderBanners(host, snap, stateView) {
+    stateView = stateView || snap;
     if (snap.notices && snap.notices.freezeSavedYesterday) {
       var n = document.createElement('p');
       n.className = 'game-neutral-banner';
@@ -900,21 +1120,18 @@
       host.appendChild(n);
       consumeNotice('freezeSavedYesterday');
     }
-    if (repairOfferActive(loadState())) {
+    if (repairOfferActive(stateView)) {
       var r = document.createElement('p');
       r.className = 'game-neutral-banner';
-      var atBreak = (loadState().repair && loadState().repair.streakAtBreak) || snap.streak;
+      var atBreak = (stateView.repair && stateView.repair.streakAtBreak) || snap.streak;
       r.textContent = 'Repair your ' + atBreak + '-day streak';
       host.appendChild(r);
     }
-    var st = loadState();
     if (
       snap.streak === 0 &&
       !snap.met &&
-      !repairOfferActive(st) &&
-      (st.hadStreakBreak || Object.keys(st.dayRecords).some(function (k) {
-        return st.dayRecords[k].kind === 'missed';
-      }))
+      !repairOfferActive(stateView) &&
+      (stateView.hadStreakBreak || hasMissedDayRecord(stateView))
     ) {
       var w = document.createElement('p');
       w.className = 'game-neutral-banner';
@@ -980,8 +1197,9 @@
     var start = document.createElement('button');
     start.type = 'button';
     start.textContent = 'Start';
+    var defaultSound = !prefersReducedMotion();
     start.addEventListener('click', function () {
-      completeFirstRun({ goal: selected, soundOn: true }).then(function () {
+      completeFirstRun({ goal: selected, soundOn: defaultSound }).then(function () {
         overlay.remove();
       });
     });
@@ -989,7 +1207,7 @@
     skip.type = 'button';
     skip.textContent = 'Skip';
     skip.addEventListener('click', function () {
-      completeFirstRun({ goal: 3, soundOn: true }).then(function () {
+      completeFirstRun({ goal: 3, soundOn: defaultSound }).then(function () {
         overlay.remove();
       });
     });
@@ -1029,7 +1247,7 @@
           if (status && res && res.ok && loadState().pendingGoal) {
             status.textContent = 'Your new goal starts tomorrow';
           }
-          renderLauncher();
+          renderLauncher(loadState());
         });
       });
       goalRow.appendChild(b);
@@ -1076,6 +1294,18 @@
     });
     vac.appendChild(vacLabel);
     vac.appendChild(vacBtn);
+    var vacEndBtn = document.createElement('button');
+    vacEndBtn.type = 'button';
+    vacEndBtn.textContent = 'End vacation early';
+    vacEndBtn.style.marginLeft = '0.5rem';
+    vacEndBtn.addEventListener('click', function () {
+      endVacationEarly().then(function () {
+        var status = document.getElementById('settings-status');
+        if (status) status.textContent = 'Vacation ended';
+        renderLauncher(loadState());
+      });
+    });
+    vac.appendChild(vacEndBtn);
     block.appendChild(vac);
     panel.insertBefore(block, panel.firstChild.nextSibling);
   }
@@ -1083,20 +1313,32 @@
   function initDom() {
     if (typeof document === 'undefined') return;
     injectStyles();
-    syncWrite(function (state) {
-      processCalendar(state, deps.now());
+    withLockedWrite(function (state) {
+      var raw = readRaw();
+      if (raw) {
+        try {
+          JSON.parse(raw);
+        } catch (e) {
+          return null;
+        }
+      }
+      var ls = deps.getLocalStorage();
+      if (ls && ls.getItem(STORAGE_CORRUPT) && !ls.getItem(STORAGE_KEY)) {
+        return null;
+      }
       return state;
-    });
-    onUiRefresh(function () {
-      renderLauncher();
+    }).then(function () {
+      onUiRefresh(function () {
+        renderLauncher(loadState());
+        renderQuizBar();
+      });
+      renderLauncher(loadState());
       renderQuizBar();
+      showFirstRunIfNeeded();
+      wireSettingsPanel();
+      scheduleMidnightRefresh();
+      initStorageListener();
     });
-    renderLauncher();
-    renderQuizBar();
-    showFirstRunIfNeeded();
-    wireSettingsPanel();
-    scheduleMidnightRefresh();
-    initStorageListener();
   }
 
   if (typeof document !== 'undefined') {

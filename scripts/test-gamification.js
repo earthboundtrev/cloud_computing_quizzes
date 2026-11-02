@@ -283,7 +283,7 @@ test('unmet prior day finalized on next calendar day', function () {
 
 test('clock back does not extend repair success window', function () {
   const opened = Date.parse('2026-06-01T12:00:00');
-  const env = makeEnv(opened + 80 * 3600000);
+  const env = makeEnv(opened + 50 * 3600000);
   env.game.syncWrite(function (st) {
     st.repair = { openedAt: opened, streakAtBreak: 4, metDays: ['2026-06-02'], missedDay: '2026-06-01', maxNow: opened + 80 * 3600000 };
     st.maxTimestampSeen = opened + 80 * 3600000;
@@ -294,7 +294,9 @@ test('clock back does not extend repair success window', function () {
     env.game.onGoalMet(st, '2026-06-03');
     return st;
   });
-  assert(env.game.loadState().repair, 'repair still open after clock back');
+  const s = env.game.loadState();
+  assert(s.repair, 'repair still open after clock back');
+  assert(s.streak !== 4 || s.repair, 'repair not completed via max timestamp after clock back');
 });
 
 test('unknown version keeps corrupt blob once', function () {
@@ -304,6 +306,166 @@ test('unknown version keeps corrupt blob once', function () {
   const s = game.loadState();
   assert(s.streak === 0, 'defaults');
   assert(ls.getItem('cloudcram_game_v1_corrupt'), 'corrupt stored');
+});
+
+test('mergeStates drops stale open repair when other tab restored streak', function () {
+  const game = loadGame();
+  const completed = game.defaultState();
+  completed.streak = 5;
+  completed.repair = null;
+  completed.hadStreakBreak = false;
+  completed.lastRepairCompletedAt = 200;
+  const stale = game.defaultState();
+  stale.streak = 0;
+  stale.repair = { openedAt: 50, streakAtBreak: 5, metDays: [], missedDay: '2026-01-01', maxNow: 50 };
+  stale.hadStreakBreak = true;
+  stale.dayRecords['2026-01-01'] = { answers: 0, met: false, celebrated: false, streakAwarded: false, kind: 'missed' };
+  completed.dayRecords['2026-01-01'] = { answers: 3, met: true, celebrated: true, streakAwarded: true, kind: 'repaired' };
+  const m = game.mergeStates(completed, stale);
+  const m2 = game.mergeStates(stale, completed);
+  assert(m.repair === null, 'repair cleared');
+  assert(m.streak === 5, 'streak restored, was ' + m.streak);
+  assert(m2.streak === 5, 'streak restored either order, was ' + m2.streak);
+});
+
+test('mergeStates reconciles answer counts from dedup keys', function () {
+  const game = loadGame();
+  const a = game.defaultState();
+  const b = game.defaultState();
+  a.dayRecords['2026-05-02'] = { answers: 1, met: false, celebrated: false, streakAwarded: false, kind: 'normal' };
+  b.answerDedup['2026-05-02:s1:q1'] = true;
+  b.answerDedup['2026-05-02:s2:q2'] = true;
+  const m = game.mergeStates(a, b);
+  assert(m.dayRecords['2026-05-02'].answers === 2, 'answers from dedup');
+});
+
+test('rebuilt streak not minned by historic missed day', function () {
+  const game = loadGame();
+  const live = game.defaultState();
+  live.streak = 5;
+  live.dayRecords['2026-01-01'] = { answers: 0, met: false, celebrated: false, streakAwarded: false, kind: 'missed' };
+  const stale = game.defaultState();
+  stale.streak = 4;
+  const m = game.mergeStates(live, stale);
+  assert(m.streak === 5, 'max streak when both nonzero, got ' + m.streak);
+});
+
+test('unmet missed day keeps min streak vs stale high tab', function () {
+  const game = loadGame();
+  const live = game.defaultState();
+  live.streak = 1;
+  live.hadStreakBreak = false;
+  live.dayRecords['2026-03-01'] = { answers: 0, met: false, celebrated: false, streakAwarded: false, kind: 'missed' };
+  const stale = game.defaultState();
+  stale.streak = 12;
+  const m = game.mergeStates(live, stale);
+  assert(m.streak === 1, 'unmet miss keeps lower live streak, got ' + m.streak);
+});
+
+test('new miss beats stale resolved repair merge', function () {
+  const game = loadGame();
+  const live = game.defaultState();
+  live.streak = 0;
+  live.hadStreakBreak = true;
+  live.lastRepairCompletedAt = 5000;
+  live.dayRecords['2026-03-01'] = { answers: 0, met: false, celebrated: false, streakAwarded: false, kind: 'missed' };
+  const stale = game.defaultState();
+  stale.streak = 12;
+  stale.repair = { openedAt: 6000, streakAtBreak: 12, metDays: [], missedDay: '2026-02-01', maxNow: 6000 };
+  stale.lastRepairCompletedAt = 5000;
+  const m = game.mergeStates(live, stale);
+  assert(m.streak === 0, 'new miss keeps streak 0, got ' + m.streak);
+});
+
+test('union repair metDays completes repair', function () {
+  const game = loadGame();
+  const a = game.defaultState();
+  const b = game.defaultState();
+  const rep = { openedAt: 100, streakAtBreak: 4, metDays: ['2026-04-01'], missedDay: '2026-03-31', maxNow: 100 };
+  a.repair = rep;
+  a.streak = 0;
+  a.lastRepairCompletedAt = 0;
+  b.repair = Object.assign({}, rep, { metDays: ['2026-04-02'] });
+  b.streak = 0;
+  b.lastRepairCompletedAt = 0;
+  const m = game.mergeStates(a, b);
+  assert(m.repair === null, 'repair completed');
+  assert(m.streak === 4, 'streak restored');
+});
+
+test('merge met day clears open repair and keeps higher streak', function () {
+  const game = loadGame();
+  const missedSide = game.defaultState();
+  missedSide.streak = 0;
+  missedSide.repair = { openedAt: 1, streakAtBreak: 5, metDays: [], missedDay: '2026-10-05', maxNow: 1 };
+  missedSide.dayRecords['2026-10-05'] = { answers: 0, met: false, celebrated: false, streakAwarded: false, kind: 'missed' };
+  const metSide = game.defaultState();
+  metSide.streak = 5;
+  metSide.dayRecords['2026-10-05'] = { answers: 3, met: true, celebrated: true, streakAwarded: true, kind: 'normal' };
+  const m = game.mergeStates(missedSide, metSide);
+  assert(m.repair === null, 'repair cleared when day met');
+  assert(m.streak === 5, 'streak max when day met, got ' + m.streak);
+});
+
+test('repair metDays defaults when missing', function () {
+  const game = loadGame();
+  const ls = new LocalStorageMock({
+    cloudcram_game_v1: JSON.stringify({
+      v: 1,
+      dailyGoal: 3,
+      streak: 0,
+      best: 0,
+      freezes: 0,
+      firstRunDone: true,
+      lastProcessedDate: '2026-11-02',
+      lastSeenDate: '2026-11-02',
+      repair: { openedAt: 1, streakAtBreak: 3, missedDay: '2026-11-01' },
+      dayRecords: {},
+      answerDedup: {}
+    })
+  });
+  game.setDeps({ localStorage: ls, locks: null, storageEventTarget: null, now: function () { return Date.parse('2026-11-02T12:00:00'); } });
+  return game.recordAnswer('s1', 'q1').then(function () {
+    return game.recordAnswer('s1', 'q2');
+  }).then(function () {
+    return game.recordAnswer('s1', 'q3');
+  }).then(function () {
+    assert(true, 'no throw');
+  });
+});
+
+test('vacation days are not finalized as missed after vacation ends', function () {
+  const env = makeEnv(Date.parse('2026-01-08T12:00:00'));
+  env.game.syncWrite(function (st) {
+    st.firstRunDone = true;
+    st.streak = 5;
+    st.lastProcessedDate = '2026-01-01';
+    st.lastSeenDate = '2026-01-01';
+    st.vacation = { start: '2026-01-01', end: '2026-01-07', days: 7 };
+    st.vacationStartedAt = Date.parse('2026-01-01T12:00:00');
+    return st;
+  });
+  env.game.syncWrite(function (st) {
+    env.game.processCalendar(st, env.now());
+    return st;
+  });
+  const s = env.game.loadState();
+  assert(s.streak === 5, 'streak unchanged after vacation, got ' + s.streak);
+  assert(!s.dayRecords['2026-01-03'] || s.dayRecords['2026-01-03'].kind !== 'missed', 'vacation day not missed');
+});
+
+test('new break after past repair uses min streak not stale max', function () {
+  const game = loadGame();
+  const live = game.defaultState();
+  live.streak = 0;
+  live.hadStreakBreak = true;
+  live.lastRepairCompletedAt = 1000;
+  live.dayRecords['2026-02-01'] = { answers: 0, met: false, celebrated: false, streakAwarded: false, kind: 'missed' };
+  const stale = game.defaultState();
+  stale.streak = 12;
+  stale.lastRepairCompletedAt = 1000;
+  const m = game.mergeStates(live, stale);
+  assert(m.streak === 0, 'new break keeps streak 0, got ' + m.streak);
 });
 
 test('mergeStates does not double repairUses when merging identical state', function () {
