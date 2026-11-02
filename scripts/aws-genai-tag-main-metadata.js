@@ -18,7 +18,6 @@ const REF = {
 
 const FILES = [
   { path: 'data/aws-genai-questions.js', varName: 'QUESTION_BANK_AWS_GENAI', idPrefix: 'genai-main' },
-  { path: 'data/aws-genai-extra-questions.js', varName: 'QUESTION_BANK_AWS_GENAI_EXTRA', idPrefix: 'genai-extra' },
   { path: 'data/aws-genai-scenario-questions.js', varName: 'QUESTION_BANK_AWS_GENAI_SCENARIOS', idPrefix: 'genai-scenario' }
 ];
 

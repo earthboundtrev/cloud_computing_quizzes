@@ -66,7 +66,7 @@ const BANK_FILES = {
   'ai900': ['data/ai900-questions.js'],
   'aws_mlea': ['data/aws-mlea-questions.js', 'data/aws-mlea-extra-questions.js', 'data/aws-mlea-case-studies.js', 'data/aws-mlea-scenario-questions.js'],
   'aws_dea': ['data/aws-data-engineering-questions.js', 'data/aws-dea-extra-questions.js', 'data/aws-dea-case-studies.js', 'data/aws-dea-scenario-questions.js'],
-  'aws_genai': ['data/aws-genai-questions.js', 'data/aws-genai-extra-questions.js', 'data/aws-genai-case-studies.js', 'data/aws-genai-scenario-questions.js', 'data/aws-genai-ramp-questions.js'],
+  'aws_genai': ['data/aws-genai-questions.js', 'data/aws-genai-case-studies.js', 'data/aws-genai-scenario-questions.js', 'data/aws-genai-ramp-questions.js'],
   'terraform': ['data/terraform-questions.js', 'data/terraform-extra-questions.js', 'data/terraform-ramp-questions.js'],
   'cissp': ['data/cissp-questions.js', 'data/cissp-ramp-questions.js', 'data/cissp-case-studies.js', 'data/cissp-scenario-questions.js'],
   'secai': ['data/secai-questions.js', 'data/secai-case-studies.js', 'data/secai-scenario-questions.js'],
