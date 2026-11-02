@@ -8,7 +8,7 @@ const configs = [
   { file: 'aws_data_engineering_quiz.html', accent: '#ff9900', accentDim: '#ec7211', dataScript: 'data/aws-data-engineering-questions.js', initScript: 'quiz-init-aws-data-engineering.js' },
   { file: 'aws_genai_quiz.html', accent: '#ff9900', accentDim: '#ec7211', dataScript: 'data/aws-genai-questions.js', initScript: 'quiz-init-aws-genai.js' },
   { file: 'cissp_quiz.html', accent: '#0066cc', accentDim: '#0052a3', dataScript: 'data/cissp-questions.js', initScript: 'quiz-init-cissp.js' },
-  { file: 'rhcsa9_quiz.html', accent: '#ee0000', accentDim: '#cc0000', dataScript: 'data/rhcsa9-questions.js', initScript: 'quiz-init-rhcsa9.js' },
+  { file: 'rhcsa10_quiz.html', accent: '#ee0000', accentDim: '#cc0000', dataScript: 'data/rhcsa10-questions.js', initScript: 'quiz-init-rhcsa10.js' },
   { file: 'rhce_quiz.html', accent: '#ee0000', accentDim: '#cc0000', dataScript: 'data/rhce-questions.js', initScript: 'quiz-init-rhce.js' },
 ];
 

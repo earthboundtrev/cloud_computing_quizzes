@@ -17,7 +17,7 @@ const banks = {
   terraform: ['terraform-questions.js', 'terraform-extra-questions.js', 'terraform-ramp-questions.js'],
   cissp: ['cissp-questions.js', 'cissp-scenario-questions.js'],
   secai: ['secai-questions.js', 'secai-scenario-questions.js'],
-  rhcsa9: ['rhcsa9-questions.js', 'rhcsa9-extra-questions.js'],
+  rhcsa10: ['rhcsa10-questions.js', 'rhcsa10-extra-questions.js', 'rhcsa10-gap-questions.js'],
   rhce: ['rhce-questions.js']
 };
 

@@ -43,7 +43,6 @@ const EXPECTED_EXAM_CODES = {
   'terraform': '004',
   'cissp': null,  // No single exam code
   'secai': 'CY0-001',
-  'rhcsa9': 'EX200',  // RHEL 9 (deprecated)
   'rhcsa10': 'EX200',  // RHEL 10 (current)
   'rhce': 'EX294'
 };
@@ -71,7 +70,6 @@ const BANK_FILES = {
   'terraform': ['data/terraform-questions.js', 'data/terraform-extra-questions.js', 'data/terraform-ramp-questions.js'],
   'cissp': ['data/cissp-questions.js', 'data/cissp-ramp-questions.js', 'data/cissp-case-studies.js', 'data/cissp-scenario-questions.js'],
   'secai': ['data/secai-questions.js', 'data/secai-case-studies.js', 'data/secai-scenario-questions.js'],
-  'rhcsa9': ['data/rhcsa9-questions.js', 'data/rhcsa9-extra-questions.js'],
   'rhcsa10': ['data/rhcsa10-questions.js', 'data/rhcsa10-extra-questions.js', 'data/rhcsa10-gap-questions.js'],
   'rhce': ['data/rhce-questions.js']
 };
@@ -91,7 +89,6 @@ const OBJECTIVES_FILES = {
   'terraform': 'data/terraform-objectives.js',
   'cissp': 'data/cissp-objectives.js',
   'secai': 'data/secai-objectives.js',
-  'rhcsa9': 'data/rhcsa9-objectives.js',
   'rhcsa10': 'data/rhcsa10-objectives.js',
   'rhce': 'data/rhce-objectives.js'
 };

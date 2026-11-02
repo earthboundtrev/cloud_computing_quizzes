@@ -24,7 +24,7 @@ Open `index.html` in a browser to access all quizzes. No build step or server re
 | **Terraform Associate** | [terraform_associate_quiz.html](terraform_associate_quiz.html) | 004 | 40/session (65 exam) | 420+ | `terraform_associate_pattern_guide.md` + `terraform-labs/` |
 | **CISSP** | [cissp_quiz.html](cissp_quiz.html) | 8 domains | 40/session (100 exam) | 235+ | Scenario blocks |
 | **CompTIA SecAI+** | [secai_quiz.html](secai_quiz.html) | CY0-001 | 40/session (60 exam) | 238+ | Scenario blocks |
-| **RHCSA 9** | [rhcsa9_quiz.html](rhcsa9_quiz.html) | EX200 | 40/session | 205+ | — |
+| **RHCSA (RHEL 10)** | [rhcsa10_quiz.html](rhcsa10_quiz.html) | EX200 | 40/session | 290+ | 62 objectives |
 | **RHCE** | [rhce_quiz.html](rhce_quiz.html) | EX294 | 40/session | 165+ | — |
 
 ## Case study / scenario blocks
