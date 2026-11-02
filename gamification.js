@@ -606,37 +606,74 @@
     }
   }
 
-  function runWrite(mutator) {
+  function applyAnswerDelta(state, sessionId, questionId) {
+    if (!state || !sessionId || !questionId) return state;
+    var now = deps.now();
+    var today = processCalendar(state, now);
+    var key = today + ':' + String(sessionId) + ':' + String(questionId);
+    if (state.answerDedup[key]) return state;
+    state.answerDedup[key] = true;
+    reconcileAnswersFromDedup(state);
+    return state;
+  }
+
+  function freshStateForWrite() {
+    var current = stateFromRaw(readRaw());
+    reconcileAnswersFromDedup(current);
+    processCalendar(current, deps.now());
+    return current;
+  }
+
+  function runWrite(mutator, answerDelta) {
     var lastNext = null;
     for (var attempt = 0; attempt < 8; attempt++) {
       var diskBefore = readRaw();
       var current = stateFromRaw(diskBefore);
       reconcileAnswersFromDedup(current);
       processCalendar(current, deps.now());
-      var next = mutator(current);
+      var next;
+      if (answerDelta) {
+        next = applyAnswerDelta(current, answerDelta.sessionId, answerDelta.questionId);
+      } else {
+        next = mutator(current);
+      }
       if (!next) return null;
       reconcileAnswersFromDedup(next);
       lastNext = next;
       var serialized = JSON.stringify(next);
       var diskMid = readRaw();
       if (diskMid !== diskBefore) {
-        next = mergeStates(next, stateFromRaw(diskMid));
-        reconcileAnswersFromDedup(next);
-        processCalendar(next, deps.now());
+        if (answerDelta) {
+          next = stateFromRaw(diskMid);
+          reconcileAnswersFromDedup(next);
+          processCalendar(next, deps.now());
+          applyAnswerDelta(next, answerDelta.sessionId, answerDelta.questionId);
+        } else {
+          next = mergeStates(next, stateFromRaw(diskMid));
+          reconcileAnswersFromDedup(next);
+          processCalendar(next, deps.now());
+        }
         serialized = JSON.stringify(next);
       }
       persistState(next);
       var diskAfter = readRaw();
       if (diskAfter === serialized) return next;
     }
+    if (answerDelta) {
+      var finalState = freshStateForWrite();
+      applyAnswerDelta(finalState, answerDelta.sessionId, answerDelta.questionId);
+      persistState(finalState);
+      var finalRaw = readRaw();
+      if (finalRaw === JSON.stringify(finalState)) return finalState;
+    }
     return lastNext;
   }
 
-  function withLockedWrite(mutator) {
+  function withLockedWrite(mutator, answerDelta) {
     function enqueue() {
       writeQueue = writeQueue
         .then(function () {
-          return Promise.resolve(runWrite(mutator));
+          return Promise.resolve(runWrite(mutator, answerDelta));
         })
         .catch(function () {
           writeQueue = Promise.resolve();
@@ -652,7 +689,7 @@
   }
 
   function syncWrite(mutator) {
-    return runWrite(mutator);
+    return runWrite(mutator, null);
   }
 
   function effectiveToday(state, now) {
@@ -880,22 +917,7 @@
 
   function recordAnswer(sessionId, questionId) {
     if (!sessionId || !questionId) return Promise.resolve(null);
-    return withLockedWrite(function (state) {
-      var now = deps.now();
-      var today = processCalendar(state, now);
-      var key = today + ':' + String(sessionId) + ':' + String(questionId);
-      if (state.answerDedup[key]) return state;
-      state.answerDedup[key] = true;
-      var rec = ensureDay(state, today);
-      rec.answers = Object.keys(state.answerDedup).filter(function (k) {
-        return k.indexOf(today + ':') === 0;
-      }).length;
-      var goal = goalForDate(state, today);
-      if (rec.answers >= goal) {
-        onGoalMet(state, today);
-      }
-      return state;
-    }).then(function (state) {
+    return withLockedWrite(null, { sessionId: sessionId, questionId: questionId }).then(function (state) {
       if (state) {
         var snap = getSnapshot();
         if (snap.met && !snap.celebrated) {
