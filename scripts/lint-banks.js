@@ -132,7 +132,7 @@ function checkSyntax(file) {
 
 function loadQuestionBank(file, varName) {
   try {
-    global.window = global;
+    global.window = {};
     delete require.cache[require.resolve(path.resolve(file))];
     require(path.resolve(file));
     
@@ -141,10 +141,19 @@ function loadQuestionBank(file, varName) {
     
     // If not found, look for any QUESTION_BANK_* or CASE_STUDIES_* variable
     if (!bank) {
-      const keys = Object.keys(global.window).filter(k => 
+      const keys = Object.keys(global.window).filter(k =>
         k.startsWith('QUESTION_BANK_') || k.startsWith('CASE_STUDIES_')
       );
-      if (keys.length > 0) {
+      const base = path.basename(file, '.js');
+      const prefer = keys.find(function (k) {
+        return k.toLowerCase().replace(/_/g, '-').indexOf(base.replace(/-/g, '-')) >= 0;
+      });
+      if (prefer) {
+        bank = global.window[prefer];
+      } else if (keys.length === 1) {
+        bank = global.window[keys[0]];
+      } else if (keys.length > 1) {
+        warn(`${file}: multiple QUESTION_BANK_* keys (${keys.join(', ')}); using first`);
         bank = global.window[keys[0]];
       }
     }

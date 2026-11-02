@@ -7,6 +7,8 @@ alwaysApply: true
 
 **Default: local.** Omit Task `environment`, or set `"local"`. This studio’s Cursor budget is **effectively zero**. The local machine can run implement, Node lint scripts, Bugbot, and Architect. Cloud is **not** a smarter model and is **not** an outage fallback.
 
+**Cursor Cloud Agent (parent on repo VM):** Bugbot/Architect Tasks still use **`local`** on that VM — same pipeline as Desktop — `.cursor/rules/cloud-agent-ticket-pipeline.mdc`. Nested Task `environment: "cloud"` (second VM) still requires explicit cost acceptance below.
+
 ## Cloud cost (always warn)
 
 `environment: "cloud"` bills extra: VM + install + a **full agent per stage**. Ticket rewinds (Bugbot ↔ Architect) multiply that. **Warn before any cloud launch**.

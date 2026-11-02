@@ -1,0 +1,69 @@
+---
+description: Cloud Agent runs use the same ticket pipeline as Desktop (BUGBOT, TESTS, ARCHITECT before merge)
+alwaysApply: true
+---
+
+# Cloud Agent ticket pipeline
+
+When the **parent agent is a Cursor Cloud Agent** (runs on the repo VM at cursor.com/agents), ticket work follows the **same** stage order as Desktop — `.cursor/rules/ticket-lifecycle-loop.mdc`. Cloud is **not** a shortcut past Bugbot or Architect.
+
+## Same pipeline
+
+```
+IMPLEMENT → BUGBOT → TESTS → ARCHITECT → DEPLOY
+```
+
+Track **Pipeline pointer** in every substantive turn. Report: stage, issue open|closed, next stage.
+
+## Subagents on the Cloud VM
+
+- Launch Bugbot and Architect with the **Task** tool, **`environment: "local"`** (default) — they run **on the same VM**, not a second billed cloud pod.
+- Do **not** set Task `environment: "cloud"` unless the **user explicitly accepts** nested cloud cost — `.cursor/rules/prefer-local-agents.mdc`.
+- **BUGBOT:** separate Task; **`model: "cursor-grok-4.6-high-fast"`** → `cursor-grok-4.5-high-fast` → omit. Prompt: diff vs base branch, bug/logic/bank/SW/storage findings; implementer must not self-review as Bugbot.
+- **ARCHITECT:** separate Task; read `.cursor/rules/cloud-cram-architect.mdc`; same **model** chain.
+- **Security** (SW, storage, imports): `.cursor/rules/security-review.mdc` when risky.
+
+There is no dedicated `bugbot` subagent_type in all environments — use **`generalPurpose`** (or **`explore`** for read-only skim) with an explicit **Bugbot role** prompt and branch diff context.
+
+## DEPLOY gates (Cloud Agent)
+
+**Do not** `ManagePullRequest` create/update for merge intent, **`gh pr merge`**, or tell the user the ticket is done until:
+
+1. **BUGBOT** clean on the **current** diff  
+2. **TESTS** pass (full `.github/workflows/lint.yml` set + ticket-specific extras)  
+3. **ARCHITECT** verdict **merge-ready** (no blockers)
+
+Human merge/sign-off still required per `core.mdc`. Any code fix → rewind pointer to **BUGBOT**.
+
+## TESTS on Cloud Agent
+
+Run the same commands as CI (see `ticket-lifecycle-loop.mdc`). When AWS GenAI / Terraform / CISSP ramps change, also run:
+
+```bash
+node scripts/lint-aws-genai-ramp.js
+node scripts/lint-terraform-ramp.js --ci
+node scripts/lint-cissp-ramp.js
+```
+
+## Retroactive audit (merged before pipeline)
+
+If implementation merged **before** Bugbot/Architect (process gap):
+
+1. Open or update `.cursor/pipeline/issue-{N}-retro.md` (see template below).  
+2. Set pointer to **BUGBOT**; diff = commits or files for that ticket on `main`.  
+3. Run Bugbot → TESTS → Architect; fix findings on a **`cursor/...-7a05`** branch → PR.  
+4. Update retro doc with dates, models, verdict. Do **not** claim the ticket fully closed until issue AC + pipeline complete.
+
+### Retro doc template (`.cursor/pipeline/issue-{N}-retro.md`)
+
+- **Issue / PRs:** links  
+- **Diff range:** e.g. `1d45ec4..main` (GenAI paths)  
+- **Pointer log:** IMPLEMENT (note if out-of-order merge) → BUGBOT → TESTS → ARCHITECT → DEPLOY  
+- **Bugbot runs:** model, clean Y/N, findings summary  
+- **Architect:** merge-ready Y/N, blockers  
+- **Follow-up PRs:** list  
+
+## Relation to Desktop rules
+
+- **`prefer-local-agents.mdc`:** applies to **nested** `environment: "cloud"` Tasks. The Cloud Agent **parent** is already on a VM; local Tasks = same machine.  
+- **`core.mdc` §5a–5c:** same gates; this file makes them explicit for Cloud Agent runs.
