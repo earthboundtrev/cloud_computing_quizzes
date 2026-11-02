@@ -97,12 +97,15 @@
   }
 
   function notifyTabsDeleteStarting() {
-    if (typeof BroadcastChannel === 'undefined') return;
+    if (typeof BroadcastChannel === 'undefined') return Promise.resolve();
     try {
       var ch = new BroadcastChannel(BROADCAST_CHANNEL);
       ch.postMessage({ type: 'DELETE_ALL_DATA' });
       ch.close();
     } catch (e) {}
+    return new Promise(function (resolve) {
+      setTimeout(resolve, 300);
+    });
   }
 
   function showDeleteCompletePage(offlineNote) {
@@ -180,14 +183,18 @@
         });
       })
       .then(function (offlineNote) {
-        sessionStorage.clear();
-        var keysApi = getKeysApi();
-        if (keysApi) {
-          keysApi.clearLocalStorageForDelete(localStorage);
-        } else {
-          localStorage.clear();
-        }
         return deleteIndexedDatabases().then(function (idbOk) {
+          if (!idbOk) {
+            window.__cloudcramDeleteInProgress = false;
+            throw new Error('IDB_DELETE_BLOCKED');
+          }
+          sessionStorage.clear();
+          var keysApi = getKeysApi();
+          if (keysApi) {
+            keysApi.clearLocalStorageForDelete(localStorage);
+          } else {
+            localStorage.clear();
+          }
           return { offlineNote: offlineNote, idbOk: idbOk };
         });
       })
@@ -202,10 +209,6 @@
         });
       })
       .then(function (state) {
-        if (state.idbOk === false) {
-          window.__cloudcramDeleteInProgress = false;
-          throw new Error('IDB_DELETE_BLOCKED');
-        }
         showDeleteCompletePage(
           !options.suppressOfflineMessage ? state.offlineNote : null
         );

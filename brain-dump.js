@@ -72,6 +72,9 @@
       req.onerror = function () { resolve(null); };
       req.onsuccess = function () {
         db = req.result;
+        db.onversionchange = function () {
+          closeConnection();
+        };
         resolve(db);
       };
       req.onupgradeneeded = function (e) {
@@ -84,6 +87,7 @@
   }
 
   function addDump(dump) {
+    if (writesBlocked()) return Promise.resolve();
     const record = {
       questionText: dump.questionText,
       dumpText: dump.dumpText,
@@ -100,7 +104,6 @@
       });
     }
     record.id = 'ls_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-    if (writesBlocked()) return Promise.resolve();
     const list = JSON.parse(localStorage.getItem(LS_FALLBACK_KEY) || '[]');
     list.push(record);
     localStorage.setItem(LS_FALLBACK_KEY, JSON.stringify(list));
@@ -108,6 +111,7 @@
   }
 
   function deleteDump(id) {
+    if (writesBlocked()) return Promise.resolve();
     if (db) {
       var key = /^\d+$/.test(String(id)) ? parseInt(id, 10) : id;
       return new Promise(function (resolve, reject) {
@@ -118,13 +122,13 @@
         req.onerror = () => reject(req.error);
       });
     }
-    if (writesBlocked()) return Promise.resolve();
     const list = JSON.parse(localStorage.getItem(LS_FALLBACK_KEY) || '[]').filter(function (d) { return d.id !== id; });
     localStorage.setItem(LS_FALLBACK_KEY, JSON.stringify(list));
     return Promise.resolve();
   }
 
   function clearAllDumps() {
+    if (writesBlocked()) return Promise.resolve();
     if (db) {
       return new Promise(function (resolve, reject) {
         const tx = db.transaction(STORE_NAME, 'readwrite');
@@ -134,12 +138,12 @@
         req.onerror = () => reject(req.error);
       });
     }
-    if (writesBlocked()) return Promise.resolve();
     localStorage.setItem(LS_FALLBACK_KEY, '[]');
     return Promise.resolve();
   }
 
   function updateDump(id, updates) {
+    if (writesBlocked()) return Promise.resolve();
     if (db) {
       var key = /^\d+$/.test(String(id)) ? parseInt(id, 10) : id;
       return new Promise(function (resolve, reject) {
@@ -156,7 +160,6 @@
         getReq.onerror = () => reject(getReq.error);
       });
     }
-    if (writesBlocked()) return Promise.resolve();
     const list = JSON.parse(localStorage.getItem(LS_FALLBACK_KEY) || '[]');
     const idx = list.findIndex(function (d) { return d.id === id; });
     if (idx >= 0 && updates.dumpText !== undefined) list[idx].dumpText = updates.dumpText;

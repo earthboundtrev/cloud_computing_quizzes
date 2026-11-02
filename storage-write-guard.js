@@ -18,6 +18,9 @@
       ch.onmessage = function (ev) {
         if (ev.data && ev.data.type === 'DELETE_ALL_DATA') {
           window.__cloudcramDeleteInProgress = true;
+          if (window.BrainDump && typeof window.BrainDump.closeConnection === 'function') {
+            window.BrainDump.closeConnection();
+          }
         }
       };
     } catch (e) {}

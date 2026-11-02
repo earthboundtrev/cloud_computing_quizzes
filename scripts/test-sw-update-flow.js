@@ -44,8 +44,8 @@ const sw = read(SW_PATH);
 const reg = read(REG_PATH);
 const engine = read(ENGINE_PATH);
 
-test('sw.js uses cloudcram-v39 cache name', function () {
-  assert(/const CACHE_NAME = 'cloudcram-v39'/.test(sw), 'Expected CACHE_NAME cloudcram-v39');
+test('sw.js uses cloudcram-v40 cache name', function () {
+  assert(/const CACHE_NAME = 'cloudcram-v40'/.test(sw), 'Expected CACHE_NAME cloudcram-v40');
 });
 
 test('sw.js install handler does not call skipWaiting', function () {
