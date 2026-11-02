@@ -11,6 +11,7 @@
   var bannerDismissed = false;
   var reloadGuard = false;
   var deferCheckTimer = null;
+  var pendingWaitingWorker = null;
   var UPDATE_INTERVAL_MS = 60 * 60 * 1000;
   var DEFER_POLL_MS = 5000;
 
@@ -27,11 +28,38 @@
     return !!navigator.serviceWorker.controller;
   }
 
-  function markUpdatePending() {
+  function markUpdatePending(waitingWorker) {
     if (!hasControllingWorker()) return;
-    var waiting = getWaitingWorker();
+    var waiting = waitingWorker || getWaitingWorker();
     if (!waiting) return;
+    pendingWaitingWorker = waiting;
     updatePending = true;
+    maybeShowBanner();
+  }
+
+  function syncBodyBannerOffset() {
+    var banner = document.getElementById('app-update-banner');
+    if (banner) {
+      document.body.classList.add('app-update-banner-visible');
+      document.body.style.setProperty('--app-update-banner-height', banner.offsetHeight + 'px');
+    } else {
+      document.body.classList.remove('app-update-banner-visible');
+      document.body.style.removeProperty('--app-update-banner-height');
+    }
+  }
+
+  function hideBannerElement() {
+    var el = document.getElementById('app-update-banner');
+    if (el) el.remove();
+    syncBodyBannerOffset();
+  }
+
+  function onQuizActivityChange() {
+    if (isQuizActive()) {
+      hideBannerElement();
+      maybeShowBanner();
+      return;
+    }
     maybeShowBanner();
   }
 
@@ -91,6 +119,7 @@
     dismissBtn.addEventListener('click', function () {
       bannerDismissed = true;
       banner.remove();
+      syncBodyBannerOffset();
     });
 
     actions.appendChild(reloadBtn);
@@ -98,18 +127,24 @@
     banner.appendChild(text);
     banner.appendChild(actions);
     document.body.appendChild(banner);
+    syncBodyBannerOffset();
   }
 
   function applyUpdate() {
-    var waiting = getWaitingWorker();
+    if (isQuizActive()) {
+      maybeShowBanner();
+      return false;
+    }
+    var waiting = pendingWaitingWorker || getWaitingWorker();
     if (!waiting) {
       updatePending = false;
-      var el = document.getElementById('app-update-banner');
-      if (el) el.remove();
-      return;
+      pendingWaitingWorker = null;
+      hideBannerElement();
+      return false;
     }
     reloadGuard = true;
     waiting.postMessage({ type: 'SKIP_WAITING' });
+    return true;
   }
 
   function checkForUpdate() {
@@ -123,7 +158,7 @@
     if (!worker) return;
     worker.addEventListener('statechange', function () {
       if (worker.state === 'installed' && hasControllingWorker()) {
-        markUpdatePending();
+        markUpdatePending(registration.waiting || worker);
       }
     });
   }
@@ -170,6 +205,7 @@
 
   window.CloudCramUpdate = {
     checkForUpdate: checkForUpdate,
-    applyUpdate: applyUpdate
+    applyUpdate: applyUpdate,
+    onQuizActivityChange: onQuizActivityChange
   };
 })();

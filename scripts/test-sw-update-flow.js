@@ -57,7 +57,8 @@ test('sw.js install handler does not call skipWaiting', function () {
 test('sw.js message handler listens for SKIP_WAITING', function () {
   assert(/addEventListener\('message'/.test(sw), 'message listener missing');
   assert(/SKIP_WAITING/.test(sw), 'SKIP_WAITING not handled in sw.js');
-  assert(/self\.skipWaiting\(\)/.test(sw), 'skipWaiting should remain for message path');
+  assert(/event\.waitUntil\(self\.skipWaiting\(\)\)/.test(sw), 'skipWaiting must use event.waitUntil');
+  assert(/event\.origin/.test(sw), 'message handler should check origin');
 });
 
 test('sw.js activate still claims clients', function () {
@@ -82,8 +83,10 @@ test('sw-register.js uses controllerchange reload guard', function () {
 
 test('sw-register.js defers banner while quiz active', function () {
   assert(/QuizEngine\.isQuizActive/.test(reg), 'QuizEngine.isQuizActive check missing');
+  assert(/onQuizActivityChange/.test(reg), 'onQuizActivityChange hook missing');
   assert(/updatePending/.test(reg), 'updatePending flag missing');
   assert(/registration\.update\(\)/.test(reg), 'registration.update missing');
+  assert(/app-update-banner-visible/.test(reg) || /syncBodyBannerOffset/.test(reg), 'body offset for banner missing');
 });
 
 test('sw-register.js update banner has role=status', function () {
@@ -94,8 +97,8 @@ test('sw-register.js update banner has role=status', function () {
 test('quiz-engine.js exposes isQuizActive and session flag', function () {
   assert(/quizSessionActive/.test(engine), 'quizSessionActive flag missing');
   assert(/isQuizActive:\s*isQuizActive/.test(engine), 'QuizEngine.isQuizActive export missing');
-  assert(/quizSessionActive = true/.test(engine), 'quizSessionActive not set on start');
-  assert(/quizSessionActive = false/.test(engine), 'quizSessionActive not cleared');
+  assert(/setQuizSessionActive/.test(engine), 'setQuizSessionActive helper missing');
+  assert(/CloudCramUpdate\.onQuizActivityChange/.test(engine), 'quiz activity notifies SW update module');
 });
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed');

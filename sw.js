@@ -123,9 +123,9 @@ self.addEventListener('install', function (event) {
 });
 
 self.addEventListener('message', function (event) {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
+  if (!event.data || event.data.type !== 'SKIP_WAITING') return;
+  if (event.origin && event.origin !== self.location.origin) return;
+  event.waitUntil(self.skipWaiting());
 });
 
 self.addEventListener('activate', function (event) {

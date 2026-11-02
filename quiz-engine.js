@@ -371,7 +371,7 @@
       navRow.insertBefore(exitBtn, navRow.firstChild);
     }
     renderQuestion();
-    quizSessionActive = true;
+    setQuizSessionActive(true);
   }
 
   function orderMatches(a, b) {
@@ -692,7 +692,7 @@
   }
 
   function exitQuiz() {
-    quizSessionActive = false;
+    setQuizSessionActive(false);
     activeCaseStudyId = null;
     var container = document.querySelector('.container');
     if (container) container.classList.remove('case-study-active');
@@ -725,7 +725,7 @@
   }
 
   function showResults() {
-    quizSessionActive = false;
+    setQuizSessionActive(false);
     saveSessionToProfile();
     document.getElementById('quiz-area').classList.add('hidden');
     var r = document.getElementById('results-screen');
@@ -950,6 +950,17 @@
 
   function isQuizActive() {
     return quizSessionActive;
+  }
+
+  function notifyQuizActivityChange() {
+    if (window.CloudCramUpdate && typeof window.CloudCramUpdate.onQuizActivityChange === 'function') {
+      window.CloudCramUpdate.onQuizActivityChange();
+    }
+  }
+
+  function setQuizSessionActive(active) {
+    quizSessionActive = active;
+    notifyQuizActivityChange();
   }
 
   window.QuizEngine = {

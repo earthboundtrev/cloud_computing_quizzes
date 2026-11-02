@@ -80,6 +80,10 @@ const page = await context.newPage();
 
 try {
   await page.goto(baseUrl + '/index.html', { waitUntil: 'networkidle' });
+  await page.evaluate(() => {
+    localStorage.setItem('study_sessions_profile_test_sw', JSON.stringify({ quizId: 'test_sw', topicStats: { Demo: { correct: 1, total: 2 } } }));
+  });
+  const profileBefore = await page.evaluate(() => localStorage.getItem('study_sessions_profile_test_sw'));
   await page.waitForFunction(() => navigator.serviceWorker.controller != null, null, { timeout: 20000 });
 
   swVersion = 'B';
@@ -88,7 +92,25 @@ try {
     if (reg) await reg.update();
   });
   await page.waitForSelector('#app-update-banner', { timeout: 25000 });
-  console.log('OK: update banner appeared after second SW version');
+
+  const reloadPromise = page.waitForNavigation({ waitUntil: 'networkidle' });
+  await page.click('.app-update-banner-reload');
+  await reloadPromise;
+
+  await page.waitForFunction(() => navigator.serviceWorker.controller != null, null, { timeout: 20000 });
+  const cacheNames = await page.evaluate(async () => {
+    return (await caches.keys()).sort();
+  });
+  if (!cacheNames.some((n) => n.includes('playwright-b'))) {
+    throw new Error('Expected playwright-b cache after reload, got: ' + cacheNames.join(', '));
+  }
+
+  const profileAfter = await page.evaluate(() => localStorage.getItem('study_sessions_profile_test_sw'));
+  if (profileAfter !== profileBefore) {
+    throw new Error('localStorage profile changed after SW update reload');
+  }
+
+  console.log('OK: banner → Reload → new cache; localStorage unchanged');
 } catch (err) {
   console.error('Playwright SW two-version test failed:', err.message);
   process.exitCode = 1;

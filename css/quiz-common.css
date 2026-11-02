@@ -343,13 +343,18 @@ pre code {
   border-radius: 0;
 }
 
+/* Reserve space when update banner is visible (above motivation FAB at 9998) */
+body.app-update-banner-visible {
+  padding-bottom: calc(var(--app-update-banner-height, 72px) + 0.5rem) !important;
+}
+
 /* Service worker update prompt (non-blocking, bottom safe area) */
 .app-update-banner {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 9000;
+  z-index: 10010;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
