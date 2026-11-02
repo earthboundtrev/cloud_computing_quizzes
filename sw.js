@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE_NAME = 'cloudcram-v36';
+const CACHE_NAME = 'cloudcram-v37';
 
 const PRECACHE_PATHS = [
   '/index.html',
@@ -118,10 +118,14 @@ self.addEventListener('install', function (event) {
   event.waitUntil(
     caches.open(CACHE_NAME).then(function (cache) {
       return cache.addAll(PRECACHE_PATHS.map(fullUrl));
-    }).then(function () {
-      return self.skipWaiting();
     })
   );
+});
+
+self.addEventListener('message', function (event) {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('activate', function (event) {

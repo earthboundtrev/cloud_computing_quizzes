@@ -41,6 +41,7 @@
   var answered = [];
   var sessionQuestions = [];
   var selectedMode = 'mixed';
+  var quizSessionActive = false;
 
   function getProfile() {
     try {
@@ -370,6 +371,7 @@
       navRow.insertBefore(exitBtn, navRow.firstChild);
     }
     renderQuestion();
+    quizSessionActive = true;
   }
 
   function orderMatches(a, b) {
@@ -690,6 +692,7 @@
   }
 
   function exitQuiz() {
+    quizSessionActive = false;
     activeCaseStudyId = null;
     var container = document.querySelector('.container');
     if (container) container.classList.remove('case-study-active');
@@ -722,6 +725,7 @@
   }
 
   function showResults() {
+    quizSessionActive = false;
     saveSessionToProfile();
     document.getElementById('quiz-area').classList.add('hidden');
     var r = document.getElementById('results-screen');
@@ -944,7 +948,12 @@
     }
   }
 
+  function isQuizActive() {
+    return quizSessionActive;
+  }
+
   window.QuizEngine = {
+    isQuizActive: isQuizActive,
     run: function (config) {
       console.log('[QuizEngine] run called, config.quizId=', config && config.quizId);
       config = config || {};
