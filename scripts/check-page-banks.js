@@ -86,6 +86,7 @@ function main() {
       
       const rhcsa10QuestionsPath = path.join(__dirname, '..', 'data', 'rhcsa10-questions.js');
       const rhcsa10ExtraPath = path.join(__dirname, '..', 'data', 'rhcsa10-extra-questions.js');
+      const rhcsa10GapPath = path.join(__dirname, '..', 'data', 'rhcsa10-gap-questions.js');
       
       if (fs.existsSync(rhcsa10QuestionsPath)) {
         const questionsContent = fs.readFileSync(rhcsa10QuestionsPath, 'utf8');
@@ -96,10 +97,16 @@ function main() {
         const extraContent = fs.readFileSync(rhcsa10ExtraPath, 'utf8');
         vm.runInContext(extraContent, sandbox);
       }
+
+      if (fs.existsSync(rhcsa10GapPath)) {
+        const gapContent = fs.readFileSync(rhcsa10GapPath, 'utf8');
+        vm.runInContext(gapContent, sandbox);
+      }
       
       const questions = (sandbox.window.QUESTION_BANK_RHCSA10 || []);
       const extra = (sandbox.window.QUESTION_BANK_RHCSA10_EXTRA || []);
-      const combined = questions.concat(extra);
+      const gap = (sandbox.window.QUESTION_BANK_RHCSA10_GAP || []);
+      const combined = questions.concat(extra).concat(gap);
       
       // Check for unique IDs
       const ids = combined.map(q => String(q.id));

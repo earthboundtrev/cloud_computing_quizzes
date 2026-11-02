@@ -175,7 +175,7 @@ function loadObjectives(file) {
     global.window = global;
     delete require.cache[require.resolve(path.resolve(file))];
     require(path.resolve(file));
-    return global.window.OBJECTIVES || null;
+    return global.window.OBJECTIVES_RHCSA10 || global.window.OBJECTIVES || null;
   } catch (e) {
     warn(`Failed to load objectives from ${file}: ${e.message}`);
     return null;
