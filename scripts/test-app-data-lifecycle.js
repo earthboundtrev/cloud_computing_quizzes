@@ -147,17 +147,20 @@ test('app-reset.js update path does not unregister SW or clear all localStorage'
 
 test('app-reset.js active quiz update confirm cancel and proceed paths', function () {
   const src = fs.readFileSync(path.join(ROOT, 'app-reset.js'), 'utf8');
-  const updateBlock = src.match(/function updateApp\(\)[\s\S]*?^  \}/m);
+  const updateBlock = src.match(/function updateApp\([^)]*\)[\s\S]*?^  \}/m);
   assert(updateBlock, 'updateApp not found');
   assert(/isQuizSessionActive/.test(src), 'quiz session guard missing');
   assert(/QuizEngine\.isQuizActive/.test(src), 'QuizEngine.isQuizActive check missing');
   assert(/confirmUpdateDuringActiveQuiz/.test(src), 'quiz update confirm dialog missing');
   assert(/Your current quiz will be lost/.test(src), 'quiz loss warning missing');
   assert(!/sessionStorage\.clear/.test(updateBlock[0]), 'updateApp must not clear storage before confirm');
-  assert(/confirmUpdateDuringActiveQuiz\(runUpdateAppFlow\)/.test(updateBlock[0]), 'confirm then run flow');
+  assert(/confirmUpdateDuringActiveQuiz\(runUpdateAppFlow,\s*triggerEl\)/.test(updateBlock[0]), 'confirm then run flow');
   assert(/closeDialog\(false\)/.test(src), 'cancel path must not proceed');
   assert(/closeDialog\(true\)/.test(src), 'confirm path must proceed');
   assert(/cancelBtn\.focus\(\)/.test(src), 'cancel focused by default on quiz update confirm');
+  assert(/trapFocusInDialog/.test(src), 'quiz update confirm must trap focus');
+  assert(/triggerEl\.focus/.test(src), 'quiz update confirm must restore trigger focus');
+  assert(/settled/.test(src), 'quiz update confirm must guard against double close');
 });
 
 test('app-reset.js delete uses BroadcastChannel and server hook', function () {

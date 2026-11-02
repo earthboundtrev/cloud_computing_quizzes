@@ -128,6 +128,22 @@
     document.body.appendChild(link);
   }
 
+  function trapFocusInDialog(dialogEl, focusables, ev) {
+    if (ev.key !== 'Tab' || !focusables.length) return;
+    var first = focusables[0];
+    var last = focusables[focusables.length - 1];
+    var active = document.activeElement;
+    if (ev.shiftKey) {
+      if (active === first || !dialogEl.contains(active)) {
+        ev.preventDefault();
+        last.focus();
+      }
+    } else if (active === last || !dialogEl.contains(active)) {
+      ev.preventDefault();
+      first.focus();
+    }
+  }
+
   function isQuizSessionActive() {
     return !!(
       window.QuizEngine &&
@@ -136,7 +152,8 @@
     );
   }
 
-  function confirmUpdateDuringActiveQuiz(onProceed) {
+  function confirmUpdateDuringActiveQuiz(onProceed, triggerEl) {
+    var settled = false;
     var overlay = document.createElement('div');
     overlay.className = 'delete-data-dialog-overlay';
     overlay.setAttribute('role', 'presentation');
@@ -176,9 +193,16 @@
     overlay.appendChild(dialog);
     document.body.appendChild(overlay);
 
+    var focusables = [cancelBtn, confirmBtn];
+
     function closeDialog(confirmed) {
+      if (settled) return;
+      settled = true;
       overlay.remove();
       document.removeEventListener('keydown', onKeyDown);
+      if (triggerEl && typeof triggerEl.focus === 'function') {
+        triggerEl.focus();
+      }
       if (confirmed && typeof onProceed === 'function') {
         onProceed();
       }
@@ -188,7 +212,9 @@
       if (ev.key === 'Escape') {
         ev.preventDefault();
         closeDialog(false);
+        return;
       }
+      trapFocusInDialog(dialog, focusables, ev);
     }
 
     document.addEventListener('keydown', onKeyDown);
@@ -239,9 +265,9 @@
       });
   }
 
-  function updateApp() {
+  function updateApp(triggerEl) {
     if (isQuizSessionActive()) {
-      confirmUpdateDuringActiveQuiz(runUpdateAppFlow);
+      confirmUpdateDuringActiveQuiz(runUpdateAppFlow, triggerEl);
       return;
     }
     runUpdateAppFlow();
@@ -332,7 +358,9 @@
   function initUpdateButton() {
     var btn = document.getElementById('update-app-btn') || document.getElementById('reset-app-btn');
     if (btn) {
-      btn.addEventListener('click', updateApp);
+      btn.addEventListener('click', function () {
+        updateApp(btn);
+      });
     }
   }
 

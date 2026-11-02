@@ -115,12 +115,14 @@ test('quiz-engine.js exposes isQuizActive and session flag', function () {
 test('app-reset.js defers storage clear until quiz update confirm', function () {
   assert(/runUpdateAppFlow/.test(reset), 'runUpdateAppFlow missing');
   assert(/confirmUpdateDuringActiveQuiz/.test(reset), 'quiz update confirm missing');
-  var updateAppBlock = reset.match(/function updateApp\(\)[\s\S]*?^  \}/m);
+  var updateAppBlock = reset.match(/function updateApp\([^)]*\)[\s\S]*?^  \}/m);
   assert(updateAppBlock, 'updateApp not found');
   assert(!/sessionStorage\.clear/.test(updateAppBlock[0]), 'updateApp must not clear before confirm');
   assert(/closeDialog\(false\)/.test(reset), 'cancel must not call onProceed');
   assert(/closeDialog\(true\)/.test(reset), 'confirm must call onProceed');
   assert(/sessionStorage\.clear/.test(reset), 'sessionStorage cleared only in runUpdateAppFlow');
+  assert(/trapFocusInDialog/.test(reset), 'quiz update confirm focus trap');
+  assert(/triggerEl\.focus/.test(reset), 'quiz update confirm restores Update app button focus');
 });
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed');
