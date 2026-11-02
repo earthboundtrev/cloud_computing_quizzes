@@ -20,6 +20,15 @@ jobs:
     
     - name: Run bank-wide lint
       run: node scripts/lint-banks.js --ci
+
+    - name: Objectives weight lint fixture (#33)
+      run: node scripts/test-objectives-weight-lint.js
+
+    - name: lint-banks per-track window isolation (#36)
+      run: node scripts/test-lint-banks-window-isolation.js
+
+    - name: RHCSA migration regression (#41)
+      run: node scripts/test-rhcsa-migration.js
     
     - name: Terraform 004 ramp metadata lint
       run: node scripts/lint-terraform-ramp.js --ci
