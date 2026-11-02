@@ -101,8 +101,123 @@
       lastProcessWallMs: 0,
       lastRepairCompletedAt: 0,
       vacationStartedAt: 0,
-      vacationEndedAt: 0
+      vacationEndedAt: 0,
+      settingsRevision: { soundOn: 0, goal: 0 }
     };
+  }
+
+  function normalizeSettingsRevision(raw) {
+    var rev = raw && typeof raw === 'object' ? raw : {};
+    return {
+      soundOn: Math.max(0, parseInt(rev.soundOn, 10) || 0),
+      goal: Math.max(0, parseInt(rev.goal, 10) || 0)
+    };
+  }
+
+  function bumpSettingsRevision(state, key) {
+    if (!state.settingsRevision) state.settingsRevision = normalizeSettingsRevision(null);
+    var ts = effectiveNow(state, deps.now());
+    var prev = state.settingsRevision[key] || 0;
+    state.settingsRevision[key] = Math.max(ts, prev + 1);
+  }
+
+  function mergeSettingsFields(base, other, out) {
+    var baseRev = normalizeSettingsRevision(base.settingsRevision);
+    var otherRev = normalizeSettingsRevision(other.settingsRevision);
+    if (otherRev.goal > baseRev.goal) {
+      out.dailyGoal = other.dailyGoal;
+      out.pendingGoal = other.pendingGoal ? Object.assign({}, other.pendingGoal) : null;
+      out.settingsRevision.goal = otherRev.goal;
+    } else if (otherRev.goal < baseRev.goal) {
+      out.dailyGoal = base.dailyGoal;
+      out.pendingGoal = base.pendingGoal ? Object.assign({}, base.pendingGoal) : null;
+      out.settingsRevision.goal = baseRev.goal;
+    } else {
+      out.dailyGoal = Math.max(base.dailyGoal, other.dailyGoal);
+      if (base.pendingGoal && other.pendingGoal) {
+        out.pendingGoal =
+          compareDateStr(base.pendingGoal.fromDate, other.pendingGoal.fromDate) >= 0
+            ? Object.assign({}, base.pendingGoal)
+            : Object.assign({}, other.pendingGoal);
+      } else {
+        out.pendingGoal = base.pendingGoal || other.pendingGoal || null;
+        if (out.pendingGoal) out.pendingGoal = Object.assign({}, out.pendingGoal);
+      }
+      out.settingsRevision.goal = baseRev.goal;
+    }
+    if (otherRev.soundOn > baseRev.soundOn) {
+      out.soundOn = other.soundOn;
+      out.settingsRevision.soundOn = otherRev.soundOn;
+    } else if (otherRev.soundOn < baseRev.soundOn) {
+      out.soundOn = base.soundOn;
+      out.settingsRevision.soundOn = baseRev.soundOn;
+    } else {
+      out.soundOn = other.soundOn;
+      out.settingsRevision.soundOn = baseRev.soundOn;
+    }
+  }
+
+  function ensureRepairMissedDays(repair) {
+    if (!repair) return [];
+    if (!Array.isArray(repair.missedDays)) {
+      repair.missedDays = repair.missedDay ? [repair.missedDay] : [];
+    }
+    return repair.missedDays;
+  }
+
+  function addRepairMissedDay(repair, dateStr) {
+    var days = ensureRepairMissedDays(repair);
+    if (days.indexOf(dateStr) < 0) days.push(dateStr);
+    if (!repair.missedDay) repair.missedDay = dateStr;
+    return days;
+  }
+
+  function syncRepairMissedDaysFromRecords(state) {
+    if (!state.repair) return [];
+    var repair = state.repair;
+    ensureRepairMissedDays(repair);
+    var anchor = repair.missedDay;
+    if (!anchor) return repair.missedDays;
+    addRepairMissedDay(repair, anchor);
+    Object.keys(state.dayRecords).forEach(function (d) {
+      if (compareDateStr(d, anchor) < 0) return;
+      var rec = state.dayRecords[d];
+      if (rec && rec.kind === 'missed' && !rec.met) {
+        addRepairMissedDay(repair, d);
+      }
+    });
+    return repair.missedDays;
+  }
+
+  function allRepairGapDaysMet(state) {
+    if (!state.repair) return false;
+    syncRepairMissedDaysFromRecords(state);
+    var list = ensureRepairMissedDays(state.repair);
+    if (!list.length) return false;
+    return list.every(function (day) {
+      var rec = state.dayRecords[day];
+      return rec && rec.met;
+    });
+  }
+
+  function markRepairMissedDaysRepaired(state) {
+    if (!state.repair) return;
+    syncRepairMissedDaysFromRecords(state);
+    ensureRepairMissedDays(state.repair).forEach(function (d) {
+      markDayKind(state, d, 'repaired');
+    });
+  }
+
+  function completeRepairSuccess(state) {
+    if (!state.repair) return;
+    var restore = state.repair.streakAtBreak || 0;
+    state.streak = restore;
+    if (state.streak > state.best) state.best = state.streak;
+    markRepairMissedDaysRepaired(state);
+    state.hadStreakBreak = false;
+    state.lastRepairCompletedAt = effectiveNow(state, deps.now());
+    state.repairUses.push(state.lastRepairCompletedAt);
+    state.repair = null;
   }
 
   function normalizeDayRecord(rec) {
@@ -158,6 +273,8 @@
     s.lastRepairCompletedAt = parseInt(raw.lastRepairCompletedAt, 10) || 0;
     s.vacationStartedAt = parseInt(raw.vacationStartedAt, 10) || 0;
     s.vacationEndedAt = parseInt(raw.vacationEndedAt, 10) || 0;
+    s.settingsRevision = normalizeSettingsRevision(raw.settingsRevision);
+    if (s.repair) ensureRepairMissedDays(s.repair);
     return s;
   }
 
@@ -244,10 +361,14 @@
       var pick = (or.openedAt || 0) >= (br.openedAt || 0) ? or : br;
       if (completedAt >= (pick.openedAt || 0)) return null;
       var metDays = pick.metDays || [];
+      var missedDays = ensureRepairMissedDays(pick);
       if ((br.openedAt || 0) === (or.openedAt || 0) || br.missedDay === or.missedDay) {
         metDays = dedupeNumericList((br.metDays || []).concat(or.metDays || []));
+        missedDays = dedupeNumericList(
+          ensureRepairMissedDays(br).concat(ensureRepairMissedDays(or))
+        );
       }
-      return Object.assign({}, pick, { metDays: metDays });
+      return Object.assign({}, pick, { metDays: metDays, missedDays: missedDays });
     }
     var open = br || or;
     if (!open) return null;
@@ -333,15 +454,8 @@
     out.best = Math.max(base.best, other.best, base.streak, other.streak);
     out.freezes = Math.max(base.freezes, other.freezes);
     out.freezeEarnProgress = Math.max(base.freezeEarnProgress, other.freezeEarnProgress);
-    out.dailyGoal = base.dailyGoal;
-    if (base.pendingGoal && other.pendingGoal) {
-      out.pendingGoal =
-        compareDateStr(base.pendingGoal.fromDate, other.pendingGoal.fromDate) >= 0
-          ? base.pendingGoal
-          : other.pendingGoal;
-    } else {
-      out.pendingGoal = base.pendingGoal || other.pendingGoal || null;
-    }
+    out.settingsRevision = normalizeSettingsRevision(base.settingsRevision);
+    mergeSettingsFields(base, other, out);
     out.maxTimestampSeen = Math.max(base.maxTimestampSeen, other.maxTimestampSeen);
     if (other.lastSeenDate && (!out.lastSeenDate || compareDateStr(other.lastSeenDate, out.lastSeenDate) > 0)) {
       out.lastSeenDate = other.lastSeenDate;
@@ -370,7 +484,6 @@
       out.dayRecords[day].answers = Math.max(out.dayRecords[day].answers, countAnswersForDay(out, day));
     });
     out.firstRunDone = base.firstRunDone || other.firstRunDone;
-    out.soundOn = base.soundOn && other.soundOn;
     out.vacation = mergeVacationState(base, other);
     out.notices = Object.assign({}, base.notices, other.notices);
     if (other.migratedFrom && !out.migratedFrom) {
@@ -389,24 +502,13 @@
     out.vacationUses = dedupeNumericList((base.vacationUses || []).concat(other.vacationUses || []));
     var outMissed = hasMissedDayRecord(out);
     var repairMergedComplete = false;
-    if (
-      out.repair &&
-      out.repair.missedDay &&
-      out.dayRecords[out.repair.missedDay] &&
-      out.dayRecords[out.repair.missedDay].met
-    ) {
-      out.repair = null;
-      outMissed = hasMissedDayRecord(out);
-    }
     if (out.repair && out.repair.metDays && out.repair.metDays.length >= 2) {
-      out.streak = out.repair.streakAtBreak || 0;
-      if (out.repair.missedDay) {
-        markDayKind(out, out.repair.missedDay, 'repaired');
-      }
-      out.lastRepairCompletedAt = Math.max(out.lastRepairCompletedAt || 0, deps.now());
-      out.repair = null;
+      completeRepairSuccess(out);
       outMissed = hasMissedDayRecord(out);
       repairMergedComplete = true;
+    } else if (out.repair && allRepairGapDaysMet(out)) {
+      out.repair = null;
+      outMissed = hasMissedDayRecord(out);
     }
     if (!repairMergedComplete) {
       if (resolvedStaleRepair && !outMissed) {
@@ -609,12 +711,15 @@
       state.notices.freezeSavedYesterday = true;
       return;
     }
-    if (!state.repair && repairAllowedNow(state, now)) {
+    if (state.repair) {
+      addRepairMissedDay(state.repair, dateStr);
+    } else if (repairAllowedNow(state, now)) {
       state.repair = {
         openedAt: now || deps.now(),
         streakAtBreak: state.streak,
         metDays: [],
         missedDay: dateStr,
+        missedDays: [dateStr],
         maxNow: state.maxTimestampSeen
       };
       state.repairUses.push(now || deps.now());
@@ -673,16 +778,7 @@
       state.repair.metDays.push(dateStr);
     }
     if (state.repair.metDays.length >= 2) {
-      var restore = state.repair.streakAtBreak || 0;
-      state.streak = restore;
-      if (state.streak > state.best) state.best = state.streak;
-      if (state.repair.missedDay) {
-        markDayKind(state, state.repair.missedDay, 'repaired');
-      }
-      state.hadStreakBreak = false;
-      state.lastRepairCompletedAt = effectiveNow(state, deps.now());
-      state.repairUses.push(state.lastRepairCompletedAt);
-      state.repair = null;
+      completeRepairSuccess(state);
     }
   }
 
@@ -828,10 +924,12 @@
       var currentGoal = goalForDate(state, today);
       if (rec.met && goal !== currentGoal) {
         state.pendingGoal = { goal: goal, fromDate: addDaysStr(today, 1) };
+        bumpSettingsRevision(state, 'goal');
         return state;
       }
       state.dailyGoal = goal;
       state.pendingGoal = null;
+      bumpSettingsRevision(state, 'goal');
       if (rec.answers >= goal) onGoalMet(state, today);
       return state;
     }).then(function () {
@@ -848,8 +946,17 @@
     options = options || {};
     return withLockedWrite(function (state) {
       state.firstRunDone = true;
-      if (options.goal) state.dailyGoal = options.goal;
-      if (options.soundOn === false) state.soundOn = false;
+      if (options.goal) {
+        state.dailyGoal = options.goal;
+        bumpSettingsRevision(state, 'goal');
+      }
+      if (options.soundOn === false) {
+        state.soundOn = false;
+        bumpSettingsRevision(state, 'soundOn');
+      } else if (options.soundOn !== false) {
+        state.soundOn = true;
+        bumpSettingsRevision(state, 'soundOn');
+      }
       return state;
     }).then(notifyUi);
   }
@@ -1270,6 +1377,7 @@
     soundCb.addEventListener('change', function () {
       withLockedWrite(function (state) {
         state.soundOn = soundCb.checked;
+        bumpSettingsRevision(state, 'soundOn');
         return state;
       });
     });

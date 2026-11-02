@@ -480,6 +480,164 @@ test('new break after past repair uses min streak not stale max', function () {
   assert(m.streak === 0, 'new break keeps streak 0, got ' + m.streak);
 });
 
+test('legacy repair object syncs gap days from dayRecords on merge', function () {
+  const game = loadGame();
+  const legacy = game.defaultState();
+  legacy.streak = 0;
+  legacy.repair = {
+    openedAt: 100,
+    streakAtBreak: 8,
+    metDays: [],
+    missedDay: '2026-06-02',
+    maxNow: 100
+  };
+  legacy.dayRecords['2026-06-02'] = { answers: 3, met: true, celebrated: true, streakAwarded: true, kind: 'normal' };
+  legacy.dayRecords['2026-06-03'] = { answers: 0, met: false, celebrated: false, streakAwarded: false, kind: 'missed' };
+  const stale = game.defaultState();
+  stale.streak = 0;
+  stale.repair = Object.assign({}, legacy.repair);
+  stale.dayRecords['2026-06-02'] = { answers: 0, met: false, celebrated: false, streakAwarded: false, kind: 'missed' };
+  stale.dayRecords['2026-06-03'] = { answers: 0, met: false, celebrated: false, streakAwarded: false, kind: 'missed' };
+  const m = game.mergeStates(legacy, stale);
+  assert(m.repair !== null, 'repair open while jun 3 unmet');
+});
+
+test('merge clears repair when every gap day already met', function () {
+  const game = loadGame();
+  const stale = game.defaultState();
+  stale.streak = 0;
+  stale.repair = {
+    openedAt: 100,
+    streakAtBreak: 8,
+    metDays: [],
+    missedDay: '2026-06-02',
+    missedDays: ['2026-06-02', '2026-06-03'],
+    maxNow: 100
+  };
+  stale.dayRecords['2026-06-02'] = { answers: 0, met: false, celebrated: false, streakAwarded: false, kind: 'missed' };
+  stale.dayRecords['2026-06-03'] = { answers: 0, met: false, celebrated: false, streakAwarded: false, kind: 'missed' };
+  const live = game.defaultState();
+  live.streak = 10;
+  live.dayRecords['2026-06-02'] = { answers: 3, met: true, celebrated: true, streakAwarded: true, kind: 'normal' };
+  live.dayRecords['2026-06-03'] = { answers: 3, met: true, celebrated: true, streakAwarded: true, kind: 'normal' };
+  const m = game.mergeStates(stale, live);
+  assert(m.repair === null, 'stale repair cleared');
+  assert(m.streak === 10, 'live streak kept, got ' + m.streak);
+});
+
+test('merge keeps multi-day repair if only first missed day met', function () {
+  const game = loadGame();
+  const openRepair = game.defaultState();
+  openRepair.streak = 0;
+  openRepair.repair = {
+    openedAt: 100,
+    streakAtBreak: 8,
+    metDays: [],
+    missedDay: '2026-06-02',
+    missedDays: ['2026-06-02', '2026-06-03'],
+    maxNow: 100
+  };
+  openRepair.dayRecords['2026-06-02'] = { answers: 0, met: false, celebrated: false, streakAwarded: false, kind: 'missed' };
+  openRepair.dayRecords['2026-06-03'] = { answers: 0, met: false, celebrated: false, streakAwarded: false, kind: 'missed' };
+  const metFirst = game.defaultState();
+  metFirst.streak = 0;
+  metFirst.repair = Object.assign({}, openRepair.repair);
+  metFirst.dayRecords['2026-06-02'] = { answers: 3, met: true, celebrated: true, streakAwarded: true, kind: 'normal' };
+  metFirst.dayRecords['2026-06-03'] = { answers: 0, met: false, celebrated: false, streakAwarded: false, kind: 'missed' };
+  const m = game.mergeStates(openRepair, metFirst);
+  assert(m.repair !== null, 'repair stays open');
+  assert(m.dayRecords['2026-06-03'].kind === 'missed', 'second gap day still missed');
+});
+
+test('settings revision survives clock back on merge', function () {
+  const game = loadGame();
+  const early = game.defaultState();
+  early.dailyGoal = 10;
+  early.settingsRevision = { soundOn: 0, goal: 1000 };
+  early.maxTimestampSeen = 1000;
+  const late = game.defaultState();
+  late.dailyGoal = 3;
+  late.settingsRevision = { soundOn: 0, goal: 100 };
+  late.maxTimestampSeen = 1000;
+  assert(game.mergeStates(late, early).dailyGoal === 10, 'higher rev wins after clock back');
+});
+
+test('non-consecutive gap misses keep repair until all gap days met', function () {
+  const game = loadGame();
+  const a = game.defaultState();
+  a.streak = 0;
+  a.repair = { openedAt: 100, streakAtBreak: 8, metDays: [], missedDay: '2026-06-02', maxNow: 100 };
+  a.dayRecords['2026-06-02'] = { answers: 0, met: false, celebrated: false, streakAwarded: false, kind: 'missed' };
+  a.dayRecords['2026-06-03'] = { answers: 3, met: true, celebrated: true, streakAwarded: true, kind: 'normal' };
+  a.dayRecords['2026-06-04'] = { answers: 0, met: false, celebrated: false, streakAwarded: false, kind: 'missed' };
+  const b = game.defaultState();
+  b.streak = 0;
+  b.repair = Object.assign({}, a.repair);
+  b.dayRecords['2026-06-02'] = { answers: 3, met: true, celebrated: true, streakAwarded: true, kind: 'normal' };
+  b.dayRecords['2026-06-03'] = b.dayRecords['2026-06-02'];
+  b.dayRecords['2026-06-04'] = { answers: 0, met: false, celebrated: false, streakAwarded: false, kind: 'missed' };
+  const m = game.mergeStates(a, b);
+  assert(m.repair !== null, 'repair stays while jun 4 missed');
+});
+
+test('mergeStates soundOn uses latest settings revision not AND', function () {
+  const game = loadGame();
+  const onTab = game.defaultState();
+  onTab.soundOn = true;
+  onTab.settingsRevision = { soundOn: 200, goal: 0 };
+  const offTab = game.defaultState();
+  offTab.soundOn = false;
+  offTab.settingsRevision = { soundOn: 50, goal: 0 };
+  assert(game.mergeStates(onTab, offTab).soundOn === true, 'newer on wins');
+  assert(game.mergeStates(offTab, onTab).soundOn === true, 'newer on wins either order');
+});
+
+test('mergeStates goal uses latest settings revision over stale answer tab', function () {
+  const game = loadGame();
+  const answerTab = game.defaultState();
+  answerTab.dailyGoal = 3;
+  answerTab.settingsRevision = { soundOn: 0, goal: 0 };
+  const settingsTab = game.defaultState();
+  settingsTab.dailyGoal = 10;
+  settingsTab.settingsRevision = { soundOn: 0, goal: 500 };
+  assert(game.mergeStates(answerTab, settingsTab).dailyGoal === 10, 'goal from settings tab');
+  assert(game.mergeStates(settingsTab, answerTab).dailyGoal === 10, 'goal from settings either order');
+});
+
+test('multi-day gap repair marks every missed day repaired on success', function () {
+  const env = makeEnv(Date.parse('2026-06-01T12:00:00'));
+  env.game.syncWrite(function (st) {
+    st.firstRunDone = true;
+    st.streak = 8;
+    st.lastProcessedDate = '2026-06-01';
+    st.lastSeenDate = '2026-06-01';
+    st.dayRecords['2026-06-01'] = { answers: 3, met: true, celebrated: true, streakAwarded: true, kind: 'normal' };
+    return st;
+  });
+  env.setNow(Date.parse('2026-06-04T12:00:00'));
+  env.game.syncWrite(function (st) {
+    env.game.processCalendar(st, env.now());
+    return st;
+  });
+  const mid = env.game.loadState();
+  assert(mid.repair && mid.repair.missedDays && mid.repair.missedDays.length === 2, 'two missed days tracked');
+  env.game.syncWrite(function (st) {
+    env.game.onGoalMet(st, '2026-06-04');
+    return st;
+  });
+  env.setNow(Date.parse('2026-06-05T12:00:00'));
+  env.game.syncWrite(function (st) {
+    env.game.processCalendar(st, env.now());
+    env.game.onGoalMet(st, '2026-06-05');
+    return st;
+  });
+  const done = env.game.loadState();
+  assert(done.repair === null, 'repair done');
+  assert(done.streak === 8, 'streak restored');
+  assert(done.dayRecords['2026-06-02'].kind === 'repaired', 'tue repaired');
+  assert(done.dayRecords['2026-06-03'].kind === 'repaired', 'wed repaired');
+});
+
 test('mergeStates does not double repairUses when merging identical state', function () {
   const game = loadGame();
   const s = game.defaultState();
