@@ -1,94 +1,146 @@
 /**
  * One-time migration script: rhcsa9 → rhcsa10
- * Migrates localStorage study_sessions_profile_rhcsa9 → rhcsa10, merges data if target exists,
- * removes retired topics, and updates quizCompleted.
- * 
- * Idempotent: safe to run on every page load.
+ * Merges localStorage study_sessions_profile_rhcsa9 into rhcsa10 (sum stats), updates quizCompleted.
+ *
+ * Idempotent: flag rhcsa_migrated_to_v10_3. See GitHub #41.
  */
 (function migrateRHCSA9toRHCSA10() {
   'use strict';
-  
-  const MIGRATION_FLAG = 'rhcsa_migrated_to_v10_2';
+
+  const MIGRATION_FLAG = 'rhcsa_migrated_to_v10_3';
+  const LEGACY_FLAG_V2 = 'rhcsa_migrated_to_v10_2';
   const OLD_PROFILE_KEY = 'study_sessions_profile_rhcsa9';
   const NEW_PROFILE_KEY = 'study_sessions_profile_rhcsa10';
   const QUIZ_COMPLETED_KEY = 'quizCompleted';
   const QUIZ_ORDER_KEY = 'quizOrder';
-  
-  // Retired topics that don't exist in rhcsa10
+
   const RETIRED_TOPICS = ['RHEL 9 vs 7', 'Containers'];
-  
-  // Check if already migrated
+
   if (localStorage.getItem(MIGRATION_FLAG)) {
-    return;  // Already migrated
+    return;
   }
-  
-  console.log('[Migration] Starting rhcsa9 → rhcsa10 migration...');
-  
+
+  console.log('[Migration] Starting rhcsa9 → rhcsa10 merge (v10_3)...');
+
   var migratedProfile = false;
   var migratedCompleted = false;
   var migratedOrder = false;
-  
-  // Migrate study_sessions_profile_rhcsa9 → rhcsa10
+
+  function sumTopicStats(a, b) {
+    return {
+      correct: (a.correct || 0) + (b.correct || 0),
+      total: (a.total || 0) + (b.total || 0)
+    };
+  }
+
+  function mergeMissArrays(a, b) {
+    var out = (a || []).slice();
+    (b || []).forEach(function (id) {
+      if (out.indexOf(id) === -1) {
+        out.push(id);
+      }
+    });
+    return out;
+  }
+
   try {
     var oldProfileStr = localStorage.getItem(OLD_PROFILE_KEY);
     if (oldProfileStr) {
-      var oldProfile = JSON.parse(oldProfileStr);
+      var oldProfile;
+      try {
+        oldProfile = JSON.parse(oldProfileStr);
+      } catch (parseErr) {
+        console.error('[Migration] Invalid rhcsa9 profile JSON:', parseErr);
+        return;
+      }
+
       var newProfileStr = localStorage.getItem(NEW_PROFILE_KEY);
       var newProfile = newProfileStr ? JSON.parse(newProfileStr) : null;
-      
-      // If new profile doesn't exist, create it from old profile
+
       if (!newProfile) {
         newProfile = {
           quizId: 'rhcsa10',
           topicStats: {},
-          topicMissesFromImports: {}
+          topicMissesFromImports: {},
+          mergedFrom: []
         };
       }
-      
-      // Merge topicStats, excluding retired topics
-      if (oldProfile.topicStats) {
-        Object.keys(oldProfile.topicStats).forEach(function(topic) {
-          if (RETIRED_TOPICS.indexOf(topic) === -1) {
-            // Keep existing stats if they exist, otherwise copy from old
-            if (!newProfile.topicStats[topic]) {
-              newProfile.topicStats[topic] = oldProfile.topicStats[topic];
-            }
-          }
-        });
+
+      if (!newProfile.topicStats || typeof newProfile.topicStats !== 'object') {
+        newProfile.topicStats = {};
       }
-      
-      // Merge topicMissesFromImports, excluding retired topics
-      if (oldProfile.topicMissesFromImports) {
-        Object.keys(oldProfile.topicMissesFromImports).forEach(function(topic) {
-          if (RETIRED_TOPICS.indexOf(topic) === -1) {
-            // Keep existing misses if they exist, otherwise copy from old
-            if (!newProfile.topicMissesFromImports[topic]) {
-              newProfile.topicMissesFromImports[topic] = oldProfile.topicMissesFromImports[topic];
-            }
-          }
-        });
+      if (!newProfile.topicMissesFromImports || typeof newProfile.topicMissesFromImports !== 'object') {
+        newProfile.topicMissesFromImports = {};
       }
-      
-      // Save the merged profile
+      if (!Array.isArray(newProfile.mergedFrom)) {
+        newProfile.mergedFrom = localStorage.getItem(LEGACY_FLAG_V2) ? ['rhcsa9'] : [];
+      }
+
+      if (!oldProfile.topicStats || typeof oldProfile.topicStats !== 'object') {
+        oldProfile.topicStats = {};
+      }
+      if (!oldProfile.topicMissesFromImports || typeof oldProfile.topicMissesFromImports !== 'object') {
+        oldProfile.topicMissesFromImports = {};
+      }
+
+      var alreadyMergedRhcsa9 = newProfile.mergedFrom.indexOf('rhcsa9') !== -1;
+
+      if (!alreadyMergedRhcsa9) {
+        if (oldProfile.topicStats) {
+          Object.keys(oldProfile.topicStats).forEach(function (topic) {
+            if (RETIRED_TOPICS.indexOf(topic) !== -1) {
+              return;
+            }
+            var oldStat = oldProfile.topicStats[topic];
+            if (newProfile.topicStats[topic]) {
+              newProfile.topicStats[topic] = sumTopicStats(newProfile.topicStats[topic], oldStat);
+            } else {
+              newProfile.topicStats[topic] = oldStat;
+            }
+          });
+        }
+
+        if (oldProfile.topicMissesFromImports) {
+          Object.keys(oldProfile.topicMissesFromImports).forEach(function (topic) {
+            if (RETIRED_TOPICS.indexOf(topic) !== -1) {
+              return;
+            }
+            var oldMiss = oldProfile.topicMissesFromImports[topic];
+            if (newProfile.topicMissesFromImports[topic]) {
+              newProfile.topicMissesFromImports[topic] = mergeMissArrays(newProfile.topicMissesFromImports[topic], oldMiss);
+            } else {
+              newProfile.topicMissesFromImports[topic] = oldMiss;
+            }
+          });
+        }
+
+        if (newProfile.mergedFrom.indexOf('rhcsa9') === -1) {
+          newProfile.mergedFrom.push('rhcsa9');
+        }
+      }
+
       var savedProfileStr = JSON.stringify(newProfile);
-      localStorage.setItem(NEW_PROFILE_KEY, savedProfileStr);
-      
-      // Verify the copy by reading it back and parsing it
+      try {
+        localStorage.setItem(NEW_PROFILE_KEY, savedProfileStr);
+      } catch (writeErr) {
+        console.error('[Migration] Failed to write rhcsa10 profile:', writeErr);
+        return;
+      }
+
       var verifyStr = localStorage.getItem(NEW_PROFILE_KEY);
       if (verifyStr === savedProfileStr) {
         migratedProfile = true;
-        console.log('[Migration] Migrated study_sessions_profile_rhcsa9 → rhcsa10 (retired topics removed)');
+        console.log('[Migration] Merged study_sessions_profile_rhcsa9 → rhcsa10 (sum stats)');
       } else {
-        console.error('[Migration] Failed to verify profile copy');
-        return;  // Don't set migration flag if verification failed
+        console.error('[Migration] Failed to verify profile write');
+        return;
       }
     }
   } catch (e) {
     console.error('[Migration] Failed to migrate profile:', e);
-    return;  // Don't set migration flag if migration failed
+    return;
   }
-  
-  // Migrate quizCompleted: replace rhcsa9 with rhcsa10
+
   try {
     var completedStr = localStorage.getItem(QUIZ_COMPLETED_KEY);
     if (completedStr) {
@@ -96,51 +148,48 @@
       if (Array.isArray(completed)) {
         var hasRhcsa9 = completed.indexOf('rhcsa9') !== -1;
         var hasRhcsa10 = completed.indexOf('rhcsa10') !== -1;
-        
+
         if (hasRhcsa9 && !hasRhcsa10) {
-          // Replace rhcsa9 with rhcsa10
-          completed = completed.map(function(id) {
+          completed = completed.map(function (id) {
             return id === 'rhcsa9' ? 'rhcsa10' : id;
           });
           localStorage.setItem(QUIZ_COMPLETED_KEY, JSON.stringify(completed));
           migratedCompleted = true;
-          console.log('[Migration] Replaced rhcsa9 with rhcsa10 in quizCompleted');
         } else if (hasRhcsa9 && hasRhcsa10) {
-          // Both exist, remove rhcsa9
-          completed = completed.filter(function(id) { return id !== 'rhcsa9'; });
+          completed = completed.filter(function (id) {
+            return id !== 'rhcsa9';
+          });
           localStorage.setItem(QUIZ_COMPLETED_KEY, JSON.stringify(completed));
           migratedCompleted = true;
-          console.log('[Migration] Removed rhcsa9 from quizCompleted (rhcsa10 already exists)');
         }
       }
     }
   } catch (e) {
     console.error('[Migration] Failed to migrate quizCompleted:', e);
-    // Continue to try quiz order migration
   }
-  
-  // Migrate quiz order: replace rhcsa9 with rhcsa10
+
   try {
     var quizOrderStr = localStorage.getItem(QUIZ_ORDER_KEY);
     if (quizOrderStr) {
       var quizOrder = JSON.parse(quizOrderStr);
       if (Array.isArray(quizOrder)) {
-        var updated = quizOrder.map(function(id) {
+        var updated = quizOrder.map(function (id) {
           return id === 'rhcsa9' ? 'rhcsa10' : id;
         });
         localStorage.setItem(QUIZ_ORDER_KEY, JSON.stringify(updated));
         migratedOrder = true;
-        console.log('[Migration] Updated quiz order');
       }
     }
   } catch (e) {
     console.error('[Migration] Failed to migrate quizOrder:', e);
-    // Continue to set migration flag
   }
-  
-  // Mark migration complete
-  localStorage.setItem(MIGRATION_FLAG, 'true');
-  
+
+  if (migratedProfile || !localStorage.getItem(OLD_PROFILE_KEY)) {
+    localStorage.setItem(MIGRATION_FLAG, 'true');
+  } else if (migratedCompleted || migratedOrder) {
+    localStorage.setItem(MIGRATION_FLAG, 'true');
+  }
+
   console.log('[Migration] Complete! Profile:', migratedProfile, ', Completed:', migratedCompleted, ', Order:', migratedOrder);
   console.log('[Migration] Old rhcsa9 data preserved. Remove manually if desired.');
 })();
