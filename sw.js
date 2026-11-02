@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE_NAME = 'cloudcram-v42';
+const CACHE_NAME = 'cloudcram-v43';
 
 const PRECACHE_PATHS = [
   '/index.html',
@@ -59,7 +59,6 @@ const PRECACHE_PATHS = [
   '/data/gcp-ace-extra-questions.js',
   '/data/aws-mlea-extra-questions.js',
   '/data/aws-dea-extra-questions.js',
-  '/data/aws-genai-extra-questions.js',
   '/data/aws-mlea-questions.js',
   '/data/aws-data-engineering-questions.js',
   '/data/aws-genai-questions.js',

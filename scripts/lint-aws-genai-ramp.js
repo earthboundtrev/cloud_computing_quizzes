@@ -10,7 +10,6 @@ const path = require('path');
 const CI = process.argv.includes('--ci');
 const TRACK_FILES = [
   'data/aws-genai-questions.js',
-  'data/aws-genai-extra-questions.js',
   'data/aws-genai-scenario-questions.js',
   'data/aws-genai-ramp-questions.js'
 ];
@@ -225,27 +224,6 @@ function main() {
   }).length;
   const sPct = strictAll.length ? (scenario / strictAll.length * 100) : 0;
   console.log('Strict bank scenario-style stems: ' + scenario + '/' + strictAll.length + ' (' + sPct.toFixed(1) + '%)');
-
-  global.window = {};
-  require(path.resolve('data/aws-genai-questions.js'));
-  require(path.resolve('data/aws-genai-extra-questions.js'));
-  const main = global.window.QUESTION_BANK_AWS_GENAI || [];
-  const extra = global.window.QUESTION_BANK_AWS_GENAI_EXTRA || [];
-  function normStem(q) {
-    return String(q.q || '').toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
-  }
-  const mainStems = new Set(main.map(normStem));
-  extra.forEach(function (q, idx) {
-    const n = normStem(q);
-    if (n && mainStems.has(n)) {
-      fail('data/aws-genai-extra-questions.js[' + idx + '] duplicates main bank stem');
-    }
-  });
-  if (extra.length) {
-    console.log('Extra bank: ' + extra.length + ' (must not duplicate main stems)');
-  } else {
-    console.log('Extra bank: empty (OK)');
-  }
 
   if (warnings.length) {
     warnings.forEach(function (w) {
