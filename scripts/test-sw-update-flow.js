@@ -11,6 +11,7 @@ const ROOT = path.join(__dirname, '..');
 const SW_PATH = path.join(ROOT, 'sw.js');
 const REG_PATH = path.join(ROOT, 'sw-register.js');
 const ENGINE_PATH = path.join(ROOT, 'quiz-engine.js');
+const RESET_PATH = path.join(ROOT, 'app-reset.js');
 
 function runTest(name, fn) {
   try {
@@ -43,6 +44,7 @@ function test(name, fn) {
 const sw = read(SW_PATH);
 const reg = read(REG_PATH);
 const engine = read(ENGINE_PATH);
+const reset = read(RESET_PATH);
 
 test('sw.js uses cloudcram-v41 cache name', function () {
   assert(/const CACHE_NAME = 'cloudcram-v41'/.test(sw), 'Expected CACHE_NAME cloudcram-v41');
@@ -108,6 +110,17 @@ test('quiz-engine.js exposes isQuizActive and session flag', function () {
   assert(/isQuizActive:\s*isQuizActive/.test(engine), 'QuizEngine.isQuizActive export missing');
   assert(/setQuizSessionActive/.test(engine), 'setQuizSessionActive helper missing');
   assert(/CloudCramUpdate\.onQuizActivityChange/.test(engine), 'quiz activity notifies SW update module');
+});
+
+test('app-reset.js defers storage clear until quiz update confirm', function () {
+  assert(/runUpdateAppFlow/.test(reset), 'runUpdateAppFlow missing');
+  assert(/confirmUpdateDuringActiveQuiz/.test(reset), 'quiz update confirm missing');
+  var updateAppBlock = reset.match(/function updateApp\(\)[\s\S]*?^  \}/m);
+  assert(updateAppBlock, 'updateApp not found');
+  assert(!/sessionStorage\.clear/.test(updateAppBlock[0]), 'updateApp must not clear before confirm');
+  assert(/closeDialog\(false\)/.test(reset), 'cancel must not call onProceed');
+  assert(/closeDialog\(true\)/.test(reset), 'confirm must call onProceed');
+  assert(/sessionStorage\.clear/.test(reset), 'sessionStorage cleared only in runUpdateAppFlow');
 });
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed');

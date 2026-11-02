@@ -128,7 +128,84 @@
     document.body.appendChild(link);
   }
 
-  function updateApp() {
+  function isQuizSessionActive() {
+    return !!(
+      window.QuizEngine &&
+      typeof window.QuizEngine.isQuizActive === 'function' &&
+      window.QuizEngine.isQuizActive()
+    );
+  }
+
+  function confirmUpdateDuringActiveQuiz(onProceed) {
+    var overlay = document.createElement('div');
+    overlay.className = 'delete-data-dialog-overlay';
+    overlay.setAttribute('role', 'presentation');
+
+    var dialog = document.createElement('div');
+    dialog.className = 'delete-data-dialog';
+    dialog.setAttribute('role', 'dialog');
+    dialog.setAttribute('aria-modal', 'true');
+    dialog.setAttribute('aria-labelledby', 'update-app-quiz-dialog-title');
+
+    var title = document.createElement('h3');
+    title.id = 'update-app-quiz-dialog-title';
+    title.textContent = 'Update app?';
+
+    var body = document.createElement('p');
+    body.textContent =
+      'You have a quiz in progress. Update anyway? Your current quiz will be lost.';
+
+    var actions = document.createElement('div');
+    actions.className = 'delete-data-dialog-actions';
+
+    var cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.className = 'delete-data-dialog-cancel';
+    cancelBtn.textContent = 'Cancel';
+
+    var confirmBtn = document.createElement('button');
+    confirmBtn.type = 'button';
+    confirmBtn.className = 'delete-data-dialog-confirm';
+    confirmBtn.textContent = 'Update anyway';
+
+    actions.appendChild(cancelBtn);
+    actions.appendChild(confirmBtn);
+    dialog.appendChild(title);
+    dialog.appendChild(body);
+    dialog.appendChild(actions);
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+
+    function closeDialog(confirmed) {
+      overlay.remove();
+      document.removeEventListener('keydown', onKeyDown);
+      if (confirmed && typeof onProceed === 'function') {
+        onProceed();
+      }
+    }
+
+    function onKeyDown(ev) {
+      if (ev.key === 'Escape') {
+        ev.preventDefault();
+        closeDialog(false);
+      }
+    }
+
+    document.addEventListener('keydown', onKeyDown);
+    cancelBtn.addEventListener('click', function () {
+      closeDialog(false);
+    });
+    overlay.addEventListener('click', function (ev) {
+      if (ev.target === overlay) closeDialog(false);
+    });
+    confirmBtn.addEventListener('click', function () {
+      closeDialog(true);
+    });
+
+    cancelBtn.focus();
+  }
+
+  function runUpdateAppFlow() {
     sessionStorage.clear();
     var keysApi = getKeysApi();
     if (keysApi) {
@@ -160,6 +237,14 @@
       .catch(function () {
         window.location.reload();
       });
+  }
+
+  function updateApp() {
+    if (isQuizSessionActive()) {
+      confirmUpdateDuringActiveQuiz(runUpdateAppFlow);
+      return;
+    }
+    runUpdateAppFlow();
   }
 
   function deleteAllMyData(options) {

@@ -136,13 +136,28 @@ test('data-export.js buildExportPayload omits push auth token', function () {
 
 test('app-reset.js update path does not unregister SW or clear all localStorage', function () {
   const src = fs.readFileSync(path.join(ROOT, 'app-reset.js'), 'utf8');
+  const flowBlock = src.match(/function runUpdateAppFlow\(\)[\s\S]*?^  \}/m);
+  assert(flowBlock, 'runUpdateAppFlow not found');
+  assert(!/localStorage\.clear/.test(flowBlock[0]), 'update flow must not localStorage.clear');
+  assert(!/unregister/.test(flowBlock[0]), 'update flow must not unregister SW');
+  assert(/CloudCramUpdate/.test(flowBlock[0]), 'update flow uses CloudCramUpdate');
+  assert(/waitAndApplyUpdate\(\{\s*userInitiated:\s*true\s*\}\)/.test(flowBlock[0]), 'update flow waits for SW install before apply');
+  assert(!/clearAllCaches/.test(flowBlock[0]), 'update flow must not clear caches before SW activates');
+});
+
+test('app-reset.js active quiz update confirm cancel and proceed paths', function () {
+  const src = fs.readFileSync(path.join(ROOT, 'app-reset.js'), 'utf8');
   const updateBlock = src.match(/function updateApp\(\)[\s\S]*?^  \}/m);
   assert(updateBlock, 'updateApp not found');
-  assert(!/localStorage\.clear/.test(updateBlock[0]), 'updateApp must not localStorage.clear');
-  assert(!/unregister/.test(updateBlock[0]), 'updateApp must not unregister SW');
-  assert(/CloudCramUpdate/.test(updateBlock[0]), 'updateApp uses CloudCramUpdate');
-  assert(/waitAndApplyUpdate\(\{\s*userInitiated:\s*true\s*\}\)/.test(updateBlock[0]), 'updateApp waits for SW install before apply');
-  assert(!/clearAllCaches/.test(updateBlock[0]), 'updateApp must not clear caches before SW activates');
+  assert(/isQuizSessionActive/.test(src), 'quiz session guard missing');
+  assert(/QuizEngine\.isQuizActive/.test(src), 'QuizEngine.isQuizActive check missing');
+  assert(/confirmUpdateDuringActiveQuiz/.test(src), 'quiz update confirm dialog missing');
+  assert(/Your current quiz will be lost/.test(src), 'quiz loss warning missing');
+  assert(!/sessionStorage\.clear/.test(updateBlock[0]), 'updateApp must not clear storage before confirm');
+  assert(/confirmUpdateDuringActiveQuiz\(runUpdateAppFlow\)/.test(updateBlock[0]), 'confirm then run flow');
+  assert(/closeDialog\(false\)/.test(src), 'cancel path must not proceed');
+  assert(/closeDialog\(true\)/.test(src), 'confirm path must proceed');
+  assert(/cancelBtn\.focus\(\)/.test(src), 'cancel focused by default on quiz update confirm');
 });
 
 test('app-reset.js delete uses BroadcastChannel and server hook', function () {
