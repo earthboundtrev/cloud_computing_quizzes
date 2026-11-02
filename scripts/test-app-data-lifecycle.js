@@ -141,6 +141,8 @@ test('app-reset.js update path does not unregister SW or clear all localStorage'
   assert(!/localStorage\.clear/.test(updateBlock[0]), 'updateApp must not localStorage.clear');
   assert(!/unregister/.test(updateBlock[0]), 'updateApp must not unregister SW');
   assert(/CloudCramUpdate/.test(updateBlock[0]), 'updateApp uses CloudCramUpdate');
+  assert(/waitAndApplyUpdate/.test(updateBlock[0]), 'updateApp waits for SW install before apply');
+  assert(!/clearAllCaches/.test(updateBlock[0]), 'updateApp must not clear caches before SW activates');
 });
 
 test('app-reset.js delete uses BroadcastChannel and server hook', function () {
@@ -181,6 +183,15 @@ test('index-init delete dialog uses accessible dialog pattern', function () {
   assert(/role',\s*'dialog'/.test(src) || /setAttribute\('role',\s*'dialog'\)/.test(src), 'dialog role');
   assert(/Export first/.test(src), 'export first offered');
   assert(/cancelBtn\.focus\(\)/.test(src), 'cancel focused by default');
+});
+
+test('index-init delete dialog traps focus and restores trigger', function () {
+  const src = fs.readFileSync(path.join(ROOT, 'index-init.js'), 'utf8');
+  assert(/trapFocusInDialog/.test(src), 'focus trap helper missing');
+  assert(/'Tab'/.test(src) && /trapFocusInDialog/.test(src), 'Tab focus trap missing');
+  assert(/shiftKey/.test(src), 'Shift+Tab handling missing');
+  assert(/triggerEl\.focus/.test(src), 'focus must return to trigger on close');
+  assert(/Escape/.test(src), 'Escape closes dialog');
 });
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed');

@@ -44,8 +44,8 @@ const sw = read(SW_PATH);
 const reg = read(REG_PATH);
 const engine = read(ENGINE_PATH);
 
-test('sw.js uses cloudcram-v40 cache name', function () {
-  assert(/const CACHE_NAME = 'cloudcram-v40'/.test(sw), 'Expected CACHE_NAME cloudcram-v40');
+test('sw.js uses cloudcram-v41 cache name', function () {
+  assert(/const CACHE_NAME = 'cloudcram-v41'/.test(sw), 'Expected CACHE_NAME cloudcram-v41');
 });
 
 test('sw.js install handler does not call skipWaiting', function () {
@@ -73,6 +73,13 @@ test('sw-register.js exposes CloudCramUpdate API', function () {
 
 test('sw-register.js posts SKIP_WAITING to waiting worker', function () {
   assert(/postMessage\(\{\s*type:\s*'SKIP_WAITING'\s*\}\)/.test(reg), 'SKIP_WAITING postMessage missing');
+});
+
+test('sw-register.js waits for installing worker before apply', function () {
+  assert(/waitForWaitingWorker/.test(reg), 'waitForWaitingWorker missing');
+  assert(/waitAndApplyUpdate/.test(reg), 'waitAndApplyUpdate missing');
+  assert(/state === 'installed'/.test(reg), 'installed state wait missing');
+  assert(/UPDATE_WAIT_TIMEOUT_MS/.test(reg), 'update wait timeout missing');
 });
 
 test('sw-register.js uses controllerchange reload guard', function () {

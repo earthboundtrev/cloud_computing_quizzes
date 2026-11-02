@@ -14,6 +14,7 @@
   var pendingWaitingWorker = null;
   var UPDATE_INTERVAL_MS = 60 * 60 * 1000;
   var DEFER_POLL_MS = 5000;
+  var UPDATE_WAIT_TIMEOUT_MS = 15000;
 
   function isQuizActive() {
     return !!(window.QuizEngine && typeof window.QuizEngine.isQuizActive === 'function' && window.QuizEngine.isQuizActive());
@@ -154,6 +155,80 @@
     });
   }
 
+  /**
+   * After registration.update(), wait until a worker is waiting (install finished)
+   * or until timeoutMs. Resolves with the waiting ServiceWorker or null.
+   */
+  function waitForWaitingWorker(timeoutMs) {
+    timeoutMs = timeoutMs || UPDATE_WAIT_TIMEOUT_MS;
+    return new Promise(function (resolve) {
+      if (!registration) {
+        resolve(null);
+        return;
+      }
+
+      var settled = false;
+      var timer = null;
+
+      function cleanup() {
+        if (timer) clearTimeout(timer);
+        registration.removeEventListener('updatefound', onUpdateFoundWhileWaiting);
+      }
+
+      function finish(worker) {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        resolve(worker);
+      }
+
+      function tryResolveWaiting() {
+        if (registration.waiting && hasControllingWorker()) {
+          finish(registration.waiting);
+          return true;
+        }
+        return false;
+      }
+
+      function watchInstalling(worker) {
+        if (!worker) return;
+        worker.addEventListener('statechange', function () {
+          if (worker.state === 'installed' && hasControllingWorker()) {
+            finish(registration.waiting || worker);
+          }
+        });
+      }
+
+      function onUpdateFoundWhileWaiting() {
+        watchInstalling(registration.installing);
+        tryResolveWaiting();
+      }
+
+      if (tryResolveWaiting()) return;
+
+      watchInstalling(registration.installing);
+      registration.addEventListener('updatefound', onUpdateFoundWhileWaiting);
+
+      timer = setTimeout(function () {
+        finish(null);
+      }, timeoutMs);
+    });
+  }
+
+  function waitAndApplyUpdate(options) {
+    options = options || {};
+    var timeoutMs = options.timeoutMs || UPDATE_WAIT_TIMEOUT_MS;
+    return waitForWaitingWorker(timeoutMs).then(function (waiting) {
+      if (!waiting) {
+        return { applied: false, reason: 'no_update' };
+      }
+      pendingWaitingWorker = waiting;
+      updatePending = true;
+      var applied = applyUpdate();
+      return { applied: applied, reason: applied ? 'skip_waiting' : 'blocked' };
+    });
+  }
+
   function trackInstallingWorker(worker) {
     if (!worker) return;
     worker.addEventListener('statechange', function () {
@@ -206,6 +281,8 @@
   window.CloudCramUpdate = {
     checkForUpdate: checkForUpdate,
     applyUpdate: applyUpdate,
+    waitForWaitingWorker: waitForWaitingWorker,
+    waitAndApplyUpdate: waitAndApplyUpdate,
     onQuizActivityChange: onQuizActivityChange
   };
 })();

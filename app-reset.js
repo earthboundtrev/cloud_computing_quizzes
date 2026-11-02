@@ -142,16 +142,20 @@
 
     check
       .then(function () {
+        if (window.CloudCramUpdate && typeof window.CloudCramUpdate.waitAndApplyUpdate === 'function') {
+          return window.CloudCramUpdate.waitAndApplyUpdate();
+        }
         var applied = false;
         if (window.CloudCramUpdate && typeof window.CloudCramUpdate.applyUpdate === 'function') {
           applied = window.CloudCramUpdate.applyUpdate();
         }
-        if (applied) {
+        return { applied: applied };
+      })
+      .then(function (result) {
+        if (result && result.applied) {
           return;
         }
-        return clearAllCaches().then(function () {
-          window.location.reload();
-        });
+        window.location.reload();
       })
       .catch(function () {
         window.location.reload();
