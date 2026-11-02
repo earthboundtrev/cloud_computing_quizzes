@@ -5,10 +5,10 @@ window.QUESTION_BANK_AWS_GENAI_SCENARIOS = [
     "topic": "Architecture",
     "q": "Which architecture BEST meets strict tenant isolation for thousands of customers?",
     "options": [
-      "One shared OpenSearch index with no ACLs",
+      "One shared OpenSearch index with no ACLs while leaving retrieval and chunking unchanged without updating IAM roles or model access in the target Region",
       "Separate Bedrock Knowledge Bases (or collections) per tenant with IAM-scoped access and KMS encryption",
-      "Public S3 bucket for all manuals",
-      "Run models only on laptops"
+      "Public S3 bucket for all manuals by disabling Guardrails instead of tuning retrieval parameters using only client-side JavaScript to hold long-lived credentials",
+      "Run models only on laptops using only client-side JavaScript to hold long-lived credentials and relying on a single synchronous InvokeModel call for all traffic"
     ],
     "correct": 1,
     "explain": "Per-tenant KB/index boundaries + IAM/KMS enforce isolation at scale.",
@@ -23,10 +23,10 @@ window.QUESTION_BANK_AWS_GENAI_SCENARIOS = [
     "topic": "Ingestion",
     "q": "When customers upload revised PDFs, embeddings should update:",
     "options": [
-      "Rebuild entire platform nightly only",
+      "Rebuild entire platform nightly only while leaving retrieval and chunking unchanged",
       "Incremental sync jobs into the Knowledge Base / vector store for changed objects",
-      "Delete all tenants",
-      "Disable versioning"
+      "Delete all tenants by disabling Guardrails instead of tuning retrieval parameters",
+      "Disable versioning using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Incremental ingestion keeps embeddings current without full rebuilds.",
@@ -41,10 +41,10 @@ window.QUESTION_BANK_AWS_GENAI_SCENARIOS = [
     "topic": "Safety",
     "q": "Unsafe or off-topic model outputs should be reduced with:",
     "options": [
-      "No controls",
+      "No controls while leaving retrieval and chunking unchanged without updating IAM roles or model access in the target Region",
       "Amazon Bedrock Guardrails (content filters, denied topics, PII filters)",
-      "Hard-coded API keys in JS",
-      "Public endpoints without auth"
+      "Hard-coded API keys in JS by disabling Guardrails instead of tuning retrieval parameters",
+      "Public endpoints without auth using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Guardrails filter harmful or non-compliant generations at inference.",
@@ -59,10 +59,10 @@ window.QUESTION_BANK_AWS_GENAI_SCENARIOS = [
     "topic": "Auth",
     "q": "Internal and external users need centralized auth to the app:",
     "options": [
-      "Shared admin password",
+      "Shared admin password while leaving retrieval and chunking unchanged without updating IAM roles or model access in the target Region",
       "Amazon Cognito (or federated IdP) with tenant claims mapped to IAM/KB access",
-      "API keys in mobile app binary",
-      "Disable TLS"
+      "API keys in mobile app binary by disabling Guardrails instead of tuning retrieval parameters",
+      "Disable TLS using only client-side JavaScript to hold long-lived credentials and relying on a single synchronous InvokeModel call for all traffic"
     ],
     "correct": 1,
     "explain": "Cognito/federation provides tenant-aware identity for the assistant.",
@@ -78,9 +78,9 @@ window.QUESTION_BANK_AWS_GENAI_SCENARIOS = [
     "q": "Latency and token cost spikes should be tracked via:",
     "options": [
       "CloudWatch metrics on Bedrock invocations + application tracing",
-      "Paper logs only",
-      "S3 Glacier",
-      "WAF only"
+      "Paper logs only without updating IAM roles or model access in the target Region",
+      "S3 Glacier by disabling Guardrails instead of tuning retrieval parameters",
+      "WAF only using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 0,
     "explain": "Observability on model calls supports SLOs and cost control.",
@@ -95,10 +95,10 @@ window.QUESTION_BANK_AWS_GENAI_SCENARIOS = [
     "topic": "Models",
     "q": "Choosing models per tenant tier (fast vs capable) is done with:",
     "options": [
-      "Single largest model for everyone always",
+      "Single largest model for everyone always while leaving retrieval and chunking unchanged",
       "Bedrock model IDs / inference profiles selected by tenant SLA and routing logic",
-      "Host weights on EC2 manually",
-      "Email PDFs to users"
+      "Host weights on EC2 manually by disabling Guardrails instead of tuning retrieval parameters",
+      "Email PDFs to users using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Route requests to appropriate FMs/inference profiles per tier.",
@@ -113,10 +113,10 @@ window.QUESTION_BANK_AWS_GENAI_SCENARIOS = [
     "topic": "Retrieval",
     "q": "Summaries miss nuance despite relevant chunks. What improves quality FIRST?",
     "options": [
-      "Lower temperature only",
+      "Lower temperature only while leaving retrieval and chunking unchanged without updating IAM roles or model access in the target Region",
       "Tune chunking, metadata filters, and hybrid retrieval; refine system prompts with domain instructions",
-      "Remove guardrails",
-      "Use smaller context window"
+      "Remove guardrails by disabling Guardrails instead of tuning retrieval parameters using only client-side JavaScript to hold long-lived credentials",
+      "Use smaller context window using only client-side JavaScript to hold long-lived credentials and relying on a single synchronous InvokeModel call for all traffic"
     ],
     "correct": 1,
     "explain": "Retrieval quality and prompt design drive financial nuance more than temperature alone.",
@@ -132,9 +132,9 @@ window.QUESTION_BANK_AWS_GENAI_SCENARIOS = [
     "q": "PII must be blocked in prompts and responses. Which combination applies?",
     "options": [
       "Macie/Comprehend PII detection on ingest + Bedrock Guardrails at inference",
-      "Store all filings public",
-      "Disable logging for privacy",
-      "Share root credentials"
+      "Store all filings public without updating IAM roles or model access in the target Region",
+      "Disable logging for privacy by disabling Guardrails instead of tuning retrieval parameters",
+      "Share root credentials using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 0,
     "explain": "Detect PII in data pipeline; guardrails block sensitive content at generation.",
@@ -149,10 +149,10 @@ window.QUESTION_BANK_AWS_GENAI_SCENARIOS = [
     "topic": "Ingestion",
     "q": "Complex PDF diagrams fail ingestion. Resilient processing uses:",
     "options": [
-      "Ignore failures",
+      "Ignore failures while leaving retrieval and chunking unchanged without updating IAM roles or model access in the target Region",
       "Bedrock Knowledge Bases with OCR/layout parsing, DLQ/retry on failed documents",
-      "Delete S3 bucket",
-      "Only plain text uploads"
+      "Delete S3 bucket by disabling Guardrails instead of tuning retrieval parameters",
+      "Only plain text uploads using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Managed KB ingestion with retries handles difficult PDFs; monitor failures.",
@@ -167,10 +167,10 @@ window.QUESTION_BANK_AWS_GENAI_SCENARIOS = [
     "topic": "Audit",
     "q": "All queries must be auditable. What should you enable?",
     "options": [
-      "No logs",
+      "No logs while leaving retrieval and chunking unchanged without updating IAM roles or model access in the target Region",
       "CloudTrail for API calls + application logs of prompts/responses stored securely with retention policy",
-      "Public CloudWatch dashboard",
-      "Disable KMS"
+      "Public CloudWatch dashboard by disabling Guardrails instead of tuning retrieval parameters using only client-side JavaScript to hold long-lived credentials",
+      "Disable KMS using only client-side JavaScript to hold long-lived credentials and relying on a single synchronous InvokeModel call for all traffic"
     ],
     "correct": 1,
     "explain": "API audit trails plus app-level query logs satisfy financial audit needs.",
@@ -185,10 +185,10 @@ window.QUESTION_BANK_AWS_GENAI_SCENARIOS = [
     "topic": "Access",
     "q": "Bedrock and S3 access from the app should use:",
     "options": [
-      "Long-lived IAM user keys in code",
+      "Long-lived IAM user keys in code while leaving retrieval and chunking unchanged",
       "IAM roles with least privilege; no keys in repositories",
-      "Bucket public read",
-      "Root account for Lambda"
+      "Bucket public read by disabling Guardrails instead of tuning retrieval parameters",
+      "Root account for Lambda using only client-side JavaScript to hold long-lived credentials"
     ],
     "correct": 1,
     "explain": "Roles and short-lived credentials reduce secret sprawl.",
@@ -203,10 +203,10 @@ window.QUESTION_BANK_AWS_GENAI_SCENARIOS = [
     "topic": "Evaluation",
     "q": "Before promoting prompt changes, measure quality with:",
     "options": [
-      "Guesswork",
+      "Guesswork while leaving retrieval and chunking unchanged without updating IAM roles or model access in the target Region",
       "Human review sets + RAG evaluation metrics (faithfulness/relevance) on sample filings",
-      "Disable testing",
-      "Only latency tests"
+      "Disable testing by disabling Guardrails instead of tuning retrieval parameters using only client-side JavaScript to hold long-lived credentials",
+      "Only latency tests using only client-side JavaScript to hold long-lived credentials and relying on a single synchronous InvokeModel call for all traffic"
     ],
     "correct": 1,
     "explain": "Structured eval on representative 10-K samples validates prompt/retrieval changes.",
