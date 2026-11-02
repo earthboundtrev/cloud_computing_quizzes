@@ -9,7 +9,7 @@ const quizFiles = [
   'aws_data_engineering_quiz.html',
   'aws_genai_quiz.html',
   'cissp_quiz.html',
-  'rhcsa9_quiz.html',
+  'rhcsa10_quiz.html',
   'rhce_quiz.html'
 ];
 

@@ -9,7 +9,7 @@ const quizzes = [
   { html: 'aws_data_engineering_quiz.html', varName: 'QUESTION_BANK_AWS_DATA_ENGINEERING', out: 'data/aws-data-engineering-questions.js' },
   { html: 'aws_genai_quiz.html', varName: 'QUESTION_BANK_AWS_GENAI', out: 'data/aws-genai-questions.js' },
   { html: 'cissp_quiz.html', varName: 'QUESTION_BANK_CISSP', out: 'data/cissp-questions.js' },
-  { html: 'rhcsa9_quiz.html', varName: 'QUESTION_BANK_RHCSA9', out: 'data/rhcsa9-questions.js' },
+  { html: 'rhcsa10_quiz.html', varName: 'QUESTION_BANK_RHCSA10', out: 'data/rhcsa10-questions.js' },
   { html: 'rhce_quiz.html', varName: 'QUESTION_BANK_RHCE', out: 'data/rhce-questions.js' },
 ];
 
