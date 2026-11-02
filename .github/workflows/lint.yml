@@ -27,6 +27,9 @@ jobs:
     - name: RHCSA10 content quality lint
       run: node scripts/lint-rhcsa10.js --ci
     
+    - name: CISSP ramp metadata lint
+      run: node scripts/lint-cissp-ramp.js --ci
+    
     - name: Check service worker precache
       run: node scripts/check-sw-precache.js
     
