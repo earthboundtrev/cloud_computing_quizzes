@@ -66,12 +66,6 @@ function classListFactory(el) {
   };
 }
 
-function syncText(el) {
-  if (el._textChild) {
-    el._textChild.data = el.textContent;
-  }
-}
-
 function makeElement(doc, tag, opts) {
   opts = opts || {};
   const el = {
@@ -84,8 +78,8 @@ function makeElement(doc, tag, opts) {
     style: {},
     dataset: {},
     attributes: {},
-    innerHTML: '',
-    textContent: '',
+    _innerHTML: '',
+    _textContent: '',
     disabled: false,
     type: opts.type || '',
     href: '',
@@ -120,8 +114,13 @@ function makeElement(doc, tag, opts) {
     },
     appendChild(child) {
       if (child.nodeType === 3) {
-        this.textContent += child.data;
-        syncText(this);
+        this._textContent = (this._textContent || '') + child.data;
+        if (!this._textChild) {
+          this.children.push(child);
+          this._textChild = child;
+        } else {
+          this._textChild.data = this._textContent;
+        }
         return child;
       }
       child.parentNode = this;
@@ -170,6 +169,34 @@ function makeElement(doc, tag, opts) {
     set(v) {
       el._className = v;
       el.classList = classListFactory(el);
+    },
+  });
+  Object.defineProperty(el, 'innerHTML', {
+    get() {
+      return el._innerHTML;
+    },
+    set(v) {
+      el._innerHTML = v == null ? '' : String(v);
+      el.children.length = 0;
+      el._textChild = null;
+      if (el._innerHTML !== '') {
+        el.children.push(makeTextNode(el._innerHTML));
+      }
+    },
+  });
+  Object.defineProperty(el, 'textContent', {
+    get() {
+      return el._textContent;
+    },
+    set(v) {
+      el._textContent = v == null ? '' : String(v);
+      el.children.length = 0;
+      el._textChild = null;
+      if (el._textContent !== '') {
+        const tn = makeTextNode(el._textContent);
+        el._textChild = tn;
+        el.children.push(tn);
+      }
     },
   });
   if (opts.id) doc.registerId(opts.id, el);
@@ -436,7 +463,7 @@ function createQuizSmokeContext(quizId, options) {
 
   vm.createContext(sandbox);
 
-  const scriptPaths = scriptsForQuizHtml(htmlPath);
+  const scriptPaths = options._testScriptOverride || scriptsForQuizHtml(htmlPath);
   if (!scriptPaths.length) {
     throw new Error('No quiz scripts found in HTML for quizId ' + quizId);
   }
@@ -526,25 +553,39 @@ function runSession(sandbox, mode) {
   sandbox.downloadResults();
 }
 
+function assertResultsMarkdown(md, quizId, modeLabel) {
+  if (!md || md.indexOf('# ') !== 0 || md.indexOf('**Score:**') === -1) {
+    throw new Error('quizId ' + quizId + ': missing results markdown after ' + modeLabel);
+  }
+  const m = md.match(/\*\*Score:\*\* (\d+)\/(\d+)/);
+  if (!m) {
+    throw new Error('quizId ' + quizId + ': could not parse score in markdown (' + modeLabel + ')');
+  }
+  const scored = parseInt(m[1], 10);
+  const total = parseInt(m[2], 10);
+  if (total < 1) {
+    throw new Error('quizId ' + quizId + ': empty session (' + modeLabel + ')');
+  }
+  if (scored < 1) {
+    throw new Error(
+      'quizId ' + quizId + ': no scored answers in ' + modeLabel + ' (0/' + total + ') — engine may not have received clicks'
+    );
+  }
+}
+
 function smokeQuiz(quizId, options) {
   const ctx = createQuizSmokeContext(quizId, options);
   const { sandbox } = ctx;
 
   runSession(sandbox, 'mixed');
-  let md = ctx.getCapturedMarkdown();
-  if (!md || md.indexOf('# ') !== 0 || md.indexOf('**Score:**') === -1) {
-    throw new Error('quizId ' + quizId + ': missing results markdown after quiz mode');
-  }
+  assertResultsMarkdown(ctx.getCapturedMarkdown(), quizId, 'quiz mode');
 
   ctx.resetCapture();
   if (typeof sandbox.exitQuiz === 'function') {
     sandbox.exitQuiz();
   }
   runSession(sandbox, 'exam');
-  md = ctx.getCapturedMarkdown();
-  if (!md || md.indexOf('# ') !== 0 || md.indexOf('**Score:**') === -1) {
-    throw new Error('quizId ' + quizId + ': missing results markdown after exam mode');
-  }
+  assertResultsMarkdown(ctx.getCapturedMarkdown(), quizId, 'exam mode');
 
   return true;
 }

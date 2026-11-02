@@ -11,7 +11,7 @@ const { spawnSync } = require('child_process');
 
 const ROOT = path.join(__dirname, '..');
 const SMOKE = path.join(__dirname, 'smoke-test-quiz.js');
-const OCI_BANK = path.join(ROOT, 'data', 'oci-questions.js');
+const BROKEN_FIXTURE = path.join(__dirname, 'fixtures', 'smoke-broken-bank.js');
 
 function assert(cond, msg) {
   if (!cond) throw new Error(msg || 'Assertion failed');
@@ -47,17 +47,30 @@ test('unknown quizId exits non-zero with quiz id in output', function () {
   assert(out.indexOf('not_a_real_quiz_id') !== -1, 'output should name quiz id');
 });
 
-test('syntax error in bank exits non-zero with quiz id (oci)', function () {
-  const backup = fs.readFileSync(OCI_BANK, 'utf8');
-  fs.writeFileSync(OCI_BANK, 'window.QUESTION_BANK_OCI = [', 'utf8');
+test('syntax error in bank fixture fails vm load', function () {
+  const vm = require('vm');
+  const code = fs.readFileSync(BROKEN_FIXTURE, 'utf8');
+  let err = null;
   try {
-    const r = runSmoke(['oci']);
-    assert(r.status !== 0, 'expected non-zero exit for broken bank');
-    const out = (r.stdout || '') + (r.stderr || '');
-    assert(out.indexOf('oci') !== -1, 'output should name quiz id oci');
-  } finally {
-    fs.writeFileSync(OCI_BANK, backup, 'utf8');
+    vm.runInContext(code, { window: {} });
+  } catch (e) {
+    err = e;
   }
+  assert(err, 'expected syntax error from fixture bank');
+});
+
+test('createQuizSmokeContext wraps bank load errors with quiz id', function () {
+  const mod = require('./smoke-test-quiz.js');
+  let err = null;
+  try {
+    mod.createQuizSmokeContext('oci', {
+      localStorage: new mod.LocalStorageMock(),
+      _testScriptOverride: ['quiz-engine.js', 'scripts/fixtures/smoke-broken-bank.js'],
+    });
+  } catch (e) {
+    err = e;
+  }
+  assert(err && String(err.message).indexOf('oci') !== -1, 'error should name quiz id');
 });
 
 test('exports createQuizSmokeContext with localStorage stub', function () {
