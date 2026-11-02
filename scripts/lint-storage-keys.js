@@ -17,6 +17,7 @@ const SCAN_FILES = [
   'rhcsa-migration.js',
   'quiz-config.js',
   'session-streak.js',
+  'gamification.js',
   'index-init.js',
   'app-reset.js',
   'data-export.js',

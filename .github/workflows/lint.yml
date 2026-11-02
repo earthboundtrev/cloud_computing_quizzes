@@ -63,6 +63,12 @@ jobs:
     - name: Run CISSP smoke tests
       run: node scripts/smoke-test-cissp.js
 
+    - name: Gamification unit tests (#68)
+      run: node scripts/test-gamification.js
+
+    - name: Gamification Playwright smoke (#68)
+      run: node scripts/playwright-gamification-test.mjs
+
     - name: Shared quiz smoke tests (#67)
       run: node scripts/smoke-test-quiz.js --all
     

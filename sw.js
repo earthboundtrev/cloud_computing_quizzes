@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE_NAME = 'cloudcram-v41';
+const CACHE_NAME = 'cloudcram-v42';
 
 const PRECACHE_PATHS = [
   '/index.html',
@@ -110,6 +110,7 @@ const PRECACHE_PATHS = [
   '/brain-dump.js',
   '/motivation.js',
   '/session-streak.js',
+  '/gamification.js',
   '/sw-register.js',
   '/index-init.js'
 ];

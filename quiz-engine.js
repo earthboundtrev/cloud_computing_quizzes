@@ -42,6 +42,19 @@
   var sessionQuestions = [];
   var selectedMode = 'mixed';
   var quizSessionActive = false;
+  var quizSessionId = null;
+
+  function newQuizSessionId() {
+    return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+  }
+
+  function notifyGameAnswer(pos) {
+    if (!window.CloudCramGame || !window.CloudCramGame.recordAnswer || !quizSessionId) return;
+    var q = sessionQuestions[pos];
+    if (!q) return;
+    var qid = q.id || (QUIZ_ID + ':' + pos);
+    window.CloudCramGame.recordAnswer(quizSessionId, qid);
+  }
 
   function getProfile() {
     try {
@@ -332,6 +345,7 @@
     currentIndex = 0;
     score = 0;
     answered = [];
+    quizSessionId = newQuizSessionId();
     var hintEl = document.getElementById('focus-hint');
     var weak = getWeakTopics(profile, 3);
     if (hintEl) {
@@ -619,6 +633,7 @@
     fb.className = 'feedback ' + (isCorrect ? 'correct-msg' : 'wrong-msg');
     setFeedbackContent(fb, isCorrect, q.explain);
     document.getElementById('score-display').textContent = score;
+    notifyGameAnswer(pos);
   }
 
   function selectOption(pos, optIdx, q) {
@@ -639,6 +654,7 @@
     fb.className = 'feedback ' + (optIdx === correctIdx ? 'correct-msg' : 'wrong-msg');
     setFeedbackContent(fb, optIdx === correctIdx, q.explain);
     document.getElementById('score-display').textContent = score;
+    notifyGameAnswer(pos);
   }
 
   function submitMulti(pos, q) {
@@ -674,6 +690,7 @@
     fb.className = 'feedback ' + (isCorrect ? 'correct-msg' : 'wrong-msg');
     setFeedbackContent(fb, isCorrect, q.explain);
     document.getElementById('score-display').textContent = score;
+    notifyGameAnswer(pos);
   }
 
   function nextQuestion() {
@@ -742,9 +759,14 @@
     passFailSpan.textContent = ' — ' + (passed ? 'Pass' : 'Fail');
     scoreEl.appendChild(passFailSpan);
     scoreEl.className = 'score ' + (passed ? 'pass' : 'fail');
-    document.getElementById('result-msg').textContent = passed
+    var msgEl = document.getElementById('result-msg');
+    msgEl.textContent = passed
       ? 'Passing is ' + PASSING_PERCENT + '%. You\'re on track!'
       : 'Aim for ' + PASSING_PERCENT + '%+ on the real exam. Review the pattern guide and try again.';
+    if (window.CloudCramGame && window.CloudCramGame.getSnapshot && msgEl) {
+      var gs = window.CloudCramGame.getSnapshot();
+      msgEl.appendChild(document.createTextNode(' Longest: ' + gs.best));
+    }
     document.getElementById('copy-toast').classList.add('hidden');
   }
 
