@@ -5,12 +5,12 @@
 | # | Title | Pointer | Close when |
 |---|--------|---------|------------|
 | [41](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/41) | RHCSA migration merge | **merged** | CLOSED |
-| [36](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/36) | lint-banks | **DEPLOY** | path fix in #33 PR; reopen if needed |
+| [36](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/36) | lint-banks | **DEPLOY** | retro logged; human close when ready |
 | [30](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/30) | RHCSA10 SW / gap | **merged** | CLOSED |
-| [35](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/35) | RHCSA9 redirects | **merged** | CLOSED |
-| [32](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/32) | CISSP p.27 / Q27 | **merged** | CLOSED |
+| [35](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/35) | RHCSA9 redirects | **DEPLOY** | retro logged; human close |
+| [32](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/32) | CISSP p.27 / Q27 | **DEPLOY** | retro logged; human close |
 | [33](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/33) | Track metadata | **merged** | main @ fffb645 — Refs (partial AC) |
-| [36](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/36) | lint-banks isolation | **DEPLOY** | fixture + #33 path fix |
+| [36](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/36) | lint-banks isolation | **DEPLOY** | retro logged; optional fixture follow-up |
 | [14](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/14) | Terraform ramp | IMPLEMENT | 500 Q — 7c TF_LOG pack |
 | [13](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/13) | AWS GenAI ramp | IMPLEMENT | ~300Q AC |
 | [14](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/14) | Terraform ramp | IMPLEMENT | #44 + follow-ups |
