@@ -13,3 +13,6 @@ When work merged **before** Cloud Agent Bugbot/Architect gates, each issue gets 
 | #14 Terraform | [issue-14-retro.md](./issue-14-retro.md) | #44 | Findings | Increment merge-ready |
 | #15 CISSP | [issue-15-retro.md](./issue-15-retro.md) | #48 | Findings | Blockers (merged) |
 | #31 RHCSA10 | [issue-31-retro.md](./issue-31-retro.md) | #47 | Findings | Blockers (issue closed) |
+| #32 CISSP p.27 | [issue-32-retro.md](./issue-32-retro.md) | #59 | Clean | Merge-ready |
+| #35 RHCSA9 | [issue-35-retro.md](./issue-35-retro.md) | #57 | Clean | Merge-ready |
+| #36 lint-banks | [issue-36-retro.md](./issue-36-retro.md) | #51, #58 | Clean (nits) | Merge-ready |
