@@ -18,6 +18,17 @@
   var pendingImportBatches = Object.create(null);
   var broadcastChannel = null;
   var testBroadcastFn = null;
+  var peerRawByKey = Object.create(null);
+  var peerHealPending = Object.create(null);
+  var storagePeerListenerInstalled = false;
+  var MAX_RMW_ATTEMPTS = 24;
+  var RMW_YIELD_MS = 8;
+
+  function delayMs(ms) {
+    return new Promise(function (resolve) {
+      setTimeout(resolve, ms);
+    });
+  }
 
   function initChannel() {
     if (broadcastChannel || testBroadcastFn) return;
@@ -75,10 +86,22 @@
     });
   }
 
+  function peekGameAnswers() {
+    return pendingGameAnswers.slice();
+  }
+
   function drainGameAnswers() {
     var out = pendingGameAnswers.slice();
     pendingGameAnswers.length = 0;
     return out;
+  }
+
+  function peekProfileAttempts(storageKey) {
+    return (pendingProfileAttempts[storageKey] || []).slice();
+  }
+
+  function peekImportBatches(storageKey) {
+    return (pendingImportBatches[storageKey] || []).slice();
   }
 
   function drainProfileAttempts(storageKey) {
@@ -252,6 +275,94 @@
     return typeof window !== 'undefined' && window.cloudCramStorageWritesBlocked && window.cloudCramStorageWritesBlocked();
   }
 
+  function notePeerRaw(storageKey, raw, fromLocalWrite) {
+    if (!storageKey || !raw) return;
+    if (fromLocalWrite) return;
+    if (storageKey.indexOf('study_sessions_profile_') !== 0) return;
+    if (peerRawByKey[storageKey]) {
+      try {
+        var a = parseProfile(peerRawByKey[storageKey], 'quiz');
+        var b = parseProfile(raw, 'quiz');
+        peerRawByKey[storageKey] = JSON.stringify(mergeProfiles(a, b));
+      } catch (e) {
+        peerRawByKey[storageKey] = raw;
+      }
+    } else {
+      peerRawByKey[storageKey] = raw;
+    }
+  }
+
+  function mergeProfileStorageEvent(ev, quizId) {
+    if (!ev || !ev.newValue) return null;
+    if (!ev.oldValue) return ev.newValue;
+    var qid = quizId || 'quiz';
+    try {
+      var parsed = JSON.parse(ev.newValue);
+      if (parsed && parsed.quizId) qid = parsed.quizId;
+    } catch (e1) {}
+    try {
+      return JSON.stringify(
+        mergeProfiles(parseProfile(ev.oldValue, qid), parseProfile(ev.newValue, qid))
+      );
+    } catch (e2) {
+      return ev.newValue;
+    }
+  }
+
+  var peerHealReschedule = Object.create(null);
+
+  function profileCoversPendingDeltas(profile, storageKey, attempt) {
+    if (!profileCoversAttempt(profile, attempt)) return false;
+    var batches = peekImportBatches(storageKey);
+    for (var bi = 0; bi < batches.length; bi++) {
+      if (!profile.appliedImportBatches || !profile.appliedImportBatches[batches[bi].id]) return false;
+    }
+    var attempts = peekProfileAttempts(storageKey);
+    for (var ai = 0; ai < attempts.length; ai++) {
+      if (!profileCoversAttempt(profile, attempts[ai])) return false;
+    }
+    return true;
+  }
+
+  function handleStorageEvent(ev, localStorage, locks) {
+    if (!ev || !ev.key) return;
+    if (ev.key.indexOf('study_sessions_profile_') !== 0) return;
+    if (!ev.newValue) {
+      delete peerRawByKey[ev.key];
+      return;
+    }
+    var quizId = 'quiz';
+    try {
+      quizId = JSON.parse(ev.newValue).quizId || quizId;
+    } catch (e) {}
+    var merged = mergeProfileStorageEvent(ev, quizId);
+    if (merged) notePeerRaw(ev.key, merged);
+    if (localStorage) scheduleProfilePeerHeal(ev.key, localStorage, locks);
+  }
+
+  function readPeerRaw(storageKey) {
+    return peerRawByKey[storageKey] || null;
+  }
+
+  function readRawMerged(localStorage, storageKey, quizId) {
+    var local = null;
+    try {
+      local = localStorage.getItem(storageKey);
+    } catch (e) {
+      local = null;
+    }
+    var peer = readPeerRaw(storageKey);
+    if (!peer) return local;
+    if (!local) return peer;
+    var merged = mergeProfiles(parseProfile(local, quizId), parseProfile(peer, quizId));
+    return JSON.stringify(merged);
+  }
+
+  function profileCoversAttempt(profile, attempt) {
+    if (!attempt || !attempt.id) return true;
+    return !!(profile.appliedSessionAttempts && profile.appliedSessionAttempts[attempt.id]);
+  }
+
   function runLocked(locks, lockName, fn) {
     if (locks && locks.request) {
       return locks.request(lockName, function () {
@@ -264,11 +375,84 @@
   function persistProfile(localStorage, storageKey, profile) {
     if (writesBlocked()) return false;
     try {
-      localStorage.setItem(storageKey, JSON.stringify(profile));
+      var serialized = JSON.stringify(profile);
+      localStorage.setItem(storageKey, serialized);
       return true;
     } catch (e) {
       return false;
     }
+  }
+
+  function writeProfileMergeHeal(opts) {
+    opts = opts || {};
+    var storageKey = opts.storageKey;
+    var quizId = opts.quizId;
+    var localStorage = opts.localStorage;
+    if (!storageKey || !localStorage) return null;
+
+    function readRaw() {
+      try {
+        return localStorage.getItem(storageKey);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    for (var i = 0; i < MAX_RMW_ATTEMPTS; i++) {
+      var mergedRaw = readRawMerged(localStorage, storageKey, quizId);
+      var current = parseProfile(mergedRaw || readRaw(), quizId);
+      var serialized = JSON.stringify(current);
+      persistProfile(localStorage, storageKey, current);
+      var afterLocal = readRaw();
+      if (afterLocal === serialized) return current;
+    }
+    return null;
+  }
+
+  function scheduleProfilePeerHeal(storageKey, localStorage, locks) {
+    if (!storageKey || !localStorage) return;
+    if (peerHealPending[storageKey]) {
+      peerHealReschedule[storageKey] = true;
+      return;
+    }
+    peerHealPending[storageKey] = true;
+    var run = function () {
+      var raw = readPeerRaw(storageKey);
+      var quizId = 'quiz';
+      if (raw) {
+        try {
+          quizId = JSON.parse(raw).quizId || quizId;
+        } catch (e) {}
+      }
+      return runLocked(locks, storageKey, function () {
+        return writeProfileMergeHeal({
+          storageKey: storageKey,
+          localStorage: localStorage,
+          quizId: quizId
+        });
+      }).finally(function () {
+        peerHealPending[storageKey] = false;
+        if (peerHealReschedule[storageKey]) {
+          peerHealReschedule[storageKey] = false;
+          scheduleProfilePeerHeal(storageKey, localStorage, locks);
+        }
+      });
+    };
+    if (typeof window !== 'undefined') {
+      setTimeout(run, 0);
+    } else {
+      run();
+    }
+  }
+
+  function installStoragePeerListener(getLocalStorage, getLocks) {
+    if (storagePeerListenerInstalled || typeof window === 'undefined') return;
+    storagePeerListenerInstalled = true;
+    window.addEventListener('storage', function (ev) {
+      var ls = getLocalStorage ? getLocalStorage() : localStorage;
+      var locks = getLocks ? getLocks() : typeof navigator !== 'undefined' ? navigator.locks : null;
+      handleStorageEvent(ev, ls, locks);
+    });
   }
 
   /**
@@ -284,46 +468,71 @@
 
     if (!opts.skipPublish) publishProfileAttempt(storageKey, attempt);
 
-    function readRaw() {
-      try {
-        return localStorage.getItem(storageKey);
-      } catch (e) {
-        return null;
-      }
+    function applyLocalDeltas(base) {
+      var current = base;
+      peekImportBatches(storageKey).forEach(function (b) {
+        current = applyImportBatch(current, b);
+      });
+      peekProfileAttempts(storageKey).forEach(function (a) {
+        current = applyProfileAttempt(current, a);
+      });
+      return applyProfileAttempt(current, attempt);
     }
 
-    function doWrite() {
+    function clearPendingDeltas() {
+      drainImportBatches(storageKey);
+      drainProfileAttempts(storageKey);
+    }
+
+    async function doWriteAsync() {
       var lastProfile = null;
-      for (var i = 0; i < 8; i++) {
-        var diskBefore = readRaw();
-        var current = parseProfile(diskBefore, quizId);
-        current = applyPendingImportBatches(current, storageKey);
-        drainProfileAttempts(storageKey).forEach(function (a) {
-          current = applyProfileAttempt(current, a);
-        });
-        current = applyProfileAttempt(current, attempt);
+      var syncOnly = !!opts.syncFlush;
+      for (var i = 0; i < MAX_RMW_ATTEMPTS; i++) {
+        if (i === 0 && !syncOnly) await delayMs(RMW_YIELD_MS);
+        var diskBefore = readRawMerged(localStorage, storageKey, quizId);
+        var current = applyLocalDeltas(parseProfile(diskBefore, quizId));
         lastProfile = current;
         var serialized = JSON.stringify(current);
-        var diskMid = readRaw();
-        if (diskMid !== diskBefore) {
-          var midProfile = parseProfile(diskMid, quizId);
-          current = mergeProfiles(midProfile, current);
-          current = applyPendingImportBatches(current, storageKey);
-          drainProfileAttempts(storageKey).forEach(function (a) {
-            current = applyProfileAttempt(current, a);
-          });
-          current = applyProfileAttempt(current, attempt);
-          serialized = JSON.stringify(current);
-          lastProfile = current;
-        }
         persistProfile(localStorage, storageKey, current);
-        if (readRaw() === serialized) return current;
+        var afterRaw = null;
+        try {
+          afterRaw = localStorage.getItem(storageKey);
+        } catch (e) {}
+        var afterProfile = parseProfile(afterRaw, quizId);
+        if (profileCoversPendingDeltas(afterProfile, storageKey, attempt)) {
+          clearPendingDeltas();
+          return current;
+        }
+        if (!syncOnly && i < MAX_RMW_ATTEMPTS - 1) await delayMs(RMW_YIELD_MS);
       }
       if (lastProfile) persistProfile(localStorage, storageKey, lastProfile);
       return lastProfile;
     }
 
-    return doWrite();
+    if (opts.syncFlush) {
+      return (function syncLoop() {
+        var lastProfile = null;
+        for (var i = 0; i < MAX_RMW_ATTEMPTS; i++) {
+          var diskBefore = readRawMerged(localStorage, storageKey, quizId);
+          var current = applyLocalDeltas(parseProfile(diskBefore, quizId));
+          lastProfile = current;
+          persistProfile(localStorage, storageKey, current);
+          var afterRaw = null;
+          try {
+            afterRaw = localStorage.getItem(storageKey);
+          } catch (e) {}
+          var afterProfileSync = parseProfile(afterRaw, quizId);
+          if (profileCoversPendingDeltas(afterProfileSync, storageKey, attempt)) {
+            clearPendingDeltas();
+            return current;
+          }
+        }
+        if (lastProfile) persistProfile(localStorage, storageKey, lastProfile);
+        return lastProfile;
+      })();
+    }
+
+    return doWriteAsync();
   }
 
   function saveProfileAttempt(opts) {
@@ -353,42 +562,37 @@
     var batch = { id: importId, topicMisses: topicMisses };
     if (!opts.skipPublish) publishImportBatch(storageKey, batch);
 
-    function readRaw() {
-      try {
-        return localStorage.getItem(storageKey);
-      } catch (e) {
-        return null;
-      }
-    }
-
-    function doWrite() {
-      for (var i = 0; i < 8; i++) {
-        var diskBefore = readRaw();
+    async function doWriteAsync() {
+      for (var i = 0; i < MAX_RMW_ATTEMPTS; i++) {
+        var diskBefore = readRawMerged(localStorage, storageKey, quizId);
         var current = parseProfile(diskBefore, quizId);
-        current = applyPendingImportBatches(current, storageKey);
-        drainProfileAttempts(storageKey).forEach(function (a) {
+        peekImportBatches(storageKey).forEach(function (b) {
+          current = applyImportBatch(current, b);
+        });
+        peekProfileAttempts(storageKey).forEach(function (a) {
           current = applyProfileAttempt(current, a);
         });
         current = applyImportBatch(current, batch);
-        var serialized = JSON.stringify(current);
-        var diskMid = readRaw();
-        if (diskMid !== diskBefore) {
-          var midProfile = parseProfile(diskMid, quizId);
-          current = mergeProfiles(midProfile, current);
-          current = applyPendingImportBatches(current, storageKey);
-          drainProfileAttempts(storageKey).forEach(function (a) {
-            current = applyProfileAttempt(current, a);
-          });
-          current = applyImportBatch(current, batch);
-          serialized = JSON.stringify(current);
-        }
         persistProfile(localStorage, storageKey, current);
-        if (readRaw() === serialized) return current;
+        var afterRaw = null;
+        try {
+          afterRaw = localStorage.getItem(storageKey);
+        } catch (e) {}
+        var afterImportProfile = parseProfile(afterRaw, quizId);
+        if (
+          afterImportProfile.appliedImportBatches[importId] &&
+          profileCoversPendingDeltas(afterImportProfile, storageKey, null)
+        ) {
+          drainImportBatches(storageKey);
+          drainProfileAttempts(storageKey);
+          return current;
+        }
+        if (i < MAX_RMW_ATTEMPTS - 1) await delayMs(RMW_YIELD_MS);
       }
       return null;
     }
 
-    return doWrite();
+    return doWriteAsync();
   }
 
   function saveImportMisses(opts) {
@@ -420,6 +624,9 @@
     pendingGameAnswers.length = 0;
     pendingProfileAttempts = Object.create(null);
     pendingImportBatches = Object.create(null);
+    peerRawByKey = Object.create(null);
+    peerHealPending = Object.create(null);
+    peerHealReschedule = Object.create(null);
   }
 
   function closeForTests() {
@@ -433,13 +640,26 @@
     resetPendingForTests();
   }
 
-  if (typeof window !== 'undefined') initChannel();
+  if (typeof window !== 'undefined') {
+    initChannel();
+    installStoragePeerListener(
+      function () {
+        return localStorage;
+      },
+      function () {
+        return typeof navigator !== 'undefined' ? navigator.locks : null;
+      }
+    );
+  }
 
   return {
     publishGameAnswer: publishGameAnswer,
     publishProfileAttempt: publishProfileAttempt,
     publishImportBatch: publishImportBatch,
+    peekGameAnswers: peekGameAnswers,
     drainGameAnswers: drainGameAnswers,
+    peekProfileAttempts: peekProfileAttempts,
+    peekImportBatches: peekImportBatches,
     drainProfileAttempts: drainProfileAttempts,
     drainImportBatches: drainImportBatches,
     mergeTopicStats: mergeTopicStats,
@@ -457,6 +677,16 @@
     setTestBroadcast: setTestBroadcast,
     resetPendingForTests: resetPendingForTests,
     closeForTests: closeForTests,
-    ingestMessage: ingestMessage
+    ingestMessage: ingestMessage,
+    notePeerRaw: notePeerRaw,
+    readPeerRaw: readPeerRaw,
+    readRawMerged: readRawMerged,
+    installStoragePeerListener: installStoragePeerListener,
+    handleStorageEvent: handleStorageEvent,
+    mergeProfileStorageEvent: mergeProfileStorageEvent,
+    writeProfileMergeHeal: writeProfileMergeHeal,
+    profileCoversAttempt: profileCoversAttempt,
+    profileCoversPendingDeltas: profileCoversPendingDeltas,
+    MAX_RMW_ATTEMPTS: MAX_RMW_ATTEMPTS
   };
 });
