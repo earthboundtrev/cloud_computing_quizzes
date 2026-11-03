@@ -118,6 +118,52 @@ await withPage(
   }
 );
 
+await withPage(
+  () => {
+    if (sessionStorage.getItem('cloudcram_first_run_a11y_seeded')) return;
+    sessionStorage.setItem('cloudcram_first_run_a11y_seeded', '1');
+    localStorage.removeItem('cloudcram_game_v1');
+    localStorage.removeItem('cloudcram_game_v1_corrupt');
+    localStorage.removeItem('cloudcram_study_streak');
+    localStorage.removeItem('cloudcram_study_last_date');
+  },
+  async (page) => {
+    await page.goto(`http://127.0.0.1:${port}/index.html`);
+    await page.waitForSelector('.game-first-run-dialog');
+    const dialogRole = await page.locator('.game-first-run-dialog').getAttribute('role');
+    if (dialogRole !== 'dialog') throw new Error('dialog role on panel');
+    const initialFocus = await page.evaluate(() => {
+      const el = document.activeElement;
+      return el && el.getAttribute('role') === 'radio' ? el.textContent : '';
+    });
+    if (initialFocus !== '3') throw new Error('expected focus on first goal, got ' + initialFocus);
+    const checked = await page.locator('.game-goal-choices [role="radio"][aria-checked="true"]').textContent();
+    if (checked !== '3') throw new Error('default selected goal');
+    await page.locator('.game-first-run-actions button:last-child').focus();
+    await page.keyboard.press('Tab');
+    const afterTab = await page.evaluate(() => document.activeElement && document.activeElement.textContent);
+    if (afterTab !== '3') throw new Error('Tab should wrap to first goal, got ' + afterTab);
+    await page.locator('.game-goal-choices [role="radio"]').first().focus();
+    await page.keyboard.press('Shift+Tab');
+    const afterShiftTab = await page.evaluate(() => document.activeElement && document.activeElement.textContent);
+    if (afterShiftTab !== 'Skip') throw new Error('Shift+Tab should wrap to Skip, got ' + afterShiftTab);
+    await page.keyboard.press('Escape');
+    await page.waitForSelector('.game-first-run-overlay', { state: 'detached' });
+    const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('cloudcram_game_v1') || '{}'));
+    if (!stored.firstRunDone) throw new Error('Esc should complete first run');
+    if (stored.dailyGoal !== 3) throw new Error('Esc should save default goal 3');
+    const focusTarget = await page.evaluate(() => {
+      const el = document.activeElement;
+      return el ? el.className || el.tagName : '';
+    });
+    if (focusTarget.indexOf('game-start-btn') < 0) throw new Error('focus should return to launcher Start');
+    await page.reload();
+    await page.waitForSelector('#game-launcher .game-start-btn');
+    if (await page.locator('.game-first-run-overlay').count()) throw new Error('picker should not reappear');
+    console.log('✓ first-run picker a11y (#86)');
+  }
+);
+
 await browser.close();
 server.close();
 console.log('Playwright gamification checks passed.');

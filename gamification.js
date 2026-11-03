@@ -1349,6 +1349,45 @@
     }
   }
 
+  function trapFocusInDialog(dialogEl, focusables, ev) {
+    if (ev.key !== 'Tab' || !focusables.length) return;
+    var first = focusables[0];
+    var last = focusables[focusables.length - 1];
+    var active = document.activeElement;
+    if (ev.shiftKey) {
+      if (active === first || !dialogEl.contains(active)) {
+        ev.preventDefault();
+        last.focus();
+      }
+    } else if (active === last || !dialogEl.contains(active)) {
+      ev.preventDefault();
+      first.focus();
+    }
+  }
+
+  function setFirstRunBackgroundInert(overlay, active) {
+    var children = document.body.children;
+    for (var i = 0; i < children.length; i++) {
+      var el = children[i];
+      if (el === overlay) continue;
+      if (active) el.setAttribute('inert', '');
+      else el.removeAttribute('inert');
+    }
+  }
+
+  function focusAfterFirstRunDismiss() {
+    var startBtn = document.querySelector('#game-launcher .game-start-btn');
+    if (startBtn && typeof startBtn.focus === 'function') {
+      startBtn.focus();
+      return;
+    }
+    var heading = document.querySelector('.container h1');
+    if (heading) {
+      if (!heading.hasAttribute('tabindex')) heading.setAttribute('tabindex', '-1');
+      heading.focus();
+    }
+  }
+
   function showFirstRunIfNeeded() {
     if (typeof document === 'undefined') return;
     var snap = getSnapshot();
@@ -1356,11 +1395,12 @@
     injectStyles();
     var overlay = document.createElement('div');
     overlay.className = 'game-first-run-overlay';
-    overlay.setAttribute('role', 'dialog');
-    overlay.setAttribute('aria-modal', 'true');
-    overlay.setAttribute('aria-labelledby', 'game-first-run-title');
+    overlay.setAttribute('role', 'presentation');
     var dialog = document.createElement('div');
     dialog.className = 'game-first-run-dialog';
+    dialog.setAttribute('role', 'dialog');
+    dialog.setAttribute('aria-modal', 'true');
+    dialog.setAttribute('aria-labelledby', 'game-first-run-title');
     var title = document.createElement('h2');
     title.id = 'game-first-run-title';
     title.textContent = 'Daily goal';
@@ -1368,18 +1408,30 @@
     hint.textContent = 'Pick how many questions count as a study day.';
     var choices = document.createElement('div');
     choices.className = 'game-goal-choices';
+    choices.setAttribute('role', 'radiogroup');
+    choices.setAttribute('aria-labelledby', 'game-first-run-title');
     var selected = 3;
+    var goalButtons = [];
+    function syncGoalSelection(goal) {
+      selected = goal;
+      goalButtons.forEach(function (btn) {
+        var g = parseInt(btn.textContent, 10);
+        var on = g === goal;
+        btn.classList.toggle('selected', on);
+        btn.setAttribute('aria-checked', on ? 'true' : 'false');
+      });
+    }
     GOAL_CHOICES.forEach(function (g) {
       var b = document.createElement('button');
       b.type = 'button';
+      b.setAttribute('role', 'radio');
       b.textContent = String(g);
+      b.setAttribute('aria-checked', g === 3 ? 'true' : 'false');
       if (g === 3) b.className = 'selected';
       b.addEventListener('click', function () {
-        selected = g;
-        choices.querySelectorAll('button').forEach(function (btn) {
-          btn.classList.toggle('selected', parseInt(btn.textContent, 10) === g);
-        });
+        syncGoalSelection(g);
       });
+      goalButtons.push(b);
       choices.appendChild(b);
     });
     var actions = document.createElement('div');
@@ -1387,19 +1439,37 @@
     var start = document.createElement('button');
     start.type = 'button';
     start.textContent = 'Start';
-    var defaultSound = !prefersReducedMotion();
-    start.addEventListener('click', function () {
-      completeFirstRun({ goal: selected, soundOn: defaultSound }).then(function () {
-        overlay.remove();
-      });
-    });
     var skip = document.createElement('button');
     skip.type = 'button';
     skip.textContent = 'Skip';
+    var defaultSound = !prefersReducedMotion();
+    var focusables = goalButtons.concat([start, skip]);
+
+    function removeFirstRunOverlay() {
+      setFirstRunBackgroundInert(overlay, false);
+      document.removeEventListener('keydown', onKeyDown);
+      overlay.remove();
+      focusAfterFirstRunDismiss();
+    }
+
+    function finishFirstRun(options) {
+      return completeFirstRun(options).then(removeFirstRunOverlay);
+    }
+
+    function onKeyDown(ev) {
+      if (ev.key === 'Escape') {
+        ev.preventDefault();
+        finishFirstRun({ goal: 3, soundOn: defaultSound });
+        return;
+      }
+      trapFocusInDialog(dialog, focusables, ev);
+    }
+
+    start.addEventListener('click', function () {
+      finishFirstRun({ goal: selected, soundOn: defaultSound });
+    });
     skip.addEventListener('click', function () {
-      completeFirstRun({ goal: 3, soundOn: defaultSound }).then(function () {
-        overlay.remove();
-      });
+      finishFirstRun({ goal: 3, soundOn: defaultSound });
     });
     actions.appendChild(start);
     actions.appendChild(skip);
@@ -1409,7 +1479,9 @@
     dialog.appendChild(actions);
     overlay.appendChild(dialog);
     document.body.appendChild(overlay);
-    start.focus();
+    setFirstRunBackgroundInert(overlay, true);
+    document.addEventListener('keydown', onKeyDown);
+    goalButtons[0].focus();
   }
 
   function wireSettingsPanel() {
