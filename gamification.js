@@ -1580,6 +1580,13 @@
     syncWrite: syncWrite,
     initDom: initDom,
     renderLauncher: renderLauncher,
-    renderQuizBar: renderQuizBar
+    renderQuizBar: renderQuizBar,
+    shutdownForTests: function () {
+      if (midnightTimer) {
+        clearTimeout(midnightTimer);
+        midnightTimer = null;
+      }
+      uiListeners.length = 0;
+    }
   };
 });

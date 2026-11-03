@@ -156,23 +156,12 @@
   function flushPendingProfileWrite() {
     if (!pendingProfileFlush || !window.CloudCramStorageMerge) return;
     var pending = pendingProfileFlush;
-    var merge = window.CloudCramStorageMerge;
-    var opts = {
+    window.CloudCramStorageMerge.writeProfileAttempt({
       storageKey: pending.key,
       quizId: QUIZ_ID,
       attempt: pending.attempt,
-      localStorage: localStorage,
-      skipPublish: true
-    };
-    var write = function () {
-      merge.writeProfileAttempt(opts);
-    };
-    var locks = typeof navigator !== 'undefined' ? navigator.locks : null;
-    if (locks && locks.request) {
-      locks.request(pending.key, write);
-    } else {
-      write();
-    }
+      localStorage: localStorage
+    });
     pendingProfileFlush = null;
   }
 

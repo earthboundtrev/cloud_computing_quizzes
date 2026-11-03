@@ -6,11 +6,15 @@
  */
 
 const path = require('path');
-const fs = require('fs');
 
 const ROOT = path.join(__dirname, '..');
 const mergePath = path.join(ROOT, 'storage-tab-merge.js');
 const gamePath = path.join(ROOT, 'gamification.js');
+
+/** @type {Array<{ shutdownForTests?: () => void }>} */
+const loadedGames = [];
+/** @type {Array<{ closeForTests?: () => void }>} */
+const loadedMerges = [];
 
 function assert(cond, msg) {
   if (!cond) throw new Error(msg || 'Assertion failed');
@@ -30,27 +34,34 @@ class LocalStorageMock {
 
 function loadMerge() {
   delete require.cache[require.resolve(mergePath)];
-  return require(mergePath);
+  const merge = require(mergePath);
+  loadedMerges.push(merge);
+  return merge;
 }
 
 function loadGame() {
   delete require.cache[require.resolve(gamePath)];
-  return require(gamePath);
+  const game = require(gamePath);
+  loadedGames.push(game);
+  return game;
 }
 
 function makeSharedLocksMock() {
   let chain = Promise.resolve();
   return {
     request: function (_name, fn) {
-      chain = chain.then(function () {
+      const run = chain.then(function () {
         return Promise.resolve(fn());
       });
-      return chain;
+      chain = run.catch(function () {
+        return undefined;
+      });
+      return run;
     }
   };
 }
 
-function linkTabs(relay) {
+function linkTabs() {
   const mergeA = loadMerge();
   const mergeB = loadMerge();
   mergeA.resetPendingForTests();
@@ -61,7 +72,20 @@ function linkTabs(relay) {
   mergeB.setTestBroadcast(function (msg) {
     mergeA.ingestMessage(msg);
   });
-  return { mergeA, mergeB, relay };
+  return { mergeA, mergeB };
+}
+
+function teardownHarness() {
+  loadedGames.forEach(function (game) {
+    if (game.shutdownForTests) game.shutdownForTests();
+  });
+  loadedMerges.forEach(function (merge) {
+    if (merge.closeForTests) merge.closeForTests();
+  });
+  loadedGames.length = 0;
+  loadedMerges.length = 0;
+  delete require.cache[require.resolve(mergePath)];
+  delete require.cache[require.resolve(gamePath)];
 }
 
 async function testProfileConcurrentAttempts() {
@@ -69,7 +93,6 @@ async function testProfileConcurrentAttempts() {
   const locks = makeSharedLocksMock();
   const { mergeA, mergeB } = linkTabs();
   const key = 'study_sessions_profile_rhce';
-  const base = { topicStats: {}, topicMissesFromImports: {} };
 
   function attempt(id, total) {
     return {
@@ -150,13 +173,11 @@ async function testInterleavedProfileWriters() {
   const ls = new LocalStorageMock();
   const merge = loadMerge();
   const key = 'study_sessions_profile_test';
-  let attemptNum = 0;
   const writers = [];
   for (let w = 0; w < 2; w++) {
     writers.push(
       (async function (tab) {
         for (let i = 0; i < 5; i++) {
-          attemptNum++;
           await merge.saveProfileAttempt({
             storageKey: key,
             lockName: key,
@@ -178,15 +199,24 @@ async function testInterleavedProfileWriters() {
 }
 
 async function main() {
-  await testProfileConcurrentAttempts();
-  console.log('OK profile concurrent attempts');
-  await testGamificationBroadcastConcurrent();
-  console.log('OK gamification broadcast concurrent 80 answers');
-  await testInterleavedProfileWriters();
-  console.log('OK interleaved profile writers');
+  try {
+    await testProfileConcurrentAttempts();
+    console.log('OK profile concurrent attempts');
+    await testGamificationBroadcastConcurrent();
+    console.log('OK gamification broadcast concurrent 80 answers');
+    await testInterleavedProfileWriters();
+    console.log('OK interleaved profile writers');
+  } finally {
+    teardownHarness();
+  }
 }
 
-main().catch(function (err) {
-  console.error(err);
-  process.exit(1);
-});
+main()
+  .then(function () {
+    process.exit(0);
+  })
+  .catch(function (err) {
+    teardownHarness();
+    console.error(err);
+    process.exit(1);
+  });

@@ -69,6 +69,11 @@ jobs:
     - name: Concurrent storage merge (#68, #79)
       run: node scripts/test-concurrent-storage.js
 
+    - name: Install Playwright (browser tests)
+      run: |
+        npm install --no-save playwright@1.49.1
+        npx playwright install --with-deps chromium
+
     - name: Gamification Playwright smoke (#68)
       run: node scripts/playwright-gamification-test.mjs
 

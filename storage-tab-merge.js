@@ -347,6 +347,17 @@
     pendingProfileAttempts = Object.create(null);
   }
 
+  function closeForTests() {
+    testBroadcastFn = null;
+    if (broadcastChannel) {
+      try {
+        broadcastChannel.close();
+      } catch (e) {}
+      broadcastChannel = null;
+    }
+    resetPendingForTests();
+  }
+
   if (typeof window !== 'undefined') initChannel();
 
   return {
@@ -366,6 +377,7 @@
     runLocked: runLocked,
     setTestBroadcast: setTestBroadcast,
     resetPendingForTests: resetPendingForTests,
+    closeForTests: closeForTests,
     ingestMessage: ingestMessage
   };
 });
