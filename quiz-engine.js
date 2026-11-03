@@ -144,7 +144,13 @@
         });
       })
       .then(function (profile) {
-        if (pendingProfileFlush && pendingProfileFlush.attempt === attempt) pendingProfileFlush = null;
+        if (
+          pendingProfileFlush &&
+          pendingProfileFlush.attempt === attempt &&
+          profileAttemptPersisted(window.CloudCramStorageMerge, attempt)
+        ) {
+          pendingProfileFlush = null;
+        }
         return profile;
       })
       .catch(function () {
@@ -153,16 +159,52 @@
     return profileWriteQueue;
   }
 
+  function profileAttemptPersisted(merge, attempt) {
+    if (!merge || !merge.profileCoversAttempt || !merge.parseProfile) return false;
+    var raw = null;
+    try {
+      raw = localStorage.getItem(PROFILE_KEY);
+    } catch (e) {
+      return false;
+    }
+    return merge.profileCoversAttempt(merge.parseProfile(raw, QUIZ_ID), attempt);
+  }
+
   function flushPendingProfileWrite() {
     if (!pendingProfileFlush || !window.CloudCramStorageMerge) return;
     var pending = pendingProfileFlush;
-    window.CloudCramStorageMerge.writeProfileAttempt({
+    var merge = window.CloudCramStorageMerge;
+    var locks = typeof navigator !== 'undefined' ? navigator.locks : null;
+    var baseOpts = {
       storageKey: pending.key,
       quizId: QUIZ_ID,
       attempt: pending.attempt,
-      localStorage: localStorage
-    });
-    pendingProfileFlush = null;
+      localStorage: localStorage,
+      syncFlush: true,
+      skipPublish: false,
+      lockName: pending.key,
+      locks: locks
+    };
+    var syncProfile = merge.writeProfileAttempt(baseOpts);
+    if (syncProfile && profileAttemptPersisted(merge, pending.attempt)) {
+      pendingProfileFlush = null;
+      return;
+    }
+    if (!merge.saveProfileAttempt) return;
+    var locked = merge.saveProfileAttempt(baseOpts);
+    if (locked && typeof locked.then === 'function') {
+      locked.then(function () {
+        if (
+          pendingProfileFlush &&
+          pendingProfileFlush.attempt === pending.attempt &&
+          profileAttemptPersisted(merge, pending.attempt)
+        ) {
+          pendingProfileFlush = null;
+        }
+      });
+    } else if (profileAttemptPersisted(merge, pending.attempt)) {
+      pendingProfileFlush = null;
+    }
   }
 
   function getTopicWeight(profile, topic) {

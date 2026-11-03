@@ -46,6 +46,18 @@
 
   var uiListeners = [];
   var midnightTimer = null;
+  var peerGameRaw = null;
+  var storageHealTimer = null;
+  var MAX_RMW_ATTEMPTS = 24;
+  var RMW_YIELD_MS = 8;
+
+  function delayMs(ms) {
+    return Promise.resolve().then(function () {
+      return new Promise(function (resolve) {
+        setTimeout(resolve, ms);
+      });
+    });
+  }
 
   function todayStr(d) {
     d = d || new Date(deps.now());
@@ -291,6 +303,53 @@
       return ls.getItem(STORAGE_KEY);
     } catch (e) {
       return null;
+    }
+  }
+
+  function readRawMerged() {
+    var local = readRaw();
+    if (!peerGameRaw) return local;
+    if (!local) return peerGameRaw;
+    try {
+      return JSON.stringify(mergeStates(stateFromRaw(local), stateFromRaw(peerGameRaw)));
+    } catch (e) {
+      return local;
+    }
+  }
+
+  function stateCoversDedup(diskRaw, expected) {
+    if (!expected || !expected.answerDedup) return true;
+    if (!diskRaw) return false;
+    var disk = stateFromRaw(diskRaw);
+    return Object.keys(expected.answerDedup).every(function (k) {
+      return disk.answerDedup && disk.answerDedup[k];
+    });
+  }
+
+  function diskCoversPendingAnswers(diskRaw, expected) {
+    if (!stateCoversDedup(diskRaw, expected)) return false;
+    var merge = getStorageMerge();
+    if (!merge || !merge.peekGameAnswers) return true;
+    var disk = stateFromRaw(diskRaw);
+    var pending = merge.peekGameAnswers();
+    for (var i = 0; i < pending.length; i++) {
+      var msg = pending[i];
+      var todayKey = msg.today || effectiveToday(disk, deps.now());
+      var key = todayKey + ':' + String(msg.sessionId) + ':' + String(msg.questionId);
+      if (!disk.answerDedup || !disk.answerDedup[key]) return false;
+    }
+    return true;
+  }
+
+  function mergeGameStorageEvent(ev) {
+    if (!ev || !ev.newValue) return null;
+    try {
+      var merged = stateFromRaw(ev.newValue);
+      if (ev.oldValue) merged = mergeStates(stateFromRaw(ev.oldValue), merged);
+      if (peerGameRaw) merged = mergeStates(stateFromRaw(peerGameRaw), merged);
+      return JSON.stringify(merged);
+    } catch (e) {
+      return ev.newValue;
     }
   }
 
@@ -632,58 +691,74 @@
 
   function applyPendingRemoteAnswers(state) {
     var merge = getStorageMerge();
-    if (!merge || !merge.drainGameAnswers) return state;
-    merge.drainGameAnswers().forEach(function (msg) {
+    if (!merge || !merge.peekGameAnswers) return state;
+    merge.peekGameAnswers().forEach(function (msg) {
       applyAnswerDelta(state, msg.sessionId, msg.questionId, msg.today);
     });
     return state;
   }
 
-  function runWrite(mutator, answerDelta) {
+  function clearPendingRemoteAnswers() {
+    var merge = getStorageMerge();
+    if (merge && merge.drainGameAnswers) merge.drainGameAnswers();
+  }
+
+  function buildNextState(current, mutator, answerDelta) {
+    reconcileAnswersFromDedup(current);
+    processCalendar(current, deps.now());
+    applyPendingRemoteAnswers(current);
+    var next;
+    if (answerDelta) {
+      next = applyAnswerDelta(current, answerDelta.sessionId, answerDelta.questionId);
+    } else {
+      next = mutator(current);
+    }
+    if (!next) return null;
+    reconcileAnswersFromDedup(next);
+    return next;
+  }
+
+  function runWriteSync(mutator, answerDelta) {
     var lastNext = null;
-    for (var attempt = 0; attempt < 8; attempt++) {
-      var diskBefore = readRaw();
-      var current = stateFromRaw(diskBefore);
-      reconcileAnswersFromDedup(current);
-      processCalendar(current, deps.now());
-      applyPendingRemoteAnswers(current);
-      var next;
-      if (answerDelta) {
-        next = applyAnswerDelta(current, answerDelta.sessionId, answerDelta.questionId);
-      } else {
-        next = mutator(current);
-      }
+    for (var attempt = 0; attempt < MAX_RMW_ATTEMPTS; attempt++) {
+      var current = stateFromRaw(readRawMerged());
+      var next = buildNextState(current, mutator, answerDelta);
       if (!next) return null;
-      reconcileAnswersFromDedup(next);
       lastNext = next;
-      var serialized = JSON.stringify(next);
-      var diskMid = readRaw();
-      if (diskMid !== diskBefore) {
-        if (answerDelta) {
-          next = stateFromRaw(diskMid);
-          reconcileAnswersFromDedup(next);
-          processCalendar(next, deps.now());
-          applyPendingRemoteAnswers(next);
-          applyAnswerDelta(next, answerDelta.sessionId, answerDelta.questionId);
-        } else {
-          next = mergeStates(next, stateFromRaw(diskMid));
-          reconcileAnswersFromDedup(next);
-          processCalendar(next, deps.now());
-          applyPendingRemoteAnswers(next);
-        }
-        serialized = JSON.stringify(next);
-      }
       persistState(next);
       var diskAfter = readRaw();
-      if (diskAfter === serialized) return next;
+      if (diskCoversPendingAnswers(diskAfter, next)) {
+        clearPendingRemoteAnswers();
+        return next;
+      }
     }
-    if (answerDelta) {
-      var finalState = freshStateForWrite();
-      applyPendingRemoteAnswers(finalState);
-      applyAnswerDelta(finalState, answerDelta.sessionId, answerDelta.questionId);
-      persistState(finalState);
-      var finalRaw = readRaw();
-      if (finalRaw === JSON.stringify(finalState)) return finalState;
+    return lastNext;
+  }
+
+  async function runWrite(mutator, answerDelta) {
+    var lastNext = null;
+    for (var attempt = 0; attempt < MAX_RMW_ATTEMPTS; attempt++) {
+      var current = stateFromRaw(readRawMerged());
+      var next = buildNextState(current, mutator, answerDelta);
+      if (!next) return null;
+      lastNext = next;
+      persistState(next);
+      var diskAfter = readRaw();
+      if (diskCoversPendingAnswers(diskAfter, next)) {
+        clearPendingRemoteAnswers();
+        return next;
+      }
+      if (attempt < MAX_RMW_ATTEMPTS - 1) await delayMs(RMW_YIELD_MS);
+    }
+    if (answerDelta && lastNext) {
+      var finalState = buildNextState(stateFromRaw(readRawMerged()), mutator, answerDelta);
+      if (finalState) {
+        persistState(finalState);
+        if (diskCoversPendingAnswers(readRaw(), finalState)) {
+          clearPendingRemoteAnswers();
+          return finalState;
+        }
+      }
     }
     return lastNext;
   }
@@ -713,7 +788,7 @@
   }
 
   function syncWrite(mutator) {
-    return runWrite(mutator, null);
+    return runWriteSync(mutator, null);
   }
 
   function effectiveToday(state, now) {
@@ -1146,10 +1221,29 @@
     }, ms);
   }
 
+  function scheduleStorageHeal() {
+    if (storageHealTimer) return;
+    storageHealTimer = setTimeout(function () {
+      storageHealTimer = null;
+      withLockedWrite(function (state) {
+        if (!peerGameRaw) return state;
+        return mergeStates(state, stateFromRaw(peerGameRaw));
+      }, null);
+    }, 0);
+  }
+
   function initStorageListener() {
     if (!deps.storageEventTarget) return;
     deps.storageEventTarget.addEventListener('storage', function (ev) {
-      if (ev.key === STORAGE_KEY) notifyUi();
+      if (ev.key !== STORAGE_KEY) return;
+      if (ev.newValue) {
+        var merged = mergeGameStorageEvent(ev);
+        if (merged) peerGameRaw = merged;
+        scheduleStorageHeal();
+      } else {
+        peerGameRaw = null;
+      }
+      notifyUi();
     });
   }
 
@@ -1658,6 +1752,11 @@
         clearTimeout(midnightTimer);
         midnightTimer = null;
       }
+      if (storageHealTimer) {
+        clearTimeout(storageHealTimer);
+        storageHealTimer = null;
+      }
+      peerGameRaw = null;
       uiListeners.length = 0;
     }
   };
