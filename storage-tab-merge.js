@@ -15,6 +15,7 @@
   var CHANNEL_NAME = 'cloudcram-storage-merge';
   var pendingGameAnswers = [];
   var pendingProfileAttempts = Object.create(null);
+  var pendingImportBatches = Object.create(null);
   var broadcastChannel = null;
   var testBroadcastFn = null;
 
@@ -38,6 +39,11 @@
     if (msg.type === 'profile-attempt' && msg.storageKey && msg.attempt) {
       if (!pendingProfileAttempts[msg.storageKey]) pendingProfileAttempts[msg.storageKey] = [];
       pendingProfileAttempts[msg.storageKey].push(msg.attempt);
+      return;
+    }
+    if (msg.type === 'import-batch' && msg.storageKey && msg.batch) {
+      if (!pendingImportBatches[msg.storageKey]) pendingImportBatches[msg.storageKey] = [];
+      pendingImportBatches[msg.storageKey].push(msg.batch);
     }
   }
 
@@ -81,6 +87,21 @@
     return arr.slice();
   }
 
+  function publishImportBatch(storageKey, batch) {
+    if (!storageKey || !batch || !batch.id) return;
+    emitMessage({
+      type: 'import-batch',
+      storageKey: storageKey,
+      batch: batch
+    });
+  }
+
+  function drainImportBatches(storageKey) {
+    var arr = pendingImportBatches[storageKey] || [];
+    delete pendingImportBatches[storageKey];
+    return arr.slice();
+  }
+
   function mergeTopicStats(into, delta) {
     if (!delta) return into;
     Object.keys(delta).forEach(function (topic) {
@@ -99,7 +120,9 @@
       topicStats: {},
       topicMissesFromImports: {},
       sessionAttempts: {},
-      appliedSessionAttempts: {}
+      appliedSessionAttempts: {},
+      importBatches: {},
+      appliedImportBatches: {}
     };
   }
 
@@ -114,6 +137,28 @@
     return profile;
   }
 
+  function ensureLegacyImportSnapshot(profile) {
+    if (!profile) return profile;
+    profile.importBatches = profile.importBatches || {};
+    profile.appliedImportBatches = profile.appliedImportBatches || {};
+    if (Object.keys(profile.importBatches).length > 0) return profile;
+    if (!profile.topicMissesFromImports || !Object.keys(profile.topicMissesFromImports).length) return profile;
+    profile.importBatches.__legacy_import__ = JSON.parse(JSON.stringify(profile.topicMissesFromImports));
+    profile.appliedImportBatches.__legacy_import__ = true;
+    return profile;
+  }
+
+  function rebuildTopicMissesFromImports(profile) {
+    profile.topicMissesFromImports = {};
+    Object.keys(profile.importBatches || {}).forEach(function (id) {
+      var batch = profile.importBatches[id];
+      Object.keys(batch || {}).forEach(function (topic) {
+        var n = batch[topic];
+        profile.topicMissesFromImports[topic] = (profile.topicMissesFromImports[topic] || 0) + n;
+      });
+    });
+  }
+
   function parseProfile(raw, quizId) {
     if (!raw) return defaultProfile(quizId);
     try {
@@ -124,8 +169,12 @@
       profile.sessionAttempts = p.sessionAttempts || {};
       profile.appliedSessionAttempts = p.appliedSessionAttempts || {};
       profile.appliedImportBatches = p.appliedImportBatches || {};
+      profile.importBatches = p.importBatches || {};
       if (Array.isArray(p.mergedFrom)) profile.mergedFrom = p.mergedFrom.slice();
-      return ensureLegacySnapshot(profile);
+      profile = ensureLegacySnapshot(profile);
+      profile = ensureLegacyImportSnapshot(profile);
+      rebuildTopicMissesFromImports(profile);
+      return profile;
     } catch (e) {
       return defaultProfile(quizId);
     }
@@ -150,6 +199,25 @@
     return profile;
   }
 
+  function applyImportBatch(profile, batch) {
+    if (!batch || !batch.id || !batch.topicMisses) return profile;
+    profile = profile || defaultProfile();
+    profile.importBatches = profile.importBatches || {};
+    profile.appliedImportBatches = profile.appliedImportBatches || {};
+    if (profile.appliedImportBatches[batch.id]) return profile;
+    profile.appliedImportBatches[batch.id] = true;
+    profile.importBatches[batch.id] = Object.assign({}, batch.topicMisses);
+    rebuildTopicMissesFromImports(profile);
+    return profile;
+  }
+
+  function applyPendingImportBatches(profile, storageKey) {
+    drainImportBatches(storageKey).forEach(function (batch) {
+      profile = applyImportBatch(profile, batch);
+    });
+    return profile;
+  }
+
   function mergeProfiles(a, b) {
     var out = defaultProfile((a && a.quizId) || (b && b.quizId));
     out.mergedFrom = [];
@@ -164,6 +232,7 @@
       (a && a.appliedImportBatches) || {},
       (b && b.appliedImportBatches) || {}
     );
+    out.importBatches = Object.assign({}, (a && a.importBatches) || {}, (b && b.importBatches) || {});
     out.sessionAttempts = Object.assign(
       {},
       (a && a.sessionAttempts) || {},
@@ -175,17 +244,7 @@
       (b && b.appliedSessionAttempts) || {}
     );
     rebuildTopicStatsFromAttempts(out);
-    var missTopics = Object.create(null);
-    [a, b].forEach(function (side) {
-      Object.keys((side && side.topicMissesFromImports) || {}).forEach(function (topic) {
-        missTopics[topic] = true;
-      });
-    });
-    Object.keys(missTopics).forEach(function (topic) {
-      var av = (a && a.topicMissesFromImports && a.topicMissesFromImports[topic]) || 0;
-      var bv = (b && b.topicMissesFromImports && b.topicMissesFromImports[topic]) || 0;
-      out.topicMissesFromImports[topic] = Math.max(av, bv);
-    });
+    rebuildTopicMissesFromImports(out);
     return out;
   }
 
@@ -238,6 +297,7 @@
       for (var i = 0; i < 8; i++) {
         var diskBefore = readRaw();
         var current = parseProfile(diskBefore, quizId);
+        current = applyPendingImportBatches(current, storageKey);
         drainProfileAttempts(storageKey).forEach(function (a) {
           current = applyProfileAttempt(current, a);
         });
@@ -248,9 +308,11 @@
         if (diskMid !== diskBefore) {
           var midProfile = parseProfile(diskMid, quizId);
           current = mergeProfiles(midProfile, current);
+          current = applyPendingImportBatches(current, storageKey);
           drainProfileAttempts(storageKey).forEach(function (a) {
             current = applyProfileAttempt(current, a);
           });
+          current = applyProfileAttempt(current, attempt);
           serialized = JSON.stringify(current);
           lastProfile = current;
         }
@@ -275,27 +337,21 @@
   }
 
   function mergeImportMisses(profile, topicMisses, importId) {
-    profile = profile || defaultProfile();
-    profile.appliedImportBatches = profile.appliedImportBatches || {};
-    if (importId && profile.appliedImportBatches[importId]) return profile;
-    if (importId) profile.appliedImportBatches[importId] = true;
-    profile.topicMissesFromImports = profile.topicMissesFromImports || {};
-    Object.keys(topicMisses || {}).forEach(function (topic) {
-      var n = topicMisses[topic];
-      profile.topicMissesFromImports[topic] = (profile.topicMissesFromImports[topic] || 0) + n;
-    });
-    return profile;
+    if (!importId) return profile;
+    return applyImportBatch(profile, { id: importId, topicMisses: topicMisses });
   }
 
-  function saveImportMisses(opts) {
+  function writeImportMisses(opts) {
     opts = opts || {};
     var storageKey = opts.storageKey;
-    var lockName = opts.lockName || storageKey;
     var topicMisses = opts.topicMisses;
     var importId = opts.importId;
     var quizId = opts.quizId;
     var localStorage = opts.localStorage;
-    if (!storageKey || !localStorage || !topicMisses) return Promise.resolve(null);
+    if (!storageKey || !localStorage || !topicMisses || !importId) return null;
+
+    var batch = { id: importId, topicMisses: topicMisses };
+    if (!opts.skipPublish) publishImportBatch(storageKey, batch);
 
     function readRaw() {
       try {
@@ -309,19 +365,21 @@
       for (var i = 0; i < 8; i++) {
         var diskBefore = readRaw();
         var current = parseProfile(diskBefore, quizId);
+        current = applyPendingImportBatches(current, storageKey);
         drainProfileAttempts(storageKey).forEach(function (a) {
           current = applyProfileAttempt(current, a);
         });
-        current = mergeImportMisses(current, topicMisses, importId);
+        current = applyImportBatch(current, batch);
         var serialized = JSON.stringify(current);
         var diskMid = readRaw();
         if (diskMid !== diskBefore) {
           var midProfile = parseProfile(diskMid, quizId);
           current = mergeProfiles(midProfile, current);
+          current = applyPendingImportBatches(current, storageKey);
           drainProfileAttempts(storageKey).forEach(function (a) {
             current = applyProfileAttempt(current, a);
           });
-          current = mergeImportMisses(current, topicMisses, importId);
+          current = applyImportBatch(current, batch);
           serialized = JSON.stringify(current);
         }
         persistProfile(localStorage, storageKey, current);
@@ -330,7 +388,23 @@
       return null;
     }
 
-    return runLocked(opts.locks, lockName, doWrite);
+    return doWrite();
+  }
+
+  function saveImportMisses(opts) {
+    opts = opts || {};
+    var storageKey = opts.storageKey;
+    var lockName = opts.lockName || storageKey;
+    var topicMisses = opts.topicMisses;
+    var importId = opts.importId;
+    var quizId = opts.quizId;
+    var localStorage = opts.localStorage;
+    if (!storageKey || !localStorage || !topicMisses) return Promise.resolve(null);
+
+    if (opts.skipLock) return Promise.resolve(writeImportMisses(opts));
+    return runLocked(opts.locks, lockName, function () {
+      return writeImportMisses(opts);
+    });
   }
 
   function newAttemptId() {
@@ -345,6 +419,7 @@
   function resetPendingForTests() {
     pendingGameAnswers.length = 0;
     pendingProfileAttempts = Object.create(null);
+    pendingImportBatches = Object.create(null);
   }
 
   function closeForTests() {
@@ -363,14 +438,18 @@
   return {
     publishGameAnswer: publishGameAnswer,
     publishProfileAttempt: publishProfileAttempt,
+    publishImportBatch: publishImportBatch,
     drainGameAnswers: drainGameAnswers,
     drainProfileAttempts: drainProfileAttempts,
+    drainImportBatches: drainImportBatches,
     mergeTopicStats: mergeTopicStats,
     parseProfile: parseProfile,
     applyProfileAttempt: applyProfileAttempt,
+    applyImportBatch: applyImportBatch,
     mergeProfiles: mergeProfiles,
     writeProfileAttempt: writeProfileAttempt,
     saveProfileAttempt: saveProfileAttempt,
+    writeImportMisses: writeImportMisses,
     saveImportMisses: saveImportMisses,
     mergeImportMisses: mergeImportMisses,
     newAttemptId: newAttemptId,

@@ -169,6 +169,52 @@ async function testGamificationBroadcastConcurrent() {
   assert(Object.keys(raw.answerDedup).length === 80, 'dedup keys 80, got ' + Object.keys(raw.answerDedup).length);
 }
 
+async function testConcurrentImportMisses() {
+  const ls = new LocalStorageMock();
+  const locks = makeSharedLocksMock();
+  const { mergeA, mergeB } = linkTabs();
+  const key = 'study_sessions_profile_cissp';
+
+  await Promise.all([
+    mergeA.saveImportMisses({
+      storageKey: key,
+      lockName: key,
+      quizId: 'cissp',
+      importId: 'import-tab-a',
+      topicMisses: { IAM: 4, Network: 2 },
+      localStorage: ls,
+      locks: locks
+    }),
+    mergeB.saveImportMisses({
+      storageKey: key,
+      lockName: key,
+      quizId: 'cissp',
+      importId: 'import-tab-b',
+      topicMisses: { IAM: 3, Crypto: 5 },
+      localStorage: ls,
+      locks: locks
+    })
+  ]);
+
+  const profile = mergeA.parseProfile(ls.getItem(key), 'cissp');
+  assert(profile.topicMissesFromImports.IAM === 7, 'IAM misses sum 7, got ' + profile.topicMissesFromImports.IAM);
+  assert(profile.topicMissesFromImports.Network === 2, 'Network misses 2');
+  assert(profile.topicMissesFromImports.Crypto === 5, 'Crypto misses 5');
+  assert(profile.appliedImportBatches['import-tab-a'] && profile.appliedImportBatches['import-tab-b'], 'both batches applied');
+
+  await mergeA.saveImportMisses({
+    storageKey: key,
+    lockName: key,
+    quizId: 'cissp',
+    importId: 'import-tab-a',
+    topicMisses: { IAM: 99 },
+    localStorage: ls,
+    locks: locks
+  });
+  const again = mergeA.parseProfile(ls.getItem(key), 'cissp');
+  assert(again.topicMissesFromImports.IAM === 7, 'replay import-tab-a is idempotent, got ' + again.topicMissesFromImports.IAM);
+}
+
 async function testInterleavedProfileWriters() {
   const ls = new LocalStorageMock();
   const merge = loadMerge();
@@ -204,6 +250,8 @@ async function main() {
     console.log('OK profile concurrent attempts');
     await testGamificationBroadcastConcurrent();
     console.log('OK gamification broadcast concurrent 80 answers');
+    await testConcurrentImportMisses();
+    console.log('OK concurrent import misses via broadcast');
     await testInterleavedProfileWriters();
     console.log('OK interleaved profile writers');
   } finally {
