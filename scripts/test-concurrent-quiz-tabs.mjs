@@ -192,6 +192,12 @@ try {
     const pageB = await context.newPage();
     await answerTwoQuizzesInterleaved(pageA, pageB);
     await new Promise((r) => setTimeout(r, SETTLE_MS));
+    await pageA.evaluate(() => {
+      if (window.CloudCramGame && window.CloudCramGame.flushPendingGameWrites) {
+        return window.CloudCramGame.flushPendingGameWrites();
+      }
+      return null;
+    });
     await pageA.waitForFunction(
       () => {
         try {
@@ -238,6 +244,12 @@ try {
     const pageB = await context.newPage();
     await answerTwoQuizzesInterleaved(pageA, pageB);
     await new Promise((r) => setTimeout(r, SETTLE_MS));
+    await pageA.evaluate(() => {
+      if (window.CloudCramGame && window.CloudCramGame.flushPendingGameWrites) {
+        return window.CloudCramGame.flushPendingGameWrites();
+      }
+      return null;
+    });
     await pageA.waitForFunction(
       () => {
         try {
@@ -269,7 +281,14 @@ try {
     const context = await makeContext(browser);
     const pages = [await context.newPage(), await context.newPage(), await context.newPage()];
     await answerThreeQuizzesInterleaved(pages);
-    await new Promise((r) => setTimeout(r, SETTLE_MS));
+    await new Promise((r) => setTimeout(r, SETTLE_MS * 2));
+    await pages[0].evaluate(() => {
+      if (window.CloudCramGame && window.CloudCramGame.flushPendingGameWrites) {
+        return window.CloudCramGame.flushPendingGameWrites();
+      }
+      return null;
+    });
+    await new Promise((r) => setTimeout(r, 500));
     const counts = await readCountsFromFreshPage(context);
     await context.close();
     if (counts.dedup !== 120 || counts.topicTotal !== 120) {

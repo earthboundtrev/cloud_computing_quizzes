@@ -791,6 +791,17 @@
     return runWriteSync(mutator, null);
   }
 
+  function flushPendingGameWrites() {
+    return writeQueue.then(function () {
+      var healed = runWriteSync(function (state) {
+        applyPendingRemoteAnswers(state);
+        if (peerGameRaw) return mergeStates(state, stateFromRaw(peerGameRaw));
+        return state;
+      }, null);
+      return healed;
+    });
+  }
+
   function effectiveToday(state, now) {
     var actual = todayStr(new Date(now || deps.now()));
     if (state.lastSeenDate && compareDateStr(actual, state.lastSeenDate) < 0) {
@@ -1704,6 +1715,11 @@
     } else {
       initDom();
     }
+    if (typeof window.addEventListener === 'function') {
+      window.addEventListener('pagehide', function () {
+        flushPendingGameWrites();
+      });
+    }
   }
 
   return {
@@ -1744,6 +1760,7 @@
       return deps;
     },
     syncWrite: syncWrite,
+    flushPendingGameWrites: flushPendingGameWrites,
     initDom: initDom,
     renderLauncher: renderLauncher,
     renderQuizBar: renderQuizBar,
