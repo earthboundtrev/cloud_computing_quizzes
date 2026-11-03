@@ -742,6 +742,20 @@ test('lint scans gamification.js', function () {
   assert(lintSrc.indexOf('gamification.js') >= 0, 'lint scans gamification.js');
 });
 
+test('first-run goal picker exposes dialog a11y (#86)', function () {
+  const src = fs.readFileSync(gamePath, 'utf8');
+  assert(/function trapFocusInDialog/.test(src), 'focus trap helper');
+  assert(/game-first-run-overlay[\s\S]*role',\s*'presentation'/.test(src), 'overlay is presentation');
+  assert(/game-first-run-dialog[\s\S]*setAttribute\('role',\s*'dialog'\)/.test(src), 'dialog role on panel');
+  assert(/aria-modal',\s*'true'/.test(src), 'aria-modal');
+  assert(/role',\s*'radiogroup'/.test(src), 'goal radiogroup');
+  assert(/role',\s*'radio'/.test(src) && /aria-checked/.test(src), 'radio checked state');
+  assert(/ev\.key === 'Escape'/.test(src) && /finishFirstRun\(\{ goal: 3/.test(src), 'Escape matches Skip');
+  assert(/setFirstRunBackgroundInert/.test(src) && /setAttribute\('inert'/.test(src), 'background inert');
+  assert(/focusAfterFirstRunDismiss/.test(src) && /game-start-btn/.test(src), 'focus returns to Start');
+  assert(/goalButtons\[0\]\.focus\(\)/.test(src), 'initial focus on first goal');
+});
+
 async function runAll() {
   let passed = 0;
   let failed = 0;
