@@ -35,8 +35,14 @@
       return Date.now();
     },
     locks: typeof navigator !== 'undefined' ? navigator.locks : null,
-    storageEventTarget: typeof window !== 'undefined' ? window : null
+    storageEventTarget: typeof window !== 'undefined' ? window : null,
+    storageMerge: null
   };
+
+  function getStorageMerge() {
+    if (deps.storageMerge) return deps.storageMerge;
+    return typeof CloudCramStorageMerge !== 'undefined' ? CloudCramStorageMerge : null;
+  }
 
   var uiListeners = [];
   var midnightTimer = null;
@@ -606,10 +612,10 @@
     }
   }
 
-  function applyAnswerDelta(state, sessionId, questionId) {
+  function applyAnswerDelta(state, sessionId, questionId, todayOverride) {
     if (!state || !sessionId || !questionId) return state;
     var now = deps.now();
-    var today = processCalendar(state, now);
+    var today = todayOverride || processCalendar(state, now);
     var key = today + ':' + String(sessionId) + ':' + String(questionId);
     if (state.answerDedup[key]) return state;
     state.answerDedup[key] = true;
@@ -624,6 +630,15 @@
     return current;
   }
 
+  function applyPendingRemoteAnswers(state) {
+    var merge = getStorageMerge();
+    if (!merge || !merge.drainGameAnswers) return state;
+    merge.drainGameAnswers().forEach(function (msg) {
+      applyAnswerDelta(state, msg.sessionId, msg.questionId, msg.today);
+    });
+    return state;
+  }
+
   function runWrite(mutator, answerDelta) {
     var lastNext = null;
     for (var attempt = 0; attempt < 8; attempt++) {
@@ -631,6 +646,7 @@
       var current = stateFromRaw(diskBefore);
       reconcileAnswersFromDedup(current);
       processCalendar(current, deps.now());
+      applyPendingRemoteAnswers(current);
       var next;
       if (answerDelta) {
         next = applyAnswerDelta(current, answerDelta.sessionId, answerDelta.questionId);
@@ -647,11 +663,13 @@
           next = stateFromRaw(diskMid);
           reconcileAnswersFromDedup(next);
           processCalendar(next, deps.now());
+          applyPendingRemoteAnswers(next);
           applyAnswerDelta(next, answerDelta.sessionId, answerDelta.questionId);
         } else {
           next = mergeStates(next, stateFromRaw(diskMid));
           reconcileAnswersFromDedup(next);
           processCalendar(next, deps.now());
+          applyPendingRemoteAnswers(next);
         }
         serialized = JSON.stringify(next);
       }
@@ -661,6 +679,7 @@
     }
     if (answerDelta) {
       var finalState = freshStateForWrite();
+      applyPendingRemoteAnswers(finalState);
       applyAnswerDelta(finalState, answerDelta.sessionId, answerDelta.questionId);
       persistState(finalState);
       var finalRaw = readRaw();
@@ -670,22 +689,27 @@
   }
 
   function withLockedWrite(mutator, answerDelta) {
-    function enqueue() {
-      writeQueue = writeQueue
-        .then(function () {
-          return Promise.resolve(runWrite(mutator, answerDelta));
-        })
-        .catch(function () {
-          writeQueue = Promise.resolve();
+    function doWrite() {
+      var mergeApi = getStorageMerge();
+      if (answerDelta && mergeApi && mergeApi.publishGameAnswer) {
+        var snap = freshStateForWrite();
+        var todayKey = effectiveToday(snap, deps.now());
+        mergeApi.publishGameAnswer(todayKey, answerDelta.sessionId, answerDelta.questionId);
+      }
+      return runWrite(mutator, answerDelta);
+    }
+    var chained = writeQueue.then(function () {
+      if (deps.locks && deps.locks.request) {
+        return deps.locks.request(LOCK_NAME, function () {
+          return doWrite();
         });
-      return writeQueue;
-    }
-    if (deps.locks && deps.locks.request) {
-      return deps.locks.request(LOCK_NAME, function () {
-        return enqueue();
-      });
-    }
-    return enqueue();
+      }
+      return doWrite();
+    });
+    writeQueue = chained.catch(function () {
+      writeQueue = Promise.resolve();
+    });
+    return chained;
   }
 
   function syncWrite(mutator) {
@@ -1545,6 +1569,9 @@
       if (overrides.locks !== undefined) deps.locks = overrides.locks;
       if (overrides.storageEventTarget !== undefined) {
         deps.storageEventTarget = overrides.storageEventTarget;
+      }
+      if (overrides.storageMerge !== undefined) {
+        deps.storageMerge = overrides.storageMerge;
       }
     },
     getDeps: function () {

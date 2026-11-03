@@ -25,7 +25,8 @@ const SCAN_FILES = [
   'sw-register.js',
   'motivation.js',
   'quiz-nav.js',
-  'storage-write-guard.js'
+  'storage-write-guard.js',
+  'storage-tab-merge.js'
 ];
 
 const IGNORE_KEY_LITERALS = new Set([

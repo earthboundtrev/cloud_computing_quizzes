@@ -43,6 +43,8 @@
   var selectedMode = 'mixed';
   var quizSessionActive = false;
   var quizSessionId = null;
+  var profileWriteQueue = Promise.resolve();
+  var pendingProfileFlush = null;
 
   function newQuizSessionId() {
     return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
@@ -59,6 +61,9 @@
   function getProfile() {
     try {
       var raw = localStorage.getItem(PROFILE_KEY);
+      if (window.CloudCramStorageMerge && window.CloudCramStorageMerge.parseProfile) {
+        return window.CloudCramStorageMerge.parseProfile(raw, QUIZ_ID);
+      }
       if (!raw) return { quizId: QUIZ_ID, topicStats: {}, topicMissesFromImports: {} };
       var p = JSON.parse(raw);
       var profile = {
@@ -80,6 +85,95 @@
     try {
       localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
     } catch (e) {}
+  }
+
+  function buildSessionTopicStats() {
+    var topicStats = {};
+    sessionQuestions.forEach(function (q, i) {
+      var t = q.topic || 'Other';
+      var isCorrect = false;
+      if (q.type === 'order') {
+        isCorrect = answered[i] !== undefined && orderMatches(answered[i], q.correctOrder);
+      } else if (q.type === 'multi') {
+        isCorrect = answered[i] !== undefined && sameSortedIndices(answered[i], q._correctDisplayIndices || []);
+      } else {
+        var correctIdx = q._correctDisplayIndex !== undefined ? q._correctDisplayIndex : q.correct;
+        isCorrect = answered[i] !== undefined && answered[i] === correctIdx;
+      }
+      if (!topicStats[t]) topicStats[t] = { correct: 0, total: 0 };
+      topicStats[t].total++;
+      if (isCorrect) topicStats[t].correct++;
+    });
+    return topicStats;
+  }
+
+  function newSessionAttemptId() {
+    if (window.CloudCramStorageMerge && window.CloudCramStorageMerge.newAttemptId) {
+      return window.CloudCramStorageMerge.newAttemptId();
+    }
+    return newQuizSessionId();
+  }
+
+  function queueProfileAttemptWrite(attempt) {
+    pendingProfileFlush = { attempt: attempt, key: PROFILE_KEY };
+    if (!window.CloudCramStorageMerge || !window.CloudCramStorageMerge.saveProfileAttempt) {
+      var profile = getProfile();
+      if (window.CloudCramStorageMerge && window.CloudCramStorageMerge.applyProfileAttempt) {
+        profile = window.CloudCramStorageMerge.applyProfileAttempt(profile, attempt);
+      } else {
+        Object.keys(attempt.topicStats).forEach(function (t) {
+          if (!profile.topicStats[t]) profile.topicStats[t] = { correct: 0, total: 0 };
+          profile.topicStats[t].total += attempt.topicStats[t].total;
+          profile.topicStats[t].correct += attempt.topicStats[t].correct;
+        });
+      }
+      saveProfile(profile);
+      pendingProfileFlush = null;
+      return Promise.resolve(profile);
+    }
+    var locks = typeof navigator !== 'undefined' ? navigator.locks : null;
+    profileWriteQueue = profileWriteQueue
+      .then(function () {
+        return window.CloudCramStorageMerge.saveProfileAttempt({
+          storageKey: PROFILE_KEY,
+          lockName: PROFILE_KEY,
+          quizId: QUIZ_ID,
+          attempt: attempt,
+          localStorage: localStorage,
+          locks: locks
+        });
+      })
+      .then(function (profile) {
+        if (pendingProfileFlush && pendingProfileFlush.attempt === attempt) pendingProfileFlush = null;
+        return profile;
+      })
+      .catch(function () {
+        profileWriteQueue = Promise.resolve();
+      });
+    return profileWriteQueue;
+  }
+
+  function flushPendingProfileWrite() {
+    if (!pendingProfileFlush || !window.CloudCramStorageMerge) return;
+    var pending = pendingProfileFlush;
+    var merge = window.CloudCramStorageMerge;
+    var opts = {
+      storageKey: pending.key,
+      quizId: QUIZ_ID,
+      attempt: pending.attempt,
+      localStorage: localStorage,
+      skipPublish: true
+    };
+    var write = function () {
+      merge.writeProfileAttempt(opts);
+    };
+    var locks = typeof navigator !== 'undefined' ? navigator.locks : null;
+    if (locks && locks.request) {
+      locks.request(pending.key, write);
+    } else {
+      write();
+    }
+    pendingProfileFlush = null;
   }
 
   function getTopicWeight(profile, topic) {
@@ -723,23 +817,11 @@
   }
 
   function saveSessionToProfile() {
-    var profile = getProfile();
-    sessionQuestions.forEach(function (q, i) {
-      var t = q.topic || 'Other';
-      var isCorrect = false;
-      if (q.type === 'order') {
-        isCorrect = answered[i] !== undefined && orderMatches(answered[i], q.correctOrder);
-      } else if (q.type === 'multi') {
-        isCorrect = answered[i] !== undefined && sameSortedIndices(answered[i], q._correctDisplayIndices || []);
-      } else {
-        var correctIdx = q._correctDisplayIndex !== undefined ? q._correctDisplayIndex : q.correct;
-        isCorrect = answered[i] !== undefined && answered[i] === correctIdx;
-      }
-      if (!profile.topicStats[t]) profile.topicStats[t] = { correct: 0, total: 0 };
-      profile.topicStats[t].total++;
-      if (isCorrect) profile.topicStats[t].correct++;
-    });
-    saveProfile(profile);
+    var attempt = {
+      id: newSessionAttemptId(),
+      topicStats: buildSessionTopicStats()
+    };
+    return queueProfileAttemptWrite(attempt);
   }
 
   function showResults() {
@@ -927,13 +1009,26 @@
       showImportToast(result.error || 'Could not parse results.', true);
       return;
     }
-    var profile = getProfile();
-    if (!profile.topicMissesFromImports) profile.topicMissesFromImports = {};
-    Object.keys(result.topicMisses).forEach(function (topic) {
-      var n = result.topicMisses[topic];
-      profile.topicMissesFromImports[topic] = (profile.topicMissesFromImports[topic] || 0) + n;
-    });
-    saveProfile(profile);
+    var importId = newSessionAttemptId();
+    if (window.CloudCramStorageMerge && window.CloudCramStorageMerge.saveImportMisses) {
+      window.CloudCramStorageMerge.saveImportMisses({
+        storageKey: PROFILE_KEY,
+        lockName: PROFILE_KEY,
+        quizId: QUIZ_ID,
+        topicMisses: result.topicMisses,
+        importId: importId,
+        localStorage: localStorage,
+        locks: typeof navigator !== 'undefined' ? navigator.locks : null
+      });
+    } else {
+      var profile = getProfile();
+      if (!profile.topicMissesFromImports) profile.topicMissesFromImports = {};
+      Object.keys(result.topicMisses).forEach(function (topic) {
+        var n = result.topicMisses[topic];
+        profile.topicMissesFromImports[topic] = (profile.topicMissesFromImports[topic] || 0) + n;
+      });
+      saveProfile(profile);
+    }
     var top = Object.keys(result.topicMisses).sort(function (a, b) { return result.topicMisses[b] - result.topicMisses[a]; }).slice(0, 3);
     showImportToast('Imported. We\'ll focus more on: ' + top.join(', ') + '.', false);
     if (ta) ta.value = '';
@@ -1100,4 +1195,10 @@
       }, 500);
     }
   };
+
+  if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+    window.addEventListener('pagehide', function () {
+      flushPendingProfileWrite();
+    });
+  }
 })();
