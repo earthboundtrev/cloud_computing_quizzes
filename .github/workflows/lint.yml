@@ -53,6 +53,9 @@ jobs:
 
     - name: Update app / Delete all my data (#70)
       run: node scripts/test-app-data-lifecycle.js
+
+    - name: Progress export / import (#109)
+      run: node scripts/test-data-import-export.js
     
     - name: Check question bank integrity
       run: node scripts/check-page-banks.js

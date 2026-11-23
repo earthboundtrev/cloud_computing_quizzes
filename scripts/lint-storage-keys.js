@@ -21,6 +21,7 @@ const SCAN_FILES = [
   'index-init.js',
   'app-reset.js',
   'data-export.js',
+  'data-import.js',
   'reminder-server.js',
   'sw-register.js',
   'motivation.js',
