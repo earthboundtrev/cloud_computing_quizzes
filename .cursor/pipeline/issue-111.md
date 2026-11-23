@@ -11,7 +11,8 @@
 |-------|--------|--------|
 | IMPLEMENT | Done | `native/` Capacitor 8.6.2, sync-www, vendor Sortable, CSP, native SW skip, export share, docs/android.md |
 | BUGBOT | **Clean** | 2nd pass after DOMContentLoaded, share cancel, icons, file_paths |
-| TESTS | **Pass** | Full CI-equivalent local + `test-capacitor-native.js` |
+| BUGBOT (CSP delta) | **Clean** | Inline handlers stripped, meta CSP sans `frame-ancestors` |
+| TESTS | **Pass** | Full CI-equivalent + `lint-html-entry.js` + `playwright-console-clean.mjs` (17 pages, 0 errors) |
 | ARCHITECT | **Merge-ready** | Residual non-blockers (storage-keys registration, doc screenshots) |
 | SECURITY | **Pass** (after fix) | FileProvider `exports/`, export cache-only, gitleaks `useDefault` |
 | DEPLOY | PR open | `Refs #111` + `Refs #110` |

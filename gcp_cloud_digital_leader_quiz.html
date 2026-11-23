@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'self'">
   <meta name="theme-color" content="#0f1419">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -58,15 +58,15 @@
       <p>40 questions per session (55 in exam mode). Passing: 70%. Pool of 165+. Choose your mode:</p>
       <p id="focus-hint" class="profile-hint hidden"></p>
       <div class="mode-selector">
-        <button type="button" class="mode-btn" data-mode="comparison" onclick="selectMode('comparison')">
+        <button type="button" class="mode-btn" data-mode="comparison">
           <span class="label">Comparison (GCP ↔ AWS)</span>
           <span class="desc">Map GCP services to AWS equivalents. Leverage your SAA/CCP knowledge.</span>
         </button>
-        <button type="button" class="mode-btn" data-mode="exam" onclick="selectMode('exam')">
+        <button type="button" class="mode-btn" data-mode="exam">
           <span class="label">Exam (Scenario-based)</span>
           <span class="desc">Business use cases, product selection, Cloud Digital Leader domains.</span>
         </button>
-        <button type="button" class="mode-btn selected" data-mode="mixed" onclick="selectMode('mixed')">
+        <button type="button" class="mode-btn selected" data-mode="mixed">
           <span class="label">Mixed</span>
           <span class="desc">Both comparison and exam-style. Simulates full exam.</span>
         </button>
@@ -81,7 +81,7 @@
         </select>
         <input type="number" id="session-time-custom" min="1" max="240" placeholder="Custom" style="width: 4.5em; margin-left: 0.5rem; padding: 0.35rem; background: var(--surface); color: var(--text); border: 1px solid var(--accent-dim); border-radius: 4px;" title="Custom minutes">
       </div>
-      <button id="start-btn" onclick="startQuiz()">Start Quiz</button>
+      <button id="start-btn">Start Quiz</button>
       <div class="import-area">
         <label for="import-results">Import past results (paste .md or choose file) to focus on weak topics:</label>
         <textarea id="import-results" placeholder="Paste quiz results markdown here..."></textarea>
@@ -111,8 +111,8 @@
         </div>
       </div>
       <div class="nav-row">
-        <button id="prev-btn" class="secondary" onclick="prevQuestion()">← Previous</button>
-        <button id="next-btn" onclick="nextQuestion()">Next →</button>
+        <button id="prev-btn" class="secondary">← Previous</button>
+        <button id="next-btn">Next →</button>
       </div>
     </div>
 

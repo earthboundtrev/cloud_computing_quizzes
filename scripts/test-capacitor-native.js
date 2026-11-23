@@ -60,6 +60,14 @@ test('sortable and native helpers in PRECACHE_PATHS', function () {
   assert(sw.indexOf("'/capacitor-env.js'") >= 0, 'capacitor-env not precached');
 });
 
+test('meta CSP omits frame-ancestors', function () {
+  htmlFiles.forEach(function (f) {
+    var html = fs.readFileSync(path.join(ROOT, f), 'utf8');
+    if (!html.includes('Content-Security-Policy')) return;
+    assert(html.indexOf('frame-ancestors') < 0, f + ' meta CSP must not include frame-ancestors');
+  });
+});
+
 test('active quiz HTML has CSP meta', function () {
   var quizConfig = fs.readFileSync(path.join(ROOT, 'quiz-config.js'), 'utf8');
   var hrefs = ['index.html'];
