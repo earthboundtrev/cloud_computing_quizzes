@@ -5,7 +5,7 @@
   'use strict';
 
   var QUICK_URL = '/index.html?quick=1';
-  var OPEN_SETTINGS_ACTION = 'OPEN_APP_NOTIFICATION_SETTINGS';
+  var rescheduleInFlight = null;
   var BANNER_DISMISS_MS = 7 * 24 * 60 * 60 * 1000;
   var OPT_IN_COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
   var PERMISSION_BANNER_COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
@@ -61,16 +61,9 @@
   function hasFreezeHeld() {
     var snap = gameSnapshot();
     if (!snap) return false;
+    if ((snap.freezes || 0) > 0) return true;
     if (snap.notices && snap.notices.freezeSavedYesterday) return true;
-    var state = window.CloudCramGame && window.CloudCramGame.loadState
-      ? window.CloudCramGame.loadState()
-      : null;
-    if (!state || !state.dayRecords) return false;
-    var today = snap.today;
-    var y = window.CloudCramGame.addDaysStr(today, -1);
-    var tRec = state.dayRecords[today] || {};
-    var yRec = state.dayRecords[y] || {};
-    return tRec.kind === 'frozen' || yRec.kind === 'frozen';
+    return false;
   }
 
   function buildScheduleContext() {
@@ -89,9 +82,13 @@
       goal: snap ? snap.goal : 3,
       streak: snap ? snap.streak : 0,
       inVacation: !!(snap && snap.vacation),
-      repairActive: window.CloudCramGame && window.CloudCramGame.repairOfferActive
-        ? window.CloudCramGame.repairOfferActive(snap)
-        : false,
+      freezesHeld: snap ? snap.freezes || 0 : 0,
+      repairActive:
+        window.CloudCramGame && window.CloudCramGame.repairOfferActive
+          ? window.CloudCramGame.repairOfferActive(
+              window.CloudCramGame.loadState ? window.CloudCramGame.loadState() : null
+            )
+          : false,
       freezeHeld: hasFreezeHeld(),
       freezeSavedYesterday: !!(snap && snap.notices && snap.notices.freezeSavedYesterday),
       examDate: settings.examDate || null,
@@ -137,8 +134,27 @@
   }
 
   function exactAlarmGranted() {
-    /* Capacitor has no direct probe; Settings UI treats primary path as inexact. */
-    return Promise.resolve(false);
+    var LN = getPlugin();
+    if (!LN || typeof LN.checkExactNotificationSetting !== 'function') {
+      return Promise.resolve(false);
+    }
+    return LN.checkExactNotificationSetting()
+      .then(function (res) {
+        return !!(res && res.exact_alarm === 'granted');
+      })
+      .catch(function () {
+        return false;
+      });
+  }
+
+  function openAppNotificationSettings() {
+    if (!native()) return;
+    try {
+      window.location.href =
+        'intent:#Intent;action=android.settings.APP_NOTIFICATION_SETTINGS;' +
+        'package=com.earthboundtrev.cloudcram;' +
+        'S.android.provider.extra.APP_PACKAGE=com.earthboundtrev.cloudcram;end';
+    } catch (e) {}
   }
 
   function ensureChannels() {
@@ -192,10 +208,11 @@
 
   function rescheduleAll(reason) {
     if (!native()) return Promise.resolve();
+    if (rescheduleInFlight) return rescheduleInFlight;
     var LN = getPlugin();
     var sch = scheduleApi();
     if (!LN || !sch) return Promise.resolve();
-    return refreshPermission()
+    rescheduleInFlight = refreshPermission()
       .then(function (perm) {
         if (perm !== 'granted') return null;
         var settings = readSettings();
@@ -218,11 +235,12 @@
       })
       .then(function () {
         refreshStatusLine();
-        if (reason === 'goal-met') {
-          /* status already refreshed */
-        }
       })
-      .catch(function () {});
+      .catch(function () {})
+      .finally(function () {
+        rescheduleInFlight = null;
+      });
+    return rescheduleInFlight;
   }
 
   function cancelAllPending() {
@@ -445,17 +463,16 @@
     });
 
     openSettingsBtn.addEventListener('click', function () {
-      var App = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
-      if (App && typeof App.openUrl === 'function') {
-        App.openUrl({ url: 'package:com.earthboundtrev.cloudcram' });
-      }
+      openAppNotificationSettings();
     });
 
     exactLink.addEventListener('click', function () {
-      var App = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
-      if (App && typeof App.openUrl === 'function') {
-        App.openUrl({ url: 'package:com.earthboundtrev.cloudcram' });
+      var LN = getPlugin();
+      if (LN && typeof LN.changeExactNotificationSetting === 'function') {
+        LN.changeExactNotificationSetting().then(refreshStatusLine);
+        return;
       }
+      openAppNotificationSettings();
     });
 
     updateAuxButtons();
@@ -514,8 +531,6 @@
     if (!native()) return;
     var snap = gameSnapshot();
     if (!snap || !snap.met) return;
-    var settings = readSettings();
-    if (settings.firstGoalMetAt) return;
     if (!shouldAskOptIn()) return;
     var existing = document.getElementById('reminder-opt-in-card');
     if (existing) return;
@@ -544,7 +559,6 @@
       var next = readSettings();
       next.lastOptInAskAt = Date.now();
       if (countBump) next.optInDismissCount += 1;
-      if (!next.firstGoalMetAt) next.firstGoalMetAt = Date.now();
       writeSettings(next);
       card.remove();
     }
@@ -563,7 +577,6 @@
         next.enabled = true;
         next.time = '19:00';
         next.explicitTime = '19:00';
-        if (!next.firstGoalMetAt) next.firstGoalMetAt = Date.now();
         writeSettings(next);
         card.remove();
       });

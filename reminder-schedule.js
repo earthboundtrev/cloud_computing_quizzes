@@ -74,6 +74,7 @@
   }
 
   function freezeHeld(ctx) {
+    if ((ctx.freezesHeld || 0) > 0) return true;
     return !!(ctx.freezeHeld || ctx.freezeSavedYesterday);
   }
 
@@ -115,7 +116,7 @@
         goal: ctx.goal || 3,
         streakDay: ctx.streak || 0,
         due: ctx.dueReviews || 0,
-        hadRecentMiss: !!ctx.hadRecentMiss,
+        hadRecentMiss: isToday && !!ctx.hadRecentMiss,
         examDay: isExamDay(ctx, dateStr),
         isToday: isToday,
         date: dateStr

@@ -20,6 +20,22 @@ function test(name, fn) {
   }
 }
 
+test('evening skipped when freeze inventory is held', function () {
+  var ctx = {
+    today: '2026-11-23',
+    dailyEnabled: true,
+    eveningEnabled: true,
+    dailyTimeMinutes: 19 * 60,
+    goalMetToday: false,
+    streak: 8,
+    freezesHeld: 1,
+    inVacation: false,
+    repairActive: false,
+    freezeHeld: false
+  };
+  assert.strictEqual(schedule.shouldScheduleEveningTonight(ctx), false);
+});
+
 test('evening requires streak 7+ and 90m gap from daily time', function () {
   var ctx = {
     today: '2026-11-23',

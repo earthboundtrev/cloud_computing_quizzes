@@ -96,6 +96,8 @@ test('reminder modules are present and browser-safe', function () {
       assert(!/USE_EXACT_ALARM/.test(src), 'must not request USE_EXACT_ALARM');
     }
   });
+  var quiz = fs.readFileSync(path.join(ROOT, 'az900_azure_fundamentals_quiz.html'), 'utf8');
+  assert(quiz.indexOf('reminder-native.js') >= 0, 'quiz pages must load reminder-native for goal-met cancel');
 });
 
 test('native capacitor config has no server.url', function () {
