@@ -292,6 +292,20 @@
           if (s.streak) parts.push('Streak ' + s.streak + ' days');
           if (s.tracks) parts.push(s.tracks + ' track' + (s.tracks === 1 ? '' : 's'));
           setSettingsStatus(parts.length ? 'Imported ✓ ' + parts.join(' · ') : 'Imported ✓');
+          if (window.CloudCramGame && typeof window.CloudCramGame.renderLauncher === 'function') {
+            window.CloudCramGame.renderLauncher(
+              window.CloudCramGame.loadState ? window.CloudCramGame.loadState() : null
+            );
+          }
+          if (window.refreshQuizNav) window.refreshQuizNav();
+          if (typeof window.getQuizCompletedIds === 'function' && document.getElementById('quiz-sortable-list')) {
+            var completedIds = window.getQuizCompletedIds();
+            document.querySelectorAll('.quiz-complete-checkbox').forEach(function (cb) {
+              var id = cb.getAttribute('data-quiz-id');
+              var done = completedIds.indexOf(id) >= 0;
+              cb.checked = done;
+            });
+          }
         })
         .catch(function () {
           closeDialog();

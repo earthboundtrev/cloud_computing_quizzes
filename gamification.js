@@ -795,7 +795,6 @@
     return withLockedWrite(function (state) {
       var current = stateFromRaw(readRawMerged());
       reconcileAnswersFromDedup(current);
-      processCalendar(current, deps.now());
       applyPendingRemoteAnswers(current);
       var importedState = null;
       if (typeof gameRaw === 'string') {

@@ -116,6 +116,32 @@ function snapshot(ls) {
     assert(!res.ok, 'reserved key');
   });
 
+  await test('rejects empty import file', function () {
+    const res = dataImport.validateImportText('');
+    assert(!res.ok, 'empty file');
+  });
+
+  await test('rejects game state over streak cap', function () {
+    const bad = minimalPayload({
+      localStorage: {
+        cloudcram_game_v1: JSON.stringify({ v: 1, streak: 50000, best: 0 })
+      }
+    });
+    const res = dataImport.validatePayloadRoot(bad);
+    assert(!res.ok, 'streak cap');
+  });
+
+  await test('rejects push endpoint keys in import file', function () {
+    const bad = minimalPayload({
+      localStorage: {
+        quizCompleted: '[]',
+        cloudcram_push_endpoint: 'https://example.test'
+      }
+    });
+    const res = dataImport.validatePayloadRoot(bad);
+    assert(!res.ok, 'push endpoint rejected');
+  });
+
   await test('rejects reserved keys nested in localStorage JSON values', function () {
     const bad = minimalPayload({
       localStorage: {
@@ -169,7 +195,7 @@ function snapshot(ls) {
       },
       {
         id: 2,
-        timestamp: '2026-01-02',
+        timestamp: '2026-01-02T00:00:00.000Z',
         quizId: 'cissp',
         questionText: 'Q2',
         dumpText: 'other'

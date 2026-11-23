@@ -163,6 +163,9 @@
     if (typeof rec.questionText !== 'string' || typeof rec.dumpText !== 'string') {
       return reject('brain_dump_type', 'Brain dump missing text fields');
     }
+    if (typeof rec.timestamp !== 'string' || !rec.timestamp.length) {
+      return reject('brain_dump_time', 'Brain dump missing timestamp');
+    }
     return null;
   }
 
@@ -203,6 +206,10 @@
       }
       if (keysApi.isImportableKey(key) && parseJsonValueHasReserved(val)) {
         return reject('reserved', 'This isn\'t a Cloud Cram progress file. Nothing was changed.');
+      }
+      if (key === GAME_KEY && typeof val === 'string') {
+        var gameErr = validateGameImportString(val);
+        if (gameErr) return gameErr;
       }
     }
     if (parsed.brainDumpsIndexedDB !== undefined) {
@@ -361,9 +368,36 @@
     return {
       questionText: String(rec.questionText || ''),
       dumpText: String(rec.dumpText || ''),
-      timestamp: String(rec.timestamp || new Date().toISOString()),
+      timestamp: String(rec.timestamp || ''),
       quizId: String(rec.quizId || '')
     };
+  }
+
+  var MAX_GAME_STREAK = 10000;
+  var MAX_GAME_BEST = 10000;
+  var MAX_DEDUP_KEYS = 200000;
+
+  function validateGameImportString(raw) {
+    if (typeof raw !== 'string' || !raw) return null;
+    var parsed = parseJsonSafe(raw);
+    if (!parsed || !isPlainObject(parsed)) {
+      return reject('game_type', 'Invalid game state in file.');
+    }
+    if (containsReservedKey(parsed, 0)) {
+      return reject('reserved', 'This isn\'t a Cloud Cram progress file. Nothing was changed.');
+    }
+    if (typeof parsed.streak === 'number' && parsed.streak > MAX_GAME_STREAK) {
+      return reject('game_cap', 'Game streak out of range.');
+    }
+    if (typeof parsed.best === 'number' && parsed.best > MAX_GAME_BEST) {
+      return reject('game_cap', 'Game best out of range.');
+    }
+    if (parsed.answerDedup && isPlainObject(parsed.answerDedup)) {
+      if (Object.keys(parsed.answerDedup).length > MAX_DEDUP_KEYS) {
+        return reject('game_cap', 'Too many answer records.');
+      }
+    }
+    return null;
   }
 
   function mergeBrainDumpsForImport(existing, imported) {
@@ -689,6 +723,7 @@
         return;
       }
       req.onerror = function () { resolve(null); };
+      req.onblocked = function () { resolve(null); };
       req.onupgradeneeded = function (ev) {
         var db = ev.target.result;
         if (!db.objectStoreNames.contains(BRAIN_STORE)) {
