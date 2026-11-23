@@ -6,10 +6,8 @@
 |-------|--------|
 | Issue | [#109](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/109) — **OPEN** (pipeline DEPLOY complete; human close; Android [#111](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/111)) |
 | PR #113 | Merged `5da787e` (PWA export/import) |
-| PR #115 | Merged `ea2ec30` (impl head `2fe0bb9`) — Tester F1/F2 retest fixes |
+| PR #115 | Merged `ea2ec30` (single commit `2fe0bb9`) — Tester F1/F2 retest fixes |
 | Paths | `gamification.js`, `data-import.js`, `sw.js`, `index.html`, tests |
-
-> **Commit label `e269aea`:** Rows in **Bugbot**, **Architect**, and **Security** below that cite `e269aea` refer to the **[#115](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/115)** branch diff reviewed before merge (branch head **`2fe0bb9`**, merge commit **`ea2ec30`**).
 
 ## Pointer log
 
@@ -17,10 +15,10 @@
 |-------|--------|--------|
 | IMPLEMENT (#113) | Done | PWA export/import → `5da787e` |
 | IMPLEMENT (#115) | Done | F1 `implicitDefaultGoal`; F2 `validateFiniteGameCount` → `ea2ec30` |
-| BUGBOT | **Clean** | `e269aea` = [#115](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/115) branch (see note above) |
+| BUGBOT | **Clean** | #115 diff `5da787e..2fe0bb9` @ `2fe0bb9` |
 | TESTS | **Pass** | Full `lint.yml` locally; import 20, gamification 43 |
-| ARCHITECT | **Merge-ready** | F1/F2 AC met on `ea2ec30`; see [retro](./issue-109-retro.md) |
-| SECURITY | **Pass** | No medium/high on [#115](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/115) retest diff (`e269aea`) |
+| ARCHITECT | **Merge-ready** | F1/F2 AC met on `2fe0bb9`; see [retro](./issue-109-retro.md) |
+| SECURITY | **Pass** | No medium/high on #115 diff `5da787e..2fe0bb9` |
 | DEPLOY | **Complete** (pending issue closure) | #113 + #115 merged; use `Closes #109` only when human signs off all AC |
 
 ## Tester retest
@@ -40,21 +38,24 @@
 | When (UTC) | Model | Clean | Summary |
 |------------|-------|-------|---------|
 | 2026-11-23 | cursor-grok-4.6-high-fast | No → Yes | PR #113 blockers (IDB, noop, profile, proto) |
-| 2026-11-23 | cursor-grok-4.6-high-fast | **Yes** | Retest F1/F2 on `e269aea` ([#115](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/115) → `2fe0bb9` / `ea2ec30`) |
+| 2026-11-23 | cursor-grok-4.6-high-fast | — | `e269aea` — local pre-push SHA, not on GitHub; superseded |
+| 2026-11-23 | cursor-grok-4.6-high-fast | **Yes** | #115 `5da787e..2fe0bb9` @ `2fe0bb9` — F1 implicitDefaultGoal; F2 fail-closed streak/best; SW v49 + tests |
 
 ## Architect
 
 | When (UTC) | Model | Verdict |
 |------------|-------|---------|
 | 2026-11-23 | cursor-grok-4.6-high-fast | Merge-ready PR #113 PWA |
-| 2026-11-23 | cursor-grok-4.6-high-fast | **Merge-ready** retest F1/F2 (`e269aea` / #115) |
+| 2026-11-23 | cursor-grok-4.6-high-fast | `e269aea` — local pre-push SHA, not on GitHub; superseded |
+| 2026-11-23 | cursor-grok-4.6-high-fast | **Merge-ready** #115 @ `2fe0bb9` — F1/F2 AC; SW + hub cache bump |
 
 ## Security
 
 | When (UTC) | Model | Verdict |
 |------------|-------|---------|
 | 2026-11-23 | cursor-grok-4.6-high-fast | Pass PR #113 |
-| 2026-11-23 | cursor-grok-4.6-high-fast | **Pass** retest diff (`e269aea` / #115) |
+| 2026-11-23 | cursor-grok-4.6-high-fast | `e269aea` — local pre-push SHA, not on GitHub; superseded |
+| 2026-11-23 | cursor-grok-4.6-high-fast | **Pass** #115 `5da787e..2fe0bb9` @ `2fe0bb9` — fail-closed import typing; no medium+ |
 
 ## TESTS (local, #115 branch)
 
