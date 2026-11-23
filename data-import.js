@@ -28,7 +28,41 @@
   }
   var PROFILE_PREFIX = 'study_sessions_profile_';
   var GAME_KEY = 'cloudcram_game_v1';
+  var PUSH_LOCAL_KEY = 'cloudcram_push_local_v1';
   var BRAIN_DUMP_ALLOWED_FIELDS = { id: true, questionText: true, dumpText: true, timestamp: true, quizId: true };
+
+  function getPushLocalApi() {
+    if (typeof CloudCramPushLocal !== 'undefined') return CloudCramPushLocal;
+    try {
+      return require('./push-local-settings.js');
+    } catch (e1) {
+      return null;
+    }
+  }
+
+  function normalizePushLocalImportString(raw) {
+    var api = getPushLocalApi();
+    if (!api) return raw;
+    try {
+      return JSON.stringify(api.normalizeSettings(JSON.parse(raw)));
+    } catch (e2) {
+      return JSON.stringify(api.defaultSettings());
+    }
+  }
+
+  function validatePushLocalImportString(raw) {
+    var api = getPushLocalApi();
+    if (!api || typeof raw !== 'string') return null;
+    try {
+      var parsed = JSON.parse(raw);
+      if (api.hasForbiddenKey(parsed)) {
+        return reject('push_local', 'This isn\'t a Cloud Cram progress file. Nothing was changed.');
+      }
+    } catch (e3) {
+      return reject('push_local', 'This isn\'t a Cloud Cram progress file. Nothing was changed.');
+    }
+    return null;
+  }
   var BRAIN_DUMP_TYPES = {
     id: ['number', 'string'],
     questionText: ['string'],
@@ -212,6 +246,10 @@
         var gameErr = validateGameImportString(val);
         if (gameErr) return gameErr;
       }
+      if (key === PUSH_LOCAL_KEY && typeof val === 'string') {
+        var pushErr = validatePushLocalImportString(val);
+        if (pushErr) return pushErr;
+      }
     }
     if (parsed.brainDumpsIndexedDB !== undefined) {
       if (!Array.isArray(parsed.brainDumpsIndexedDB)) {
@@ -224,6 +262,9 @@
         var err = validateBrainDumpRecord(parsed.brainDumpsIndexedDB[b], b);
         if (err) return err;
       }
+    }
+    if (ls[PUSH_LOCAL_KEY]) {
+      ls[PUSH_LOCAL_KEY] = normalizePushLocalImportString(String(ls[PUSH_LOCAL_KEY]));
     }
     var sanitized = {
       schema: SCHEMA_V1,

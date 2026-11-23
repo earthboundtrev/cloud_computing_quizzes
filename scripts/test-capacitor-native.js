@@ -87,6 +87,19 @@ test('native-app.js waits for DOMContentLoaded before hiding Update app', functi
   assert(/DOMContentLoaded/.test(src), 'native-app must defer DOM mutations');
 });
 
+test('reminder modules are present and browser-safe', function () {
+  ['push-local-settings.js', 'reminder-copy.js', 'reminder-schedule.js', 'reminder-native.js'].forEach(function (f) {
+    var src = fs.readFileSync(path.join(ROOT, f), 'utf8');
+    assert(fs.existsSync(path.join(ROOT, f)), f + ' missing');
+    if (f === 'reminder-native.js') {
+      assert(/isNativePlatform/.test(src), 'reminder-native must gate on native');
+      assert(!/USE_EXACT_ALARM/.test(src), 'must not request USE_EXACT_ALARM');
+    }
+  });
+  var quiz = fs.readFileSync(path.join(ROOT, 'az900_azure_fundamentals_quiz.html'), 'utf8');
+  assert(quiz.indexOf('reminder-native.js') >= 0, 'quiz pages must load reminder-native for goal-met cancel');
+});
+
 test('native capacitor config has no server.url', function () {
   var cfgPath = path.join(ROOT, 'native', 'capacitor.config.json');
   assert(fs.existsSync(cfgPath), 'native/capacitor.config.json missing');

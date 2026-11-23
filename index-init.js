@@ -297,6 +297,9 @@
               window.CloudCramGame.loadState ? window.CloudCramGame.loadState() : null
             );
           }
+          if (window.CloudCramReminders && typeof window.CloudCramReminders.rescheduleAll === 'function') {
+            window.CloudCramReminders.rescheduleAll('import');
+          }
           if (window.refreshQuizNav) window.refreshQuizNav();
           if (typeof window.getQuizCompletedIds === 'function' && document.getElementById('quiz-sortable-list')) {
             var completedIds = window.getQuizCompletedIds();

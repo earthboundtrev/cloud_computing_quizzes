@@ -45,6 +45,12 @@ files.forEach(function (f) {
         s = s.replace(anchor[0], '<script src="native-app.js?v=1"></script>\n  ' + anchor[0]);
       }
     }
+    if (!s.includes('reminder-native.js') && s.includes('gamification.js')) {
+      s = s.replace(
+        /(<script src="gamification\.js[^"]*"><\/script>\n)/,
+        '$1  <script src="push-local-settings.js?v=1"></script>\n  <script src="reminder-copy.js?v=1"></script>\n  <script src="reminder-schedule.js?v=1"></script>\n  <script src="reminder-native.js?v=1"></script>\n'
+      );
+    }
   }
   fs.writeFileSync(path.join(ROOT, f), s);
 });

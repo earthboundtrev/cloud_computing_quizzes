@@ -1003,6 +1003,15 @@
       }
     }
     trackRepairProgress(state, dateStr);
+    if (
+      typeof window !== 'undefined' &&
+      window.CloudCramReminders &&
+      typeof window.CloudCramReminders.onGoalMet === 'function'
+    ) {
+      try {
+        window.CloudCramReminders.onGoalMet();
+      } catch (e) {}
+    }
   }
 
   function migrateFromLegacy(state) {

@@ -98,6 +98,16 @@ Publish SHA-256 of the APK and the signing-cert SHA-256 next to GitHub Release a
 
 Settings → **Your data** → Export / Import. Export uses the system share sheet (`@capacitor/share` / `@capacitor/filesystem`). Import uses the system file picker (no extra storage permission).
 
+Reminder preferences (`cloudcram_push_local_v1`) travel with **Export progress** and survive **Update app**. They are cleared by **Delete all my data**.
+
+## Local study reminders (#112)
+
+- Scheduled on-device with `@capacitor/local-notifications` — no Netlify, no Web Push subscription, no server.
+- **Settings → Reminders:** daily time (default 7:00 PM), optional evening nudge at 9:00 PM when streak ≥ 7 and today’s goal is still open.
+- **Chrome PWA vs app:** progress is separate storage. Meeting today’s goal only in Chrome does **not** cancel a reminder already scheduled on the phone until you **Import** that progress or meet the goal inside the app.
+
+Device checks (Trevor): lock-screen tap with details hidden, OEM battery limits over several days, import-from-PWA cancel behavior.
+
 ## CI
 
 Full `lint.yml` runs on every PR. An optional non-blocking `assembleDebug` workflow may run on `native/**` changes; it is **not** required to merge.
