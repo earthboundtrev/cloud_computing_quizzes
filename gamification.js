@@ -791,6 +791,29 @@
     return runWriteSync(mutator, null);
   }
 
+  function importState(gameRaw) {
+    return withLockedWrite(function (state) {
+      var current = stateFromRaw(readRawMerged());
+      reconcileAnswersFromDedup(current);
+      applyPendingRemoteAnswers(current);
+      var importedState = null;
+      if (typeof gameRaw === 'string') {
+        try {
+          var parsed = JSON.parse(gameRaw);
+          if (!parsed || parsed.v !== STATE_VERSION) return null;
+          importedState = normalizeState(parsed);
+        } catch (e) {
+          return null;
+        }
+      } else if (gameRaw && typeof gameRaw === 'object') {
+        if (gameRaw.v !== STATE_VERSION) return null;
+        importedState = normalizeState(gameRaw);
+      }
+      if (!importedState) return null;
+      return mergeStates(current, importedState);
+    });
+  }
+
   function flushPendingGameWrites() {
     return writeQueue.then(function () {
       var healed = runWriteSync(function (state) {
@@ -1760,6 +1783,7 @@
       return deps;
     },
     syncWrite: syncWrite,
+    importState: importState,
     flushPendingGameWrites: flushPendingGameWrites,
     initDom: initDom,
     renderLauncher: renderLauncher,

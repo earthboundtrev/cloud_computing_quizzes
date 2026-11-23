@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE_NAME = 'cloudcram-v47';
+const CACHE_NAME = 'cloudcram-v48';
 
 const PRECACHE_PATHS = [
   '/index.html',
@@ -39,6 +39,7 @@ const PRECACHE_PATHS = [
   '/storage-tab-merge.js',
   '/reminder-server.js',
   '/data-export.js',
+  '/data-import.js',
   '/data/oci-questions.js',
   '/data/gcp-questions.js',
   '/data/gcp-pca-questions.js',

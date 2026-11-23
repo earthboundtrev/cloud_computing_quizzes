@@ -200,7 +200,34 @@ test('index-init delete dialog uses accessible dialog pattern', function () {
   const src = fs.readFileSync(path.join(ROOT, 'index-init.js'), 'utf8');
   assert(/role',\s*'dialog'/.test(src) || /setAttribute\('role',\s*'dialog'\)/.test(src), 'dialog role');
   assert(/Export first/.test(src), 'export first offered');
+  assert(/Also in Settings/.test(src), 'delete dialog links to Settings export');
   assert(/cancelBtn\.focus\(\)/.test(src), 'cancel focused by default');
+});
+
+test('export allowlist uses registry isImportableKey', function () {
+  const ls = new LocalStorageMock();
+  ls.setItem('quizCompleted', '[]');
+  ls.setItem('unregistered', 'x');
+  const payload = registry.collectExportableLocalStorage(ls);
+  assert(payload.quizCompleted === '[]', 'registered exported');
+  assert(!Object.prototype.hasOwnProperty.call(payload, 'unregistered'), 'unregistered omitted');
+});
+
+test('index.html Settings Your data export/import wired', function () {
+  const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+  assert(/settings-block-data/.test(html), 'your data block');
+  assert(/export-progress-btn/.test(html), 'export button');
+  assert(/import-progress-file/.test(html), 'import file input');
+  assert(/data-import\.js/.test(html), 'import script');
+});
+
+test('index-init wires settings export and import confirm', function () {
+  const src = fs.readFileSync(path.join(ROOT, 'index-init.js'), 'utf8');
+  assert(/export-progress-btn/.test(src), 'export handler');
+  assert(/import-progress-file/.test(src), 'import file handler');
+  assert(/Already up to date/.test(src), 'idempotent message');
+  assert(/confirmSummaryText/.test(src), 'confirm summary');
+  assert(/textContent/.test(src), 'safe text rendering');
 });
 
 test('index-init delete dialog traps focus and restores trigger', function () {

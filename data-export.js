@@ -73,13 +73,18 @@
     return readBrainDumpsFromIdb().then(function (dumps) {
       var payload = buildExportPayload(dumps);
       var date = new Date().toISOString().slice(0, 10);
-      downloadJson('cloudcram_export_' + date + '.json', payload);
+      downloadJson('cloudcram-progress-' + date + '.json', payload);
       return payload;
     });
   }
 
+  function progressFilenameForDate(isoDate) {
+    return 'cloudcram-progress-' + (isoDate || new Date().toISOString().slice(0, 10)) + '.json';
+  }
+
   window.CloudCramDataExport = {
     exportAllUserData: exportAllUserData,
-    buildExportPayload: buildExportPayload
+    buildExportPayload: buildExportPayload,
+    progressFilenameForDate: progressFilenameForDate
   };
 })();

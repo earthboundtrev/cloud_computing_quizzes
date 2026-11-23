@@ -46,8 +46,16 @@ const reg = read(REG_PATH);
 const engine = read(ENGINE_PATH);
 const reset = read(RESET_PATH);
 
-test('sw.js uses cloudcram-v47 cache name', function () {
-  assert(/const CACHE_NAME = 'cloudcram-v47'/.test(sw), 'Expected CACHE_NAME cloudcram-v47');
+function readCacheNameFromSw(source) {
+  const m = source.match(/const CACHE_NAME = '([^']+)'/);
+  if (!m) throw new Error('CACHE_NAME not found in sw.js');
+  return m[1];
+}
+
+const swCacheName = readCacheNameFromSw(sw);
+
+test('sw.js defines CACHE_NAME read from file (not hard-coded in tests)', function () {
+  assert(/^cloudcram-v\d+$/.test(swCacheName), 'Expected cloudcram-vN CACHE_NAME, got ' + swCacheName);
 });
 
 test('sw.js install handler does not call skipWaiting', function () {

@@ -1,0 +1,356 @@
+#!/usr/bin/env node
+/**
+ * Export / import progress — validation and merge (#109).
+ */
+'use strict';
+
+const fs = require('fs');
+const path = require('path');
+const vm = require('vm');
+
+const ROOT = path.join(__dirname, '..');
+const registry = require(path.join(ROOT, 'storage-keys.js'));
+const dataImport = require(path.join(ROOT, 'data-import.js'));
+const mergeApi = require(path.join(ROOT, 'storage-tab-merge.js'));
+const game = require(path.join(ROOT, 'gamification.js'));
+
+class LocalStorageMock {
+  constructor(initial) {
+    this.store = Object.assign(Object.create(null), initial || {});
+  }
+  get length() {
+    return Object.keys(this.store).length;
+  }
+  key(i) {
+    return Object.keys(this.store)[i] || null;
+  }
+  getItem(k) {
+    return Object.prototype.hasOwnProperty.call(this.store, k) ? this.store[k] : null;
+  }
+  setItem(k, v) {
+    this.store[k] = String(v);
+  }
+  removeItem(k) {
+    delete this.store[k];
+  }
+}
+
+function assert(cond, msg) {
+  if (!cond) throw new Error(msg || 'Assertion failed');
+}
+
+let passed = 0;
+let failed = 0;
+
+function test(name, fn) {
+  return Promise.resolve()
+    .then(fn)
+    .then(function () {
+      console.log('✓ ' + name);
+      passed++;
+    })
+    .catch(function (e) {
+      console.error('✗ ' + name);
+      console.error('  ' + e.message);
+      failed++;
+    });
+}
+
+function minimalPayload(overrides) {
+  return Object.assign(
+    {
+      exportedAt: '2026-11-22T12:00:00.000Z',
+      schema: 'cloudcram-export-v1',
+      localStorage: { quizCompleted: '[]' },
+      brainDumpsIndexedDB: []
+    },
+    overrides || {}
+  );
+}
+
+function snapshot(ls) {
+  return dataImport.snapshotLocalStorage(ls);
+}
+
+(async function main() {
+  await test('export allowlist omits unregistered and UI keys', function () {
+    const ls = new LocalStorageMock({
+      quizCompleted: '[]',
+      cloudcram_quiz_ui_foo: '1',
+      random_key: 'x',
+      cloudcram_push_auth_token: 'secret'
+    });
+    const payload = registry.collectExportableLocalStorage(ls);
+    assert(payload.quizCompleted === '[]', 'keeps registered key');
+    assert(!Object.prototype.hasOwnProperty.call(payload, 'cloudcram_quiz_ui_foo'), 'drops UI');
+    assert(!Object.prototype.hasOwnProperty.call(payload, 'random_key'), 'drops unknown');
+    assert(!Object.prototype.hasOwnProperty.call(payload, 'cloudcram_push_auth_token'), 'redacts auth');
+  });
+
+  await test('rejects oversize file before parse', function () {
+    const res = dataImport.validateImportText('{}', dataImport.MAX_FILE_BYTES + 1);
+    assert(!res.ok, 'oversize rejected');
+  });
+
+  await test('rejects wrong schema and invalid JSON', function () {
+    assert(!dataImport.validateImportText('{').ok, 'bad json');
+    const bad = dataImport.validatePayloadRoot({ schema: 'nope', localStorage: {} });
+    assert(!bad.ok, 'wrong schema');
+  });
+
+  await test('rejects redacted key in file', function () {
+    const payload = minimalPayload({
+      localStorage: {
+        quizCompleted: '[]',
+        cloudcram_push_auth_token: 'leak'
+      }
+    });
+    const res = dataImport.validatePayloadRoot(payload);
+    assert(!res.ok, 'redacted in file');
+  });
+
+  await test('rejects reserved prototype keys', function () {
+    const raw =
+      '{"schema":"cloudcram-export-v1","localStorage":{},"__proto__":{"polluted":true}}';
+    const res = dataImport.validateImportText(raw);
+    assert(!res.ok, 'reserved key');
+  });
+
+  await test('rejects empty import file', function () {
+    const res = dataImport.validateImportText('');
+    assert(!res.ok, 'empty file');
+  });
+
+  await test('rejects game state over streak cap', function () {
+    const bad = minimalPayload({
+      localStorage: {
+        cloudcram_game_v1: JSON.stringify({ v: 1, streak: 50000, best: 0 })
+      }
+    });
+    const res = dataImport.validatePayloadRoot(bad);
+    assert(!res.ok, 'streak cap');
+  });
+
+  await test('rejects push endpoint keys in import file', function () {
+    const bad = minimalPayload({
+      localStorage: {
+        quizCompleted: '[]',
+        cloudcram_push_endpoint: 'https://example.test'
+      }
+    });
+    const res = dataImport.validatePayloadRoot(bad);
+    assert(!res.ok, 'push endpoint rejected');
+  });
+
+  await test('rejects reserved keys nested in localStorage JSON values', function () {
+    const bad = minimalPayload({
+      localStorage: {
+        cloudcram_settings_v1: '{"theme":"dark","sessionAttempts":{"__proto__":{"x":1}}}'
+      }
+    });
+    const res = dataImport.validatePayloadRoot(bad);
+    assert(!res.ok, 'nested reserved');
+  });
+
+  await test('validate-then-fail leaves storage unchanged', function () {
+    const ls = new LocalStorageMock({ quizCompleted: '["cissp"]' });
+    const before = snapshot(ls);
+    const res = dataImport.validatePayloadRoot({
+      schema: 'cloudcram-export-v1',
+      localStorage: { cloudcram_push_auth_token: 'x' }
+    });
+    assert(!res.ok, 'invalid');
+    assert(JSON.stringify(snapshot(ls)) === JSON.stringify(before), 'unchanged storage');
+  });
+
+  await test('mergeQuizCompleted unions without duplicates', function () {
+    const merged = dataImport.mergeQuizCompleted('["a","b"]', '["b","c"]');
+    assert(merged === '["a","b","c"]', 'union');
+  });
+
+  await test('mergeQuizOrder keeps local when set', function () {
+    const local = '["cissp","oci"]';
+    const file = '["oci","cissp"]';
+    assert(dataImport.mergeQuizOrder(local, file) === local, 'local order wins');
+    assert(dataImport.mergeQuizOrder(null, file) === file, 'take file when local empty');
+  });
+
+  await test('brain dump merge is idempotent by content identity', function () {
+    const existing = [
+      {
+        id: 1,
+        timestamp: '2026-01-01',
+        quizId: 'cissp',
+        questionText: 'Q1',
+        dumpText: 'note'
+      }
+    ];
+    const incoming = [
+      {
+        id: 99,
+        timestamp: '2026-01-01',
+        quizId: 'cissp',
+        questionText: 'Q1',
+        dumpText: 'note'
+      },
+      {
+        id: 2,
+        timestamp: '2026-01-02T00:00:00.000Z',
+        quizId: 'cissp',
+        questionText: 'Q2',
+        dumpText: 'other'
+      }
+    ];
+    const first = dataImport.mergeBrainDumpsForImport(existing, incoming);
+    assert(first.added === 1, 'only new content');
+    const second = dataImport.mergeBrainDumpsForImport(existing.concat(first.toAdd), incoming);
+    assert(second.added === 0, 're-import noop');
+  });
+
+  await test('profile merge idempotent via sessionAttempts union', async function () {
+    const ls = new LocalStorageMock();
+    const key = 'study_sessions_profile_cissp';
+    const attemptA = {
+      id: 'attempt-a',
+      quizId: 'cissp',
+      answered: 5,
+      correct: 4,
+      topicHits: {},
+      topicMisses: {}
+    };
+    const base = mergeApi.parseProfile(null, 'cissp');
+    base.sessionAttempts[attemptA.id] = attemptA;
+    base.appliedSessionAttempts[attemptA.id] = true;
+    ls.setItem(key, JSON.stringify(base));
+
+    const importProf = mergeApi.parseProfile(null, 'cissp');
+    const attemptB = {
+      id: 'attempt-b',
+      quizId: 'cissp',
+      answered: 3,
+      correct: 2,
+      topicHits: {},
+      topicMisses: {}
+    };
+    importProf.sessionAttempts[attemptB.id] = attemptB;
+    importProf.appliedSessionAttempts[attemptB.id] = true;
+
+    const validated = dataImport.validatePayloadRoot(
+      minimalPayload({ localStorage: { [key]: JSON.stringify(importProf) } })
+    );
+    assert(validated.ok, 'payload ok');
+    const beforeSnap = snapshot(ls);
+    const res1 = await dataImport.applyImportMerge({
+      payload: validated.payload,
+      localStorage: ls,
+      mergeApi: mergeApi,
+      existingBrainDumps: [],
+      writeBrainDumps: function () { return Promise.resolve(0); }
+    });
+    assert(res1.ok && !res1.noop, 'first import changes data');
+    const afterFirst = snapshot(ls);
+    const res2 = await dataImport.applyImportMerge({
+      payload: validated.payload,
+      localStorage: ls,
+      mergeApi: mergeApi,
+      existingBrainDumps: [],
+      writeBrainDumps: function () { return Promise.resolve(0); }
+    });
+    assert(res2.noop, 'second import noop');
+    assert(JSON.stringify(snapshot(ls)) === JSON.stringify(afterFirst), 'stable re-import');
+    assert(JSON.stringify(snapshot(ls)) !== JSON.stringify(beforeSnap), 'first import differed');
+  });
+
+  await test('importState merges game without raw replace', async function () {
+    game.shutdownForTests && game.shutdownForTests();
+    const ls = new LocalStorageMock();
+    game.setDeps({
+      localStorage: ls,
+      locks: null,
+      storageEventTarget: null,
+      now: function () { return Date.parse('2026-11-22T12:00:00Z'); }
+    });
+    const localState = game.defaultState();
+    localState.streak = 5;
+    localState.answers = 10;
+    localState.v = 1;
+    ls.setItem('cloudcram_game_v1', JSON.stringify(localState));
+
+    const incoming = game.defaultState();
+    incoming.streak = 14;
+    incoming.answers = 12;
+    incoming.v = 1;
+    incoming.answerDedup = Object.assign({}, localState.answerDedup || {});
+    incoming.answerDedup['2026-11-21:s1:q1'] = true;
+    incoming.answerDedup['2026-11-21:s1:q2'] = true;
+
+    const merged = await game.importState(JSON.stringify(incoming));
+    assert(merged && merged.streak === 14, 'streak merged up');
+    const dedupCount = Object.keys(merged.answerDedup || {}).length;
+    assert(dedupCount >= 2, 'answer dedup merged');
+    const again = await game.importState(JSON.stringify(incoming));
+    const dedupAgain = Object.keys(again.answerDedup || {}).length;
+    assert(dedupAgain === dedupCount, 'idempotent game re-import');
+    assert(again.streak === merged.streak, 'streak stable');
+  });
+
+  await test('applyImportMerge noop when re-importing same export', async function () {
+    game.shutdownForTests && game.shutdownForTests();
+    const ls = new LocalStorageMock();
+    game.setDeps({
+      localStorage: ls,
+      locks: null,
+      storageEventTarget: null,
+      now: function () { return Date.parse('2026-11-22T12:00:00Z'); }
+    });
+    const gameState = game.defaultState();
+    gameState.streak = 14;
+    gameState.v = 1;
+    gameState.answerDedup = { '2026-11-21:s1:q1': true };
+    ls.setItem('cloudcram_game_v1', JSON.stringify(gameState));
+    const validated = dataImport.validatePayloadRoot(
+      minimalPayload({
+        localStorage: {
+          quizCompleted: '["cissp"]',
+          cloudcram_game_v1: JSON.stringify(gameState)
+        }
+      })
+    );
+    const first = await dataImport.applyImportMerge({
+      payload: validated.payload,
+      localStorage: ls,
+      mergeApi: mergeApi,
+      gameApi: game,
+      existingBrainDumps: [],
+      writeBrainDumps: function () { return Promise.resolve(0); }
+    });
+    assert(first.ok, 'first ok');
+    const second = await dataImport.applyImportMerge({
+      payload: validated.payload,
+      localStorage: ls,
+      mergeApi: mergeApi,
+      gameApi: game,
+      existingBrainDumps: [],
+      writeBrainDumps: function () { return Promise.resolve(0); }
+    });
+    assert(second.ok && second.noop, 're-import noop');
+  });
+
+  await test('data-export filename uses cloudcram-progress prefix', function () {
+    const sandbox = { window: {}, console: console };
+    sandbox.window = sandbox;
+    vm.createContext(sandbox);
+    vm.runInContext(fs.readFileSync(path.join(ROOT, 'data-export.js'), 'utf8'), sandbox);
+    assert(
+      sandbox.window.CloudCramDataExport.progressFilenameForDate('2026-11-22') ===
+        'cloudcram-progress-2026-11-22.json',
+      'progress filename'
+    );
+  });
+
+  console.log('\n' + passed + ' passed, ' + failed + ' failed');
+  process.exit(failed > 0 ? 1 : 0);
+})().catch(function (e) {
+  console.error(e);
+  process.exit(1);
+});

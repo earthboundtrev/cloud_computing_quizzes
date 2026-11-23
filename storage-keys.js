@@ -103,11 +103,25 @@
     });
   }
 
+  function isExportRedactedKey(storageKey) {
+    if (EXPORT_REDACT_EXACT[storageKey]) return true;
+    if (storageKey.indexOf('push') !== -1 && storageKey.indexOf('cloudcram_push_local') === -1) {
+      return true;
+    }
+    return false;
+  }
+
+  function isImportableKey(storageKey) {
+    if (!isRegisteredKey(storageKey)) return false;
+    if (!shouldKeepOnUpdate(storageKey)) return false;
+    if (isExportRedactedKey(storageKey)) return false;
+    return true;
+  }
+
   function collectExportableLocalStorage(storage) {
     var out = {};
     listLocalStorageKeys(storage).forEach(function (key) {
-      if (EXPORT_REDACT_EXACT[key]) return;
-      if (key.indexOf('push') !== -1 && key.indexOf('cloudcram_push_local') === -1) return;
+      if (!isImportableKey(key)) return;
       try {
         out[key] = storage.getItem(key);
       } catch (e) {}
@@ -127,6 +141,8 @@
     listLocalStorageKeys: listLocalStorageKeys,
     pruneLocalStorageForUpdate: pruneLocalStorageForUpdate,
     clearLocalStorageForDelete: clearLocalStorageForDelete,
-    collectExportableLocalStorage: collectExportableLocalStorage
+    collectExportableLocalStorage: collectExportableLocalStorage,
+    isExportRedactedKey: isExportRedactedKey,
+    isImportableKey: isImportableKey
   };
 });

@@ -114,7 +114,12 @@
     title.textContent = 'Delete all my data?';
 
     var body = document.createElement('p');
-    body.textContent = 'Delete all my data removes everything from this device and the reminder server.';
+    body.textContent =
+      'Delete all my data removes everything from this device and the reminder server.';
+
+    var alsoSettings = document.createElement('p');
+    alsoSettings.className = 'settings-help';
+    alsoSettings.textContent = 'Also in Settings > Your data.';
 
     var actions = document.createElement('div');
     actions.className = 'delete-data-dialog-actions';
@@ -139,6 +144,7 @@
     actions.appendChild(confirmBtn);
     dialog.appendChild(title);
     dialog.appendChild(body);
+    dialog.appendChild(alsoSettings);
     dialog.appendChild(actions);
     overlay.appendChild(dialog);
     document.body.appendChild(overlay);
@@ -189,6 +195,163 @@
   if (deleteBtn) {
     deleteBtn.addEventListener('click', function () {
       openDeleteConfirmDialog(deleteBtn);
+    });
+  }
+
+  function setSettingsStatus(message) {
+    var status = document.getElementById('settings-status');
+    if (status) status.textContent = message || '';
+  }
+
+  function openImportConfirmDialog(summary, payload, triggerEl, fileInput) {
+    var overlay = document.createElement('div');
+    overlay.className = 'delete-data-dialog-overlay';
+    overlay.setAttribute('role', 'presentation');
+
+    var dialog = document.createElement('div');
+    dialog.className = 'delete-data-dialog';
+    dialog.setAttribute('role', 'dialog');
+    dialog.setAttribute('aria-modal', 'true');
+    dialog.setAttribute('aria-labelledby', 'import-progress-dialog-title');
+
+    var title = document.createElement('h3');
+    title.id = 'import-progress-dialog-title';
+    title.textContent = 'Import progress?';
+
+    var body = document.createElement('p');
+    if (window.CloudCramDataImport && typeof window.CloudCramDataImport.confirmSummaryText === 'function') {
+      body.textContent = window.CloudCramDataImport.confirmSummaryText(summary);
+    } else {
+      body.textContent = 'Your current progress is kept and combined, nothing is deleted.';
+    }
+
+    var actions = document.createElement('div');
+    actions.className = 'delete-data-dialog-actions';
+
+    var cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.className = 'delete-data-dialog-cancel';
+    cancelBtn.textContent = 'Cancel';
+
+    var importBtn = document.createElement('button');
+    importBtn.type = 'button';
+    importBtn.className = 'delete-data-dialog-export';
+    importBtn.textContent = 'Import';
+
+    actions.appendChild(cancelBtn);
+    actions.appendChild(importBtn);
+    dialog.appendChild(title);
+    dialog.appendChild(body);
+    dialog.appendChild(actions);
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+
+    var focusables = [cancelBtn, importBtn];
+
+    function closeDialog() {
+      overlay.remove();
+      document.removeEventListener('keydown', onKeyDown);
+      if (triggerEl && typeof triggerEl.focus === 'function') triggerEl.focus();
+      if (fileInput) fileInput.value = '';
+    }
+
+    function onKeyDown(ev) {
+      if (ev.key === 'Escape') {
+        ev.preventDefault();
+        closeDialog();
+        return;
+      }
+      trapFocusInDialog(dialog, focusables, ev);
+    }
+
+    document.addEventListener('keydown', onKeyDown);
+    cancelBtn.addEventListener('click', closeDialog);
+    overlay.addEventListener('click', function (ev) {
+      if (ev.target === overlay) closeDialog();
+    });
+
+    importBtn.addEventListener('click', function () {
+      importBtn.disabled = true;
+      var run =
+        window.CloudCramDataImport && typeof window.CloudCramDataImport.runValidatedImport === 'function'
+          ? window.CloudCramDataImport.runValidatedImport(payload)
+          : Promise.resolve({ ok: false });
+      run
+        .then(function (res) {
+          closeDialog();
+          if (!res || !res.ok) {
+            setSettingsStatus('This isn\'t a Cloud Cram progress file. Nothing was changed.');
+            return;
+          }
+          if (res.noop) {
+            setSettingsStatus('Already up to date. Nothing new in this file.');
+            return;
+          }
+          var s = res.summary || summary;
+          var parts = [];
+          if (s.streak) parts.push('Streak ' + s.streak + ' days');
+          if (s.tracks) parts.push(s.tracks + ' track' + (s.tracks === 1 ? '' : 's'));
+          setSettingsStatus(parts.length ? 'Imported ✓ ' + parts.join(' · ') : 'Imported ✓');
+          if (window.CloudCramGame && typeof window.CloudCramGame.renderLauncher === 'function') {
+            window.CloudCramGame.renderLauncher(
+              window.CloudCramGame.loadState ? window.CloudCramGame.loadState() : null
+            );
+          }
+          if (window.refreshQuizNav) window.refreshQuizNav();
+          if (typeof window.getQuizCompletedIds === 'function' && document.getElementById('quiz-sortable-list')) {
+            var completedIds = window.getQuizCompletedIds();
+            document.querySelectorAll('.quiz-complete-checkbox').forEach(function (cb) {
+              var id = cb.getAttribute('data-quiz-id');
+              var done = completedIds.indexOf(id) >= 0;
+              cb.checked = done;
+            });
+          }
+        })
+        .catch(function () {
+          closeDialog();
+          setSettingsStatus('This isn\'t a Cloud Cram progress file. Nothing was changed.');
+        });
+    });
+
+    cancelBtn.focus();
+  }
+
+  var exportBtn = document.getElementById('export-progress-btn');
+  if (exportBtn && window.CloudCramDataExport) {
+    exportBtn.addEventListener('click', function () {
+      window.CloudCramDataExport.exportAllUserData().then(function () {
+        setSettingsStatus('Saved to Downloads');
+      }).catch(function () {
+        setSettingsStatus('Could not export progress.');
+      });
+    });
+  }
+
+  var importFile = document.getElementById('import-progress-file');
+  var importTrigger = document.getElementById('import-progress-btn');
+  function startImportPicker() {
+    if (importFile) importFile.click();
+  }
+  if (importTrigger && importFile) {
+    importTrigger.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      startImportPicker();
+    });
+    importFile.addEventListener('change', function () {
+      var file = importFile.files && importFile.files[0];
+      if (!file || !window.CloudCramDataImport) return;
+      window.CloudCramDataImport.applyImportFromFile(file).then(function (parsed) {
+        if (!parsed || !parsed.ok) {
+          setSettingsStatus(
+            (parsed && parsed.message) ||
+              'This isn\'t a Cloud Cram progress file. Nothing was changed.'
+          );
+          importFile.value = '';
+          return;
+        }
+        var summary = window.CloudCramDataImport.buildImportSummary(parsed.payload);
+        openImportConfirmDialog(summary, parsed.payload, importTrigger, importFile);
+      });
     });
   }
 })();

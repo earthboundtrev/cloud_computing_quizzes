@@ -11,7 +11,7 @@
   <link rel="icon" href="/favicon.ico">
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
   <title>Study Sessions – Practice Quizzes</title>
-  <link rel="stylesheet" href="css/quiz-common.css?v=5">
+  <link rel="stylesheet" href="css/quiz-common.css?v=6">
   <style>
     :root {
       --oci: #f97316;
@@ -83,7 +83,7 @@
   <script src="sw-register.js?v=5"></script>
   <script src="brain-dump.js?v=2"></script>
   <script src="motivation.js?v=5"></script>
-  <script src="gamification.js?v=7"></script>
+  <script src="gamification.js?v=8"></script>
   <script src="session-streak.js?v=3"></script>
 </head>
 <body>
@@ -107,6 +107,15 @@
       <div class="settings-block settings-block-update">
         <p class="settings-help" id="settings-update-help">Update app keeps your progress and reminders</p>
       </div>
+      <div class="settings-block settings-block-data" aria-labelledby="settings-data-heading">
+        <h3 id="settings-data-heading" class="settings-subheading">Your data</h3>
+        <p class="settings-help" id="settings-data-help">Export or import progress as a JSON file on this device.</p>
+        <div class="settings-data-actions">
+          <button type="button" class="settings-data-btn" id="export-progress-btn" aria-describedby="settings-data-help">Export progress</button>
+          <input type="file" class="settings-data-file" id="import-progress-file" accept=".json,application/json" tabindex="-1" aria-hidden="true" />
+          <button type="button" class="settings-data-btn settings-data-btn-secondary" id="import-progress-btn">Import progress…</button>
+        </div>
+      </div>
       <div class="settings-block settings-block-danger" aria-labelledby="settings-delete-heading">
         <h3 id="settings-delete-heading" class="settings-subheading">Data on this device</h3>
         <p class="settings-help settings-danger-help" id="settings-delete-help">Delete all my data removes everything from this device and the reminder server.</p>
@@ -118,10 +127,11 @@
     <div id="quiz-list-container"></div>
   </div>
   <script src="quiz-nav.js?v=2"></script>
-  <script src="storage-keys.js?v=1"></script>
+  <script src="storage-keys.js?v=2"></script>
   <script src="reminder-server.js?v=1"></script>
-  <script src="data-export.js?v=1"></script>
+  <script src="data-export.js?v=2"></script>
+  <script src="data-import.js?v=1"></script>
   <script src="app-reset.js?v=5"></script>
-  <script src="index-init.js?v=6"></script>
+  <script src="index-init.js?v=7"></script>
 </body>
 </html>
