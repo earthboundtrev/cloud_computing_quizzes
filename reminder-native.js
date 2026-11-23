@@ -180,11 +180,15 @@
   }
 
   function planToNotifications(plan, exact) {
+    var now = Date.now();
+    var today = todayStr();
     return plan.map(function (item) {
       var at = item.at;
-      if (!at || !(at instanceof Date) || at.getTime() <= Date.now()) {
-        if (item.kind === 'daily' && item.date !== todayStr()) return null;
-        if (item.kind === 'evening' && at && at.getTime() <= Date.now()) return null;
+      if (!at || !(at instanceof Date)) return null;
+      if (at.getTime() <= now) {
+        if (item.kind === 'daily' && item.date === today) return null;
+        if (item.kind === 'evening' && item.date === today) return null;
+        if (item.kind === 'daily' && item.date !== today) return null;
       }
       return {
         id: item.id,
