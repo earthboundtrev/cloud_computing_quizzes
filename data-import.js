@@ -17,7 +17,14 @@
   var MAX_BRAIN_DUMP_RECORDS = 12000;
   var MAX_BRAIN_TEXT_CHARS = 100000;
   var IMPORT_LOCK = 'cloudcram_progress_import_v1';
-  var RESERVED = { __proto__: true, constructor: true, prototype: true };
+  var BRAIN_DB = 'StudySessionsBrainDumps';
+  var BRAIN_STORE = 'dumps';
+  var BRAIN_DB_VER = 1;
+  var LS_BRAIN_KEY = 'study_sessions_brain_dumps';
+
+  function isReservedKeyName(key) {
+    return key === '__proto__' || key === 'constructor' || key === 'prototype';
+  }
   var PROFILE_PREFIX = 'study_sessions_profile_';
   var GAME_KEY = 'cloudcram_game_v1';
   var BRAIN_DUMP_ALLOWED_FIELDS = { id: true, questionText: true, dumpText: true, timestamp: true, quizId: true };
@@ -46,10 +53,19 @@
     }
     var keys = Object.keys(val);
     for (var k = 0; k < keys.length; k++) {
-      if (RESERVED[keys[k]]) return true;
+      if (isReservedKeyName(keys[k])) return true;
       if (containsReservedKey(val[keys[k]], depth + 1)) return true;
     }
     return false;
+  }
+
+  function parseJsonValueHasReserved(raw) {
+    if (typeof raw !== 'string' || !raw) return false;
+    var trimmed = raw.trim();
+    if (trimmed.charAt(0) !== '{' && trimmed.charAt(0) !== '[') return false;
+    var parsed = parseJsonSafe(raw);
+    if (parsed === null) return false;
+    return containsReservedKey(parsed, 0);
   }
 
   function sanitizePlainObject(val, depth) {
@@ -59,7 +75,7 @@
     var keys = Object.keys(val);
     for (var i = 0; i < keys.length; i++) {
       var key = keys[i];
-      if (RESERVED[key]) continue;
+      if (isReservedKeyName(key)) continue;
       var child = val[key];
       if (child !== null && typeof child === 'object') {
         if (Array.isArray(child)) {
@@ -170,7 +186,7 @@
     if (!keysApi) return reject('registry', 'Storage registry unavailable.');
     for (var i = 0; i < lsKeys.length; i++) {
       var key = lsKeys[i];
-      if (RESERVED[key]) {
+      if (isReservedKeyName(key)) {
         return reject('reserved', 'This isn\'t a Cloud Cram progress file. Nothing was changed.');
       }
       if (keysApi.isExportRedactedKey && keysApi.isExportRedactedKey(key)) {
@@ -184,6 +200,9 @@
       }
       if (typeof val === 'string' && val.length > MAX_LS_VALUE_CHARS) {
         return reject('localStorage_size', 'localStorage value too large.');
+      }
+      if (keysApi.isImportableKey(key) && parseJsonValueHasReserved(val)) {
+        return reject('reserved', 'This isn\'t a Cloud Cram progress file. Nothing was changed.');
       }
     }
     if (parsed.brainDumpsIndexedDB !== undefined) {
@@ -304,11 +323,10 @@
     if (!importRaw) return localRaw;
     if (!localRaw) return importRaw;
     try {
-      var a = JSON.parse(localRaw);
-      var b = JSON.parse(importRaw);
-      if (isPlainObject(a) && isPlainObject(b)) {
-        var out = Object.assign({}, b, a);
-        return JSON.stringify(out);
+      var a = sanitizePlainObject(JSON.parse(localRaw), 0);
+      var b = sanitizePlainObject(JSON.parse(importRaw), 0);
+      if (a && b) {
+        return JSON.stringify(Object.assign({}, b, a));
       }
     } catch (e) {}
     return localRaw;
@@ -475,33 +493,75 @@
     return true;
   }
 
-  function applyProfileMerges(localStorage, entries, mergeApi) {
-    if (!mergeApi) return false;
-    var changed = false;
-    var keys = Object.keys(entries);
-    for (var i = 0; i < keys.length; i++) {
-      var key = keys[i];
-      if (key.indexOf(PROFILE_PREFIX) !== 0) continue;
-      var importRaw = entries[key];
-      if (importRaw == null) continue;
-      var quizId = key.slice(PROFILE_PREFIX.length) || 'quiz';
+  function mergeOneProfile(localStorage, entries, mergeApi, locks, key) {
+    var importRaw = entries[key];
+    if (importRaw == null) return Promise.resolve(false);
+    var quizId = key.slice(PROFILE_PREFIX.length) || 'quiz';
+    var maxAttempts = mergeApi.MAX_RMW_ATTEMPTS || 24;
+
+    function mergeOnce() {
       var before = null;
       try {
         before = localStorage.getItem(key);
-      } catch (e1) {}
-      var mergedRaw = mergeApi.readRawMerged
-        ? mergeApi.readRawMerged(localStorage, key, quizId)
-        : before;
-      var localProf = mergeApi.parseProfile(mergedRaw, quizId);
-      var importProf = mergeApi.parseProfile(importRaw, quizId);
-      var nextProf = mergeApi.mergeProfiles(localProf, importProf);
-      var serialized = JSON.stringify(nextProf);
-      if (serialized !== before) {
-        localStorage.setItem(key, serialized);
-        changed = true;
+      } catch (e0) {}
+      for (var i = 0; i < maxAttempts; i++) {
+        var mergedRaw = mergeApi.readRawMerged
+          ? mergeApi.readRawMerged(localStorage, key, quizId)
+          : before;
+        var localProf = mergeApi.parseProfile(mergedRaw, quizId);
+        var importProf = mergeApi.parseProfile(importRaw, quizId);
+        var nextProf = mergeApi.mergeProfiles(localProf, importProf);
+        var serialized = JSON.stringify(nextProf);
+        if (serialized === before) return false;
+        try {
+          localStorage.setItem(key, serialized);
+        } catch (e1) {
+          return false;
+        }
+        if (localStorage.getItem(key) === serialized) return true;
       }
+      return false;
     }
-    return changed;
+
+    if (locks && mergeApi.runLocked) {
+      return mergeApi.runLocked(locks, key, mergeOnce);
+    }
+    return Promise.resolve(mergeOnce());
+  }
+
+  function applyProfileMerges(localStorage, entries, mergeApi, locks) {
+    if (!mergeApi) return Promise.resolve(false);
+    var keys = Object.keys(entries).filter(function (key) {
+      return key.indexOf(PROFILE_PREFIX) === 0;
+    });
+  if (!keys.length) return Promise.resolve(false);
+    var chain = Promise.resolve(false);
+    keys.forEach(function (key) {
+      chain = chain.then(function (changed) {
+        return mergeOneProfile(localStorage, entries, mergeApi, locks, key).then(function (one) {
+          return changed || one;
+        });
+      });
+    });
+    return chain;
+  }
+
+  function writeBrainDumpsToLocalStorage(localStorage, toAdd, existing) {
+    if (!localStorage || !toAdd || !toAdd.length) return 0;
+    var list = Array.isArray(existing) ? existing.slice() : [];
+    var merged = mergeBrainDumpsForImport(list, toAdd);
+    if (!merged.added) return 0;
+    var withIds = merged.toAdd.map(function (rec, idx) {
+      return Object.assign({}, rec, {
+        id: 'imp_' + Date.now() + '_' + idx
+      });
+    });
+    try {
+      localStorage.setItem(LS_BRAIN_KEY, JSON.stringify(list.concat(withIds)));
+      return withIds.length;
+    } catch (e) {
+      return 0;
+    }
   }
 
   function applyExactMerges(localStorage, entries, skipKeys) {
@@ -551,18 +611,26 @@
 
     function doMerge() {
       var gameRaw = entries[GAME_KEY];
+      var gameDiskBefore = null;
+      try {
+        gameDiskBefore = localStorage.getItem(GAME_KEY);
+      } catch (eGame) {}
       var gamePromise = Promise.resolve(false);
       if (gameRaw && gameApi && typeof gameApi.importState === 'function') {
-        gamePromise = Promise.resolve(gameApi.importState(gameRaw)).then(function (res) {
-          return res !== false && res != null;
-        }).catch(function () {
-          return false;
-        });
+        gamePromise = Promise.resolve(gameApi.importState(gameRaw))
+          .then(function () {
+            try {
+              return localStorage.getItem(GAME_KEY) !== gameDiskBefore;
+            } catch (e2) {
+              return false;
+            }
+          })
+          .catch(function () {
+            return false;
+          });
       }
       return gamePromise.then(function (gameChanged) {
-        var profileChanged = mergeApi
-          ? applyProfileMerges(localStorage, entries, mergeApi)
-          : false;
+        return applyProfileMerges(localStorage, entries, mergeApi, locks).then(function (profileChanged) {
         var storageChanged = applyExactMerges(localStorage, entries, skipKeys);
 
         var importDumpSource =
@@ -576,6 +644,9 @@
             ? writeBrainDumps(brainMerge.toAdd)
             : 0
         ).then(function (written) {
+          if (!written && brainMerge.added > 0) {
+            written = writeBrainDumpsToLocalStorage(localStorage, brainMerge.toAdd, existingBrainDumps);
+          }
           var brainChanged = written > 0;
           var afterSnap = snapshotLocalStorage(localStorage);
           var noop =
@@ -592,6 +663,7 @@
             summary: buildImportSummary(payload)
           };
         });
+        });
       });
     }
 
@@ -603,29 +675,41 @@
     return doMerge();
   }
 
-  function readBrainDumpsFromIdb(idb) {
+  function openBrainDumpDatabase(idb) {
     return new Promise(function (resolve) {
       if (!idb) {
-        resolve([]);
+        resolve(null);
         return;
       }
       var req;
       try {
-        req = idb.open('StudySessionsBrainDumps');
+        req = idb.open(BRAIN_DB, BRAIN_DB_VER);
       } catch (e) {
-        resolve([]);
+        resolve(null);
         return;
       }
-      req.onerror = function () { resolve([]); };
-      req.onsuccess = function () {
-        var db = req.result;
-        if (!db.objectStoreNames.contains('dumps')) {
-          db.close();
-          resolve([]);
-          return;
+      req.onerror = function () { resolve(null); };
+      req.onupgradeneeded = function (ev) {
+        var db = ev.target.result;
+        if (!db.objectStoreNames.contains(BRAIN_STORE)) {
+          db.createObjectStore(BRAIN_STORE, { keyPath: 'id', autoIncrement: true });
         }
-        var tx = db.transaction('dumps', 'readonly');
-        var all = tx.objectStore('dumps').getAll();
+      };
+      req.onsuccess = function () {
+        resolve(req.result);
+      };
+    });
+  }
+
+  function readBrainDumpsFromIdb(idb) {
+    return openBrainDumpDatabase(idb).then(function (db) {
+      if (!db || !db.objectStoreNames.contains(BRAIN_STORE)) {
+        if (db) db.close();
+        return [];
+      }
+      return new Promise(function (resolve) {
+        var tx = db.transaction(BRAIN_STORE, 'readonly');
+        var all = tx.objectStore(BRAIN_STORE).getAll();
         all.onsuccess = function () {
           db.close();
           resolve(all.result || []);
@@ -634,33 +718,20 @@
           db.close();
           resolve([]);
         };
-      };
+      });
     });
   }
 
   function writeBrainDumpsToIdb(idb, records) {
-    return new Promise(function (resolve) {
-      if (!idb || !records || !records.length) {
-        resolve(0);
-        return;
+    if (!records || !records.length) return Promise.resolve(0);
+    return openBrainDumpDatabase(idb).then(function (db) {
+      if (!db || !db.objectStoreNames.contains(BRAIN_STORE)) {
+        if (db) db.close();
+        return 0;
       }
-      var req;
-      try {
-        req = idb.open('StudySessionsBrainDumps');
-      } catch (e) {
-        resolve(0);
-        return;
-      }
-      req.onerror = function () { resolve(0); };
-      req.onsuccess = function () {
-        var db = req.result;
-        if (!db.objectStoreNames.contains('dumps')) {
-          db.close();
-          resolve(0);
-          return;
-        }
-        var tx = db.transaction('dumps', 'readwrite');
-        var store = tx.objectStore('dumps');
+      return new Promise(function (resolve) {
+        var tx = db.transaction(BRAIN_STORE, 'readwrite');
+        var store = tx.objectStore(BRAIN_STORE);
         var added = 0;
         records.forEach(function (rec) {
           store.add(rec);
@@ -674,7 +745,7 @@
           db.close();
           resolve(0);
         };
-      };
+      });
     });
   }
 

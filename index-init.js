@@ -323,12 +323,6 @@
       ev.preventDefault();
       startImportPicker();
     });
-    importTrigger.addEventListener('keydown', function (ev) {
-      if (ev.key === 'Enter' || ev.key === ' ') {
-        ev.preventDefault();
-        startImportPicker();
-      }
-    });
     importFile.addEventListener('change', function () {
       var file = importFile.files && importFile.files[0];
       if (!file || !window.CloudCramDataImport) return;

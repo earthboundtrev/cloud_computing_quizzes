@@ -116,6 +116,16 @@ function snapshot(ls) {
     assert(!res.ok, 'reserved key');
   });
 
+  await test('rejects reserved keys nested in localStorage JSON values', function () {
+    const bad = minimalPayload({
+      localStorage: {
+        cloudcram_settings_v1: '{"theme":"dark","sessionAttempts":{"__proto__":{"x":1}}}'
+      }
+    });
+    const res = dataImport.validatePayloadRoot(bad);
+    assert(!res.ok, 'nested reserved');
+  });
+
   await test('validate-then-fail leaves storage unchanged', function () {
     const ls = new LocalStorageMock({ quizCompleted: '["cissp"]' });
     const before = snapshot(ls);
@@ -256,6 +266,48 @@ function snapshot(ls) {
     const dedupAgain = Object.keys(again.answerDedup || {}).length;
     assert(dedupAgain === dedupCount, 'idempotent game re-import');
     assert(again.streak === merged.streak, 'streak stable');
+  });
+
+  await test('applyImportMerge noop when re-importing same export', async function () {
+    game.shutdownForTests && game.shutdownForTests();
+    const ls = new LocalStorageMock();
+    game.setDeps({
+      localStorage: ls,
+      locks: null,
+      storageEventTarget: null,
+      now: function () { return Date.parse('2026-11-22T12:00:00Z'); }
+    });
+    const gameState = game.defaultState();
+    gameState.streak = 14;
+    gameState.v = 1;
+    gameState.answerDedup = { '2026-11-21:s1:q1': true };
+    ls.setItem('cloudcram_game_v1', JSON.stringify(gameState));
+    const validated = dataImport.validatePayloadRoot(
+      minimalPayload({
+        localStorage: {
+          quizCompleted: '["cissp"]',
+          cloudcram_game_v1: JSON.stringify(gameState)
+        }
+      })
+    );
+    const first = await dataImport.applyImportMerge({
+      payload: validated.payload,
+      localStorage: ls,
+      mergeApi: mergeApi,
+      gameApi: game,
+      existingBrainDumps: [],
+      writeBrainDumps: function () { return Promise.resolve(0); }
+    });
+    assert(first.ok, 'first ok');
+    const second = await dataImport.applyImportMerge({
+      payload: validated.payload,
+      localStorage: ls,
+      mergeApi: mergeApi,
+      gameApi: game,
+      existingBrainDumps: [],
+      writeBrainDumps: function () { return Promise.resolve(0); }
+    });
+    assert(second.ok && second.noop, 're-import noop');
   });
 
   await test('data-export filename uses cloudcram-progress prefix', function () {
