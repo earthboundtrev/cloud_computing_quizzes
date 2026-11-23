@@ -91,7 +91,7 @@ Publish SHA-256 of the APK and the signing-cert SHA-256 next to GitHub Release a
 ## PWA vs Android UI
 
 - In the Android app, **Update app** (service worker) is hidden — sideload a new APK to update bundled code.
-- Settings shows **App {versionName} · {CACHE_NAME}** (e.g. `App 1.0.0 · cloudcram-v49`).
+- Settings shows **App {versionName} · {CACHE_NAME}** (e.g. `App 1.0.0 · cloudcram-v50`).
 - **Delete all my data** still clears local storage, IndexedDB, and caches (export first if needed).
 
 ## Export / import in WebView

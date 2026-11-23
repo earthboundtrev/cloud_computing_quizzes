@@ -3,13 +3,14 @@
 | Field | Value |
 |-------|--------|
 | Issues | [#111](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/111), [#110](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/110) — **OPEN** (`Refs` only until device sideload) |
-| Branch | `cursor/capacitor-android-111-c7d9` |
+| Branch | `cursor/capacitor-android-111-c7d9` (rebased on `ea2ec30` / #115) |
 
 ## Pointer log
 
 | Stage | Status | Notes |
 |-------|--------|--------|
 | IMPLEMENT | Done | `native/` Capacitor 8.6.2, sync-www, vendor Sortable, CSP, native SW skip, export share, docs/android.md |
+| REBASE | Done | Onto `ea2ec30` (#115); `CACHE_NAME` **cloudcram-v50** (v49 consumed by #115) |
 | BUGBOT | **Clean** | 2nd pass after DOMContentLoaded, share cancel, icons, file_paths |
 | BUGBOT (CSP delta) | **Clean** | Inline handlers stripped, meta CSP sans `frame-ancestors` |
 | TESTS | **Pass** | Full CI-equivalent + `lint-html-entry.js` + `playwright-console-clean.mjs` (17 pages, 0 errors) |
