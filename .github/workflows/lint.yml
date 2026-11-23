@@ -60,6 +60,9 @@ jobs:
     - name: Capacitor Android guardrails (#111)
       run: node scripts/test-capacitor-native.js
 
+    - name: Local reminder schedule (#112)
+      run: node scripts/test-reminder-schedule.js
+
     - name: Entry HTML CSP and no inline handlers (#111)
       run: node scripts/lint-html-entry.js
     

@@ -290,11 +290,17 @@
 
   function runDeleteAllMyDataAfterNotify(options) {
     var reminderApi = window.CloudCramReminderServer;
+    var localCancel =
+      window.CloudCramReminders && typeof window.CloudCramReminders.cancelAllPending === 'function'
+        ? window.CloudCramReminders.cancelAllPending()
+        : Promise.resolve();
     var serverPromise = reminderApi && typeof reminderApi.deleteReminderServerRecord === 'function'
       ? reminderApi.deleteReminderServerRecord()
       : Promise.resolve({ ok: true, skipped: true });
 
-    return serverPromise
+    return localCancel.then(function () {
+      return serverPromise;
+    })
       .then(function (serverResult) {
         if (serverResult && serverResult.ok === false && !serverResult.offline) {
           window.__cloudcramDeleteInProgress = false;

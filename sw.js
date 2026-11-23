@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE_NAME = 'cloudcram-v50';
+const CACHE_NAME = 'cloudcram-v51';
 
 const PRECACHE_PATHS = [
   '/index.html',
@@ -112,6 +112,10 @@ const PRECACHE_PATHS = [
   '/motivation.js',
   '/session-streak.js',
   '/gamification.js',
+  '/push-local-settings.js',
+  '/reminder-copy.js',
+  '/reminder-schedule.js',
+  '/reminder-native.js',
   '/sw-register.js',
   '/index-init.js',
   '/vendor/sortablejs/Sortable.min.js',

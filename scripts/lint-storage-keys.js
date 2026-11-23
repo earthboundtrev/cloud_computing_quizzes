@@ -23,6 +23,8 @@ const SCAN_FILES = [
   'data-export.js',
   'data-import.js',
   'reminder-server.js',
+  'reminder-native.js',
+  'push-local-settings.js',
   'sw-register.js',
   'motivation.js',
   'quiz-nav.js',

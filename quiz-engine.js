@@ -880,6 +880,12 @@
       var gs = window.CloudCramGame.getSnapshot();
       msgEl.appendChild(document.createTextNode(' Longest: ' + gs.best));
     }
+    if (
+      window.CloudCramReminders &&
+      typeof window.CloudCramReminders.onQuizResults === 'function'
+    ) {
+      window.CloudCramReminders.onQuizResults();
+    }
     document.getElementById('copy-toast').classList.add('hidden');
   }
 
