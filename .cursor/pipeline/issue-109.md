@@ -2,52 +2,55 @@
 
 | Field | Value |
 |-------|--------|
-| Issue | [#109](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/109) — **OPEN** (`Refs` only until full AC incl. Android hand-off) |
-| Branch | `cursor/settings-progress-import-109-3dcb` |
-| Paths | `data-import.js`, `data-export.js`, `storage-keys.js`, `gamification.js`, `index.html`, `index-init.js`, `sw.js`, `scripts/test-data-import-export.js` |
+| Issue | [#109](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/109) — **OPEN** (Tester retest F1/F2; Android #111) |
+| PR #113 | Merged `5da787e` (PWA export/import) |
+| PR (retest) | `cursor/import-retest-fixes-109-3dcb` — F1 implicit first-run goal, F2 streak/best type check |
+| Paths | `gamification.js`, `data-import.js`, `sw.js`, `index.html`, tests |
 
 ## Pointer log
 
 | Stage | Status | Notes |
 |-------|--------|--------|
-| IMPLEMENT | Done | Settings Your data export/import, merge path, tests |
-| BUGBOT | **Clean** | 1st pass blockers fixed; IDB open timeout + `onblocked`/`onabort` handled |
-| TESTS | **Pass** | Full CI-equivalent set local + `test-data-import-export.js` (17 cases) |
-| ARCHITECT | **Merge-ready (with notes)** | PWA path ready; Android Share/Filesystem deferred #111; optional extended AC tests later |
-| SECURITY | **Pass** | No medium/high; import validate-before-write, allowlist, reserved keys |
-| DEPLOY | PR open | `Refs #109` |
+| IMPLEMENT (retest) | Done | F1 `implicitDefaultGoal`; F2 `validateFiniteGameCount` |
+| BUGBOT | **Clean** | `e269aea` diff |
+| TESTS | **Pass** | Full `lint.yml` locally; import 20, gamification 43 |
+| ARCHITECT | **Merge-ready** | F1/F2 AC met; issue stays open for Tester + #111 |
+| SECURITY | **Pass** | No medium/high on retest diff |
+| DEPLOY | PR pending | `Refs #109` only |
+
+## Tester retest (comment 7093178044 @ 5da787e)
+
+| Finding | Fix |
+|---------|-----|
+| F1 dailyGoal lost after Skip/Start then import | `implicitDefaultGoal` on picker default paths; explicit goal click still bumps revision |
+| F2 string/null streak coerced | Reject whole file in `validateGameImportString` before confirm |
 
 ## Bugbot runs
 
 | When (UTC) | Model | Clean | Summary |
 |------------|-------|-------|---------|
-| 2026-11-23 | cursor-grok-4.6-high-fast | No | IDB open, game noop, profile LWW, nested proto, import UI |
-| 2026-11-23 | cursor-grok-4.6-high-fast | **Yes** | Fixes landed; IDB open timeout + `onblocked` |
-| 2026-11-23 (CI) | — | **Yes** | `test-sw-update-flow.js` reads `CACHE_NAME` from `sw.js` (was hard-coded v47) |
+| 2026-11-23 | cursor-grok-4.6-high-fast | No → Yes | PR #113 blockers (IDB, noop, profile, proto) |
+| 2026-11-23 | cursor-grok-4.6-high-fast | **Yes** | Retest F1/F2 on `e269aea` |
 
 ## Architect
 
 | When (UTC) | Model | Verdict |
 |------------|-------|---------|
-| 2026-11-23 | cursor-grok-4.6-high-fast | Not merge-ready → fixes → **merge-ready for PWA PR** |
-
-Notes: Do not `Closes #109` until Android export path (#111) verified on device per issue AC.
+| 2026-11-23 | cursor-grok-4.6-high-fast | Merge-ready PR #113 PWA |
+| 2026-11-23 | cursor-grok-4.6-high-fast | **Merge-ready** retest F1/F2 |
 
 ## Security
 
 | When (UTC) | Model | Verdict |
 |------------|-------|---------|
-| 2026-11-23 | cursor-grok-4.6-high-fast | **Pass** — no medium/high |
+| 2026-11-23 | cursor-grok-4.6-high-fast | Pass PR #113 |
+| 2026-11-23 | cursor-grok-4.6-high-fast | **Pass** retest diff |
 
-## TESTS (local)
+## TESTS (local, retest branch)
 
-Full `.github/workflows/lint.yml` step list run on branch after CI fix (2026-11-23): **all steps green** (incl. `test-sw-update-flow.js`, Playwright smokes, concurrent tabs).
+Full `.github/workflows/lint.yml` (2026-11-23): **all steps green**.
 
-- `node scripts/test-data-import-export.js` — 17 passed
-- `node scripts/check-sw-precache.js` — pass (`cloudcram-v48`, `data-import.js`)
-- `node scripts/test-sw-update-flow.js` — reads `CACHE_NAME` from `sw.js` (no hard-coded v47)
-- `node scripts/lint-storage-keys.js` — pass
-- `node scripts/test-app-data-lifecycle.js` — pass
-- `node scripts/test-gamification.js` — 40 passed
-- `node scripts/test-concurrent-storage.js` — pass
-- Bank / CISSP suite — pass
+- `test-data-import-export.js` — 20 passed (incl. F1/F2 regressions)
+- `test-gamification.js` — 43 passed
+- `check-sw-precache.js` — `cloudcram-v49`
+- Playwright gamification + concurrent quiz tabs + smoke — pass

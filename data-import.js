@@ -378,6 +378,17 @@
   var MAX_GAME_BEST = 10000;
   var MAX_DEDUP_KEYS = 200000;
 
+  function validateFiniteGameCount(val, field, max) {
+    if (val === undefined) return null;
+    if (typeof val !== 'number' || !isFinite(val) || val < 0) {
+      return reject('game_type', 'Invalid game state in file.');
+    }
+    if (val > max) {
+      return reject('game_cap', field === 'streak' ? 'Game streak out of range.' : 'Game best out of range.');
+    }
+    return null;
+  }
+
   function validateGameImportString(raw) {
     if (typeof raw !== 'string' || !raw) return null;
     var parsed = parseJsonSafe(raw);
@@ -387,11 +398,13 @@
     if (containsReservedKey(parsed, 0)) {
       return reject('reserved', 'This isn\'t a Cloud Cram progress file. Nothing was changed.');
     }
-    if (typeof parsed.streak === 'number' && parsed.streak > MAX_GAME_STREAK) {
-      return reject('game_cap', 'Game streak out of range.');
+    if (Object.prototype.hasOwnProperty.call(parsed, 'streak')) {
+      var streakErr = validateFiniteGameCount(parsed.streak, 'streak', MAX_GAME_STREAK);
+      if (streakErr) return streakErr;
     }
-    if (typeof parsed.best === 'number' && parsed.best > MAX_GAME_BEST) {
-      return reject('game_cap', 'Game best out of range.');
+    if (Object.prototype.hasOwnProperty.call(parsed, 'best')) {
+      var bestErr = validateFiniteGameCount(parsed.best, 'best', MAX_GAME_BEST);
+      if (bestErr) return bestErr;
     }
     if (parsed.answerDedup && isPlainObject(parsed.answerDedup)) {
       if (Object.keys(parsed.answerDedup).length > MAX_DEDUP_KEYS) {
