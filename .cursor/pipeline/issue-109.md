@@ -1,27 +1,37 @@
 # Pipeline — GitHub #109 (Settings progress export/import)
 
+**Retro (full history):** [issue-109-retro.md](./issue-109-retro.md)
+
 | Field | Value |
 |-------|--------|
-| Issue | [#109](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/109) — **OPEN** (Tester retest F1/F2; Android #111) |
+| Issue | [#109](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/109) — **OPEN** (pipeline DEPLOY complete; human close; Android [#111](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/111)) |
 | PR #113 | Merged `5da787e` (PWA export/import) |
-| PR (retest) | `cursor/import-retest-fixes-109-3dcb` — F1 implicit first-run goal, F2 streak/best type check |
+| PR #115 | Merged `ea2ec30` (impl head `2fe0bb9`) — Tester F1/F2 retest fixes |
 | Paths | `gamification.js`, `data-import.js`, `sw.js`, `index.html`, tests |
+
+> **Commit label `e269aea`:** Rows in **Bugbot**, **Architect**, and **Security** below that cite `e269aea` refer to the **[#115](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/115)** branch diff reviewed before merge (branch head **`2fe0bb9`**, merge commit **`ea2ec30`**).
 
 ## Pointer log
 
 | Stage | Status | Notes |
 |-------|--------|--------|
-| IMPLEMENT (retest) | Done | F1 `implicitDefaultGoal`; F2 `validateFiniteGameCount` |
-| BUGBOT | **Clean** | `e269aea` diff |
+| IMPLEMENT (#113) | Done | PWA export/import → `5da787e` |
+| IMPLEMENT (#115) | Done | F1 `implicitDefaultGoal`; F2 `validateFiniteGameCount` → `ea2ec30` |
+| BUGBOT | **Clean** | `e269aea` = [#115](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/115) branch (see note above) |
 | TESTS | **Pass** | Full `lint.yml` locally; import 20, gamification 43 |
-| ARCHITECT | **Merge-ready** | F1/F2 AC met; issue stays open for Tester + #111 |
-| SECURITY | **Pass** | No medium/high on retest diff |
-| DEPLOY | PR pending | `Refs #109` only |
+| ARCHITECT | **Merge-ready** | F1/F2 AC met on `ea2ec30`; see [retro](./issue-109-retro.md) |
+| SECURITY | **Pass** | No medium/high on [#115](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/115) retest diff (`e269aea`) |
+| DEPLOY | **Complete** (pending issue closure) | #113 + #115 merged; use `Closes #109` only when human signs off all AC |
 
-## Tester retest (comment 7093178044 @ 5da787e)
+## Tester retest
 
-| Finding | Fix |
-|---------|-----|
+| When | Commit | Result |
+|------|--------|--------|
+| First retest | `5da787e` | **F1**, **F2** failed — see [retro](./issue-109-retro.md) |
+| Retest after #115 | `ea2ec30` | **F1 5/5**, **F2 14/14** pass |
+
+| Finding (on `5da787e`) | Fix (#115) |
+|------------------------|------------|
 | F1 dailyGoal lost after Skip/Start then import | `implicitDefaultGoal` on picker default paths; explicit goal click still bumps revision |
 | F2 string/null streak coerced | Reject whole file in `validateGameImportString` before confirm |
 
@@ -30,27 +40,27 @@
 | When (UTC) | Model | Clean | Summary |
 |------------|-------|-------|---------|
 | 2026-11-23 | cursor-grok-4.6-high-fast | No → Yes | PR #113 blockers (IDB, noop, profile, proto) |
-| 2026-11-23 | cursor-grok-4.6-high-fast | **Yes** | Retest F1/F2 on `e269aea` |
+| 2026-11-23 | cursor-grok-4.6-high-fast | **Yes** | Retest F1/F2 on `e269aea` ([#115](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/115) → `2fe0bb9` / `ea2ec30`) |
 
 ## Architect
 
 | When (UTC) | Model | Verdict |
 |------------|-------|---------|
 | 2026-11-23 | cursor-grok-4.6-high-fast | Merge-ready PR #113 PWA |
-| 2026-11-23 | cursor-grok-4.6-high-fast | **Merge-ready** retest F1/F2 |
+| 2026-11-23 | cursor-grok-4.6-high-fast | **Merge-ready** retest F1/F2 (`e269aea` / #115) |
 
 ## Security
 
 | When (UTC) | Model | Verdict |
 |------------|-------|---------|
 | 2026-11-23 | cursor-grok-4.6-high-fast | Pass PR #113 |
-| 2026-11-23 | cursor-grok-4.6-high-fast | **Pass** retest diff |
+| 2026-11-23 | cursor-grok-4.6-high-fast | **Pass** retest diff (`e269aea` / #115) |
 
-## TESTS (local, retest branch)
+## TESTS (local, #115 branch)
 
 Full `.github/workflows/lint.yml` (2026-11-23): **all steps green**.
 
 - `test-data-import-export.js` — 20 passed (incl. F1/F2 regressions)
 - `test-gamification.js` — 43 passed
-- `check-sw-precache.js` — `cloudcram-v49`
+- `check-sw-precache.js` — `cloudcram-v49` at review time (#114 later → v50; see [retro](./issue-109-retro.md))
 - Playwright gamification + concurrent quiz tabs + smoke — pass
