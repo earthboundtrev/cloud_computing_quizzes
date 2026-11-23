@@ -11,10 +11,10 @@
 | Stage | Status | Notes |
 |-------|--------|--------|
 | IMPLEMENT | Done | push-local-settings, schedule/copy, reminder-native UI, cap local-notifications, manifest perms, tests |
-| BUGBOT | Pending | Post-commit diff vs main |
-| TESTS | Pass (local) | lint.yml subset + playwright 17/17 + test-reminder-schedule 4/4 |
-| ARCHITECT | Pending | |
-| SECURITY | Pending | SW/storage review |
+| BUGBOT | Clean (2nd pass) | Quiz scripts, opt-in, freeze/repair, settings intents fixed |
+| TESTS | Pass (local) | playwright 17/17; test-reminder-schedule 5/5; CI-equivalent subset |
+| ARCHITECT | Merge-ready | Post blocker fix |
+| SECURITY | Pass | No push endpoints; import forbids tokens; native-only Capacitor |
 | DEPLOY | Pending | PR `Refs #112` |
 
 ## Tests (local)
