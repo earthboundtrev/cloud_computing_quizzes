@@ -75,6 +75,11 @@ test('sw.js activate still claims clients', function () {
   assert(/clients\.claim\(\)/.test(sw), 'clients.claim missing in activate');
 });
 
+test('sw-register.js short-circuits on Capacitor native', function () {
+  assert(/isNativePlatform/.test(reg), 'native platform guard missing');
+  assert(/CloudCramUpdate/.test(reg), 'native CloudCramUpdate stub missing');
+});
+
 test('sw-register.js exposes CloudCramUpdate API', function () {
   assert(/window\.CloudCramUpdate\s*=/.test(reg), 'CloudCramUpdate not exposed');
   assert(/checkForUpdate/.test(reg), 'checkForUpdate missing');

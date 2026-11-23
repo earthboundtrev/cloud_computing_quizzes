@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE_NAME = 'cloudcram-v49';
+const CACHE_NAME = 'cloudcram-v50';
 
 const PRECACHE_PATHS = [
   '/index.html',
@@ -113,7 +113,11 @@ const PRECACHE_PATHS = [
   '/session-streak.js',
   '/gamification.js',
   '/sw-register.js',
-  '/index-init.js'
+  '/index-init.js',
+  '/vendor/sortablejs/Sortable.min.js',
+  '/capacitor-env.js',
+  '/native-app.js',
+  '/build-meta.js'
 ];
 
 function fullUrl(path) {

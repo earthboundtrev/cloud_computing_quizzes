@@ -320,7 +320,11 @@
   if (exportBtn && window.CloudCramDataExport) {
     exportBtn.addEventListener('click', function () {
       window.CloudCramDataExport.exportAllUserData().then(function () {
-        setSettingsStatus('Saved to Downloads');
+        var msg = 'Saved to Downloads';
+        if (window.CloudCramCapacitor && window.CloudCramCapacitor.isNativePlatform()) {
+          msg = 'Use the share sheet to save your progress file.';
+        }
+        setSettingsStatus(msg);
       }).catch(function () {
         setSettingsStatus('Could not export progress.');
       });

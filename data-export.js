@@ -56,8 +56,62 @@
     };
   }
 
+  function isNativeExport() {
+    return window.CloudCramCapacitor && window.CloudCramCapacitor.isNativePlatform();
+  }
+
+  function getCapPlugin(name) {
+    return window.Capacitor &&
+      window.Capacitor.Plugins &&
+      window.Capacitor.Plugins[name]
+      ? window.Capacitor.Plugins[name]
+      : null;
+  }
+
+  function isShareCanceled(err) {
+    var msg = err && (err.message || String(err));
+    return /cancel/i.test(msg || '');
+  }
+
+  var NATIVE_EXPORT_SUBDIR = 'exports/';
+
+  function nativeSaveJson(filename, jsonText) {
+    var Share = getCapPlugin('Share');
+    var Filesystem = getCapPlugin('Filesystem');
+    if (!Share || !Filesystem) {
+      return Promise.reject(new Error('no_native_plugins'));
+    }
+    var cachePath = NATIVE_EXPORT_SUBDIR + filename;
+    return Filesystem.writeFile({
+      path: cachePath,
+      data: jsonText,
+      directory: 'CACHE',
+      encoding: 'utf8',
+      recursive: true
+    })
+      .then(function () {
+        return Filesystem.getUri({ path: cachePath, directory: 'CACHE' });
+      })
+      .then(function (uriResult) {
+        return Share.share({
+          title: 'Cloud Cram progress',
+          text: 'Cloud Cram progress export',
+          files: [uriResult.uri],
+          dialogTitle: 'Save or share progress'
+        });
+      })
+      .catch(function (err) {
+        if (isShareCanceled(err)) return Promise.resolve();
+        return Promise.reject(err);
+      });
+  }
+
   function downloadJson(filename, obj) {
-    var blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+    var jsonText = JSON.stringify(obj, null, 2);
+    if (isNativeExport()) {
+      return nativeSaveJson(filename, jsonText);
+    }
+    var blob = new Blob([jsonText], { type: 'application/json' });
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
@@ -67,14 +121,17 @@
     a.click();
     a.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+    return Promise.resolve();
   }
 
   function exportAllUserData() {
     return readBrainDumpsFromIdb().then(function (dumps) {
       var payload = buildExportPayload(dumps);
       var date = new Date().toISOString().slice(0, 10);
-      downloadJson('cloudcram-progress-' + date + '.json', payload);
-      return payload;
+      var filename = progressFilenameForDate(date);
+      return downloadJson(filename, payload).then(function () {
+        return payload;
+      });
     });
   }
 

@@ -56,6 +56,12 @@ jobs:
 
     - name: Progress export / import (#109)
       run: node scripts/test-data-import-export.js
+
+    - name: Capacitor Android guardrails (#111)
+      run: node scripts/test-capacitor-native.js
+
+    - name: Entry HTML CSP and no inline handlers (#111)
+      run: node scripts/lint-html-entry.js
     
     - name: Check question bank integrity
       run: node scripts/check-page-banks.js
@@ -79,6 +85,9 @@ jobs:
 
     - name: Gamification Playwright smoke (#68)
       run: node scripts/playwright-gamification-test.mjs
+
+    - name: Entry pages console-clean CSP (#111)
+      run: node scripts/playwright-console-clean.mjs
 
     - name: Concurrent quiz tabs Playwright (#68, #79)
       run: |

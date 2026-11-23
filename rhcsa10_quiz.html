@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'self'">
   <meta name="theme-color" content="#0f1419">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,6 +14,7 @@
   <title>RHCSA (EX200, RHEL 10) Practice Quiz</title>
   <link rel="stylesheet" href="css/quiz-common.css?v=5">
   <style>:root { --accent: #ee0000; --accent-dim: #cc0000; }</style>
+  <script src="capacitor-env.js?v=1"></script>
   <script src="storage-write-guard.js?v=1"></script>
   <script src="storage-tab-merge.js?v=3"></script>
   <script src="rhcsa-migration.js?v=3"></script>
@@ -30,6 +32,7 @@
   <script src="quiz-init-rhcsa10.js?v=2"></script>
   <script src="quiz-nav.js?v=2"></script>
   <script src="storage-keys.js?v=1"></script>
+  <script src="native-app.js?v=1"></script>
   <script src="app-reset.js?v=5"></script>
 </head>
 <body>
@@ -59,7 +62,7 @@
       <p>40 questions per session. Passing: 70%. Pool of 293. EX200 is performance-based (hands-on tasks); configurations must persist after reboot. These MCQs build command recall. Choose your mode:</p>
       <p id="focus-hint" class="profile-hint hidden"></p>
       <div class="mode-selector">
-        <button type="button" class="mode-btn selected" data-mode="exam" onclick="selectMode('exam')">
+        <button type="button" class="mode-btn selected" data-mode="exam">
           <span class="label">Exam (RHEL 10 objectives)</span>
           <span class="desc">Storage (GPT, LVM), systemd, firewalld, SELinux, Flatpak, tuned, networking, users, scheduling.</span>
         </button>
@@ -74,7 +77,7 @@
         </select>
         <input type="number" id="session-time-custom" min="1" max="240" placeholder="Custom" style="width: 4.5em; margin-left: 0.5rem; padding: 0.35rem; background: var(--surface); color: var(--text); border: 1px solid var(--accent-dim); border-radius: 4px;" title="Custom minutes">
       </div>
-      <button id="start-btn" onclick="startQuiz()">Start Quiz</button>
+      <button id="start-btn">Start Quiz</button>
       <div class="import-area">
         <label for="import-results">Import past results (paste .md or choose file) to focus on weak topics:</label>
         <textarea id="import-results" placeholder="Paste quiz results markdown here..."></textarea>
@@ -104,8 +107,8 @@
         </div>
       </div>
       <div class="nav-row">
-        <button id="prev-btn" class="secondary" onclick="prevQuestion()">← Previous</button>
-        <button id="next-btn" onclick="nextQuestion()">Next →</button>
+        <button id="prev-btn" class="secondary">← Previous</button>
+        <button id="next-btn">Next →</button>
       </div>
     </div>
 
