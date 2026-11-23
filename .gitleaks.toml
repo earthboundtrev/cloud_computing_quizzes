@@ -1,0 +1,18 @@
+title = "Cloud Cram secret scan"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "android-signing-properties"
+description = "Gradle keystore passwords"
+regex = '''(?i)(storePassword|keyPassword|keyAlias)\s*=\s*['"]?[^'"\s]+'''
+path = '''\.(gradle|properties)$'''
+
+[allowlist]
+paths = [
+  '''\.gitignore''',
+  '''docs/android\.md''',
+  '''\.gitleaks\.toml''',
+  '''native/android/app/build\.gradle''',
+]

@@ -56,6 +56,9 @@ jobs:
 
     - name: Progress export / import (#109)
       run: node scripts/test-data-import-export.js
+
+    - name: Capacitor Android guardrails (#111)
+      run: node scripts/test-capacitor-native.js
     
     - name: Check question bank integrity
       run: node scripts/check-page-banks.js

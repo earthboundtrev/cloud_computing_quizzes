@@ -1,0 +1,22 @@
+{
+  "name": "cloud-cram-native",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Capacitor 8 Android shell for Cloud Cram (bundled static assets, Option A)",
+  "scripts": {
+    "sync:www": "node scripts/sync-www.js",
+    "cap:copy": "npm run sync:www && npx cap copy",
+    "cap:sync": "npm run sync:www && npx cap sync",
+    "cap:open:android": "npx cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.6.2",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/core": "8.6.2",
+    "@capacitor/filesystem": "8.1.5",
+    "@capacitor/share": "8.0.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.6.2"
+  }
+}

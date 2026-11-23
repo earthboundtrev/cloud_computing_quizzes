@@ -4,6 +4,25 @@
 (function () {
   'use strict';
 
+  function isCapacitorNative() {
+    return !!(
+      window.Capacitor &&
+      typeof window.Capacitor.isNativePlatform === 'function' &&
+      window.Capacitor.isNativePlatform()
+    );
+  }
+
+  if (isCapacitorNative()) {
+    window.CloudCramUpdate = {
+      checkForUpdate: function () { return Promise.resolve(); },
+      applyUpdate: function () { return false; },
+      waitForWaitingWorker: function () { return Promise.resolve(null); },
+      waitAndApplyUpdate: function () { return Promise.resolve({ applied: false, reason: 'native' }); },
+      onQuizActivityChange: function () {}
+    };
+    return;
+  }
+
   if (!('serviceWorker' in navigator)) return;
 
   var registration = null;

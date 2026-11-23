@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'">
   <meta name="theme-color" content="#0f1419">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,6 +14,7 @@
   <title>AZ-104 Azure Administrator Practice Quiz</title>
   <link rel="stylesheet" href="css/quiz-common.css?v=5">
   <style>:root { --accent: #0078d4; --accent-dim: #106ebe; }</style>
+  <script src="capacitor-env.js?v=1"></script>
   <script src="storage-write-guard.js?v=1"></script>
   <script src="storage-tab-merge.js?v=3"></script>
   <script src="quiz-config.js?v=3"></script>
@@ -30,6 +32,7 @@
   <script src="quiz-init-az104.js?v=3"></script>
   <script src="quiz-nav.js?v=2"></script>
   <script src="storage-keys.js?v=1"></script>
+  <script src="native-app.js?v=1"></script>
   <script src="app-reset.js?v=5"></script>
 </head>
 <body>
