@@ -1132,7 +1132,9 @@
       state.firstRunDone = true;
       if (options.goal) {
         state.dailyGoal = options.goal;
-        bumpSettingsRevision(state, 'goal');
+        if (!options.implicitDefaultGoal) {
+          bumpSettingsRevision(state, 'goal');
+        }
       }
       if (options.soundOn === false) {
         state.soundOn = false;
@@ -1539,8 +1541,10 @@
     choices.setAttribute('role', 'radiogroup');
     choices.setAttribute('aria-labelledby', 'game-first-run-title');
     var selected = 3;
+    var goalExplicit = false;
     var goalButtons = [];
     function syncGoalSelection(goal) {
+      goalExplicit = true;
       selected = goal;
       goalButtons.forEach(function (btn) {
         var g = parseInt(btn.textContent, 10);
@@ -1587,17 +1591,21 @@
     function onKeyDown(ev) {
       if (ev.key === 'Escape') {
         ev.preventDefault();
-        finishFirstRun({ goal: 3, soundOn: defaultSound });
+        finishFirstRun({ goal: 3, soundOn: defaultSound, implicitDefaultGoal: true });
         return;
       }
       trapFocusInDialog(dialog, focusables, ev);
     }
 
     start.addEventListener('click', function () {
-      finishFirstRun({ goal: selected, soundOn: defaultSound });
+      finishFirstRun({
+        goal: selected,
+        soundOn: defaultSound,
+        implicitDefaultGoal: !goalExplicit
+      });
     });
     skip.addEventListener('click', function () {
-      finishFirstRun({ goal: 3, soundOn: defaultSound });
+      finishFirstRun({ goal: 3, soundOn: defaultSound, implicitDefaultGoal: true });
     });
     actions.appendChild(start);
     actions.appendChild(skip);

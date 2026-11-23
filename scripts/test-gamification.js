@@ -695,6 +695,41 @@ test('mergeStates goal uses latest settings revision over stale answer tab', fun
   assert(game.mergeStates(settingsTab, answerTab).dailyGoal === 10, 'goal from settings either order');
 });
 
+test('completeFirstRun implicit default does not bump goal revision', function () {
+  const env = makeEnv(Date.parse('2026-11-22T12:00:00Z'));
+  return env.game
+    .completeFirstRun({ goal: 3, soundOn: true, implicitDefaultGoal: true })
+  .then(function () {
+    const s = env.game.loadState();
+    assert(s.dailyGoal === 3, 'goal applied');
+    assert(s.settingsRevision.goal === 0, 'implicit picker leaves goal revision at 0');
+  });
+});
+
+test('mergeStates imported goal wins over implicit first-run default', function () {
+  const game = loadGame();
+  const local = game.defaultState();
+  local.firstRunDone = true;
+  local.dailyGoal = 3;
+  local.settingsRevision = { soundOn: 0, goal: 0 };
+  const imported = game.defaultState();
+  imported.dailyGoal = 10;
+  imported.settingsRevision = { soundOn: 0, goal: 50 };
+  assert(game.mergeStates(local, imported).dailyGoal === 10, 'imported goal');
+  assert(game.mergeStates(imported, local).dailyGoal === 10, 'imported goal either order');
+});
+
+test('mergeStates explicit first-run goal keeps higher revision', function () {
+  const game = loadGame();
+  const local = game.defaultState();
+  local.dailyGoal = 20;
+  local.settingsRevision = { soundOn: 0, goal: 10000 };
+  const imported = game.defaultState();
+  imported.dailyGoal = 10;
+  imported.settingsRevision = { soundOn: 0, goal: 100 };
+  assert(game.mergeStates(local, imported).dailyGoal === 20, 'explicit local goal wins');
+});
+
 test('multi-day gap repair marks every missed day repaired on success', function () {
   const env = makeEnv(Date.parse('2026-06-01T12:00:00'));
   env.game.syncWrite(function (st) {

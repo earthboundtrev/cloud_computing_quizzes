@@ -131,6 +131,73 @@ function snapshot(ls) {
     assert(!res.ok, 'streak cap');
   });
 
+  await test('rejects string streak or best in game state', function () {
+    const badStreak = minimalPayload({
+      localStorage: {
+        cloudcram_game_v1: JSON.stringify({ v: 1, streak: '7', best: 3 })
+      }
+    });
+    assert(!dataImport.validatePayloadRoot(badStreak).ok, 'string streak');
+    const badBest = minimalPayload({
+      localStorage: {
+        cloudcram_game_v1: JSON.stringify({ v: 1, streak: 3, best: '12' })
+      }
+    });
+    assert(!dataImport.validatePayloadRoot(badBest).ok, 'string best');
+  });
+
+  await test('rejects null or non-finite streak or best in game state', function () {
+    const nullStreak = minimalPayload({
+      localStorage: {
+        cloudcram_game_v1: JSON.stringify({ v: 1, streak: null, best: 0 })
+      }
+    });
+    assert(!dataImport.validatePayloadRoot(nullStreak).ok, 'null streak');
+    const nanBest = minimalPayload({
+      localStorage: {
+        cloudcram_game_v1: JSON.stringify({ v: 1, streak: 1, best: NaN })
+      }
+    });
+    assert(!dataImport.validatePayloadRoot(nanBest).ok, 'nan best');
+  });
+
+  await test('import keeps dailyGoal after implicit first-run complete', async function () {
+    game.shutdownForTests && game.shutdownForTests();
+    const ls = new LocalStorageMock();
+    game.setDeps({
+      localStorage: ls,
+      locks: null,
+      storageEventTarget: null,
+      now: function () { return Date.parse('2026-11-22T12:00:00Z'); }
+    });
+    await game.completeFirstRun({ goal: 3, soundOn: true, implicitDefaultGoal: true });
+    assert(game.loadState().dailyGoal === 3, 'picker default');
+    assert(game.loadState().settingsRevision.goal === 0, 'no picker revision bump');
+
+    const exported = game.defaultState();
+    exported.v = 1;
+    exported.dailyGoal = 10;
+    exported.firstRunDone = true;
+    exported.settingsRevision = { soundOn: 0, goal: 50 };
+    exported.streak = 5;
+    exported.best = 5;
+    const validated = dataImport.validatePayloadRoot(
+      minimalPayload({
+        localStorage: { cloudcram_game_v1: JSON.stringify(exported) }
+      })
+    );
+    assert(validated.ok, 'payload ok');
+    await dataImport.applyImportMerge({
+      payload: validated.payload,
+      localStorage: ls,
+      mergeApi: mergeApi,
+      gameApi: game,
+      existingBrainDumps: [],
+      writeBrainDumps: function () { return Promise.resolve(0); }
+    });
+    assert(game.loadState().dailyGoal === 10, 'imported dailyGoal kept');
+  });
+
   await test('rejects push endpoint keys in import file', function () {
     const bad = minimalPayload({
       localStorage: {
