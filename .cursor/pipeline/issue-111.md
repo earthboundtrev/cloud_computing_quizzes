@@ -13,6 +13,7 @@
 | REBASE | Done | Onto `ea2ec30` (#115); `CACHE_NAME` **cloudcram-v50** (v49 consumed by #115) |
 | BUGBOT | **Clean** | 2nd pass after DOMContentLoaded, share cancel, icons, file_paths |
 | BUGBOT (CSP delta) | **Clean** | Inline handlers stripped, meta CSP sans `frame-ancestors` |
+| BUGBOT (rebase v50) | **Clean** | Post-`ea2ec30` / `cloudcram-v50` |
 | TESTS | **Pass** | Full CI-equivalent + `lint-html-entry.js` + `playwright-console-clean.mjs` (17 pages, 0 errors) |
 | ARCHITECT | **Merge-ready** | Residual non-blockers (storage-keys registration, doc screenshots) |
 | SECURITY | **Pass** (after fix) | FileProvider `exports/`, export cache-only, gitleaks `useDefault` |
