@@ -20,6 +20,7 @@
   var BRAIN_DB = 'StudySessionsBrainDumps';
   var BRAIN_STORE = 'dumps';
   var BRAIN_DB_VER = 1;
+  var IDB_OPEN_TIMEOUT_MS = 8000;
   var LS_BRAIN_KEY = 'study_sessions_brain_dumps';
 
   function isReservedKeyName(key) {
@@ -715,15 +716,25 @@
         resolve(null);
         return;
       }
+      var settled = false;
+      function finish(db) {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        resolve(db || null);
+      }
+      var timer = setTimeout(function () {
+        finish(null);
+      }, IDB_OPEN_TIMEOUT_MS);
       var req;
       try {
         req = idb.open(BRAIN_DB, BRAIN_DB_VER);
       } catch (e) {
-        resolve(null);
+        finish(null);
         return;
       }
-      req.onerror = function () { resolve(null); };
-      req.onblocked = function () { resolve(null); };
+      req.onerror = function () { finish(null); };
+      req.onblocked = function () { finish(null); };
       req.onupgradeneeded = function (ev) {
         var db = ev.target.result;
         if (!db.objectStoreNames.contains(BRAIN_STORE)) {
@@ -731,7 +742,7 @@
         }
       };
       req.onsuccess = function () {
-        resolve(req.result);
+        finish(req.result);
       };
     });
   }
@@ -775,6 +786,10 @@
         tx.oncomplete = function () {
           db.close();
           resolve(added);
+        };
+        tx.onabort = function () {
+          db.close();
+          resolve(0);
         };
         tx.onerror = function () {
           db.close();

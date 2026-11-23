@@ -61,6 +61,9 @@ async function withPage(seedFn, fn) {
 
 await withPage(
   () => {
+    const fmt = (dt) => dt.toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+    const today = fmt(new Date());
+    const day = { answers: 3, met: true, celebrated: true, streakAwarded: true, kind: 'normal' };
     localStorage.setItem(
       'cloudcram_game_v1',
       JSON.stringify({
@@ -72,21 +75,21 @@ await withPage(
         streak: 5,
         best: 5,
         freezes: 1,
-        lastSeenDate: '2026-11-01',
+        lastSeenDate: today,
         freezeEarnProgress: 0,
-        dayRecords: { '2026-11-01': { answers: 3, met: true, celebrated: true, streakAwarded: true, kind: 'normal' } },
+        dayRecords: { [today]: day },
         answerDedup: {},
         repair: null,
         vacation: null,
         notices: {},
         migratedFrom: 'study_streak_v0',
         migratedAt: 1,
-        lastProcessedDate: '2026-11-01',
+        lastProcessedDate: today,
         maxTimestampSeen: 0,
         repairUses: [],
         vacationUses: [],
         hadStreakBreak: false,
-        lastProcessWallMs: 0
+        lastProcessWallMs: Date.now()
       })
     );
   },
@@ -103,11 +106,13 @@ await withPage(
 
 await withPage(
   () => {
+    const fmt = (dt) => dt.toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+    const yesterday = fmt(new Date(Date.now() - 86400000));
     localStorage.setItem(
       'cloudcram_study_streak',
       '12'
     );
-    localStorage.setItem('cloudcram_study_last_date', '2026-11-02');
+    localStorage.setItem('cloudcram_study_last_date', yesterday);
   },
   async (page) => {
     await page.goto(`http://127.0.0.1:${port}/index.html`);
