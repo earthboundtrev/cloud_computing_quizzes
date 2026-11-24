@@ -34,12 +34,52 @@
     return api ? api.canonicalQuestionId(raw) : raw;
   }
 
+  function reservedKeyNameApi() {
+    var g = typeof globalThis !== 'undefined' ? globalThis : null;
+    if (g && g.CloudCramReservedKeyNames) {
+      return g.CloudCramReservedKeyNames;
+    }
+    if (g && g.CloudCramDataImport && g.CloudCramDataImport.isReservedKeyName) {
+      return { isReservedKeyName: g.CloudCramDataImport.isReservedKeyName };
+    }
+    try {
+      return require('./reserved-key-names.js');
+    } catch (e0) {
+      return null;
+    }
+  }
+
+  function isReservedKeyName(key) {
+    var api = reservedKeyNameApi();
+    if (api && typeof api.isReservedKeyName === 'function') {
+      return api.isReservedKeyName(key);
+    }
+    return key === '__proto__' || key === 'constructor' || key === 'prototype';
+  }
+
+  function copyAllowedAnswerDedup(raw) {
+    var out = Object.create(null);
+    if (!raw || typeof raw !== 'object') {
+      return out;
+    }
+    Object.keys(raw).forEach(function (k) {
+      if (isReservedKeyName(k)) {
+        return;
+      }
+      if (raw[k]) {
+        out[k] = true;
+      }
+    });
+    return out;
+  }
+
   function rhcsa10NormalizeDedup(dedup) {
     var api = rhcsa10IdApi();
+    var allowed = copyAllowedAnswerDedup(dedup);
     if (api) {
-      return api.normalizeAnswerDedup(dedup);
+      return api.normalizeAnswerDedup(allowed);
     }
-    return dedup && typeof dedup === 'object' ? dedup : {};
+    return allowed;
   }
   var MS_DAY = 24 * 60 * 60 * 1000;
 
@@ -289,9 +329,7 @@
         s.dayRecords[k] = normalizeDayRecord(raw.dayRecords[k]);
       });
     }
-    s.answerDedup = rhcsa10NormalizeDedup(
-      raw.answerDedup && typeof raw.answerDedup === 'object' ? Object.assign({}, raw.answerDedup) : {}
-    );
+    s.answerDedup = rhcsa10NormalizeDedup(raw.answerDedup);
     if (raw.repair && typeof raw.repair === 'object') {
       s.repair = Object.assign({ metDays: [] }, raw.repair);
       if (!Array.isArray(s.repair.metDays)) s.repair.metDays = [];
@@ -571,7 +609,16 @@
     Object.keys(base.dayRecords).forEach(function (day) {
       if (!out.dayRecords[day]) out.dayRecords[day] = normalizeDayRecord(base.dayRecords[day]);
     });
-    out.answerDedup = rhcsa10NormalizeDedup(Object.assign({}, base.answerDedup, other.answerDedup));
+    var mergedDedup = Object.create(null);
+    var baseDedup = copyAllowedAnswerDedup(base.answerDedup);
+    var otherDedup = copyAllowedAnswerDedup(other.answerDedup);
+    Object.keys(baseDedup).forEach(function (k) {
+      mergedDedup[k] = true;
+    });
+    Object.keys(otherDedup).forEach(function (k) {
+      mergedDedup[k] = true;
+    });
+    out.answerDedup = rhcsa10NormalizeDedup(mergedDedup);
     Object.keys(out.dayRecords).forEach(function (day) {
       out.dayRecords[day].answers = Math.max(out.dayRecords[day].answers, countAnswersForDay(out, day));
     });
