@@ -100,19 +100,27 @@ function testRemapNumericAndStringIds() {
 }
 
 function testTabMergeDedupesOldAndNew() {
-  const utils = loadUtils();
   const map = loadMap();
   const canon = map.forward['129'];
-  const mergedInput = {};
-  mergedInput['2026-11-24:sess-a:' + canon] = true;
-  mergedInput['2026-11-24:sess-b:129'] = true;
-  const merged = utils.normalizeAnswerDedup(mergedInput);
-  const keys = Object.keys(merged);
-  if (keys.length !== 2) {
-    throw new Error('expected two session keys after canonical merge, got ' + keys.length);
+  const day = '2026-11-24';
+  bootRhcsa10Ids(globalThis);
+  const game = loadGame();
+  game.setDeps({ localStorage: new LocalStorageMock(), locks: null, storageEventTarget: null });
+  const hub = game.normalizeState({
+    v: 1,
+    answerDedup: { [day + ':hub-tab:129']: true }
+  });
+  const quiz = game.normalizeState({
+    v: 1,
+    answerDedup: { [day + ':quiz-tab:' + canon]: true }
+  });
+  const merged = game.mergeStates(hub, quiz);
+  const d = merged.answerDedup || {};
+  if (!d[day + ':hub-tab:' + canon] || !d[day + ':quiz-tab:' + canon]) {
+    throw new Error('mergeStates should collapse legacy and canonical ids across tabs');
   }
-  if (!merged['2026-11-24:sess-a:' + canon] || !merged['2026-11-24:sess-b:' + canon]) {
-    throw new Error('both sessions should use canonical id only');
+  if (d[day + ':hub-tab:129'] || d[day + ':quiz-tab:129']) {
+    throw new Error('legacy id keys must not remain after merge');
   }
 }
 
@@ -134,7 +142,7 @@ function testImportThenReanswerNoExtraXp() {
   });
   const imported = JSON.stringify({
     v: 1,
-    answerDedup: { [day + ':import:sess:129']: true }
+    answerDedup: { [day + ':import:129']: true }
   });
   return game.importState(imported).then(function () {
     const afterImport = dedupCountForDay(ls, day);
