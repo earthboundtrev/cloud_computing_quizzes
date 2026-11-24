@@ -75,6 +75,54 @@ test('sw.js activate still claims clients', function () {
   assert(/clients\.claim\(\)/.test(sw), 'clients.claim missing in activate');
 });
 
+test('sw.js activate deletes only stale cloudcram- caches', function () {
+  const activateBlock = sw.match(/addEventListener\('activate'[\s\S]*?\n\}\);/);
+  assert(activateBlock, 'activate handler not found');
+  assert(
+    /indexOf\('cloudcram-'\)\s*===\s*0/.test(activateBlock[0]) ||
+      /startsWith\('cloudcram-'\)/.test(activateBlock[0]),
+    'cloudcram- prefix filter missing in activate cleanup'
+  );
+  assert(/name\s*!==\s*CACHE_NAME/.test(activateBlock[0]), 'activate must still skip current CACHE_NAME');
+});
+
+test('activate cleanup (mocked caches) keeps foreign and current cloudcram- caches', function () {
+  const current = swCacheName;
+  const store = {
+    'cloudcram-v51': true,
+    'cloudcram-v60': true,
+    [current]: true,
+    'workbox-precache-v2': true,
+    'third-party-shell-v3': true
+  };
+  const deleted = [];
+  const caches = {
+    keys: function () {
+      return Object.keys(store);
+    },
+    delete: function (name) {
+      deleted.push(name);
+      delete store[name];
+      return true;
+    }
+  };
+  const names = caches.keys();
+  names
+    .filter(function (name) {
+      return name !== current && name.indexOf('cloudcram-') === 0;
+    })
+    .forEach(function (name) {
+      caches.delete(name);
+    });
+  assert(deleted.indexOf('cloudcram-v51') !== -1, 'cloudcram-v51 should be deleted');
+  assert(deleted.indexOf('cloudcram-v60') !== -1, 'cloudcram-v60 should be deleted');
+  assert(deleted.indexOf(current) === -1, 'current CACHE_NAME must be kept');
+  assert(deleted.indexOf('workbox-precache-v2') === -1, 'foreign cache workbox must survive');
+  assert(deleted.indexOf('third-party-shell-v3') === -1, 'foreign cache third-party must survive');
+  assert(store[current] === true, 'current cache entry still present');
+  assert(store['workbox-precache-v2'] === true, 'foreign cache still present');
+});
+
 test('sw-register.js short-circuits on Capacitor native', function () {
   assert(/isNativePlatform/.test(reg), 'native platform guard missing');
   assert(/CloudCramUpdate/.test(reg), 'native CloudCramUpdate stub missing');
