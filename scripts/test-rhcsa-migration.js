@@ -214,7 +214,11 @@ function testScenarioC2WithV10_2OverlapSum() {
     'study_sessions_profile_rhcsa9',
     JSON.stringify({
       quizId: 'rhcsa9',
-      topicStats: { Storage: { correct: 14, total: 20 }, Boot: { correct: 3, total: 5 } },
+      topicStats: {
+        Storage: { correct: 14, total: 20 },
+        SELinux: { correct: 1, total: 2 },
+        Boot: { correct: 3, total: 5 }
+      },
       topicMissesFromImports: { Networking: 3 }
     })
   );
@@ -232,7 +236,8 @@ function testScenarioC2WithV10_2OverlapSum() {
   const p = JSON.parse(localStorage.getItem('study_sessions_profile_rhcsa10'));
   assertDeepEqual(p.topicStats.Storage, { correct: 16, total: 23 }, 'v10_2 overlap sum');
   assertDeepEqual(p.topicStats.Flatpak, { correct: 1, total: 4 }, 'Flatpak kept');
-  assert(p.topicStats.Boot === undefined, 'rhcsa9-only not re-copied after v10_2');
+  assertDeepEqual(p.topicStats.SELinux, { correct: 1, total: 2 }, 'SELinux from rhcsa9 after v10_2');
+  assertDeepEqual(p.topicStats.Boot, { correct: 3, total: 5 }, 'Boot from rhcsa9 after v10_2');
   assertEqual(p.topicMissesFromImports.Networking, 4, 'miss counts summed');
   assert(p.mergedFrom.indexOf('rhcsa9') !== -1, 'mergedFrom set');
 }
@@ -373,6 +378,84 @@ function testInvalidRhcsa9Json() {
   assert(localStorage.getItem(MIGRATION_FLAG) === null, 'no flag on invalid JSON');
 }
 
+function testInvalidRhcsa9NormalizesRhcsa10() {
+  const localStorage = new LocalStorageMock();
+  localStorage.setItem('study_sessions_profile_rhcsa9', '{not json');
+  localStorage.setItem('study_sessions_profile_rhcsa10', '{}');
+  executeMigrationWithLocalStorage(localStorage);
+  const p = JSON.parse(localStorage.getItem('study_sessions_profile_rhcsa10'));
+  assertDeepEqual(p.topicStats, {}, 'topicStats object after invalid rhcsa9');
+  assertDeepEqual(p.topicMissesFromImports, {}, 'topicMissesFromImports object');
+  assert(p.quizId === 'rhcsa10', 'quizId on normalized profile');
+  assert(localStorage.getItem(MIGRATION_FLAG) === 'true', 'flag after normalize');
+}
+
+function testMissingTopicMissesOnlyOnRhcsa10() {
+  const localStorage = new LocalStorageMock();
+  localStorage.setItem(
+    'study_sessions_profile_rhcsa10',
+    JSON.stringify({
+      quizId: 'rhcsa10',
+      topicStats: { Storage: { correct: 1, total: 2 } }
+    })
+  );
+  localStorage.setItem(
+    'study_sessions_profile_rhcsa9',
+    JSON.stringify({
+      quizId: 'rhcsa9',
+      topicStats: { Networking: { correct: 3, total: 4 } }
+    })
+  );
+  executeMigrationWithLocalStorage(localStorage);
+  const p = JSON.parse(localStorage.getItem('study_sessions_profile_rhcsa10'));
+  assertDeepEqual(p.topicMissesFromImports, {}, 'defaults topicMissesFromImports');
+  assertDeepEqual(p.topicStats.Storage, { correct: 1, total: 2 }, 'keeps rhcsa10 stats');
+  assertDeepEqual(p.topicStats.Networking, { correct: 3, total: 4 }, 'adds rhcsa9-only topic');
+  assert(localStorage.getItem(MIGRATION_FLAG) === 'true', 'flag set');
+}
+
+function testRhcsa9WithoutImportMisses() {
+  const localStorage = new LocalStorageMock();
+  localStorage.setItem('quizCompleted', JSON.stringify(['az900', 'rhcsa9']));
+  localStorage.setItem(
+    'study_sessions_profile_rhcsa9',
+    JSON.stringify({
+      quizId: 'rhcsa9',
+      topicStats: { Storage: { correct: 14, total: 20 } }
+    })
+  );
+  executeMigrationWithLocalStorage(localStorage);
+  const p = JSON.parse(localStorage.getItem('study_sessions_profile_rhcsa10'));
+  assertDeepEqual(p.topicStats.Storage, { correct: 14, total: 20 }, 'R: Storage 14/20');
+  assertDeepEqual(p.topicMissesFromImports, {}, 'empty misses default');
+  executeMigrationWithLocalStorage(localStorage);
+  executeMigrationWithLocalStorage(localStorage);
+  const p2 = JSON.parse(localStorage.getItem('study_sessions_profile_rhcsa10'));
+  assertDeepEqual(p2.topicStats.Storage, { correct: 14, total: 20 }, 'R: still 14/20 after reloads');
+  const completed = JSON.parse(localStorage.getItem('quizCompleted'));
+  assertDeepEqual(completed, ['az900', 'rhcsa10'], 'quizCompleted no duplicates');
+}
+
+function testConcurrentFirstRunNoDoubleCount() {
+  const localStorage = new LocalStorageMock();
+  localStorage.setItem(
+    'study_sessions_profile_rhcsa9',
+    JSON.stringify({
+      quizId: 'rhcsa9',
+      topicStats: { Storage: { correct: 14, total: 20 } },
+      topicMissesFromImports: {}
+    })
+  );
+  executeMigrationWithLocalStorage(localStorage);
+  const afterFirst = JSON.parse(localStorage.getItem('study_sessions_profile_rhcsa10'));
+  assertDeepEqual(afterFirst.topicStats.Storage, { correct: 14, total: 20 }, 'T: first run 14/20');
+  localStorage.removeItem(MIGRATION_FLAG);
+  executeMigrationWithLocalStorage(localStorage);
+  const afterSecond = JSON.parse(localStorage.getItem('study_sessions_profile_rhcsa10'));
+  assertDeepEqual(afterSecond.topicStats.Storage, { correct: 14, total: 20 }, 'T: mergedFrom prevents 28/40');
+  assert(afterSecond.mergedFrom.indexOf('rhcsa9') !== -1, 'mergedFrom set');
+}
+
 function testNoRhcsa9Data() {
   const localStorage = new LocalStorageMock();
   executeMigrationWithLocalStorage(localStorage);
@@ -430,6 +513,10 @@ const tests = [
   ['Both rhcsa9 and rhcsa10 in quizCompleted', testBothInCompleted],
   ['Missing topicStats on rhcsa10', testMissingFieldsOnRhcsa10],
   ['Invalid rhcsa9 JSON — no flag', testInvalidRhcsa9Json],
+  ['Invalid rhcsa9 JSON normalizes rhcsa10 {}', testInvalidRhcsa9NormalizesRhcsa10],
+  ['Missing topicMissesFromImports on rhcsa10 (M)', testMissingTopicMissesOnlyOnRhcsa10],
+  ['Rerun keeps Storage 14/20 (R)', testRhcsa9WithoutImportMisses],
+  ['Second run with mergedFrom — no double count (T)', testConcurrentFirstRunNoDoubleCount],
   ['No rhcsa9 data (fresh user)', testNoRhcsa9Data],
   ['Old v10 flag does not block migration', testOldV10FlagStillMigrates],
   ['Profile write failure — no flag (F)', testWriteFailureNoFlag]
