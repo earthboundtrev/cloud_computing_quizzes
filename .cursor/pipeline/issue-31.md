@@ -19,6 +19,7 @@
 | SECURITY | Pass (pre-merge); post-merge no blockers | P3 hardening tracked separately |
 | DEPLOY | **Merged** | PR #124 @ `b8b6116` |
 | TESTER | **Pending** | Retest on `b8b6116` |
+| CONTENT FIX (post-#124) | **In progress** | Branch `cursor/issue-31-rhcsa10-content-d59c`: 0070, 0172, 0183, 0187, 0144; cache v54 |
 
 ## Review outcomes (pre-merge)
 
