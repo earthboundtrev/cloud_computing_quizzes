@@ -371,9 +371,9 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "id": "rhcsa10-0136",
     "mode": "exam",
     "topic": "Storage",
-    "q": "All extents on /dev/sdb in vg0 must move to /dev/sdc in the same volume group. What is the correct sequence?",
+    "q": "All allocated extents on PV /dev/sdb in vg0 must be evacuated to PV /dev/sdc in the same volume group. What command accomplishes that?",
     "options": [
-      "pvmove /dev/sdb1 /dev/sdc1 (or pvmove /dev/sdb /dev/sdc) while LVs are active or during maintenance",
+      "pvmove /dev/sdb /dev/sdc",
       "vgmerge vg0 other_vg to move extents between disks",
       "lvconvert --type mirror /dev/vg0/lv0 to relocate PV data",
       "pvremove /dev/sdb without pvmove first"

@@ -5,7 +5,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "topic": "RHCSA gap fill",
     "q": "Save the output of rpm -qa to /tmp/packages.txt on RHEL:",
     "options": [
-      "rpm -qa 2>&1 | tee /tmp/packages.txt",
+      "rpm -qa | wc -l",
       "rpm -qa > /tmp/packages.txt",
       "rpm -qa < /tmp/packages.txt",
       "rpm -qa & /tmp/packages.txt"

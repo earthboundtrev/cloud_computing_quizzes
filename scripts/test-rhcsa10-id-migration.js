@@ -67,6 +67,16 @@ function testRemapNumericAndStringIds() {
   }
 }
 
+function testMissingMapDoesNotSetFlag() {
+  const ls = new LocalStorageMock();
+  const migJs = fs.readFileSync('rhcsa10-question-id-migration.js', 'utf8');
+  const fn = new Function('localStorage', 'window', 'console', migJs);
+  fn(ls, {}, { log: () => {}, warn: () => {}, error: () => {} });
+  if (ls.getItem('rhcsa10_question_ids_v1')) {
+    throw new Error('flag must not be set when map is missing');
+  }
+}
+
 function testIdempotent() {
   const ls = new LocalStorageMock();
   ls.setItem(
@@ -83,7 +93,11 @@ function testIdempotent() {
 
 let ok = 0;
 let fail = 0;
-[{ name: 'remap numeric and string ids', fn: testRemapNumericAndStringIds }, { name: 'idempotent', fn: testIdempotent }].forEach(
+[
+  { name: 'remap numeric and string ids', fn: testRemapNumericAndStringIds },
+  { name: 'missing map leaves flag unset', fn: testMissingMapDoesNotSetFlag },
+  { name: 'idempotent', fn: testIdempotent }
+].forEach(
   function (t) {
     try {
       t.fn();

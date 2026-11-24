@@ -20,8 +20,7 @@
 
   var mapPayload = window.RHCSA10_QUESTION_ID_MAP;
   if (!mapPayload || !mapPayload.forward || typeof mapPayload.forward !== 'object') {
-    console.warn('[Migration] RHCSA10 question id map missing; skip id remap');
-    localStorage.setItem(FLAG, 'true');
+    console.warn('[Migration] RHCSA10 question id map missing; will retry on next load');
     return;
   }
 
