@@ -702,15 +702,12 @@ function createBrainDumpIdbHarness(seedRecords) {
     });
   }
 
-  async function assertOverCapRejected(mapField, buildMap, cap, lsOptional) {
+  function assertOverCapRejected(mapField, buildMap, cap) {
     const game = minimalGameState();
     game[mapField] = buildMap(cap + 1);
     const res = dataImport.validatePayloadRoot(gamePayload(game));
     assert(!res.ok, mapField + ' over cap rejected');
-    if (lsOptional) {
-      const before = JSON.stringify(snapshot(lsOptional));
-      assert(JSON.stringify(snapshot(lsOptional)) === before, mapField + ' storage unchanged');
-    }
+    assert(res.code === 'game_cap', mapField + ' game_cap code');
   }
 
   function assertAtCapAccepted(mapField, buildMap, cap) {
@@ -731,20 +728,39 @@ function createBrainDumpIdbHarness(seedRecords) {
     return { answers: 0, met: false, celebrated: false, streakAwarded: false, kind: 'normal' };
   };
 
-  await test('rejects over-cap dayRecords and leaves storage unchanged', async function () {
-    const ls = new LocalStorageMock({ quizCompleted: '["keep"]' });
-    await assertOverCapRejected(
+  await test('rejects over-cap dayRecords with game_cap', function () {
+    assertOverCapRejected(
       'dayRecords',
       function (n) {
         return makeKeyedPlainObject(n, function (i) {
           return '2020-01-' + String((i % 28) + 1).padStart(2, '0') + ':' + i;
         }, function () {
-          return dayEntry();
+          return {};
         });
       },
-      dataImport.MAX_DAY_RECORD_KEYS,
-      ls
+      dataImport.MAX_DAY_RECORD_KEYS
     );
+  });
+
+  await test('over-cap game state leaves storage unchanged when import blocked', async function () {
+    const ls = new LocalStorageMock({ quizCompleted: '["keep"]' });
+    const before = JSON.stringify(snapshot(ls));
+    const game = minimalGameState({
+      dayRecords: makeKeyedPlainObject(dataImport.MAX_DAY_RECORD_KEYS + 1, function (i) {
+        return 'd:' + i;
+      }, function () {
+        return {};
+      })
+    });
+    const raw = JSON.stringify(
+      minimalPayload({
+        localStorage: { cloudcram_game_v1: JSON.stringify(game) }
+      })
+    );
+    const validated = dataImport.validateImportText(raw);
+    assert(!validated.ok, 'import blocked');
+    assert(validated.code === 'game_cap', 'game_cap');
+    assert(JSON.stringify(snapshot(ls)) === before, 'storage unchanged');
   });
 
   await test('accepts at-cap and under-cap dayRecords', function () {
@@ -801,15 +817,19 @@ function createBrainDumpIdbHarness(seedRecords) {
     assert(!dataImport.validatePayloadRoot(gamePayload(game)).ok, 'settingsRevision bad value');
   });
 
-  await test('rejects over-cap answerDedup', function () {
-    const game = minimalGameState({
-      answerDedup: makeKeyedPlainObject(dataImport.MAX_DEDUP_KEYS + 1, function (i) {
-        return 'k:' + i;
-      }, function () {
-        return true;
-      })
+  await test('rejects invalid notices entry shape', function () {
+    const game = minimalGameState({ notices: { bad: { nested: true } } });
+    assert(!dataImport.validatePayloadRoot(gamePayload(game)).ok, 'notices bad value');
+  });
+
+  await test('rejects over-cap answerDedup on game JSON', function () {
+    const dedup = makeKeyedPlainObject(dataImport.MAX_DEDUP_KEYS + 1, function (i) {
+      return 'k:' + i;
+    }, function () {
+      return true;
     });
-    assert(!dataImport.validatePayloadRoot(gamePayload(game)).ok, 'answerDedup over cap');
+    const err = dataImport.validateGameImportString(JSON.stringify({ v: 1, answerDedup: dedup }));
+    assert(err && err.code === 'game_cap', 'answerDedup over cap');
   });
 
   await test('accepts under-cap answerDedup', function () {

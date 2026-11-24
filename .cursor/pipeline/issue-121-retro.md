@@ -31,26 +31,27 @@
 | Stage | Status | Notes |
 |-------|--------|--------|
 | IMPLEMENT | Done | Caps + tests + CACHE_NAME v58 |
-| BUGBOT | _TBD_ | |
-| TESTS | _TBD_ | Full `lint.yml` |
-| ARCHITECT | _TBD_ | |
-| SECURITY | _TBD_ | Import map caps; reserved keys unchanged |
+| BUGBOT | **Clean** (post test fix) | Major: over-cap dayRecords test hit `localStorage_size` — fixed compact maps + `game_cap` assert |
+| TESTS | **Pass** | Full `lint.yml` locally (`test-data-import-export.js` 33/33) |
+| ARCHITECT | **Merge-ready** | `cursor-grok-4.6-high-fast` |
+| SECURITY | **PASS** | `cursor-grok-4.6-high-fast`; L1 optional reserved-key in map helpers |
 | DEPLOY | Pending | PR open; **Tester retest pending** |
 
 ## Bugbot runs
 
 | When (UTC) | Model | Clean | Summary |
 |------------|-------|-------|---------|
-| _TBD_ | | | |
+| 2026-11-24 | cursor-grok-4.6-high-fast | No | Over-cap tests did not assert `game_cap` under LS size limit |
+| 2026-11-24 | (parent) | **Yes** | Compact over-cap maps; export `validateGameImportString`; `game_cap` asserts |
 
 ## Architect
 
 | When (UTC) | Model | Verdict |
 |------------|-------|---------|
-| _TBD_ | | |
+| 2026-11-24 | cursor-grok-4.6-high-fast | **Merge-ready** | Caps pre-normalize; v58 SW; tests cover new maps |
 
 ## Security
 
 | When (UTC) | Model | Verdict |
 |------------|-------|---------|
-| _TBD_ | | |
+| 2026-11-24 | cursor-grok-4.6-high-fast | **PASS** | Fail-closed reject; no new storage keys; bounded key count |

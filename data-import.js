@@ -1155,6 +1155,7 @@
     containsReservedKey: containsReservedKey,
     sanitizePlainObject: sanitizePlainObject,
     validateImportText: validateImportText,
+    validateGameImportString: validateGameImportString,
     validatePayloadRoot: validatePayloadRoot,
     importableLocalStorageEntries: importableLocalStorageEntries,
     mergeQuizCompleted: mergeQuizCompleted,
