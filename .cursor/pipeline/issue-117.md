@@ -23,7 +23,7 @@ Post PRs #123, #124, #130, #131, #132 — finding **still open**:
 | TESTS | **Pass** | Full `lint.yml` set + Playwright offline/console/concurrent + smoke --all |
 | ARCHITECT | **Merge-ready** | cursor-grok-4.6-high-fast — no blockers |
 | SECURITY | **Pass** | cursor-grok-4.6-high-fast — no medium+; gitignore-only |
-| DEPLOY | PR open | `Refs #117`; no merge |
+| DEPLOY | PR open | `Refs #117`; no merge; GitHub Actions **9/9 green** on `76d12da` |
 
 ## Changes
 
