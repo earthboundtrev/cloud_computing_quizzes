@@ -5,7 +5,7 @@
 | Field | Value |
 |-------|--------|
 | Issue | [#125](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/125) — **OPEN** (`Refs` only; human close when AC sign-off complete) |
-| PR | _see PR URL in agent summary_ |
+| PR | [#141](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/141) |
 | Branch | `cursor/push-local-export-redaction-125-b211` |
 | Base | `28a8eb6` (`cloudcram-v58`) |
 | Cache | **cloudcram-v59** |
