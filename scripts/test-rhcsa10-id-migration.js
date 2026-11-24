@@ -30,12 +30,17 @@ function loadMap() {
   return sandbox.window.RHCSA10_QUESTION_ID_MAP;
 }
 
+function bootReservedKeys(target) {
+  vm.runInContext(fs.readFileSync(path.join(ROOT, 'reserved-key-names.js'), 'utf8'), target);
+}
+
 function bootRhcsa10Ids(target) {
   target.RHCSA10_QUESTION_ID_MAP = loadMap();
   target.window = target;
   target.globalThis = target;
   target.console = console;
   vm.createContext(target);
+  bootReservedKeys(target);
   vm.runInContext(fs.readFileSync(path.join(ROOT, 'rhcsa10-question-id-utils.js'), 'utf8'), target);
 }
 
@@ -162,6 +167,44 @@ function testImportThenReanswerNoExtraXp() {
   });
 }
 
+function testAnswerDedupSkipsReservedKeys() {
+  const utils = loadUtils();
+  const raw = Object.create(null);
+  raw['2026-11-24:s1:rhcsa10-0001'] = true;
+  raw.__proto__ = true;
+  raw.constructor = true;
+  raw.prototype = true;
+  const next = utils.normalizeAnswerDedup(raw);
+  assert(Object.keys(next).length === 1, 'only allowed dedup key kept');
+  assert(next['2026-11-24:s1:rhcsa10-0001'], 'valid key kept');
+  assert(next.polluted === undefined, 'no pollution via reserved dedup key');
+  assert({}.polluted === undefined, 'Object.prototype clean');
+}
+
+function testPendingGameAnswerSkipsReservedKeys() {
+  const utils = loadUtils();
+  const msg = {
+    questionId: '129',
+    sessionId: 's1',
+    __proto__: { polluted: true },
+    constructor: 'x',
+    prototype: 'y'
+  };
+  const out = utils.normalizePendingGameAnswer(msg);
+  assert(out.questionId && out.questionId.indexOf('rhcsa10-') === 0, 'canon question id');
+  assert(out.__proto__ === undefined, 'reserved __proto__ dropped');
+  assert(out.constructor === undefined, 'reserved constructor dropped');
+  assert(out.prototype === undefined, 'reserved prototype dropped');
+  assert(out.sessionId === 's1', 'allowed field kept');
+  assert({}.polluted === undefined, 'Object.prototype clean');
+}
+
+function assert(condition, message) {
+  if (!condition) {
+    throw new Error(message || 'assertion failed');
+  }
+}
+
 function testIdempotentPersist() {
   const ls = new LocalStorageMock();
   ls.setItem(
@@ -179,6 +222,8 @@ function testIdempotentPersist() {
 const syncTests = [
   { name: 'remap numeric and string ids', fn: testRemapNumericAndStringIds },
   { name: 'tab merge dedupes old and new ids', fn: testTabMergeDedupesOldAndNew },
+  { name: 'answerDedup skips reserved keys (#127)', fn: testAnswerDedupSkipsReservedKeys },
+  { name: 'pending game answer skips reserved keys (#127)', fn: testPendingGameAnswerSkipsReservedKeys },
   { name: 'idempotent persist migration', fn: testIdempotentPersist }
 ];
 

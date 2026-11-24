@@ -5,6 +5,16 @@
 (function (root) {
   'use strict';
 
+  function isReservedKeyName(key) {
+    if (root.CloudCramReservedKeyNames && root.CloudCramReservedKeyNames.isReservedKeyName) {
+      return root.CloudCramReservedKeyNames.isReservedKeyName(key);
+    }
+    if (root.CloudCramDataImport && typeof root.CloudCramDataImport.isReservedKeyName === 'function') {
+      return root.CloudCramDataImport.isReservedKeyName(key);
+    }
+    return key === '__proto__' || key === 'constructor' || key === 'prototype';
+  }
+
   function getForward() {
     var payload = root.RHCSA10_QUESTION_ID_MAP;
     if (!payload || !payload.forward || typeof payload.forward !== 'object') {
@@ -35,7 +45,7 @@
     }
     var next = Object.create(null);
     Object.keys(dedup).forEach(function (dedupKey) {
-      if (!dedup[dedupKey]) {
+      if (isReservedKeyName(dedupKey) || !dedup[dedupKey]) {
         return;
       }
       var m = dedupKey.match(/^([^:]+):([^:]+):(.+)$/);
@@ -57,8 +67,11 @@
     if (canon === String(msg.questionId)) {
       return msg;
     }
-    var out = {};
+    var out = Object.create(null);
     Object.keys(msg).forEach(function (k) {
+      if (isReservedKeyName(k)) {
+        return;
+      }
       out[k] = msg[k];
     });
     out.questionId = canon;

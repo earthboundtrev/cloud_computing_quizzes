@@ -75,19 +75,23 @@ function loadMigrationScript() {
   return fs.readFileSync(scriptPath, 'utf8');
 }
 
+function loadReservedKeyNamesScript() {
+  return fs.readFileSync(path.join(__dirname, '..', 'reserved-key-names.js'), 'utf8');
+}
+
 function executeMigrationWithLocalStorage(localStorage) {
+  const reservedKeys = loadReservedKeyNamesScript();
   const scriptContent = loadMigrationScript();
-  const wrappedScript = `
-    (function() {
-      ${scriptContent}
-    })();
-  `;
-  const func = new Function('localStorage', 'console', wrappedScript);
+  const wrappedScript =
+    reservedKeys +
+    '\n' +
+    scriptContent;
+  const func = new Function('localStorage', 'console', 'globalThis', 'require', 'module', wrappedScript);
   const mockConsole = {
     log: () => {},
     error: () => {}
   };
-  func(localStorage, mockConsole);
+  func(localStorage, mockConsole, globalThis, require, { exports: {} });
 }
 
 function testBasicMigration() {
@@ -480,6 +484,81 @@ function testOldV10FlagStillMigrates() {
   assert(localStorage.getItem(MIGRATION_FLAG) === 'true', 'v10_3 set');
 }
 
+function assertNoPrototypePollution() {
+  assertEqual(({}).polluted, undefined, 'Object.prototype not polluted');
+}
+
+function testReservedKeysSkippedInTopicMaps() {
+  const localStorage = new LocalStorageMock();
+  localStorage.setItem(
+    'study_sessions_profile_rhcsa10',
+    JSON.stringify({
+      quizId: 'rhcsa10',
+      topicStats: { Storage: { correct: 10, total: 15 } },
+      topicMissesFromImports: { Storage: 2 },
+      mergedFrom: []
+    })
+  );
+  localStorage.setItem(
+    'study_sessions_profile_rhcsa9',
+    JSON.stringify({
+      quizId: 'rhcsa9',
+      topicStats: {
+        Storage: { correct: 3, total: 5 },
+        __proto__: { correct: 99, total: 99 },
+        constructor: { correct: 88, total: 88 },
+        prototype: { correct: 77, total: 77 }
+      },
+      topicMissesFromImports: {
+        Networking: 4,
+        __proto__: 50,
+        constructor: 60,
+        prototype: 70
+      }
+    })
+  );
+  executeMigrationWithLocalStorage(localStorage);
+  const p = JSON.parse(localStorage.getItem('study_sessions_profile_rhcsa10'));
+  assertDeepEqual(p.topicStats.Storage, { correct: 13, total: 20 }, 'Storage summed; reserved skipped');
+  assert(!Object.prototype.hasOwnProperty.call(p.topicStats, '__proto__'), 'no __proto__ topic stat');
+  assertEqual(p.topicStats.Networking, undefined, 'Networking only from misses path not stats');
+  assertDeepEqual(p.topicMissesFromImports.Storage, 2, 'rhcsa10 miss unchanged');
+  assertEqual(p.topicMissesFromImports.Networking, 4, 'valid miss merged');
+  assert(!Object.prototype.hasOwnProperty.call(p.topicMissesFromImports, '__proto__'), 'no reserved miss keys');
+  assertNoPrototypePollution();
+}
+
+function testReservedKeysInExistingRhcsa10NotApplied() {
+  const localStorage = new LocalStorageMock();
+  const pollutionMarker = { polluted: true };
+  localStorage.setItem(
+    'study_sessions_profile_rhcsa10',
+    JSON.stringify({
+      quizId: 'rhcsa10',
+      topicStats: {
+        Storage: { correct: 5, total: 8 },
+        __proto__: { correct: 100, total: 100 }
+      },
+      topicMissesFromImports: { __proto__: 9 },
+      mergedFrom: ['rhcsa9']
+    })
+  );
+  localStorage.setItem(
+    'study_sessions_profile_rhcsa9',
+    JSON.stringify({
+      quizId: 'rhcsa9',
+      topicStats: { Storage: { correct: 1, total: 2 } }
+    })
+  );
+  executeMigrationWithLocalStorage(localStorage);
+  const p = JSON.parse(localStorage.getItem('study_sessions_profile_rhcsa10'));
+  assertDeepEqual(p.topicStats.Storage, { correct: 5, total: 8 }, 'already-merged rhcsa10 Storage unchanged');
+  assert(!Object.prototype.hasOwnProperty.call(p.topicStats, '__proto__'), 'reserved stripped from stored profile');
+  assert(!Object.prototype.hasOwnProperty.call(p.topicMissesFromImports, '__proto__'), 'reserved miss stripped');
+  assertEqual(({}).polluted, undefined, 'prototype clean');
+  assert(pollutionMarker.polluted === true, 'local marker unchanged');
+}
+
 function testWriteFailureNoFlag() {
   const localStorage = new LocalStorageMock();
   localStorage.setItem(
@@ -519,7 +598,9 @@ const tests = [
   ['Second run with mergedFrom — no double count (T)', testConcurrentFirstRunNoDoubleCount],
   ['No rhcsa9 data (fresh user)', testNoRhcsa9Data],
   ['Old v10 flag does not block migration', testOldV10FlagStillMigrates],
-  ['Profile write failure — no flag (F)', testWriteFailureNoFlag]
+  ['Profile write failure — no flag (F)', testWriteFailureNoFlag],
+  ['Reserved keys skipped in topic maps (#127)', testReservedKeysSkippedInTopicMaps],
+  ['Reserved keys — rhcsa10 totals unchanged when mergedFrom set', testReservedKeysInExistingRhcsa10NotApplied]
 ];
 
 tests.forEach(([name, fn]) => {

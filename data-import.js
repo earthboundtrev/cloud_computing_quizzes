@@ -23,7 +23,23 @@
   var IDB_OPEN_TIMEOUT_MS = 8000;
   var LS_BRAIN_KEY = 'study_sessions_brain_dumps';
 
+  function getReservedKeyApi() {
+    try {
+      return require('./reserved-key-names.js');
+    } catch (e1) {
+      if (typeof CloudCramReservedKeyNames !== 'undefined') {
+        return CloudCramReservedKeyNames;
+      }
+      return null;
+    }
+  }
+
+  var reservedKeyApi = getReservedKeyApi();
+
   function isReservedKeyName(key) {
+    if (reservedKeyApi && typeof reservedKeyApi.isReservedKeyName === 'function') {
+      return reservedKeyApi.isReservedKeyName(key);
+    }
     return key === '__proto__' || key === 'constructor' || key === 'prototype';
   }
   var PROFILE_PREFIX = 'study_sessions_profile_';
@@ -1147,6 +1163,7 @@
   return {
     SCHEMA_V1: SCHEMA_V1,
     MAX_FILE_BYTES: MAX_FILE_BYTES,
+    isReservedKeyName: isReservedKeyName,
     MAX_DEDUP_KEYS: MAX_DEDUP_KEYS,
     MAX_DAY_RECORD_KEYS: MAX_DAY_RECORD_KEYS,
     MAX_NOTICE_KEYS: MAX_NOTICE_KEYS,

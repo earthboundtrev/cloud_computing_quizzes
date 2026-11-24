@@ -22,6 +22,120 @@
 
   const RETIRED_TOPICS = ['RHEL 9 vs 7', 'Containers'];
 
+  function getReservedKeyApi() {
+    if (typeof CloudCramReservedKeyNames !== 'undefined') {
+      return CloudCramReservedKeyNames;
+    }
+    if (typeof CloudCramDataImport !== 'undefined' && CloudCramDataImport.isReservedKeyName) {
+      return { isReservedKeyName: CloudCramDataImport.isReservedKeyName };
+    }
+    try {
+      return require('./reserved-key-names.js');
+    } catch (e0) {
+      return null;
+    }
+  }
+
+  var reservedKeyApi = getReservedKeyApi();
+
+  function isReservedKeyName(key) {
+    if (reservedKeyApi && typeof reservedKeyApi.isReservedKeyName === 'function') {
+      return reservedKeyApi.isReservedKeyName(key);
+    }
+    return key === '__proto__' || key === 'constructor' || key === 'prototype';
+  }
+
+  function copyAllowedTopicStats(src) {
+    var out = Object.create(null);
+    if (!src || typeof src !== 'object') {
+      return out;
+    }
+    Object.keys(src).forEach(function (topic) {
+      if (isReservedKeyName(topic) || RETIRED_TOPICS.indexOf(topic) !== -1) {
+        return;
+      }
+      var stat = src[topic];
+      if (!stat || typeof stat !== 'object' || Array.isArray(stat)) {
+        return;
+      }
+      out[topic] = {
+        correct: stat.correct || 0,
+        total: stat.total || 0
+      };
+    });
+    return out;
+  }
+
+  function copyAllowedTopicMisses(src) {
+    var out = Object.create(null);
+    if (!src || typeof src !== 'object') {
+      return out;
+    }
+    Object.keys(src).forEach(function (topic) {
+      if (isReservedKeyName(topic) || RETIRED_TOPICS.indexOf(topic) !== -1) {
+        return;
+      }
+      out[topic] = missCount(src[topic]);
+    });
+    return out;
+  }
+
+  function mergeTopicStatsFromOld(existing, oldStats, v10_2Ran) {
+    var merged = copyAllowedTopicStats(existing);
+    if (!oldStats || typeof oldStats !== 'object') {
+      return merged;
+    }
+    Object.keys(oldStats).forEach(function (topic) {
+      if (isReservedKeyName(topic) || RETIRED_TOPICS.indexOf(topic) !== -1) {
+        return;
+      }
+      var oldStat = oldStats[topic];
+      if (!oldStat || typeof oldStat !== 'object' || Array.isArray(oldStat)) {
+        return;
+      }
+      if (merged[topic]) {
+        var curStat = merged[topic];
+        var shouldSumOverlap = !v10_2Ran ||
+          (curStat.total || 0) < (oldStat.total || 0) ||
+          (curStat.correct || 0) < (oldStat.correct || 0);
+        if (shouldSumOverlap) {
+          merged[topic] = sumTopicStats(curStat, oldStat);
+        }
+      } else {
+        merged[topic] = {
+          correct: oldStat.correct || 0,
+          total: oldStat.total || 0
+        };
+      }
+    });
+    return merged;
+  }
+
+  function mergeTopicMissesFromOld(existing, oldMisses, v10_2Ran) {
+    var merged = copyAllowedTopicMisses(existing);
+    if (!oldMisses || typeof oldMisses !== 'object') {
+      return merged;
+    }
+    Object.keys(oldMisses).forEach(function (topic) {
+      if (isReservedKeyName(topic) || RETIRED_TOPICS.indexOf(topic) !== -1) {
+        return;
+      }
+      var oldMiss = oldMisses[topic];
+      var hasNewMiss = merged[topic] !== undefined && merged[topic] !== null;
+      if (hasNewMiss) {
+        var curMiss = missCount(merged[topic]);
+        var oldMissN = missCount(oldMiss);
+        var shouldSumMiss = !v10_2Ran || curMiss < oldMissN;
+        if (shouldSumMiss) {
+          merged[topic] = curMiss + oldMissN;
+        }
+      } else {
+        merged[topic] = missCount(oldMiss);
+      }
+    });
+    return merged;
+  }
+
   if (localStorage.getItem(MIGRATION_FLAG)) {
     return;
   }
@@ -138,50 +252,23 @@
       var alreadyMergedRhcsa9 = newProfile.mergedFrom.indexOf('rhcsa9') !== -1;
 
       if (!alreadyMergedRhcsa9) {
-        if (oldProfile.topicStats) {
-          Object.keys(oldProfile.topicStats).forEach(function (topic) {
-            if (RETIRED_TOPICS.indexOf(topic) !== -1) {
-              return;
-            }
-            var oldStat = oldProfile.topicStats[topic];
-            if (newProfile.topicStats[topic]) {
-              var curStat = newProfile.topicStats[topic];
-              var shouldSumOverlap = !v10_2Ran ||
-                (curStat.total || 0) < (oldStat.total || 0) ||
-                (curStat.correct || 0) < (oldStat.correct || 0);
-              if (shouldSumOverlap) {
-                newProfile.topicStats[topic] = sumTopicStats(curStat, oldStat);
-              }
-            } else {
-              newProfile.topicStats[topic] = oldStat;
-            }
-          });
-        }
-
-        if (oldProfile.topicMissesFromImports) {
-          Object.keys(oldProfile.topicMissesFromImports).forEach(function (topic) {
-            if (RETIRED_TOPICS.indexOf(topic) !== -1) {
-              return;
-            }
-            var oldMiss = oldProfile.topicMissesFromImports[topic];
-            var hasNewMiss = newProfile.topicMissesFromImports[topic] !== undefined &&
-              newProfile.topicMissesFromImports[topic] !== null;
-            if (hasNewMiss) {
-              var curMiss = missCount(newProfile.topicMissesFromImports[topic]);
-              var oldMissN = missCount(oldMiss);
-              var shouldSumMiss = !v10_2Ran || curMiss < oldMissN;
-              if (shouldSumMiss) {
-                newProfile.topicMissesFromImports[topic] = curMiss + oldMissN;
-              }
-            } else {
-              newProfile.topicMissesFromImports[topic] = missCount(oldMiss);
-            }
-          });
-        }
+        newProfile.topicStats = mergeTopicStatsFromOld(
+          newProfile.topicStats,
+          oldProfile.topicStats,
+          v10_2Ran
+        );
+        newProfile.topicMissesFromImports = mergeTopicMissesFromOld(
+          newProfile.topicMissesFromImports,
+          oldProfile.topicMissesFromImports,
+          v10_2Ran
+        );
 
         if (newProfile.mergedFrom.indexOf('rhcsa9') === -1) {
           newProfile.mergedFrom.push('rhcsa9');
         }
+      } else {
+        newProfile.topicStats = copyAllowedTopicStats(newProfile.topicStats);
+        newProfile.topicMissesFromImports = copyAllowedTopicMisses(newProfile.topicMissesFromImports);
       }
 
       var savedProfileStr = JSON.stringify(newProfile);
