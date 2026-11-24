@@ -5,7 +5,7 @@
 | Field | Value |
 |-------|--------|
 | Issue | [#38](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/38) — **OPEN** until human close |
-| PR | _(filled after push)_ |
+| PR | [#140](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/140) |
 | Branch | `cursor/ci-workflow-hardening-38-259d` |
 | Base | `d056bf2` |
 | Diff scope | `.github/workflows/lint.yml`, `.github/workflows/gitleaks.yml`, `.github/workflows/android-assemble-debug-optional.yml`, this retro |
