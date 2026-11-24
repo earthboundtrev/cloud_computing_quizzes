@@ -3,41 +3,49 @@
 | Field | Value |
 |-------|--------|
 | Issue | [#30](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/30) — **OPEN** |
-| Base | `main` @ `b8b6116` (post #31 merge) |
-| Branch | `cursor/issue-30-rhcsa10-sw-pipeline-37d5` |
+| PR | [#130](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/130) — **merged** |
+| Merge commit | `2e7bfd9` |
+| Branch head (PR) | `12512de` |
+| Retro | [issue-30-retro.md](./issue-30-retro.md) |
 
-## Acceptance criteria vs main @ b8b6116 (pre-branch)
+## Acceptance criteria (post-merge @ `2e7bfd9`)
 
-| Criterion | Met on main? | Evidence |
-|-----------|----------------|----------|
-| `check-page-banks.js` — no orphan banks | **Yes** | `rhcsa10-gap-questions.js` loaded in `rhcsa10_quiz.html` L38; script exit 0, 293 unique `rhcsa10-NNNN` ids |
-| Dedupe + launcher count | **Yes** | `quiz-config.js` L24: `293 Q`; `check-page-banks.js` concat main+extra+gap |
-| `check-sw-precache.js` | **Yes** | 118 precache paths; `ignoreSearch: true` in `sw.js` L168; id map, utils, migration in precache |
-| Offline first visit (all quiz pages) | **No** | No Playwright offline step in `lint.yml` before this PR |
-| CACHE_NAME bump when PRECACHE changes | **No** | Reopen comment 2026-11-02; no CI step |
+| Criterion | Met? | Evidence |
+|-----------|------|----------|
+| `check-page-banks.js` — no orphan banks | **Yes** | On main @ `b8b6116` before PR |
+| Dedupe + launcher count | **Yes** | 293 Q; concat main+extra+gap on main before PR |
+| `check-sw-precache.js` | **Yes** | 118 paths; id map/utils/migration on main before PR |
+| Offline first visit (all quiz pages) | **Yes** | `playwright-offline-first-visit.mjs` in `lint.yml` — **16/16** |
+| CACHE_NAME bump when PRECACHE changes | **Yes** | `check-sw-cache-name-bump.js` — fails closed on CI |
 
 ### Notes (stale issue text)
 
-- Original issue @ `c590359` assumed delete gap file; after #31 the gap bank is a **third shard** with uniform ids (not duplicate of extra).
-- `CACHE_NAME` is `cloudcram-v53` on main (`sw.js`, `build-meta.js`).
+- Original issue @ `c590359` assumed delete gap file; after #31 the gap bank is a **third shard** with uniform ids.
+- PR #130 did not change `CACHE_NAME` (precache already correct at **cloudcram-v53**).
 - No `rhcsa9` precache entries (#35).
-- 293 questions, not 249.
 
 ## Pointer log
 
 | Stage | Status | Notes |
 |-------|--------|--------|
 | IMPLEMENT | Done | `check-sw-cache-name-bump.js`, `playwright-offline-first-visit.mjs`, `lint.yml` |
-| BUGBOT | Clean (2nd pass) | P0 CI base ref + P1 offline oracles fixed |
-| TESTS | Pass | local CI mirror + Playwright offline 16/16 |
-| ARCHITECT | Merge-ready | fail-closed CACHE_NAME CI; offline Playwright in lint.yml |
-| SECURITY | Pass | no medium+ |
-| DEPLOY | Pending | `Refs #30` PR |
+| BUGBOT | **Clean** | 2nd pass — P0 CI base ref + P1 offline oracles |
+| TESTS | **Pass** | Lead pre-merge smoke **445/0**; offline **16/16** |
+| ARCHITECT | **Merge-ready** | Fail-closed CACHE_NAME CI; offline in `lint.yml` |
+| SECURITY | **Pass** | No medium+ |
+| DEPLOY | **Merged** | PR #130 @ `2e7bfd9` |
+| TESTER | **PASS** | Retest @ `2e7bfd9` — all five criteria |
 
-## Implemented in this PR
+## Lead verification
+
+| Check | Result |
+|-------|--------|
+| Pre-merge smoke | **445/0** |
+| Playwright offline first-visit | **16/16** |
+| CACHE_NAME bump guard (mutation) | **Fails closed** |
+
+## Implemented in PR #130
 
 1. `scripts/check-sw-cache-name-bump.js` — fails when `PRECACHE_PATHS` diff vs base without `CACHE_NAME` bump.
-2. `scripts/playwright-offline-first-visit.mjs` — fresh context, index online → each quiz offline; rhcsa10 asserts 293 unique ids.
+2. `scripts/playwright-offline-first-visit.mjs` — index online → each quiz offline; rhcsa10 asserts 293 unique ids.
 3. `.github/workflows/lint.yml` — both steps after Playwright install.
-
-No `sw.js` / `CACHE_NAME` change (precache already correct on main).
