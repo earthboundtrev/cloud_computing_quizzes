@@ -5,7 +5,7 @@
 | Field | Value |
 |-------|--------|
 | Issue | [#127](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/127) — **OPEN** until human close |
-| PR | _(pending)_ |
+| PR | [#142](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/142) |
 | Branch | `cursor/reserved-keys-migration-127-89fd` |
 | Base | `74c0aff` (`cloudcram-v59`) |
 | Cache | **cloudcram-v60** |
@@ -20,7 +20,7 @@
 | TESTS | **Pass** | Migration 20/20; import-export 37/37; app-data-lifecycle 18/18; CI subset green |
 | ARCHITECT | **Merge-ready** | `cursor-grok-4.6-high-fast` |
 | SECURITY | **PASS** | `cursor-grok-4.6-high-fast`; no medium+ on diff |
-| DEPLOY | Pending | PR open |
+| DEPLOY | **Open PR #142** | `9b6bc4f`; body `Refs #127` only |
 
 ## Deliverables
 
