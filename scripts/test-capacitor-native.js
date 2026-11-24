@@ -112,6 +112,31 @@ test('native capacitor config has no server.url', function () {
   assert(!cfg.server || !cfg.server.url, 'server.url must not be set (Option A)');
 });
 
+test('google-services.json is gitignored at root and native/android (#117)', function () {
+  var rootGi = fs.readFileSync(path.join(ROOT, '.gitignore'), 'utf8');
+  assert(
+    /^\s*google-services\.json\s*$/m.test(rootGi) && !/^\s*#\s*google-services\.json/m.test(rootGi),
+    'root .gitignore must list google-services.json'
+  );
+  var androidGi = fs.readFileSync(path.join(ROOT, 'native', 'android', '.gitignore'), 'utf8');
+  assert(
+    /^\s*google-services\.json\s*$/m.test(androidGi),
+    'native/android/.gitignore must list google-services.json (not commented)'
+  );
+  var execFileSync = require('child_process').execFileSync;
+  var outRoot = execFileSync('git', ['check-ignore', '-v', 'google-services.json'], {
+    cwd: ROOT,
+    encoding: 'utf8',
+  }).trim();
+  assert(outRoot.indexOf('google-services.json') >= 0, 'git check-ignore root: ' + outRoot);
+  var outNative = execFileSync(
+    'git',
+    ['check-ignore', '-v', 'native/android/google-services.json'],
+    { cwd: ROOT, encoding: 'utf8' }
+  ).trim();
+  assert(outNative.indexOf('google-services.json') >= 0, 'git check-ignore android: ' + outNative);
+});
+
 if (failures.length) {
   console.error('\n' + failures.length + ' failure(s)');
   process.exit(1);
