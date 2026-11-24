@@ -51,7 +51,7 @@
       return out;
     }
     Object.keys(src).forEach(function (topic) {
-      if (isReservedKeyName(topic) || RETIRED_TOPICS.indexOf(topic) !== -1) {
+      if (isReservedKeyName(topic)) {
         return;
       }
       var stat = src[topic];
@@ -72,7 +72,7 @@
       return out;
     }
     Object.keys(src).forEach(function (topic) {
-      if (isReservedKeyName(topic) || RETIRED_TOPICS.indexOf(topic) !== -1) {
+      if (isReservedKeyName(topic)) {
         return;
       }
       out[topic] = missCount(src[topic]);

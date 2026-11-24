@@ -501,30 +501,20 @@ function testReservedKeysSkippedInTopicMaps() {
   );
   localStorage.setItem(
     'study_sessions_profile_rhcsa9',
-    JSON.stringify({
-      quizId: 'rhcsa9',
-      topicStats: {
-        Storage: { correct: 3, total: 5 },
-        __proto__: { correct: 99, total: 99 },
-        constructor: { correct: 88, total: 88 },
-        prototype: { correct: 77, total: 77 }
-      },
-      topicMissesFromImports: {
-        Networking: 4,
-        __proto__: 50,
-        constructor: 60,
-        prototype: 70
-      }
-    })
+    '{"quizId":"rhcsa9","topicStats":{"Storage":{"correct":3,"total":5},"__proto__":{"correct":99,"total":99},"constructor":{"correct":88,"total":88},"prototype":{"correct":77,"total":77}},"topicMissesFromImports":{"Networking":4,"__proto__":50,"constructor":60,"prototype":70}}'
   );
   executeMigrationWithLocalStorage(localStorage);
   const p = JSON.parse(localStorage.getItem('study_sessions_profile_rhcsa10'));
   assertDeepEqual(p.topicStats.Storage, { correct: 13, total: 20 }, 'Storage summed; reserved skipped');
   assert(!Object.prototype.hasOwnProperty.call(p.topicStats, '__proto__'), 'no __proto__ topic stat');
+  assert(!Object.prototype.hasOwnProperty.call(p.topicStats, 'constructor'), 'no constructor topic stat');
+  assert(!Object.prototype.hasOwnProperty.call(p.topicStats, 'prototype'), 'no prototype topic stat');
   assertEqual(p.topicStats.Networking, undefined, 'Networking only from misses path not stats');
   assertDeepEqual(p.topicMissesFromImports.Storage, 2, 'rhcsa10 miss unchanged');
   assertEqual(p.topicMissesFromImports.Networking, 4, 'valid miss merged');
   assert(!Object.prototype.hasOwnProperty.call(p.topicMissesFromImports, '__proto__'), 'no reserved miss keys');
+  assert(!Object.prototype.hasOwnProperty.call(p.topicMissesFromImports, 'constructor'), 'no constructor miss');
+  assert(!Object.prototype.hasOwnProperty.call(p.topicMissesFromImports, 'prototype'), 'no prototype miss');
   assertNoPrototypePollution();
 }
 
@@ -533,15 +523,7 @@ function testReservedKeysInExistingRhcsa10NotApplied() {
   const pollutionMarker = { polluted: true };
   localStorage.setItem(
     'study_sessions_profile_rhcsa10',
-    JSON.stringify({
-      quizId: 'rhcsa10',
-      topicStats: {
-        Storage: { correct: 5, total: 8 },
-        __proto__: { correct: 100, total: 100 }
-      },
-      topicMissesFromImports: { __proto__: 9 },
-      mergedFrom: ['rhcsa9']
-    })
+    '{"quizId":"rhcsa10","topicStats":{"Storage":{"correct":5,"total":8},"__proto__":{"correct":100,"total":100},"Containers":{"correct":2,"total":3}},"topicMissesFromImports":{"__proto__":9},"mergedFrom":["rhcsa9"]}'
   );
   localStorage.setItem(
     'study_sessions_profile_rhcsa9',
@@ -553,7 +535,10 @@ function testReservedKeysInExistingRhcsa10NotApplied() {
   executeMigrationWithLocalStorage(localStorage);
   const p = JSON.parse(localStorage.getItem('study_sessions_profile_rhcsa10'));
   assertDeepEqual(p.topicStats.Storage, { correct: 5, total: 8 }, 'already-merged rhcsa10 Storage unchanged');
+  assertDeepEqual(p.topicStats.Containers, { correct: 2, total: 3 }, 'retired topic on rhcsa10 preserved');
   assert(!Object.prototype.hasOwnProperty.call(p.topicStats, '__proto__'), 'reserved stripped from stored profile');
+  assert(!Object.prototype.hasOwnProperty.call(p.topicStats, 'constructor'), 'no constructor on rhcsa10 stats');
+  assert(!Object.prototype.hasOwnProperty.call(p.topicStats, 'prototype'), 'no prototype on rhcsa10 stats');
   assert(!Object.prototype.hasOwnProperty.call(p.topicMissesFromImports, '__proto__'), 'reserved miss stripped');
   assertEqual(({}).polluted, undefined, 'prototype clean');
   assert(pollutionMarker.polluted === true, 'local marker unchanged');
