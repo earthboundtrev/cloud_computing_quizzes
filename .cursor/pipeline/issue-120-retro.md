@@ -5,7 +5,7 @@
 | Field | Value |
 |-------|--------|
 | Issue | [#120](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/120) — **OPEN** until human close |
-| PR | _TBD after push_ |
+| PR | [#138](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/138) |
 | Branch | `cursor/import-fail-closed-rollback-120-d90a` |
 | Base | `12bead2` (`cloudcram-v56`) |
 | Diff scope | `data-import.js`, `index-init.js`, `index.html`, `sw.js`, `build-meta.js`, `scripts/test-data-import-export.js`, pipeline log |
