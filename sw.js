@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE_NAME = 'cloudcram-v52';
+const CACHE_NAME = 'cloudcram-v53';
 
 const PRECACHE_PATHS = [
   '/index.html',
@@ -88,6 +88,7 @@ const PRECACHE_PATHS = [
   '/data/rhcsa10-questions.js',
   '/data/rhcsa10-extra-questions.js',
   '/data/rhcsa10-gap-questions.js',
+  '/data/rhcsa10-question-id-map.js',
   '/data/rhce-questions.js',
   '/quiz-init-oci.js',
   '/quiz-init-gcp.js',
@@ -106,6 +107,7 @@ const PRECACHE_PATHS = [
   '/quiz-init-rhcsa10.js',
   '/quiz-init-rhce.js',
   '/rhcsa-migration.js',
+  '/rhcsa10-question-id-migration.js',
   '/quiz-config.js',
   '/quiz-nav.js',
   '/brain-dump.js',

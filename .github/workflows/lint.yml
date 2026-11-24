@@ -29,6 +29,9 @@ jobs:
 
     - name: RHCSA migration regression (#41)
       run: node scripts/test-rhcsa-migration.js
+
+    - name: RHCSA10 question id migration (#31)
+      run: node scripts/test-rhcsa10-id-migration.js
     
     - name: Terraform 004 ramp metadata lint
       run: node scripts/lint-terraform-ramp.js --ci

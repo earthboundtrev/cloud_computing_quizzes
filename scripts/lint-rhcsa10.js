@@ -51,8 +51,13 @@ function main() {
   const padRe = /\((alternative method|limited scope|incorrect for this task)\)/i;
   const rhel9Re = /\bmodule (install|stream)|type team\b|teamd\b/i;
 
+  const idRe = /^rhcsa10-\d{4}$/;
+
   questions.forEach(function (q, idx) {
     const label = 'q id ' + q.id;
+    if (typeof q.id !== 'string' || !idRe.test(q.id)) {
+      fail(label + ' must be string rhcsa10-NNNN (four digits)');
+    }
     (q.options || []).forEach(function (opt, oi) {
       if (padRe.test(opt)) {
         fail(label + ' option[' + oi + '] still has padded distractor text');
