@@ -23,7 +23,8 @@ Post PRs #123, #124, #130, #131, #132 — finding **still open**:
 | TESTS | **Pass** | Full `lint.yml` set + Playwright offline/console/concurrent + smoke --all |
 | ARCHITECT | **Merge-ready** | cursor-grok-4.6-high-fast — no blockers |
 | SECURITY | **Pass** | cursor-grok-4.6-high-fast — no medium+; gitignore-only |
-| DEPLOY | PR open | `Refs #117`; no merge |
+| DEPLOY | **Merged** | PR [#134](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/134) @ `68e0c3d` |
+| TESTER | **PASS** | Retest after merge — gitignore regression verified |
 
 ## Changes
 

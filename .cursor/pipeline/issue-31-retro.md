@@ -78,7 +78,7 @@
 | ARCHITECT | **Merge-ready** | |
 | SECURITY | **PASS** | |
 | DEPLOY | **Merged** | `cafd4f4` via PR #131 |
-| TESTER | **Pending** | Content retest on five ids — not passed in this retro |
+| TESTER | **PASS** | Content retest on five ids after #131 — **PASS** (post `cafd4f4`) |
 
 ## Follow-up PRs
 
