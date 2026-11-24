@@ -280,7 +280,11 @@
         .then(function (res) {
           closeDialog();
           if (!res || !res.ok) {
-            setSettingsStatus('This isn\'t a Cloud Cram progress file. Nothing was changed.');
+            var failMsg =
+              res && typeof res.message === 'string' && res.message
+                ? res.message
+                : 'This isn\'t a Cloud Cram progress file. Nothing was changed.';
+            setSettingsStatus(failMsg);
             return;
           }
           if (res.noop) {

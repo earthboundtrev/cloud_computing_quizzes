@@ -581,6 +581,85 @@
     return true;
   }
 
+  function importApplyError(code, message) {
+    var err = new Error(message || 'Import failed.');
+    err.importCode = code || 'apply_failed';
+    return err;
+  }
+
+  function cloneBrainDumpRecords(list) {
+    if (!list || !list.length) return [];
+    return JSON.parse(JSON.stringify(list));
+  }
+
+  function restoreLocalStorageFromSnapshot(storage, snap) {
+    var keysApi = getKeysApi();
+    if (!storage || !keysApi || !snap) return false;
+    try {
+      var currentKeys = keysApi.listLocalStorageKeys(storage).filter(function (key) {
+        return keysApi.isImportableKey(key);
+      });
+      for (var i = 0; i < currentKeys.length; i++) {
+        var key = currentKeys[i];
+        if (!Object.prototype.hasOwnProperty.call(snap, key)) {
+          storage.removeItem(key);
+        }
+      }
+      var snapKeys = Object.keys(snap);
+      for (var j = 0; j < snapKeys.length; j++) {
+        var k = snapKeys[j];
+        storage.setItem(k, snap[k]);
+      }
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function restoreBrainDumpRecordsInPlace(target, snapshot) {
+    if (!target || !Array.isArray(target) || !snapshot) return;
+    target.length = 0;
+    for (var i = 0; i < snapshot.length; i++) {
+      target.push(snapshot[i]);
+    }
+  }
+
+  function rollbackImportApply(opts, beforeSnap, beforeBrainClone, err, rollbackMeta) {
+    rollbackMeta = rollbackMeta || {};
+    var brainApplyAttempted = !!rollbackMeta.brainApplyAttempted;
+    var brainIdbReadOk = !!rollbackMeta.brainIdbReadOk;
+    var lsOk = restoreLocalStorageFromSnapshot(opts.localStorage, beforeSnap);
+    var brainPromise;
+    if (brainApplyAttempted && opts.idb && brainIdbReadOk) {
+      brainPromise = replaceAllBrainDumpsInIdb(opts.idb, beforeBrainClone)
+        .then(function (n) {
+          return typeof n === 'number' && n >= 0;
+        })
+        .catch(function () {
+          return false;
+        });
+    } else if (brainApplyAttempted && Array.isArray(opts.existingBrainDumps)) {
+      restoreBrainDumpRecordsInPlace(opts.existingBrainDumps, beforeBrainClone);
+      brainPromise = Promise.resolve(true);
+    } else {
+      brainPromise = Promise.resolve(true);
+    }
+    return brainPromise.then(function (brainOk) {
+      if (!lsOk || !brainOk) {
+        return {
+          ok: false,
+          code: 'rollback_failed',
+          message:
+            'Import failed and your saved progress could not be fully restored. Try refreshing this page.'
+        };
+      }
+      var code = err && err.importCode ? err.importCode : 'apply_failed';
+      var msg =
+        err && err.message ? err.message : 'Import failed. Nothing was changed.';
+      return { ok: false, code: code, message: msg };
+    });
+  }
+
   function mergeOneProfile(localStorage, entries, mergeApi, locks, key) {
     var importRaw = entries[key];
     if (importRaw == null) return Promise.resolve(false);
@@ -652,6 +731,21 @@
     }
   }
 
+  function importBrainMergeFromPayload(payload, existingBrainDumps) {
+    existingBrainDumps = existingBrainDumps || [];
+    var entries = importableLocalStorageEntries(payload);
+    var importDumpSource =
+      payload.brainDumpsIndexedDB && payload.brainDumpsIndexedDB.length
+        ? payload.brainDumpsIndexedDB
+        : parseJsonSafe(entries.study_sessions_brain_dumps || '[]');
+    if (!Array.isArray(importDumpSource)) importDumpSource = [];
+    return mergeBrainDumpsForImport(existingBrainDumps, importDumpSource);
+  }
+
+  function brainImportNeedsTrustedIdbRead(brainMerge, writeBrainDumps) {
+    return !!(brainMerge && brainMerge.added > 0 && typeof writeBrainDumps === 'function');
+  }
+
   function applyExactMerges(localStorage, entries, skipKeys) {
     skipKeys = skipKeys || Object.create(null);
     var changed = false;
@@ -667,7 +761,11 @@
       } catch (e) {}
       var merged = mergeExactStorageValue(key, localVal, importVal);
       if (merged != null && merged !== localVal) {
-        localStorage.setItem(key, merged);
+        try {
+          localStorage.setItem(key, merged);
+        } catch (eSet) {
+          throw importApplyError('storage', 'Import failed. Nothing was changed.');
+        }
         changed = true;
       }
     }
@@ -683,6 +781,8 @@
     var locks = opts.locks;
     var existingBrainDumps = opts.existingBrainDumps || [];
     var writeBrainDumps = opts.writeBrainDumps;
+    var idb = opts.idb || null;
+    var brainIdbReadOk = !!opts.brainIdbReadOk;
 
     if (!payload || !localStorage) {
       return { ok: false, code: 'internal', message: 'Import unavailable.' };
@@ -690,6 +790,7 @@
 
     var entries = importableLocalStorageEntries(payload);
     var beforeSnap = snapshotLocalStorage(localStorage);
+    var beforeBrainClone = cloneBrainDumpRecords(existingBrainDumps);
 
     var skipKeys = Object.create(null);
     skipKeys[GAME_KEY] = true;
@@ -697,7 +798,17 @@
       if (key.indexOf(PROFILE_PREFIX) === 0) skipKeys[key] = true;
     });
 
+    var upfrontBrainMerge = importBrainMergeFromPayload(payload, existingBrainDumps);
+    if (brainImportNeedsTrustedIdbRead(upfrontBrainMerge, writeBrainDumps) && !brainIdbReadOk) {
+      return Promise.resolve({
+        ok: false,
+        code: 'brain_read',
+        message: 'Couldn\'t read your existing brain dumps. Nothing was imported.'
+      });
+    }
+
     function doMerge() {
+      var brainApplyAttempted = false;
       var gameRaw = entries[GAME_KEY];
       var gameDiskBefore = null;
       try {
@@ -714,45 +825,79 @@
             }
           })
           .catch(function () {
-            return false;
+            throw importApplyError('game', 'Import failed. Nothing was changed.');
           });
       }
-      return gamePromise.then(function (gameChanged) {
-        return applyProfileMerges(localStorage, entries, mergeApi, locks).then(function (profileChanged) {
-        var storageChanged = applyExactMerges(localStorage, entries, skipKeys);
+      return gamePromise
+        .then(function (gameChanged) {
+          return applyProfileMerges(localStorage, entries, mergeApi, locks).then(function (profileChanged) {
+            var storageChanged;
+            try {
+              storageChanged = applyExactMerges(localStorage, entries, skipKeys);
+            } catch (eExact) {
+              return Promise.reject(eExact);
+            }
 
-        var importDumpSource =
-          payload.brainDumpsIndexedDB && payload.brainDumpsIndexedDB.length
-            ? payload.brainDumpsIndexedDB
-            : parseJsonSafe(entries.study_sessions_brain_dumps || '[]');
-        var brainMerge = mergeBrainDumpsForImport(existingBrainDumps, importDumpSource);
+            var importDumpSource =
+              payload.brainDumpsIndexedDB && payload.brainDumpsIndexedDB.length
+                ? payload.brainDumpsIndexedDB
+                : parseJsonSafe(entries.study_sessions_brain_dumps || '[]');
+            var brainMerge = mergeBrainDumpsForImport(existingBrainDumps, importDumpSource);
 
-        return Promise.resolve(
-          typeof writeBrainDumps === 'function' && brainMerge.added > 0
-            ? writeBrainDumps(brainMerge.toAdd)
-            : 0
-        ).then(function (written) {
-          if (!written && brainMerge.added > 0) {
-            written = writeBrainDumpsToLocalStorage(localStorage, brainMerge.toAdd, existingBrainDumps);
-          }
-          var brainChanged = written > 0;
-          var afterSnap = snapshotLocalStorage(localStorage);
-          var noop =
-            !gameChanged &&
-            !profileChanged &&
-            !storageChanged &&
-            !brainChanged &&
-            snapshotsEqual(beforeSnap, afterSnap);
+            if (brainMerge.added > 0 && typeof writeBrainDumps === 'function') {
+              brainApplyAttempted = true;
+            }
+            return Promise.resolve(
+              brainApplyAttempted ? writeBrainDumps(brainMerge.toAdd) : 0
+            )
+              .then(function (written) {
+                if (!written && brainMerge.added > 0) {
+                  var idbWritePath = idb && typeof writeBrainDumps === 'function';
+                  if (!idbWritePath) {
+                    written = writeBrainDumpsToLocalStorage(
+                      localStorage,
+                      brainMerge.toAdd,
+                      existingBrainDumps
+                    );
+                  }
+                }
+                if (brainMerge.added > 0 && !written) {
+                  throw importApplyError('brain_dump', 'Import failed. Nothing was changed.');
+                }
+                var brainChanged = written > 0;
+                var afterSnap = snapshotLocalStorage(localStorage);
+                var noop =
+                  !gameChanged &&
+                  !profileChanged &&
+                  !storageChanged &&
+                  !brainChanged &&
+                  snapshotsEqual(beforeSnap, afterSnap);
 
-          return {
-            ok: true,
-            noop: noop,
-            addedDumps: brainMerge.added,
-            summary: buildImportSummary(payload)
-          };
+                return {
+                  ok: true,
+                  noop: noop,
+                  addedDumps: brainMerge.added,
+                  summary: buildImportSummary(payload)
+                };
+              })
+          });
+        })
+        .catch(function (err) {
+          return rollbackImportApply(
+            {
+              localStorage: localStorage,
+              idb: idb,
+              existingBrainDumps: existingBrainDumps
+            },
+            beforeSnap,
+            beforeBrainClone,
+            err,
+            {
+              brainApplyAttempted: brainApplyAttempted,
+              brainIdbReadOk: brainIdbReadOk
+            }
+          );
         });
-        });
-      });
     }
 
     if (locks && locks.request) {
@@ -801,21 +946,55 @@
   }
 
   function readBrainDumpsFromIdb(idb) {
+    if (!idb) {
+      return Promise.resolve({ readOk: false, records: [] });
+    }
     return openBrainDumpDatabase(idb).then(function (db) {
       if (!db || !db.objectStoreNames.contains(BRAIN_STORE)) {
         if (db) db.close();
-        return [];
+        return { readOk: false, records: [] };
       }
       return new Promise(function (resolve) {
         var tx = db.transaction(BRAIN_STORE, 'readonly');
         var all = tx.objectStore(BRAIN_STORE).getAll();
         all.onsuccess = function () {
           db.close();
-          resolve(all.result || []);
+          resolve({ readOk: true, records: all.result || [] });
         };
         all.onerror = function () {
           db.close();
-          resolve([]);
+          resolve({ readOk: false, records: [] });
+        };
+      });
+    });
+  }
+
+  function replaceAllBrainDumpsInIdb(idb, records) {
+    records = records || [];
+    if (!idb) return Promise.resolve(-1);
+    return openBrainDumpDatabase(idb).then(function (db) {
+      if (!db || !db.objectStoreNames.contains(BRAIN_STORE)) {
+        if (db) db.close();
+        return -1;
+      }
+      return new Promise(function (resolve) {
+        var tx = db.transaction(BRAIN_STORE, 'readwrite');
+        var store = tx.objectStore(BRAIN_STORE);
+        store.clear();
+        for (var i = 0; i < records.length; i++) {
+          store.put(records[i]);
+        }
+        tx.oncomplete = function () {
+          db.close();
+          resolve(records.length);
+        };
+        tx.onabort = function () {
+          db.close();
+          resolve(-1);
+        };
+        tx.onerror = function () {
+          db.close();
+          resolve(-1);
         };
       });
     });
@@ -877,12 +1056,15 @@
   function runValidatedImport(payload) {
     var idb = typeof indexedDB !== 'undefined' ? indexedDB : null;
     var locks = typeof navigator !== 'undefined' ? navigator.locks : null;
-    return readBrainDumpsFromIdb(idb).then(function (existing) {
+    return readBrainDumpsFromIdb(idb).then(function (brainSnap) {
+      brainSnap = brainSnap || { readOk: false, records: [] };
       return applyImportMerge({
         payload: payload,
         localStorage: localStorage,
         locks: locks,
-        existingBrainDumps: existing,
+        idb: idb,
+        brainIdbReadOk: brainSnap.readOk,
+        existingBrainDumps: brainSnap.records || [],
         writeBrainDumps: function (recs) {
           return writeBrainDumpsToIdb(idb, recs);
         }
@@ -911,6 +1093,8 @@
     applyImportMerge: applyImportMerge,
     applyImportFromFile: applyImportFromFile,
     runValidatedImport: runValidatedImport,
-    readBrainDumpsFromIdb: readBrainDumpsFromIdb
+    readBrainDumpsFromIdb: readBrainDumpsFromIdb,
+    writeBrainDumpsToIdb: writeBrainDumpsToIdb,
+    replaceAllBrainDumpsInIdb: replaceAllBrainDumpsInIdb
   };
 });
