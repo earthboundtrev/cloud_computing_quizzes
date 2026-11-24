@@ -35,9 +35,12 @@
     }
   }
 
-  var reservedKeyApi = getReservedKeyApi();
+  var reservedKeyApi = null;
 
   function isReservedKeyName(key) {
+    if (!reservedKeyApi) {
+      reservedKeyApi = getReservedKeyApi();
+    }
     if (reservedKeyApi && typeof reservedKeyApi.isReservedKeyName === 'function') {
       return reservedKeyApi.isReservedKeyName(key);
     }
@@ -183,11 +186,13 @@
       return;
     }
     if (msg.type === 'profile-attempt' && msg.storageKey && msg.attempt) {
+      if (!msg.attempt.id || isReservedKeyName(msg.attempt.id)) return;
       if (!pendingProfileAttempts[msg.storageKey]) pendingProfileAttempts[msg.storageKey] = [];
       pendingProfileAttempts[msg.storageKey].push(msg.attempt);
       return;
     }
     if (msg.type === 'import-batch' && msg.storageKey && msg.batch) {
+      if (!msg.batch.id || isReservedKeyName(msg.batch.id)) return;
       if (!pendingImportBatches[msg.storageKey]) pendingImportBatches[msg.storageKey] = [];
       pendingImportBatches[msg.storageKey].push(msg.batch);
     }
@@ -370,7 +375,7 @@
   }
 
   function applyProfileAttempt(profile, attempt) {
-    if (!attempt || !attempt.id) return profile;
+    if (!attempt || !attempt.id || isReservedKeyName(attempt.id)) return profile;
     profile = profile || defaultProfile();
     profile.sessionAttempts = profile.sessionAttempts || Object.create(null);
     profile.appliedSessionAttempts = profile.appliedSessionAttempts || Object.create(null);
@@ -382,7 +387,7 @@
   }
 
   function applyImportBatch(profile, batch) {
-    if (!batch || !batch.id || !batch.topicMisses) return profile;
+    if (!batch || !batch.id || isReservedKeyName(batch.id) || !batch.topicMisses) return profile;
     profile = profile || defaultProfile();
     profile.importBatches = profile.importBatches || Object.create(null);
     profile.appliedImportBatches = profile.appliedImportBatches || Object.create(null);
@@ -710,7 +715,7 @@
     var importId = opts.importId;
     var quizId = opts.quizId;
     var localStorage = opts.localStorage;
-    if (!storageKey || !localStorage || !topicMisses || !importId) return null;
+    if (!storageKey || !localStorage || !topicMisses || !importId || isReservedKeyName(importId)) return null;
 
     var batch = { id: importId, topicMisses: topicMisses };
     if (!opts.skipPublish) publishImportBatch(storageKey, batch);

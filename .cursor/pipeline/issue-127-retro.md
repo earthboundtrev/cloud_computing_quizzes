@@ -69,10 +69,10 @@
 | Stage | Status | Notes |
 |-------|--------|--------|
 | IMPLEMENT | Done | Allowlist copies via `isReservedKeyName`; null-prototype maps; quiz completion + storage-event test |
-| BUGBOT | Pending | |
-| TESTS | **Pass** | concurrent-storage + reserved test; migration 20/20; import-export 37/37; app-data-lifecycle 18/18 |
-| ARCHITECT | Pending | |
-| SECURITY | Pending | |
+| BUGBOT | **Clean** | `cursor-grok-4.6-high-fast` (id guard + lazy reserved API + tests) |
+| TESTS | **Pass** | concurrent-storage + reserved tests; migration 20/20; import-export 37/37; app-data-lifecycle 18/18 |
+| ARCHITECT | **Merge-ready** | `cursor-grok-4.6-high-fast` |
+| SECURITY | **PASS** | `cursor-grok-4.6-high-fast` |
 | DEPLOY | Pending | body `Refs #127` only |
 
 ### Files hardened (follow-up)
@@ -87,13 +87,16 @@
 
 | When (UTC) | Model | Clean | Summary |
 |------------|-------|-------|---------|
+| 2026-11-24 | cursor-grok-4.6-high-fast | **Yes** | Reserved attempt/batch id rejection; lazy `isReservedKeyName` |
 
 ### Architect (follow-up)
 
 | When (UTC) | Model | Verdict |
 |------------|-------|---------|
+| 2026-11-24 | cursor-grok-4.6-high-fast | **Merge-ready** — storage-tab-merge AC; no blockers |
 
 ### Security (follow-up)
 
 | When (UTC) | Model | Verdict |
 |------------|-------|---------|
+| 2026-11-24 | cursor-grok-4.6-high-fast | **PASS** — no medium+ on diff |

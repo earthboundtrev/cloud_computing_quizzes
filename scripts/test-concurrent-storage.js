@@ -579,6 +579,32 @@ async function testReservedKeysQuizCompletionAndTabMerge() {
   }
 }
 
+async function testReservedAttemptIdRejected() {
+  const ls = new LocalStorageMock();
+  const merge = loadMerge();
+  merge.resetPendingForTests();
+  const key = 'study_sessions_profile_az900';
+  await merge.saveProfileAttempt({
+    storageKey: key,
+    lockName: key,
+    quizId: 'az900',
+    attempt: { id: '__proto__', topicStats: { Compute: { correct: 9, total: 9 } } },
+    localStorage: ls,
+    locks: null,
+    syncFlush: true
+  });
+  const profile = merge.parseProfile(ls.getItem(key), 'az900');
+  assert(!profile.sessionAttempts.__proto__, 'reserved attempt id not stored');
+  assert(!profile.appliedSessionAttempts.__proto__, 'reserved applied flag not stored');
+  assert(!profile.topicStats.Compute, 'reserved attempt did not merge stats');
+  merge.ingestMessage({
+    type: 'profile-attempt',
+    storageKey: key,
+    attempt: { id: 'constructor', topicStats: { Storage: { correct: 1, total: 1 } } }
+  });
+  assert(merge.peekProfileAttempts(key).length === 0, 'reserved id not queued from broadcast');
+}
+
 async function testInterleavedProfileWriters() {
   const ls = new LocalStorageMock();
   const merge = loadMerge();
@@ -620,6 +646,8 @@ async function main() {
     console.log('OK interleaved profile writers');
     await testReservedKeysQuizCompletionAndTabMerge();
     console.log('OK reserved keys quiz completion + tab merge (#127)');
+    await testReservedAttemptIdRejected();
+    console.log('OK reserved attempt/batch ids rejected (#127)');
 
     const p2 = await stressProfileTwoTabsSplitBrain();
     console.log('OK stress 2-tab profile split-brain ' + p2 + '/' + STRESS_RUNS);
