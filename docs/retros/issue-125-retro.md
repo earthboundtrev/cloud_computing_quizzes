@@ -5,7 +5,7 @@
 | Field | Value |
 |-------|--------|
 | Issue | [#125](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/125) — **OPEN** (`Refs` only; human close when AC sign-off complete) |
-| PR | _TBD_ |
+| PR | _see PR URL in agent summary_ |
 | Branch | `cursor/push-local-export-redaction-125-b211` |
 | Base | `28a8eb6` (`cloudcram-v58`) |
 | Cache | **cloudcram-v59** |
@@ -16,29 +16,29 @@
 | Stage | Status | Notes |
 |-------|--------|--------|
 | IMPLEMENT | Done | Exact redaction exception; export via `normalizeSettings`; tests |
-| BUGBOT | _TBD_ | |
-| TESTS | _TBD_ | |
-| ARCHITECT | _TBD_ | |
-| SECURITY | _TBD_ | |
+| BUGBOT | **Clean** | cursor-grok-4.6-high-fast |
+| TESTS | **Pass** | `test-data-import-export.js` 37/37 + CI subset |
+| ARCHITECT | **Merge-ready** | cursor-grok-4.6-high-fast |
+| SECURITY | **PASS** | cursor-grok-4.6-high-fast |
 | DEPLOY | Pending | PR open |
 
 ## Bugbot runs
 
 | When (UTC) | Model | Clean | Summary |
 |------------|-------|-------|---------|
-| _TBD_ | | | |
+| 2026-11-24 | cursor-grok-4.6-high-fast | **Yes** | Exact key + export normalize |
 
 ## Architect
 
 | When (UTC) | Model | Verdict |
 |------------|-------|---------|
-| _TBD_ | | |
+| 2026-11-24 | cursor-grok-4.6-high-fast | **Merge-ready** |
 
 ## Security
 
 | When (UTC) | Model | Verdict |
 |------------|-------|---------|
-| _TBD_ | | |
+| 2026-11-24 | cursor-grok-4.6-high-fast | **PASS** |
 
 ## Behavior summary
 
