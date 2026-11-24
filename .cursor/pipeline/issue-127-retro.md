@@ -54,3 +54,49 @@
 ## Follow-up PRs
 
 - Pre-merge: `build-meta.js?v=6` on `index.html` (was `v=5` while `CLOUDCRAM_WEB_CACHE_NAME` is v61; no extra `CACHE_NAME` bump)
+
+## Follow-up (storage-tab-merge)
+
+| Field | Value |
+|-------|--------|
+| Issue | [#127](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/127) — **OPEN** |
+| Base | `ffc714a` (`cloudcram-v62`) |
+| Cache | **cloudcram-v63** |
+| Scope | `storage-tab-merge.js`, `quiz-engine.js` (fallback merge), `sw.js`, `build-meta.js`, HTML `?v=`, `scripts/test-concurrent-storage.js`; this section |
+
+### Pointer log (follow-up)
+
+| Stage | Status | Notes |
+|-------|--------|--------|
+| IMPLEMENT | Done | Allowlist copies via `isReservedKeyName`; null-prototype maps; quiz completion + storage-event test |
+| BUGBOT | **Clean** | `cursor-grok-4.6-high-fast` (id guard + lazy reserved API + tests) |
+| TESTS | **Pass** | concurrent-storage + reserved tests; migration 20/20; import-export 37/37; app-data-lifecycle 18/18 |
+| ARCHITECT | **Merge-ready** | `cursor-grok-4.6-high-fast` |
+| SECURITY | **PASS** | `cursor-grok-4.6-high-fast` |
+| DEPLOY | Pending | body `Refs #127` only |
+
+### Files hardened (follow-up)
+
+| File | Change |
+|------|--------|
+| `storage-tab-merge.js` | `parseProfile`, `mergeTopicStats`, legacy snapshots, `mergeProfiles`, import/session maps — no `Object.assign` from stored JSON |
+| `quiz-engine.js` | Fallback `queueProfileAttemptWrite` skips reserved topic keys when merge API absent |
+| `gamification.js` | Reviewed — no `topicStats` / `sessionAttempts` merge at quiz completion (no change) |
+
+### Bugbot runs (follow-up)
+
+| When (UTC) | Model | Clean | Summary |
+|------------|-------|-------|---------|
+| 2026-11-24 | cursor-grok-4.6-high-fast | **Yes** | Reserved attempt/batch id rejection; lazy `isReservedKeyName` |
+
+### Architect (follow-up)
+
+| When (UTC) | Model | Verdict |
+|------------|-------|---------|
+| 2026-11-24 | cursor-grok-4.6-high-fast | **Merge-ready** — storage-tab-merge AC; no blockers |
+
+### Security (follow-up)
+
+| When (UTC) | Model | Verdict |
+|------------|-------|---------|
+| 2026-11-24 | cursor-grok-4.6-high-fast | **PASS** — no medium+ on diff |
