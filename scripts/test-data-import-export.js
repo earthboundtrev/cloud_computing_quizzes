@@ -72,6 +72,88 @@ function snapshot(ls) {
   return dataImport.snapshotLocalStorage(ls);
 }
 
+const BRAIN_DB = 'StudySessionsBrainDumps';
+const BRAIN_STORE = 'dumps';
+
+function createBrainDumpIdbHarness(seedRecords) {
+  const state = {
+    records: (seedRecords || []).map(function (r) {
+      return Object.assign({}, r);
+    }),
+    nextId: 9000
+  };
+
+  const idb = {
+    open: function (_name, _version) {
+      const req = {};
+      setImmediate(function () {
+        const db = {
+          objectStoreNames: {
+            contains: function (sn) {
+              return sn === BRAIN_STORE;
+            }
+          },
+          close: function () {},
+          transaction: function (_storeName, _mode) {
+            const tx = {
+              objectStore: function () {
+                return {
+                  getAll: function () {
+                    const g = { result: null, onsuccess: null, onerror: null };
+                    g.result = state.records.map(function (r) {
+                      return Object.assign({}, r);
+                    });
+                    setImmediate(function () {
+                      if (g.onsuccess) g.onsuccess({ target: g });
+                    });
+                    return g;
+                  },
+                  add: function (rec) {
+                    const copy = Object.assign({}, rec);
+                    if (copy.id == null) copy.id = ++state.nextId;
+                    state.records.push(copy);
+                  },
+                  put: function (rec) {
+                    const copy = Object.assign({}, rec);
+                    const idx = state.records.findIndex(function (x) {
+                      return x.id === copy.id;
+                    });
+                    if (idx >= 0) state.records[idx] = copy;
+                    else state.records.push(copy);
+                  },
+                  clear: function () {
+                    state.records.length = 0;
+                  }
+                };
+              },
+              oncomplete: null,
+              onerror: null,
+              onabort: null
+            };
+            setImmediate(function () {
+              if (tx.oncomplete) tx.oncomplete();
+            });
+            return tx;
+          }
+        };
+        req.result = db;
+        if (req.onsuccess) req.onsuccess({ target: req });
+      });
+      req.onerror = null;
+      req.onblocked = null;
+      req.onupgradeneeded = null;
+      return req;
+    }
+  };
+
+  return {
+    idb: idb,
+    idbSnapshot: function () {
+      return JSON.stringify(state.records);
+    }
+  };
+}
+
 (async function main() {
   await test('export allowlist omits unregistered and UI keys', function () {
     const ls = new LocalStorageMock({
@@ -430,11 +512,15 @@ function snapshot(ls) {
     );
     assert(validated.ok, 'payload ok');
 
+    const idbHarness = createBrainDumpIdbHarness(brainRecords);
+    const idbBefore = idbHarness.idbSnapshot();
     const res = await dataImport.applyImportMerge({
       payload: validated.payload,
       localStorage: ls,
       mergeApi: mergeApi,
       gameApi: game,
+      idb: idbHarness.idb,
+      brainIdbReadOk: true,
       existingBrainDumps: brainRecords,
       writeBrainDumps: function () {
         return Promise.reject(new Error('simulated IndexedDB write failure'));
@@ -444,21 +530,23 @@ function snapshot(ls) {
     assert(res.code !== 'rollback_failed', 'rollback succeeds');
     assert(JSON.stringify(snapshot(ls)) === lsBefore, 'localStorage byte-identical');
     assert(JSON.stringify(brainRecords) === brainBefore, 'brain dumps byte-identical');
+    assert(idbHarness.idbSnapshot() === idbBefore, 'idb store byte-identical');
   });
 
-  await test('pre-brain apply failure restores localStorage only', async function () {
+  await test('idb read fail blocks import before any brain write', async function () {
     const ls = new LocalStorageMock({ quizCompleted: '["keep"]' });
     const lsBefore = JSON.stringify(snapshot(ls));
-    const brainRecords = [
+    const idbHarness = createBrainDumpIdbHarness([
       {
-        id: 2,
-        timestamp: '2026-02-01T00:00:00.000Z',
+        id: 3,
+        timestamp: '2026-03-01T00:00:00.000Z',
         quizId: 'oci',
-        questionText: 'Q',
-        dumpText: 'untouched'
+        questionText: 'Stored',
+        dumpText: 'note'
       }
-    ];
-    const brainBefore = JSON.stringify(brainRecords);
+    ]);
+    const idbBefore = idbHarness.idbSnapshot();
+    let writeCalls = 0;
 
     const validated = dataImport.validatePayloadRoot(
       minimalPayload({
@@ -467,11 +555,11 @@ function snapshot(ls) {
         },
         brainDumpsIndexedDB: [
           {
-            id: 88,
-            timestamp: '2026-07-01T00:00:00.000Z',
+            id: 44,
+            timestamp: '2026-08-01T00:00:00.000Z',
             quizId: 'cissp',
-            questionText: 'Late',
-            dumpText: 'never'
+            questionText: 'Incoming',
+            dumpText: 'blocked'
           }
         ]
       })
@@ -482,16 +570,76 @@ function snapshot(ls) {
       payload: validated.payload,
       localStorage: ls,
       mergeApi: mergeApi,
-      existingBrainDumps: brainRecords,
+      existingBrainDumps: [],
       brainIdbReadOk: false,
-      idb: {},
+      idb: idbHarness.idb,
       writeBrainDumps: function () {
-        return Promise.reject(new Error('idb write fail'));
+        writeCalls++;
+        return Promise.resolve(1);
       }
     });
     assert(!res.ok, 'fails closed');
+    assert(res.code === 'brain_read', 'brain read code');
+    assert(/brain dumps/i.test(res.message || ''), 'user-visible brain read message');
+    assert(writeCalls === 0, 'writeBrainDumps never called');
+    assert(JSON.stringify(snapshot(ls)) === lsBefore, 'localStorage unchanged');
+    assert(idbHarness.idbSnapshot() === idbBefore, 'idb unchanged');
+  });
+
+  await test('idb restore after committed brain write failure', async function () {
+    const seed = [
+      {
+        id: 10,
+        timestamp: '2026-04-01T00:00:00.000Z',
+        quizId: 'cissp',
+        questionText: 'Pre',
+        dumpText: 'import'
+      }
+    ];
+    const idbHarness = createBrainDumpIdbHarness(seed);
+    const brainSnap = await dataImport.readBrainDumpsFromIdb(idbHarness.idb);
+    assert(brainSnap.readOk, 'idb pre-read ok');
+    const idbBefore = JSON.stringify(brainSnap.records);
+    const ls = new LocalStorageMock({ quizCompleted: '["a"]' });
+    const lsBefore = JSON.stringify(snapshot(ls));
+
+    const validated = dataImport.validatePayloadRoot(
+      minimalPayload({
+        localStorage: {
+          quizCompleted: '["a","b"]'
+        },
+        brainDumpsIndexedDB: [
+          {
+            id: 55,
+            timestamp: '2026-09-01T00:00:00.000Z',
+            quizId: 'cissp',
+            questionText: 'New',
+            dumpText: 'rollback me'
+          }
+        ]
+      })
+    );
+    assert(validated.ok, 'payload ok');
+
+    const res = await dataImport.applyImportMerge({
+      payload: validated.payload,
+      localStorage: ls,
+      mergeApi: mergeApi,
+      idb: idbHarness.idb,
+      brainIdbReadOk: true,
+      existingBrainDumps: brainSnap.records,
+      writeBrainDumps: function (recs) {
+        return dataImport.writeBrainDumpsToIdb(idbHarness.idb, recs).then(function (n) {
+          if (!n) return Promise.reject(new Error('idb write failed'));
+          return Promise.reject(new Error('simulated post-write failure'));
+        });
+      }
+    });
+    assert(!res.ok, 'import fails closed');
     assert(JSON.stringify(snapshot(ls)) === lsBefore, 'localStorage restored');
-    assert(JSON.stringify(brainRecords) === brainBefore, 'brain array untouched before idb step');
+    const afterIdb = await dataImport.readBrainDumpsFromIdb(idbHarness.idb);
+    assert(afterIdb.readOk, 'idb read after rollback');
+    assert(JSON.stringify(afterIdb.records) === idbBefore, 'idb restored to pre-import snapshot');
   });
 
   await test('applyImportMerge noop when re-importing same export', async function () {

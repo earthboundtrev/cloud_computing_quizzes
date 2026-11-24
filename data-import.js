@@ -731,6 +731,21 @@
     }
   }
 
+  function importBrainMergeFromPayload(payload, existingBrainDumps) {
+    existingBrainDumps = existingBrainDumps || [];
+    var entries = importableLocalStorageEntries(payload);
+    var importDumpSource =
+      payload.brainDumpsIndexedDB && payload.brainDumpsIndexedDB.length
+        ? payload.brainDumpsIndexedDB
+        : parseJsonSafe(entries.study_sessions_brain_dumps || '[]');
+    if (!Array.isArray(importDumpSource)) importDumpSource = [];
+    return mergeBrainDumpsForImport(existingBrainDumps, importDumpSource);
+  }
+
+  function brainImportNeedsTrustedIdbRead(brainMerge, writeBrainDumps) {
+    return !!(brainMerge && brainMerge.added > 0 && typeof writeBrainDumps === 'function');
+  }
+
   function applyExactMerges(localStorage, entries, skipKeys) {
     skipKeys = skipKeys || Object.create(null);
     var changed = false;
@@ -783,6 +798,15 @@
       if (key.indexOf(PROFILE_PREFIX) === 0) skipKeys[key] = true;
     });
 
+    var upfrontBrainMerge = importBrainMergeFromPayload(payload, existingBrainDumps);
+    if (brainImportNeedsTrustedIdbRead(upfrontBrainMerge, writeBrainDumps) && !brainIdbReadOk) {
+      return Promise.resolve({
+        ok: false,
+        code: 'brain_read',
+        message: 'Couldn\'t read your existing brain dumps. Nothing was imported.'
+      });
+    }
+
     function doMerge() {
       var brainApplyAttempted = false;
       var gameRaw = entries[GAME_KEY];
@@ -828,7 +852,14 @@
             )
               .then(function (written) {
                 if (!written && brainMerge.added > 0) {
-                  written = writeBrainDumpsToLocalStorage(localStorage, brainMerge.toAdd, existingBrainDumps);
+                  var idbWritePath = idb && typeof writeBrainDumps === 'function';
+                  if (!idbWritePath) {
+                    written = writeBrainDumpsToLocalStorage(
+                      localStorage,
+                      brainMerge.toAdd,
+                      existingBrainDumps
+                    );
+                  }
                 }
                 if (brainMerge.added > 0 && !written) {
                   throw importApplyError('brain_dump', 'Import failed. Nothing was changed.');
@@ -1062,6 +1093,8 @@
     applyImportMerge: applyImportMerge,
     applyImportFromFile: applyImportFromFile,
     runValidatedImport: runValidatedImport,
-    readBrainDumpsFromIdb: readBrainDumpsFromIdb
+    readBrainDumpsFromIdb: readBrainDumpsFromIdb,
+    writeBrainDumpsToIdb: writeBrainDumpsToIdb,
+    replaceAllBrainDumpsInIdb: replaceAllBrainDumpsInIdb
   };
 });
