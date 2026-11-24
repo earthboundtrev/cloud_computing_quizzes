@@ -30,7 +30,19 @@
 | TESTS | **Pass** | Lead pre-merge **PASS**; lint.yml node set + offline **16/16** + smoke **16/16** |
 | ARCHITECT | **Merge-ready** | |
 | DEPLOY | **Merged** | PR #131 @ `cafd4f4` |
-| TESTER | **Pending** | Content retest after #131 — not yet recorded |
+| TESTER | **PASS** | Content retest after #131 fix-forward — **PASS** (merged `cafd4f4`) |
+
+## Pointer log — `rhcsa10-0144` (GRUB explanation, this PR)
+
+| Stage | Status | Notes |
+|-------|--------|--------|
+| IMPLEMENT | In progress | Correct explanation only (`obj` 7.6); answer/choices unchanged |
+| Scope | Docs + bank | `Refs #31`; no new issue |
+
+### Content (`rhcsa10-0144`)
+
+- **Fix:** Explanation stated grub2-setpassword “encrypts grub.cfg user”; corrected to PBKDF2 hash in `/boot/grub2/user.cfg`, not encryption of `grub.cfg`.
+- **Cache:** `cloudcram-v55` → **cloudcram-v56**; `rhcsa10-extra-questions.js?v=6`; gap bank `?v=5` aligned with main bank.
 
 ## Lead verification (#131)
 

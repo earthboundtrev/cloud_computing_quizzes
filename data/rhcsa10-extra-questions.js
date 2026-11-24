@@ -507,7 +507,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
       "growpart"
     ],
     "correct": 0,
-    "explain": "grub2-setpassword encrypts grub.cfg user; BIOS/UEFI password also recommended.",
+    "explain": "grub2-setpassword stores a PBKDF2-hashed password in /boot/grub2/user.cfg (grub2-mkpasswd-pbkdf2); it does not encrypt grub.cfg. BIOS/UEFI password also recommended.",
     "obj": "7.6",
     "level": 1
   },
