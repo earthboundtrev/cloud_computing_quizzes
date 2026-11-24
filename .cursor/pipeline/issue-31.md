@@ -20,11 +20,11 @@
 
 | Stage | Status | Notes |
 |-------|--------|--------|
-| IMPLEMENT | In progress | uniform ids, 136/gap fixes, migration, lint id rule, v53 cache |
-| BUGBOT | Pending | |
-| TESTS | Pending | |
-| ARCHITECT | Pending | |
-| DEPLOY | Pending | PR `Refs #31`, no merge |
+| IMPLEMENT | Done | uniform ids, 136/gap fixes, migration, lint id rule, v53 cache |
+| BUGBOT | Clean (after P1/P2 fixes) | map-missing flag; pvmove stem; gap redirect distractor |
+| TESTS | Pass | lint-rhcsa10, lint-banks, sw precache, rhcsa smoke, id migration, app-data-lifecycle |
+| ARCHITECT | Merge-ready | residual: generator obj 2.3 comment only |
+| DEPLOY | PR open | `Refs #31`, no merge |
 
 ## Acceptance criteria checklist
 
