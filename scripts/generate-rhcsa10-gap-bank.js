@@ -3,7 +3,7 @@
 const fs = require('fs');
 
 const gap = [
-  { id: 'rhcsa10-gap-001', obj: '1.2', q: 'Send stdout of dpkg-query to a file on RHEL (concept: redirection):', opts: ['cmd 2>&1 | tee log', 'cmd > outfile.txt', 'cmd < infile', 'cmd & background only'], c: 1, e: 'Single > redirects stdout. 2>&1 merges stderr; tee writes and displays.' },
+  { id: 'rhcsa10-gap-001', obj: '1.2', q: 'Save the output of rpm -qa to /tmp/packages.txt on RHEL 10:', opts: ['rpm -qa | wc -l', 'rpm -qa > /tmp/packages.txt', 'rpm -qa < /tmp/packages.txt', 'rpm -qa & /tmp/packages.txt'], c: 1, e: 'Single > redirects stdout to a file.' },
   { id: 'rhcsa10-gap-002', obj: '1.2', q: 'Append errors from a script to /var/log/my.log:', opts: ['script >> /var/log/my.log 2>&1', 'script > /var/log/my.log only', 'script 2> /dev/null always', 'script | less'], c: 0, e: '>> appends; 2>&1 includes stderr in the redirect target.' },
   { id: 'rhcsa10-gap-003', obj: '1.3', q: 'Find lines containing "Failed password" in /var/log/secure:', opts: ['grep "Failed password" /var/log/secure', 'ls -l /var/log/secure', 'chmod +x /var/log/secure', 'man grep only'], c: 0, e: 'grep filters text; -i for case; regex for patterns.' },
   { id: 'rhcsa10-gap-004', obj: '1.3', q: 'Match lines starting with ERROR in app.log (regex):', opts: ['grep "^ERROR" app.log', 'grep ERROR$ app.log', 'cat app.log | wc', 'touch app.log'], c: 0, e: '^ anchors start of line in basic regex.' },
