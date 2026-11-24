@@ -57,13 +57,53 @@
     var oldProfileStr = localStorage.getItem(OLD_PROFILE_KEY);
     if (oldProfileStr) {
       var oldProfile;
+      var rhcsa9ParseOk = false;
       try {
         oldProfile = JSON.parse(oldProfileStr);
+        rhcsa9ParseOk = true;
       } catch (parseErr) {
         console.error('[Migration] Invalid rhcsa9 profile JSON:', parseErr);
-        return;
+        var badRhcsa10Str = localStorage.getItem(NEW_PROFILE_KEY);
+        if (badRhcsa10Str) {
+          var badRhcsa10;
+          try {
+            badRhcsa10 = JSON.parse(badRhcsa10Str);
+          } catch (rhcsa10ParseErr) {
+            console.error('[Migration] Invalid rhcsa10 profile JSON:', rhcsa10ParseErr);
+            return;
+          }
+          if (!badRhcsa10 || typeof badRhcsa10 !== 'object') {
+            badRhcsa10 = { quizId: 'rhcsa10' };
+          }
+          if (!badRhcsa10.quizId) {
+            badRhcsa10.quizId = 'rhcsa10';
+          }
+          if (!badRhcsa10.topicStats || typeof badRhcsa10.topicStats !== 'object') {
+            badRhcsa10.topicStats = {};
+          }
+          if (!badRhcsa10.topicMissesFromImports || typeof badRhcsa10.topicMissesFromImports !== 'object') {
+            badRhcsa10.topicMissesFromImports = {};
+          }
+          if (!Array.isArray(badRhcsa10.mergedFrom)) {
+            badRhcsa10.mergedFrom = [];
+          }
+          var normalizedStr = JSON.stringify(badRhcsa10);
+          try {
+            localStorage.setItem(NEW_PROFILE_KEY, normalizedStr);
+          } catch (normWriteErr) {
+            console.error('[Migration] Failed to normalize rhcsa10 profile:', normWriteErr);
+            return;
+          }
+          if (localStorage.getItem(NEW_PROFILE_KEY) === normalizedStr) {
+            migratedProfile = true;
+          }
+        }
+        if (!migratedProfile) {
+          return;
+        }
       }
 
+      if (rhcsa9ParseOk) {
       var newProfileStr = localStorage.getItem(NEW_PROFILE_KEY);
       var newProfile = newProfileStr ? JSON.parse(newProfileStr) : null;
 
@@ -112,7 +152,7 @@
               if (shouldSumOverlap) {
                 newProfile.topicStats[topic] = sumTopicStats(curStat, oldStat);
               }
-            } else if (!v10_2Ran) {
+            } else {
               newProfile.topicStats[topic] = oldStat;
             }
           });
@@ -133,7 +173,7 @@
               if (shouldSumMiss) {
                 newProfile.topicMissesFromImports[topic] = curMiss + oldMissN;
               }
-            } else if (!v10_2Ran) {
+            } else {
               newProfile.topicMissesFromImports[topic] = missCount(oldMiss);
             }
           });
@@ -159,6 +199,7 @@
       } else {
         console.error('[Migration] Failed to verify profile write');
         return;
+      }
       }
     }
   } catch (e) {
