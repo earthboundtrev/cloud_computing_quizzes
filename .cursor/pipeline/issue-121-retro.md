@@ -5,7 +5,7 @@
 | Field | Value |
 |-------|--------|
 | Issue | [#121](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/121) — **OPEN** (`Refs` only; human close when AC sign-off complete) |
-| PR | _TBD_ |
+| PR | [#139](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/139) |
 | Branch | `cursor/cap-game-map-import-121-86ca` |
 | Base | `eaea619` (`cloudcram-v57`) |
 | Cache | **cloudcram-v58** |
