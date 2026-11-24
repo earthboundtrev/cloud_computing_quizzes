@@ -13,7 +13,7 @@
 | TESTS | 2026-11-24 | Full lint.yml set + `test-rhcsa-migration.js` 18/18 |
 | ARCHITECT | 2026-11-24 | **Merge-ready** — `cursor-grok-4.6-high-fast` |
 | SECURITY | 2026-11-24 | **Low / PASS** — `cursor-grok-4.6-high-fast` |
-| DEPLOY | pending | PR opened with `Refs #41` (no merge) |
+| DEPLOY | 2026-11-24 | PR #123 open; GitHub Actions **7/7 green** on `b19cfa5` |
 
 ## Bugbot
 
