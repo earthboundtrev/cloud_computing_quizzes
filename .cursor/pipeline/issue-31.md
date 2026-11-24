@@ -36,8 +36,12 @@
 
 | Stage | Status | Notes |
 |-------|--------|--------|
-| IMPLEMENT | In progress | Correct explanation only (`obj` 7.6); answer/choices unchanged |
-| Scope | Docs + bank | `Refs #31`; no new issue |
+| IMPLEMENT | **Done** | Correct explanation only (`obj` 7.6); answer/choices unchanged |
+| BUGBOT | **Clean** | `cursor-grok-4.6-high-fast` |
+| TESTS | **Pass** | Required scripts + `lint-rhcsa10.js --ci` + rhcsa10 smoke |
+| ARCHITECT | **Merge-ready** | `cursor-grok-4.6-high-fast` |
+| SECURITY | **PASS** | `cursor-grok-4.6-high-fast` — explain text + CACHE_NAME only |
+| DEPLOY | PR open | `Refs #31`, `Refs #117` (docs retro); no `Closes` |
 
 ### Content (`rhcsa10-0144`)
 
