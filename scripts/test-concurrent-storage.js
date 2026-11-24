@@ -496,6 +496,89 @@ async function testConcurrentImportMisses() {
   assert(again.topicMissesFromImports.IAM === 7, 'replay import-tab-a is idempotent, got ' + again.topicMissesFromImports.IAM);
 }
 
+const RESERVED_PROFILE_JSON =
+  '{"quizId":"az900","topicStats":{"Compute":{"correct":2,"total":4},"__proto__":{"correct":99,"total":99},"constructor":{"correct":88,"total":88},"prototype":{"correct":77,"total":77}},"topicMissesFromImports":{"__proto__":5},"sessionAttempts":{"__proto__":{"Compute":{"correct":1,"total":1}},"constructor":{"total":1,"correct":0},"prototype":{"total":1,"correct":1}}}';
+
+function objectPrototypeOwnNames() {
+  return Object.getOwnPropertyNames(Object.prototype).slice().sort();
+}
+
+function assertNoReservedInTopicMaps(map, label) {
+  assert(!Object.prototype.hasOwnProperty.call(map, '__proto__'), label + ' missing __proto__');
+  assert(!Object.prototype.hasOwnProperty.call(map, 'constructor'), label + ' missing constructor');
+  assert(!Object.prototype.hasOwnProperty.call(map, 'prototype'), label + ' missing prototype');
+}
+
+async function testReservedKeysQuizCompletionAndTabMerge() {
+  const protoBefore = objectPrototypeOwnNames();
+  const ls = new LocalStorageMock();
+  const locks = makeSharedLocksMock();
+  const brain = new SplitBrainLocalStorage();
+  const tabA = brain.createTab();
+  const tabB = brain.createTab();
+  const mergeA = loadMerge();
+  const mergeB = loadMerge();
+  mergeA.resetPendingForTests();
+  mergeB.resetPendingForTests();
+  linkMergeBroadcast(mergeA, mergeB);
+  wirePeerStorage(tabA, mergeA, locks);
+  wirePeerStorage(tabB, mergeB, locks);
+
+  const key = 'study_sessions_profile_az900';
+  ls.setItem(key, RESERVED_PROFILE_JSON);
+  tabA.localStorage.setItem(key, RESERVED_PROFILE_JSON);
+  tabB.localStorage.setItem(key, RESERVED_PROFILE_JSON);
+
+  const parsedSeed = mergeA.parseProfile(RESERVED_PROFILE_JSON, 'az900');
+  assert(parsedSeed.topicStats.Compute && parsedSeed.topicStats.Compute.total === 4, 'seed Compute total 4');
+  assertNoReservedInTopicMaps(parsedSeed.topicStats, 'parse topicStats');
+  assertNoReservedInTopicMaps(parsedSeed.sessionAttempts, 'parse sessionAttempts');
+  if (parsedSeed.sessionAttempts.__legacy_snapshot__) {
+    assertNoReservedInTopicMaps(parsedSeed.sessionAttempts.__legacy_snapshot__, 'legacy snapshot');
+  }
+
+  await mergeA.saveProfileAttempt({
+    storageKey: key,
+    lockName: key,
+    quizId: 'az900',
+    attempt: { id: 'quiz-complete-1', topicStats: { Compute: { correct: 3, total: 5 } } },
+    localStorage: tabA.localStorage,
+    locks: locks,
+    syncFlush: true
+  });
+
+  const profile = mergeA.parseProfile(tabA.localStorage.getItem(key), 'az900');
+  assert(profile.topicStats.Compute && profile.topicStats.Compute.total === 9, 'Compute 4+5, got ' + (profile.topicStats.Compute && profile.topicStats.Compute.total));
+  assert(profile.topicStats.Compute.correct === 5, 'Compute correct 2+3');
+  assertNoReservedInTopicMaps(profile.topicStats, 'after attempt topicStats');
+  assertNoReservedInTopicMaps(profile.sessionAttempts, 'after attempt sessionAttempts');
+  Object.keys(profile.sessionAttempts || {}).forEach(function (sid) {
+    assertNoReservedInTopicMaps(profile.sessionAttempts[sid], 'attempt snapshot ' + sid);
+  });
+  if (profile.sessionAttempts.__legacy_snapshot__) {
+    assertNoReservedInTopicMaps(profile.sessionAttempts.__legacy_snapshot__, 'legacy snapshot after');
+  }
+
+  const ev = {
+    key: key,
+    oldValue: RESERVED_PROFILE_JSON,
+    newValue: tabA.localStorage.getItem(key)
+  };
+  mergeB.handleStorageEvent(ev, tabB.localStorage, locks);
+  const mergedRaw = mergeA.mergeProfileStorageEvent(ev, 'az900');
+  assert(mergedRaw, 'storage merge produced value');
+  const fromEvent = mergeA.parseProfile(mergedRaw, 'az900');
+  assert(fromEvent.topicStats.Compute && fromEvent.topicStats.Compute.total === 9, 'tab merge totals');
+  assertNoReservedInTopicMaps(fromEvent.topicStats, 'tab merge topicStats');
+  assertNoReservedInTopicMaps(fromEvent.sessionAttempts, 'tab merge sessionAttempts');
+
+  const protoAfter = objectPrototypeOwnNames();
+  assert(protoBefore.length === protoAfter.length, 'Object.prototype own property count unchanged');
+  for (let i = 0; i < protoBefore.length; i++) {
+    assert(protoBefore[i] === protoAfter[i], 'Object.prototype name drift at ' + i);
+  }
+}
+
 async function testInterleavedProfileWriters() {
   const ls = new LocalStorageMock();
   const merge = loadMerge();
@@ -535,6 +618,8 @@ async function main() {
     console.log('OK concurrent import misses via broadcast');
     await testInterleavedProfileWriters();
     console.log('OK interleaved profile writers');
+    await testReservedKeysQuizCompletionAndTabMerge();
+    console.log('OK reserved keys quiz completion + tab merge (#127)');
 
     const p2 = await stressProfileTwoTabsSplitBrain();
     console.log('OK stress 2-tab profile split-brain ' + p2 + '/' + STRESS_RUNS);

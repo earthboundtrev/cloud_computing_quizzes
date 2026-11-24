@@ -24,6 +24,141 @@
   var MAX_RMW_ATTEMPTS = 24;
   var RMW_YIELD_MS = 8;
 
+  function getReservedKeyApi() {
+    if (typeof CloudCramReservedKeyNames !== 'undefined') {
+      return CloudCramReservedKeyNames;
+    }
+    try {
+      return require('./reserved-key-names.js');
+    } catch (e0) {
+      return null;
+    }
+  }
+
+  var reservedKeyApi = getReservedKeyApi();
+
+  function isReservedKeyName(key) {
+    if (reservedKeyApi && typeof reservedKeyApi.isReservedKeyName === 'function') {
+      return reservedKeyApi.isReservedKeyName(key);
+    }
+    return key === '__proto__' || key === 'constructor' || key === 'prototype';
+  }
+
+  function copyAllowedTopicStats(src) {
+    var out = Object.create(null);
+    if (!src || typeof src !== 'object' || Array.isArray(src)) {
+      return out;
+    }
+    Object.keys(src).forEach(function (topic) {
+      if (isReservedKeyName(topic)) {
+        return;
+      }
+      var stat = src[topic];
+      if (!stat || typeof stat !== 'object' || Array.isArray(stat)) {
+        return;
+      }
+      out[topic] = {
+        correct: stat.correct || 0,
+        total: stat.total || 0
+      };
+    });
+    return out;
+  }
+
+  function copyAllowedTopicMissMap(src) {
+    var out = Object.create(null);
+    if (!src || typeof src !== 'object' || Array.isArray(src)) {
+      return out;
+    }
+    Object.keys(src).forEach(function (topic) {
+      if (isReservedKeyName(topic)) {
+        return;
+      }
+      var n = src[topic];
+      if (typeof n === 'number' && isFinite(n)) {
+        out[topic] = n;
+      } else if (n != null && !isNaN(Number(n))) {
+        out[topic] = Number(n);
+      }
+    });
+    return out;
+  }
+
+  function copyAllowedSessionAttempts(src) {
+    var out = Object.create(null);
+    if (!src || typeof src !== 'object' || Array.isArray(src)) {
+      return out;
+    }
+    Object.keys(src).forEach(function (id) {
+      if (isReservedKeyName(id)) {
+        return;
+      }
+      var val = src[id];
+      if (val && typeof val === 'object' && !Array.isArray(val)) {
+        out[id] = copyAllowedTopicStats(val);
+      }
+    });
+    return out;
+  }
+
+  function copyAllowedImportBatches(src) {
+    var out = Object.create(null);
+    if (!src || typeof src !== 'object' || Array.isArray(src)) {
+      return out;
+    }
+    Object.keys(src).forEach(function (id) {
+      if (isReservedKeyName(id)) {
+        return;
+      }
+      var batch = src[id];
+      if (batch && typeof batch === 'object' && !Array.isArray(batch)) {
+        out[id] = copyAllowedTopicMissMap(batch);
+      }
+    });
+    return out;
+  }
+
+  function copyAllowedIdFlags(src) {
+    var out = Object.create(null);
+    if (!src || typeof src !== 'object' || Array.isArray(src)) {
+      return out;
+    }
+    Object.keys(src).forEach(function (id) {
+      if (isReservedKeyName(id)) {
+        return;
+      }
+      out[id] = src[id];
+    });
+    return out;
+  }
+
+  function mergeIdFlagMaps(a, b) {
+    var out = copyAllowedIdFlags(a);
+    var other = copyAllowedIdFlags(b);
+    Object.keys(other).forEach(function (id) {
+      out[id] = other[id];
+    });
+    return out;
+  }
+
+  function mergeSessionAttemptsMaps(a, b) {
+    var out = copyAllowedSessionAttempts(a);
+    var other = copyAllowedSessionAttempts(b);
+    Object.keys(other).forEach(function (id) {
+      out[id] = other[id];
+    });
+    return out;
+  }
+
+  function mergeImportBatchesMaps(a, b) {
+    var out = copyAllowedImportBatches(a);
+    var other = copyAllowedImportBatches(b);
+    Object.keys(other).forEach(function (id) {
+      out[id] = other[id];
+    });
+    return out;
+  }
+
   function delayMs(ms) {
     return new Promise(function (resolve) {
       setTimeout(resolve, ms);
@@ -132,56 +267,70 @@
   }
 
   function mergeTopicStats(into, delta) {
-    if (!delta) return into;
+    var merged = copyAllowedTopicStats(into);
+    if (!delta || typeof delta !== 'object') {
+      return merged;
+    }
     Object.keys(delta).forEach(function (topic) {
+      if (isReservedKeyName(topic)) {
+        return;
+      }
       var d = delta[topic];
-      if (!d) return;
-      if (!into[topic]) into[topic] = { correct: 0, total: 0 };
-      into[topic].total += d.total || 0;
-      into[topic].correct += d.correct || 0;
+      if (!d || typeof d !== 'object' || Array.isArray(d)) {
+        return;
+      }
+      if (!merged[topic]) merged[topic] = { correct: 0, total: 0 };
+      merged[topic].total += d.total || 0;
+      merged[topic].correct += d.correct || 0;
     });
-    return into;
+    return merged;
   }
 
   function defaultProfile(quizId) {
     return {
       quizId: quizId || 'quiz',
-      topicStats: {},
-      topicMissesFromImports: {},
-      sessionAttempts: {},
-      appliedSessionAttempts: {},
-      importBatches: {},
-      appliedImportBatches: {}
+      topicStats: Object.create(null),
+      topicMissesFromImports: Object.create(null),
+      sessionAttempts: Object.create(null),
+      appliedSessionAttempts: Object.create(null),
+      importBatches: Object.create(null),
+      appliedImportBatches: Object.create(null)
     };
   }
 
   function ensureLegacySnapshot(profile) {
     if (!profile) return profile;
-    profile.sessionAttempts = profile.sessionAttempts || {};
-    profile.appliedSessionAttempts = profile.appliedSessionAttempts || {};
+    profile.sessionAttempts = profile.sessionAttempts || Object.create(null);
+    profile.appliedSessionAttempts = profile.appliedSessionAttempts || Object.create(null);
     if (Object.keys(profile.sessionAttempts).length > 0) return profile;
     if (!profile.topicStats || !Object.keys(profile.topicStats).length) return profile;
-    profile.sessionAttempts.__legacy_snapshot__ = JSON.parse(JSON.stringify(profile.topicStats));
+    profile.sessionAttempts.__legacy_snapshot__ = copyAllowedTopicStats(profile.topicStats);
     profile.appliedSessionAttempts.__legacy_snapshot__ = true;
     return profile;
   }
 
   function ensureLegacyImportSnapshot(profile) {
     if (!profile) return profile;
-    profile.importBatches = profile.importBatches || {};
-    profile.appliedImportBatches = profile.appliedImportBatches || {};
+    profile.importBatches = profile.importBatches || Object.create(null);
+    profile.appliedImportBatches = profile.appliedImportBatches || Object.create(null);
     if (Object.keys(profile.importBatches).length > 0) return profile;
     if (!profile.topicMissesFromImports || !Object.keys(profile.topicMissesFromImports).length) return profile;
-    profile.importBatches.__legacy_import__ = JSON.parse(JSON.stringify(profile.topicMissesFromImports));
+    profile.importBatches.__legacy_import__ = copyAllowedTopicMissMap(profile.topicMissesFromImports);
     profile.appliedImportBatches.__legacy_import__ = true;
     return profile;
   }
 
   function rebuildTopicMissesFromImports(profile) {
-    profile.topicMissesFromImports = {};
+    profile.topicMissesFromImports = Object.create(null);
     Object.keys(profile.importBatches || {}).forEach(function (id) {
+      if (isReservedKeyName(id)) {
+        return;
+      }
       var batch = profile.importBatches[id];
       Object.keys(batch || {}).forEach(function (topic) {
+        if (isReservedKeyName(topic)) {
+          return;
+        }
         var n = batch[topic];
         profile.topicMissesFromImports[topic] = (profile.topicMissesFromImports[topic] || 0) + n;
       });
@@ -193,12 +342,12 @@
     try {
       var p = JSON.parse(raw);
       var profile = defaultProfile(p.quizId || quizId);
-      profile.topicStats = p.topicStats || {};
-      profile.topicMissesFromImports = p.topicMissesFromImports || {};
-      profile.sessionAttempts = p.sessionAttempts || {};
-      profile.appliedSessionAttempts = p.appliedSessionAttempts || {};
-      profile.appliedImportBatches = p.appliedImportBatches || {};
-      profile.importBatches = p.importBatches || {};
+      profile.topicStats = copyAllowedTopicStats(p.topicStats);
+      profile.topicMissesFromImports = copyAllowedTopicMissMap(p.topicMissesFromImports);
+      profile.sessionAttempts = copyAllowedSessionAttempts(p.sessionAttempts);
+      profile.appliedSessionAttempts = copyAllowedIdFlags(p.appliedSessionAttempts);
+      profile.appliedImportBatches = copyAllowedIdFlags(p.appliedImportBatches);
+      profile.importBatches = copyAllowedImportBatches(p.importBatches);
       if (Array.isArray(p.mergedFrom)) profile.mergedFrom = p.mergedFrom.slice();
       profile = ensureLegacySnapshot(profile);
       profile = ensureLegacyImportSnapshot(profile);
@@ -210,20 +359,24 @@
   }
 
   function rebuildTopicStatsFromAttempts(profile) {
-    profile.topicStats = {};
+    var stats = Object.create(null);
     Object.keys(profile.sessionAttempts || {}).forEach(function (id) {
-      mergeTopicStats(profile.topicStats, profile.sessionAttempts[id]);
+      if (isReservedKeyName(id)) {
+        return;
+      }
+      stats = mergeTopicStats(stats, profile.sessionAttempts[id]);
     });
+    profile.topicStats = stats;
   }
 
   function applyProfileAttempt(profile, attempt) {
     if (!attempt || !attempt.id) return profile;
     profile = profile || defaultProfile();
-    profile.sessionAttempts = profile.sessionAttempts || {};
-    profile.appliedSessionAttempts = profile.appliedSessionAttempts || {};
+    profile.sessionAttempts = profile.sessionAttempts || Object.create(null);
+    profile.appliedSessionAttempts = profile.appliedSessionAttempts || Object.create(null);
     if (profile.appliedSessionAttempts[attempt.id]) return profile;
     profile.appliedSessionAttempts[attempt.id] = true;
-    profile.sessionAttempts[attempt.id] = attempt.topicStats || {};
+    profile.sessionAttempts[attempt.id] = copyAllowedTopicStats(attempt.topicStats);
     rebuildTopicStatsFromAttempts(profile);
     return profile;
   }
@@ -231,11 +384,11 @@
   function applyImportBatch(profile, batch) {
     if (!batch || !batch.id || !batch.topicMisses) return profile;
     profile = profile || defaultProfile();
-    profile.importBatches = profile.importBatches || {};
-    profile.appliedImportBatches = profile.appliedImportBatches || {};
+    profile.importBatches = profile.importBatches || Object.create(null);
+    profile.appliedImportBatches = profile.appliedImportBatches || Object.create(null);
     if (profile.appliedImportBatches[batch.id]) return profile;
     profile.appliedImportBatches[batch.id] = true;
-    profile.importBatches[batch.id] = Object.assign({}, batch.topicMisses);
+    profile.importBatches[batch.id] = copyAllowedTopicMissMap(batch.topicMisses);
     rebuildTopicMissesFromImports(profile);
     return profile;
   }
@@ -256,21 +409,15 @@
         if (out.mergedFrom.indexOf(m) === -1) out.mergedFrom.push(m);
       });
     }
-    out.appliedImportBatches = Object.assign(
-      {},
-      (a && a.appliedImportBatches) || {},
-      (b && b.appliedImportBatches) || {}
+    out.appliedImportBatches = mergeIdFlagMaps(
+      (a && a.appliedImportBatches) || null,
+      (b && b.appliedImportBatches) || null
     );
-    out.importBatches = Object.assign({}, (a && a.importBatches) || {}, (b && b.importBatches) || {});
-    out.sessionAttempts = Object.assign(
-      {},
-      (a && a.sessionAttempts) || {},
-      (b && b.sessionAttempts) || {}
-    );
-    out.appliedSessionAttempts = Object.assign(
-      {},
-      (a && a.appliedSessionAttempts) || {},
-      (b && b.appliedSessionAttempts) || {}
+    out.importBatches = mergeImportBatchesMaps((a && a.importBatches) || null, (b && b.importBatches) || null);
+    out.sessionAttempts = mergeSessionAttemptsMaps((a && a.sessionAttempts) || null, (b && b.sessionAttempts) || null);
+    out.appliedSessionAttempts = mergeIdFlagMaps(
+      (a && a.appliedSessionAttempts) || null,
+      (b && b.appliedSessionAttempts) || null
     );
     rebuildTopicStatsFromAttempts(out);
     rebuildTopicMissesFromImports(out);

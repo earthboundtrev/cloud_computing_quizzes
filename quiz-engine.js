@@ -121,7 +121,14 @@
       if (window.CloudCramStorageMerge && window.CloudCramStorageMerge.applyProfileAttempt) {
         profile = window.CloudCramStorageMerge.applyProfileAttempt(profile, attempt);
       } else {
+        function reservedTopicKey(t) {
+          if (typeof CloudCramReservedKeyNames !== 'undefined' && CloudCramReservedKeyNames.isReservedKeyName) {
+            return CloudCramReservedKeyNames.isReservedKeyName(t);
+          }
+          return t === '__proto__' || t === 'constructor' || t === 'prototype';
+        }
         Object.keys(attempt.topicStats).forEach(function (t) {
+          if (reservedTopicKey(t)) return;
           if (!profile.topicStats[t]) profile.topicStats[t] = { correct: 0, total: 0 };
           profile.topicStats[t].total += attempt.topicStats[t].total;
           profile.topicStats[t].correct += attempt.topicStats[t].correct;
