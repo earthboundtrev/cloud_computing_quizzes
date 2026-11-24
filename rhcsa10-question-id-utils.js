@@ -35,13 +35,44 @@
     return key;
   }
 
+  function copyAllowedDedupKeys(dedup) {
+    var next = Object.create(null);
+    if (!dedup || typeof dedup !== 'object') {
+      return next;
+    }
+    Object.keys(dedup).forEach(function (dedupKey) {
+      if (isReservedKeyName(dedupKey) || !dedup[dedupKey]) {
+        return;
+      }
+      next[dedupKey] = true;
+    });
+    return next;
+  }
+
+  function copyPendingGameAnswer(msg, questionId) {
+    var out = Object.create(null);
+    if (!msg || typeof msg !== 'object') {
+      return out;
+    }
+    Object.keys(msg).forEach(function (k) {
+      if (isReservedKeyName(k)) {
+        return;
+      }
+      out[k] = msg[k];
+    });
+    if (questionId !== undefined) {
+      out.questionId = questionId;
+    }
+    return out;
+  }
+
   /** Collapse legacy + new dedup keys that refer to the same rhcsa10 question. */
   function normalizeAnswerDedup(dedup) {
     if (!dedup || typeof dedup !== 'object') {
-      return dedup || {};
+      return Object.create(null);
     }
     if (!getForward()) {
-      return dedup;
+      return copyAllowedDedupKeys(dedup);
     }
     var next = Object.create(null);
     Object.keys(dedup).forEach(function (dedupKey) {
@@ -64,18 +95,7 @@
       return msg;
     }
     var canon = canonicalQuestionId(msg.questionId);
-    if (canon === String(msg.questionId)) {
-      return msg;
-    }
-    var out = Object.create(null);
-    Object.keys(msg).forEach(function (k) {
-      if (isReservedKeyName(k)) {
-        return;
-      }
-      out[k] = msg[k];
-    });
-    out.questionId = canon;
-    return out;
+    return copyPendingGameAnswer(msg, canon);
   }
 
   root.CloudCramRhcsa10Ids = {

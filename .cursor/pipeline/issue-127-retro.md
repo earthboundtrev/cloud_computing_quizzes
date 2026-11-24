@@ -8,7 +8,7 @@
 | PR | [#142](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/142) |
 | Branch | `cursor/reserved-keys-migration-127-89fd` |
 | Base | `74c0aff` (`cloudcram-v59`) |
-| Cache | **cloudcram-v60** |
+| Cache | **cloudcram-v61** (v60 after first commit; v61 after Bugbot utils follow-up) |
 | Diff scope | `reserved-key-names.js`, `data-import.js`, `rhcsa-migration.js`, `rhcsa10-question-id-utils.js`, `gamification.js`, `sw.js`, `build-meta.js`, HTML `?v=`, `scripts/test-rhcsa-migration.js`, `scripts/test-rhcsa10-id-migration.js`, this retro; `git mv` [#125](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/125) retro to `.cursor/pipeline/` (`Refs #125 (retro location)`) |
 
 ## Pointer log
@@ -37,7 +37,7 @@
 
 | When (UTC) | Model | Clean | Summary |
 |------------|-------|-------|---------|
-| 2026-11-24 | cursor-grok-4.6-high-fast | **Yes** | Fresh-map merges; retired topics only skipped on rhcsa9 ingest |
+| 2026-11-24 | cursor-grok-4.6-high-fast | **Yes** | Fresh-map merges; retired topics only on rhcsa9 ingest; utils always strip reserved |
 
 ## Architect
 

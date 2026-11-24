@@ -199,6 +199,43 @@ function testPendingGameAnswerSkipsReservedKeys() {
   assert({}.polluted === undefined, 'Object.prototype clean');
 }
 
+function testPendingGameAnswerCanonicalStillStripsReserved() {
+  const utils = loadUtils();
+  const map = loadMap();
+  const canon = map.forward['129'];
+  if (!canon) {
+    throw new Error('fixture canonical id missing');
+  }
+  const msg = {
+    questionId: canon,
+    sessionId: 's1',
+    constructor: 'x',
+    prototype: 'y'
+  };
+  const out = utils.normalizePendingGameAnswer(msg);
+  assert(out !== msg, 'returns fresh object even when id already canonical');
+  assert(out.questionId === canon, 'canonical id unchanged');
+  assert(out.constructor === undefined, 'reserved constructor dropped on noop remap');
+  assert(out.prototype === undefined, 'reserved prototype dropped on noop remap');
+}
+
+function testAnswerDedupSkipsReservedWithoutIdMap() {
+  const g = { console: console, globalThis: null, window: null };
+  g.globalThis = g;
+  g.window = g;
+  vm.createContext(g);
+  bootReservedKeys(g);
+  vm.runInContext(fs.readFileSync(path.join(ROOT, 'rhcsa10-question-id-utils.js'), 'utf8'), g);
+  const utils = g.CloudCramRhcsa10Ids;
+  const raw = Object.create(null);
+  raw['2026-11-24:s1:q1'] = true;
+  raw.constructor = true;
+  raw.prototype = true;
+  const next = utils.normalizeAnswerDedup(raw);
+  assert(Object.keys(next).length === 1, 'only allowed key when map missing');
+  assert(next['2026-11-24:s1:q1'], 'valid key kept');
+}
+
 function assert(condition, message) {
   if (!condition) {
     throw new Error(message || 'assertion failed');
@@ -224,6 +261,8 @@ const syncTests = [
   { name: 'tab merge dedupes old and new ids', fn: testTabMergeDedupesOldAndNew },
   { name: 'answerDedup skips reserved keys (#127)', fn: testAnswerDedupSkipsReservedKeys },
   { name: 'pending game answer skips reserved keys (#127)', fn: testPendingGameAnswerSkipsReservedKeys },
+  { name: 'pending game answer strips reserved when id already canonical', fn: testPendingGameAnswerCanonicalStillStripsReserved },
+  { name: 'answerDedup strips reserved when id map missing', fn: testAnswerDedupSkipsReservedWithoutIdMap },
   { name: 'idempotent persist migration', fn: testIdempotentPersist }
 ];
 
