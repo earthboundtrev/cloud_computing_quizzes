@@ -6,20 +6,24 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       with:
         fetch-depth: 0
-    
+        persist-credentials: false
+
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
       with:
-        node-version: '18'
-    
+        node-version: '22'
+
     - name: Run bank-wide lint
       run: node scripts/lint-banks.js --ci
 
@@ -34,19 +38,19 @@ jobs:
 
     - name: RHCSA10 question id migration (#31)
       run: node scripts/test-rhcsa10-id-migration.js
-    
+
     - name: Terraform 004 ramp metadata lint
       run: node scripts/lint-terraform-ramp.js --ci
-    
+
     - name: RHCSA10 content quality lint
       run: node scripts/lint-rhcsa10.js --ci
-    
+
     - name: CISSP ramp metadata lint
       run: node scripts/lint-cissp-ramp.js --ci
-    
+
     - name: AWS GenAI ramp metadata lint
       run: node scripts/lint-aws-genai-ramp.js --ci
-    
+
     - name: Check service worker precache
       run: node scripts/check-sw-precache.js
 
@@ -94,13 +98,13 @@ jobs:
 
     - name: Entry HTML CSP and no inline handlers (#111)
       run: node scripts/lint-html-entry.js
-    
+
     - name: Check question bank integrity
       run: node scripts/check-page-banks.js
-    
+
     - name: Run CISSP validation
       run: node scripts/validate-cissp-questions.js
-    
+
     - name: Run CISSP smoke tests
       run: node scripts/smoke-test-cissp.js
 
@@ -131,6 +135,6 @@ jobs:
 
     - name: Shared quiz smoke tests (#67)
       run: node scripts/smoke-test-quiz.js --all
-    
+
     - name: Run CISSP lint
       run: node scripts/lint-cissp-questions.js
