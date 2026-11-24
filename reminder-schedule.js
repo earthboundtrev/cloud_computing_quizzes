@@ -27,6 +27,7 @@
   var CHANNEL_EVENING = 'cloudcram-streak-nudge';
   var ID_DAILY_BASE = 10000;
   var ID_EVENING = 20000;
+  var GENERIC_LOCK_FALLBACK = 'Cloud Cram: study reminder';
 
   function parseYmd(s) {
     var p = String(s || '').split('-');
@@ -122,7 +123,7 @@
         date: dateStr
       };
       var body = copy ? copy.selectDailyBody(copyCtx) : '';
-      var title = copy ? copy.LOCK_SCREEN_GENERIC : 'Cloud Quizzes';
+      var title = copy ? copy.LOCK_SCREEN_GENERIC : GENERIC_LOCK_FALLBACK;
       if (isExamDay(ctx, dateStr)) body = copy ? copy.EXAM_DAY : 'Good luck today.';
       plan.push({
         id: ID_DAILY_BASE + offset,
@@ -132,8 +133,8 @@
         channelId: CHANNEL_DAILY,
         title: title,
         body: body,
-        visibility: isToday ? 'public' : 'secret',
-        lockScreenBody: copy ? copy.LOCK_SCREEN_GENERIC : title
+        visibility: 'secret',
+        lockScreenBody: copy ? copy.LOCK_SCREEN_GENERIC : GENERIC_LOCK_FALLBACK
       });
     }
 
@@ -145,10 +146,10 @@
         date: today,
         at: atLocalTime(today, EVENING_MINUTES),
         channelId: CHANNEL_EVENING,
-        title: copy ? copy.LOCK_SCREEN_GENERIC : 'Cloud Quizzes',
+        title: copy ? copy.LOCK_SCREEN_GENERIC : GENERIC_LOCK_FALLBACK,
         body: eveBody,
         visibility: 'secret',
-        lockScreenBody: copy ? copy.LOCK_SCREEN_GENERIC : 'Cloud Quizzes'
+        lockScreenBody: copy ? copy.LOCK_SCREEN_GENERIC : GENERIC_LOCK_FALLBACK
       });
     }
 
@@ -164,6 +165,30 @@
     for (var i = 0; i < SCHEDULE_DAYS; i++) ids.push(ID_DAILY_BASE + i);
     ids.push(ID_EVENING);
     return ids;
+  }
+
+  function pluginNotificationFromPlanItem(item) {
+    item = item || {};
+    var generic = copyApi ? copyApi.LOCK_SCREEN_GENERIC : GENERIC_LOCK_FALLBACK;
+    return {
+      id: item.id,
+      title: item.title || generic,
+      body: item.body,
+      largeBody: item.body,
+      summaryText: item.lockScreenBody || generic,
+      channelId: item.channelId,
+      visibility: item.visibility || 'secret',
+      lockScreenBody: item.lockScreenBody || generic,
+      schedule: {
+        at: item.at,
+        allowWhileIdle: true
+      },
+      sound: 'default',
+      actionTypeId: 'OPEN_QUICK',
+      extra: {
+        reminderKind: item.kind
+      }
+    };
   }
 
   function describeStatus(ctx, permission, exactAlarms) {
@@ -199,6 +224,8 @@
     shouldScheduleEveningTonight: shouldScheduleEveningTonight,
     shouldSkipDailyForDate: shouldSkipDailyForDate,
     buildNotificationPlan: buildNotificationPlan,
+    pluginNotificationFromPlanItem: pluginNotificationFromPlanItem,
+    GENERIC_LOCK_FALLBACK: GENERIC_LOCK_FALLBACK,
     idsForToday: idsForToday,
     allScheduledIds: allScheduledIds,
     describeStatus: describeStatus,

@@ -96,6 +96,87 @@ test('plan caps at seven daily ids plus optional evening', function () {
   });
 });
 
+test('generic lock-screen copy uses launcher app name', function () {
+  assert.strictEqual(copy.LOCK_SCREEN_GENERIC, 'Cloud Cram: study reminder');
+  assert.ok(copy.LOCK_SCREEN_GENERIC.indexOf('Cloud Quizzes') < 0);
+});
+
+test('daily plan is private (secret) for today and future slots', function () {
+  var ctx = {
+    today: '2026-11-24',
+    dailyEnabled: true,
+    eveningEnabled: false,
+    dailyTimeMinutes: 19 * 60,
+    goalMetToday: false,
+    streak: 12,
+    goal: 3,
+    inVacation: false,
+    repairActive: false,
+    freezeHeld: false
+  };
+  var plan = schedule.buildNotificationPlan(ctx);
+  var todayDaily = plan.filter(function (p) {
+    return p.kind === 'daily' && p.date === ctx.today;
+  });
+  assert.strictEqual(todayDaily.length, 1);
+  assert.strictEqual(todayDaily[0].visibility, 'secret');
+  assert.strictEqual(todayDaily[0].title, copy.LOCK_SCREEN_GENERIC);
+  assert.strictEqual(todayDaily[0].lockScreenBody, copy.LOCK_SCREEN_GENERIC);
+  plan.forEach(function (p) {
+    assert.strictEqual(p.visibility, 'secret', 'all planned notifications must be secret');
+    assert.strictEqual(p.title, copy.LOCK_SCREEN_GENERIC, 'lock-screen title must stay generic');
+    assert.strictEqual(p.lockScreenBody, copy.LOCK_SCREEN_GENERIC, 'lock-screen body must stay generic');
+  });
+});
+
+test('pluginNotificationFromPlanItem passes visibility and lockScreenBody', function () {
+  var at = new Date('2026-11-25T19:00:00');
+  var item = {
+    id: 10001,
+    kind: 'daily',
+    title: copy.LOCK_SCREEN_GENERIC,
+    body: "Time for today's 3 questions.",
+    channelId: schedule.CHANNEL_DAILY,
+    visibility: 'secret',
+    lockScreenBody: copy.LOCK_SCREEN_GENERIC,
+    at: at
+  };
+  var payload = schedule.pluginNotificationFromPlanItem(item);
+  assert.strictEqual(payload.title, 'Cloud Cram: study reminder');
+  assert.strictEqual(payload.visibility, 'secret');
+  assert.strictEqual(payload.lockScreenBody, 'Cloud Cram: study reminder');
+  assert.strictEqual(payload.summaryText, 'Cloud Cram: study reminder');
+  assert.strictEqual(payload.body, item.body);
+  assert.strictEqual(payload.schedule.at, at);
+});
+
+test('test-notification payload shape matches reschedule mapper', function () {
+  var body = copy.selectDailyBody({
+    goal: 3,
+    streakDay: 5,
+    due: 0,
+    hadRecentMiss: false,
+    examDay: false,
+    isToday: true,
+    date: '2026-11-24'
+  });
+  var item = {
+    id: 91001,
+    kind: 'daily',
+    title: copy.LOCK_SCREEN_GENERIC,
+    body: body,
+    channelId: schedule.CHANNEL_DAILY,
+    visibility: 'secret',
+    lockScreenBody: copy.LOCK_SCREEN_GENERIC,
+    at: new Date('2026-11-24T19:00:01')
+  };
+  var payload = schedule.pluginNotificationFromPlanItem(item);
+  assert.strictEqual(payload.visibility, 'secret');
+  assert.strictEqual(payload.lockScreenBody, 'Cloud Cram: study reminder');
+  assert.strictEqual(payload.title, 'Cloud Cram: study reminder');
+  assert.notStrictEqual(payload.body, payload.lockScreenBody, 'expanded body stays off the lock screen fields');
+});
+
 test('copy strings respect 60 char limit and ban guilt phrases', function () {
   var banned = copy.BANNED_FRAGMENTS;
   copy.allBundledStrings().forEach(function (s) {

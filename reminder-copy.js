@@ -10,7 +10,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
-  var LOCK_SCREEN_GENERIC = 'Cloud Quizzes: study reminder';
+  var LOCK_SCREEN_GENERIC = 'Cloud Cram: study reminder';
   var EXAM_DAY = 'Good luck today.';
   var BANNED_FRAGMENTS = [
     "don't break",
