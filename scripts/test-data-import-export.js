@@ -684,6 +684,145 @@ function createBrainDumpIdbHarness(seedRecords) {
     assert(second.ok && second.noop, 're-import noop');
   });
 
+  function makeKeyedPlainObject(count, keyFn, valueFn) {
+    const o = {};
+    for (let i = 0; i < count; i++) {
+      o[keyFn(i)] = valueFn(i);
+    }
+    return o;
+  }
+
+  function minimalGameState(overrides) {
+    return Object.assign({ v: 1, streak: 0, best: 0 }, overrides || {});
+  }
+
+  function gamePayload(gameState) {
+    return minimalPayload({
+      localStorage: { cloudcram_game_v1: JSON.stringify(gameState) }
+    });
+  }
+
+  async function assertOverCapRejected(mapField, buildMap, cap, lsOptional) {
+    const game = minimalGameState();
+    game[mapField] = buildMap(cap + 1);
+    const res = dataImport.validatePayloadRoot(gamePayload(game));
+    assert(!res.ok, mapField + ' over cap rejected');
+    if (lsOptional) {
+      const before = JSON.stringify(snapshot(lsOptional));
+      assert(JSON.stringify(snapshot(lsOptional)) === before, mapField + ' storage unchanged');
+    }
+  }
+
+  function assertAtCapAccepted(mapField, buildMap, cap) {
+    const game = minimalGameState();
+    game[mapField] = buildMap(cap);
+    const res = dataImport.validatePayloadRoot(gamePayload(game));
+    assert(res.ok, mapField + ' at cap accepted');
+  }
+
+  function assertUnderCapAccepted(mapField, buildMap) {
+    const game = minimalGameState();
+    game[mapField] = buildMap(3);
+    const res = dataImport.validatePayloadRoot(gamePayload(game));
+    assert(res.ok, mapField + ' under cap accepted');
+  }
+
+  const dayEntry = function () {
+    return { answers: 0, met: false, celebrated: false, streakAwarded: false, kind: 'normal' };
+  };
+
+  await test('rejects over-cap dayRecords and leaves storage unchanged', async function () {
+    const ls = new LocalStorageMock({ quizCompleted: '["keep"]' });
+    await assertOverCapRejected(
+      'dayRecords',
+      function (n) {
+        return makeKeyedPlainObject(n, function (i) {
+          return '2020-01-' + String((i % 28) + 1).padStart(2, '0') + ':' + i;
+        }, function () {
+          return dayEntry();
+        });
+      },
+      dataImport.MAX_DAY_RECORD_KEYS,
+      ls
+    );
+  });
+
+  await test('accepts at-cap and under-cap dayRecords', function () {
+    const build = function (n, compact) {
+      return makeKeyedPlainObject(n, function (i) {
+        return '2021-06-' + String((i % 28) + 1).padStart(2, '0') + ':' + i;
+      }, function () {
+        return compact ? {} : dayEntry();
+      });
+    };
+    assertAtCapAccepted('dayRecords', function (n) {
+      return build(n, true);
+    }, dataImport.MAX_DAY_RECORD_KEYS);
+    assertUnderCapAccepted('dayRecords', function (n) {
+      return build(n, false);
+    });
+  });
+
+  await test('rejects invalid dayRecords entry shape', function () {
+    const game = minimalGameState({ dayRecords: { '2026-01-01': 'not-an-object' } });
+    assert(!dataImport.validatePayloadRoot(gamePayload(game)).ok, 'bad day record value');
+  });
+
+  await test('rejects over-cap notices and accepts at or under cap', function () {
+    const build = function (n) {
+      return makeKeyedPlainObject(n, function (i) {
+        return 'notice_' + i;
+      }, function () {
+        return true;
+      });
+    };
+    const over = minimalGameState({ notices: build(dataImport.MAX_NOTICE_KEYS + 1) });
+    assert(!dataImport.validatePayloadRoot(gamePayload(over)).ok, 'notices over cap');
+    assertAtCapAccepted('notices', build, dataImport.MAX_NOTICE_KEYS);
+    assertUnderCapAccepted('notices', build);
+  });
+
+  await test('rejects over-cap settingsRevision and accepts at or under cap', function () {
+    const build = function (n) {
+      return makeKeyedPlainObject(n, function (i) {
+        return i === 0 ? 'soundOn' : i === 1 ? 'goal' : 'extra_' + i;
+      }, function (i) {
+        return i;
+      });
+    };
+    const over = minimalGameState({ settingsRevision: build(dataImport.MAX_SETTINGS_REVISION_KEYS + 1) });
+    assert(!dataImport.validatePayloadRoot(gamePayload(over)).ok, 'settingsRevision over cap');
+    assertAtCapAccepted('settingsRevision', build, dataImport.MAX_SETTINGS_REVISION_KEYS);
+    assertUnderCapAccepted('settingsRevision', build);
+  });
+
+  await test('rejects invalid settingsRevision value type', function () {
+    const game = minimalGameState({ settingsRevision: { soundOn: 'nope', goal: 0 } });
+    assert(!dataImport.validatePayloadRoot(gamePayload(game)).ok, 'settingsRevision bad value');
+  });
+
+  await test('rejects over-cap answerDedup', function () {
+    const game = minimalGameState({
+      answerDedup: makeKeyedPlainObject(dataImport.MAX_DEDUP_KEYS + 1, function (i) {
+        return 'k:' + i;
+      }, function () {
+        return true;
+      })
+    });
+    assert(!dataImport.validatePayloadRoot(gamePayload(game)).ok, 'answerDedup over cap');
+  });
+
+  await test('accepts under-cap answerDedup', function () {
+    const build = function (n) {
+      return makeKeyedPlainObject(n, function (i) {
+        return 'k:' + i;
+      }, function () {
+        return true;
+      });
+    };
+    assertUnderCapAccepted('answerDedup', build);
+  });
+
   await test('data-export filename uses cloudcram-progress prefix', function () {
     const sandbox = { window: {}, console: console };
     sandbox.window = sandbox;

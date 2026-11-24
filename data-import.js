@@ -417,6 +417,57 @@
   var MAX_GAME_STREAK = 10000;
   var MAX_GAME_BEST = 10000;
   var MAX_DEDUP_KEYS = 200000;
+  /** One ISO date key per calendar day; ~41 years at 15000 — above realistic history and streak cap. */
+  var MAX_DAY_RECORD_KEYS = 15000;
+  /** Sparse UI flags on game state; legitimate exports stay in single digits. */
+  var MAX_NOTICE_KEYS = 500;
+  /** settingsRevision only reads soundOn and goal; cap blocks junk-key maps. */
+  var MAX_SETTINGS_REVISION_KEYS = 10;
+
+  function countPlainObjectKeysBounded(obj, limit) {
+    if (!isPlainObject(obj)) return { invalid: true, over: false };
+    var n = 0;
+    for (var key in obj) {
+      if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;
+      n++;
+      if (n > limit) return { invalid: false, over: true };
+    }
+    return { invalid: false, over: false };
+  }
+
+  function isValidDayRecordValue(val) {
+    if (val === null || val === undefined) return true;
+    return isPlainObject(val);
+  }
+
+  function isValidNoticeValue(val) {
+    if (val === null || val === undefined) return true;
+    var t = typeof val;
+    return t === 'boolean' || t === 'number' || t === 'string';
+  }
+
+  function isValidSettingsRevisionValue(val) {
+    return typeof val === 'number' && isFinite(val) && val >= 0;
+  }
+
+  function validateImportedPlainObjectMap(obj, max, capMessage, validateValue) {
+    if (obj === undefined || obj === null) return null;
+    if (!isPlainObject(obj)) {
+      return reject('game_type', 'Invalid game state in file.');
+    }
+    if (countPlainObjectKeysBounded(obj, max).over) {
+      return reject('game_cap', capMessage);
+    }
+    if (validateValue) {
+      for (var k in obj) {
+        if (!Object.prototype.hasOwnProperty.call(obj, k)) continue;
+        if (!validateValue(obj[k])) {
+          return reject('game_type', 'Invalid game state in file.');
+        }
+      }
+    }
+    return null;
+  }
 
   function validateFiniteGameCount(val, field, max) {
     if (val === undefined) return null;
@@ -447,10 +498,31 @@
       if (bestErr) return bestErr;
     }
     if (parsed.answerDedup && isPlainObject(parsed.answerDedup)) {
-      if (Object.keys(parsed.answerDedup).length > MAX_DEDUP_KEYS) {
+      if (countPlainObjectKeysBounded(parsed.answerDedup, MAX_DEDUP_KEYS).over) {
         return reject('game_cap', 'Too many answer records.');
       }
     }
+    var dayErr = validateImportedPlainObjectMap(
+      parsed.dayRecords,
+      MAX_DAY_RECORD_KEYS,
+      'Too many day records.',
+      isValidDayRecordValue
+    );
+    if (dayErr) return dayErr;
+    var noticeErr = validateImportedPlainObjectMap(
+      parsed.notices,
+      MAX_NOTICE_KEYS,
+      'Too many notice flags.',
+      isValidNoticeValue
+    );
+    if (noticeErr) return noticeErr;
+    var revErr = validateImportedPlainObjectMap(
+      parsed.settingsRevision,
+      MAX_SETTINGS_REVISION_KEYS,
+      'Too many settings revision fields.',
+      isValidSettingsRevisionValue
+    );
+    if (revErr) return revErr;
     return null;
   }
 
@@ -1075,6 +1147,10 @@
   return {
     SCHEMA_V1: SCHEMA_V1,
     MAX_FILE_BYTES: MAX_FILE_BYTES,
+    MAX_DEDUP_KEYS: MAX_DEDUP_KEYS,
+    MAX_DAY_RECORD_KEYS: MAX_DAY_RECORD_KEYS,
+    MAX_NOTICE_KEYS: MAX_NOTICE_KEYS,
+    MAX_SETTINGS_REVISION_KEYS: MAX_SETTINGS_REVISION_KEYS,
     IMPORT_LOCK: IMPORT_LOCK,
     containsReservedKey: containsReservedKey,
     sanitizePlainObject: sanitizePlainObject,
