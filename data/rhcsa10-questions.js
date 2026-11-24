@@ -1107,16 +1107,16 @@ window.QUESTION_BANK_RHCSA10 = [
     "id": "rhcsa10-0070",
     "mode": "exam",
     "topic": "Boot",
-    "q": "Default GRUB config file location (x86 UEFI):",
+    "q": "Primary GRUB configuration file on RHEL 10 (BIOS or UEFI):",
     "options": [
+      "/boot/grub2/grub.cfg",
+      "/boot/efi/EFI/redhat/grub.cfg",
       "/boot/grub/grub.cfg",
-      "/boot/efi/EFI/redhat/grub.cfg (or /boot/grub2/grub.cfg)",
-      "/etc/grub.cfg",
-      "Only MBR"
+      "/etc/grub.cfg"
     ],
-    "correct": 1,
-    "explain": "UEFI = /boot/efi/EFI/redhat/grub.cfg. BIOS = /boot/grub2/grub.cfg. Don't edit directly; use grub2-mkconfig.",
-    "obj": "7.1",
+    "correct": 0,
+    "explain": "grub2-mkconfig writes /boot/grub2/grub.cfg on both BIOS and UEFI. On UEFI, /boot/efi/EFI/redhat/grub.cfg is a small EFI stub that must not be regenerated or overwritten—edit /etc/default/grub and regenerate only the main config (RHEL 10: Resetting the GRUB boot loader).",
+    "obj": "7.6",
     "level": 1
   },
   {

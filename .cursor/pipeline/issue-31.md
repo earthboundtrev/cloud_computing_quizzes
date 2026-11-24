@@ -19,6 +19,13 @@
 | SECURITY | Pass (pre-merge); post-merge no blockers | P3 hardening tracked separately |
 | DEPLOY | **Merged** | PR #124 @ `b8b6116` |
 | TESTER | **Pending** | Retest on `b8b6116` |
+| CONTENT FIX (post-#124) | **Done** | 0070, 0172, 0183, 0187, 0144; cache v54 |
+| CURRICULUM | **Approved** | Grok 4.6 High — five AC items |
+| BUGBOT | **Clean** | Post-content diff |
+| SECURITY | **Pass** | Bank + CACHE_NAME only |
+| TESTS | **Pass** | lint.yml node set + Playwright offline + smoke 16/16 |
+| ARCHITECT | **Merge-ready** | Content fix-forward |
+| DEPLOY | **PR open** | Refs #31; awaiting human merge |
 
 ## Review outcomes (pre-merge)
 

@@ -508,7 +508,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     ],
     "correct": 0,
     "explain": "grub2-setpassword encrypts grub.cfg user; BIOS/UEFI password also recommended.",
-    "obj": "5.6",
+    "obj": "7.6",
     "level": 1
   },
   {
@@ -949,14 +949,14 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "topic": "Boot",
     "q": "Verify boot loader config after editing /etc/default/grub:",
     "options": [
-      "grub2-mkconfig -o /boot/grub2/grub.cfg (BIOS) or grub.cfg under EFI",
+      "grub2-mkconfig -o /boot/grub2/grub.cfg",
+      "grub2-mkconfig -o /boot/efi/EFI/redhat/grub.cfg",
       "dracut",
-      "nmcli",
-      "podman"
+      "nmcli"
     ],
     "correct": 0,
-    "explain": "UEFI path under /boot/efi/EFI/redhat/; BIOS /boot/grub2/.",
-    "obj": "7.1",
+    "explain": "Run grub2-mkconfig -o /boot/grub2/grub.cfg on both BIOS and UEFI. Do not overwrite /boot/efi/EFI/redhat/grub.cfg—that EFI stub must stay intact (RHEL 10: Resetting the GRUB boot loader).",
+    "obj": "7.6",
     "level": 1
   },
   {
@@ -1125,13 +1125,13 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "topic": "tuned",
     "q": "To check the currently active tuned profile:",
     "options": [
-      "tuned-adm status",
+      "cat /etc/tuned/active_profile",
       "tuned-adm active",
       "systemctl status tuned",
-      "Both A and B"
+      "tuned-adm list --active"
     ],
-    "correct": 3,
-    "explain": "tuned-adm active shows active profile. tuned-adm status shows profile and tuned daemon status.",
+    "correct": 1,
+    "explain": "tuned-adm active prints the active profile name. There is no tuned-adm status subcommand; use systemctl status tuned for daemon health.",
     "obj": "4.6",
     "level": 2
   },
@@ -1189,13 +1189,13 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "topic": "tuned",
     "q": "tuned profiles are stored in:",
     "options": [
+      "/usr/lib/tuned/profiles/ (system) and /etc/tuned/profiles/ (custom)",
       "/etc/tuned/ and /usr/lib/tuned/",
       "/var/lib/tuned/",
-      "/etc/sysconfig/tuned/",
-      "/proc/tuned/"
+      "/etc/sysconfig/tuned/"
     ],
     "correct": 0,
-    "explain": "/usr/lib/tuned/ has system profiles. /etc/tuned/ for custom profiles. tuned.conf per profile.",
+    "explain": "System profiles live under /usr/lib/tuned/profiles/; custom profiles under /etc/tuned/profiles/ (each profile directory contains tuned.conf). See RHEL 10 Monitoring and managing system status and performance.",
     "obj": "4.6",
     "level": 2
   },
