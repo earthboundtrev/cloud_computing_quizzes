@@ -31,7 +31,7 @@
 | `answerDedup` | Fresh allowed-key map; cap 200000 unchanged (#121) |
 | `normalizePendingGameAnswer` | Reserved keys dropped; fresh object when remapping id |
 | Regression | #41 migration cases + reserved-key tests; `Object.prototype` not polluted |
-| Cache | `CACHE_NAME` **v59→v60** once; `check-sw-cache-name-bump` + precache pass |
+| Cache | `CACHE_NAME` **cloudcram-v61**; `index.html` `build-meta.js?v=6` aligned with meta content; precache check pass |
 
 ## Bugbot runs
 
@@ -53,4 +53,4 @@
 
 ## Follow-up PRs
 
-- None
+- Pre-merge: `build-meta.js?v=6` on `index.html` (was `v=5` while `CLOUDCRAM_WEB_CACHE_NAME` is v61; no extra `CACHE_NAME` bump)
