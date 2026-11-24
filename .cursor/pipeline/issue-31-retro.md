@@ -1,6 +1,6 @@
 # Pipeline retro — GitHub #31 (RHCSA10 content quality, PR #124)
 
-**Purpose:** Record merge of [#124](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/124) after an earlier partial delivery (#47 / #53). Earlier retro for #47 remains historical; this doc is the merge record for uniform `rhcsa10-NNNN` ids and gamification dedup.
+**Purpose:** Record merge of [#124](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/124) after an earlier partial delivery (#47 / #53), and fix-forward [#131](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/131) (TuneD / GRUB content). Earlier retro for #47 remains historical; this doc is the merge record for uniform `rhcsa10-NNNN` ids, gamification dedup, and Curriculum-confirmed content corrections.
 
 | Field | Value |
 |-------|--------|
@@ -21,7 +21,7 @@
 | ARCHITECT | **Merge-ready** | |
 | SECURITY | **PASS** (pre-merge); post-merge reviewer no blockers | P3 hardening filed separately |
 | DEPLOY | **Merged** | `b8b6116` via PR #124 |
-| TESTER | **Pending** | Retest on `b8b6116` not recorded here yet |
+| TESTER (#124) | **Superseded** | Content retest opened after #131 fix-forward |
 
 ## Lead Developer pre-merge blockers (round 1 → fixed before merge)
 
@@ -55,6 +55,30 @@
 |------------|-------|---------|
 | 2026-11-24 | cursor-grok-4.6-high-fast | **PASS** (no medium+) pre-merge |
 | Post-merge (Security Reviewer) | — | **No blockers**; P3 items filed separately |
+
+## PR #131 — content fix-forward (TuneD / GRUB)
+
+| Field | Value |
+|-------|--------|
+| PR | [#131](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/131) — merged |
+| Branch head | `eb1580c` |
+| Merge commit on `main` | `cafd4f4` |
+| Diff base | `2e7bfd9` (main after #130) |
+| Cache | `cloudcram-v53` → **cloudcram-v54** |
+| Question ids | `rhcsa10-0070`, `0144`, `0172`, `0183`, `0187` |
+
+### Pointer log (#131)
+
+| Stage | Status | Notes |
+|-------|--------|--------|
+| IMPLEMENT | Done | Curriculum-confirmed answers from [#31 comments](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/31#issuecomment-7123814162); no id-map changes |
+| CURRICULUM | **Approved** | Grok 4.6 High — five items |
+| BUGBOT | **Clean** | |
+| TESTS | **Pass** | Lead pre-merge smoke **445/0**; post-merge smoke **445/0** |
+| ARCHITECT | **Merge-ready** | |
+| SECURITY | **PASS** | |
+| DEPLOY | **Merged** | `cafd4f4` via PR #131 |
+| TESTER | **Pending** | Content retest on five ids — not passed in this retro |
 
 ## Follow-up PRs
 

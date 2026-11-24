@@ -3,31 +3,43 @@
 | Field | Value |
 |-------|--------|
 | Issue | [#31](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/31) — **OPEN** |
-| PR | [#124](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/124) — **merged** |
-| Merge commit | `b8b6116` |
-| Branch head (PR) | `dabbbff` |
+| PR #124 | **merged** @ `b8b6116` (uniform ids, gamification dedup) |
+| PR #131 | [#131](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/131) — **merged** @ `cafd4f4` (`cloudcram-v54`) |
+| Branch head (#131) | `eb1580c` |
 | Retro | [issue-31-retro.md](./issue-31-retro.md) |
 
-## Pointer log
+## Pointer log — PR #124
 
 | Stage | Status | Notes |
 |-------|--------|--------|
 | IMPLEMENT | Done | Uniform ids, gamification dedup, RHEL 10 content/lint, v53 cache |
-| BUGBOT | Clean | After Lead blockers (hub + all-quiz utils wiring) |
-| TESTS | Pass | CI green pre-merge (Lead); local lint + id migration tests |
-| ARCHITECT | Merge-ready | |
-| SECURITY | Pass (pre-merge); post-merge no blockers | P3 hardening tracked separately |
+| BUGBOT | **Clean** | After Lead blockers (hub + all-quiz utils wiring) |
+| TESTS | **Pass** | CI green pre-merge (Lead) |
+| ARCHITECT | **Merge-ready** | |
+| SECURITY | **Pass** | Pre-merge; post-merge no blockers |
 | DEPLOY | **Merged** | PR #124 @ `b8b6116` |
-| TESTER | **Pending** | Retest on `b8b6116` |
-| CONTENT FIX (post-#124) | **Done** | 0070, 0172, 0183, 0187, 0144; cache v54 |
-| CURRICULUM | **Approved** | Grok 4.6 High — five AC items |
-| BUGBOT | **Clean** | Post-content diff |
-| SECURITY | **Pass** | Bank + CACHE_NAME only |
-| TESTS | **Pass** | lint.yml node set + Playwright offline + smoke 16/16 |
-| ARCHITECT | **Merge-ready** | Content fix-forward |
-| DEPLOY | **PR open** | Refs #31; awaiting human merge |
 
-## Review outcomes (pre-merge)
+## Pointer log — PR #131 (content fix-forward)
+
+| Stage | Status | Notes |
+|-------|--------|--------|
+| IMPLEMENT | Done | `rhcsa10-0070`, `0144`, `0172`, `0183`, `0187`; **cloudcram-v54** |
+| CURRICULUM | **Approved** | Curriculum-confirmed answers from #31 comments |
+| BUGBOT | **Clean** | Content + cache bump only |
+| SECURITY | **Pass** | Bank + CACHE_NAME scope |
+| TESTS | **Pass** | Lead pre-merge **PASS**; lint.yml node set + offline **16/16** + smoke **16/16** |
+| ARCHITECT | **Merge-ready** | |
+| DEPLOY | **Merged** | PR #131 @ `cafd4f4` |
+| TESTER | **Pending** | Content retest after #131 — not yet recorded |
+
+## Lead verification (#131)
+
+| Check | Result |
+|-------|--------|
+| Pre-merge smoke | **445/0** |
+| Post-merge smoke @ `cafd4f4` | **445/0** |
+
+## Review outcomes (PR #124)
 
 ### Bugbot
 - Round 1: hub lacked map/migration; sticky flag; cross-tab without utils — **fixed** in #124 before merge.
@@ -38,7 +50,7 @@
 ### Security
 - **PASS** pre-merge; Post-merge Security Reviewer: no blockers.
 
-## Tests (recorded at merge)
+## Tests (recorded at #124 merge)
 
 ```
 node scripts/lint-rhcsa10.js --ci
