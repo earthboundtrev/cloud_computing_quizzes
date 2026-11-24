@@ -19,3 +19,4 @@ native/android/app/debug/
 # Root-level Android artifacts (if any)
 local.properties
 keystore.properties
+google-services.json
