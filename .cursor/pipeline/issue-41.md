@@ -2,7 +2,8 @@
 
 **Issue:** https://github.com/earthboundtrev/cloud_computing_quizzes/issues/41 (OPEN)  
 **Branch:** `cursor/rhcsa-migration-merge-41-a7ba`  
-**PR:** (see DEPLOY)
+**PR:** [#123](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/123) (merged)  
+**Retro:** [issue-41-retro.md](./issue-41-retro.md)
 
 ## Pointer log
 
@@ -13,7 +14,7 @@
 | TESTS | 2026-11-24 | Full lint.yml set + `test-rhcsa-migration.js` 18/18 |
 | ARCHITECT | 2026-11-24 | **Merge-ready** — `cursor-grok-4.6-high-fast` |
 | SECURITY | 2026-11-24 | **Low / PASS** — `cursor-grok-4.6-high-fast` |
-| DEPLOY | pending | PR opened with `Refs #41` (no merge) |
+| DEPLOY | **Merged** | PR [#123](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/123) @ `3ee9b64` |
 
 ## Bugbot
 
