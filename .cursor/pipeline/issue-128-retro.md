@@ -5,7 +5,7 @@
 | Field | Value |
 |-------|--------|
 | Issue | [#128](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/128) — **OPEN** until human close |
-| PR | _(created on push)_ |
+| PR | [#143](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/143) |
 | Branch | `cursor/sw-activate-cloudcram-prefix-128-af3c` |
 | Base | `79e3446` (`cloudcram-v61`) |
 | Cache | **cloudcram-v62** |
@@ -20,7 +20,7 @@
 | TESTS | **Pass** | SW flow 15/15; precache; cache-name bump; CI subset |
 | ARCHITECT | **Merge-ready** | `cursor-grok-4.6-high-fast` |
 | SECURITY | **PASS** | `cursor-grok-4.6-high-fast`; scoped to activate change; global `caches.match` deferred per AC |
-| DEPLOY | **Open PR** | body `Refs #128` only |
+| DEPLOY | **Open PR #143** | `5d00c3b`; body `Refs #128` only |
 
 ## Deliverables
 
