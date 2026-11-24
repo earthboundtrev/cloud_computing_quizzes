@@ -8,6 +8,9 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
+const ROOT = path.join(__dirname, '..');
+const gamePath = path.join(ROOT, 'gamification.js');
+
 class LocalStorageMock {
   constructor() {
     this.store = {};
@@ -23,15 +26,47 @@ class LocalStorageMock {
 function loadMap() {
   const sandbox = { window: {} };
   vm.createContext(sandbox);
-  vm.runInContext(fs.readFileSync('data/rhcsa10-question-id-map.js', 'utf8'), sandbox);
+  vm.runInContext(fs.readFileSync(path.join(ROOT, 'data/rhcsa10-question-id-map.js'), 'utf8'), sandbox);
   return sandbox.window.RHCSA10_QUESTION_ID_MAP;
 }
 
-function runMigration(ls) {
-  const migJs = fs.readFileSync('rhcsa10-question-id-migration.js', 'utf8');
-  const win = { RHCSA10_QUESTION_ID_MAP: loadMap() };
+function bootRhcsa10Ids(target) {
+  target.RHCSA10_QUESTION_ID_MAP = loadMap();
+  target.window = target;
+  target.globalThis = target;
+  target.console = console;
+  vm.createContext(target);
+  vm.runInContext(fs.readFileSync(path.join(ROOT, 'rhcsa10-question-id-utils.js'), 'utf8'), target);
+}
+
+function loadUtils() {
+  const g = {};
+  bootRhcsa10Ids(g);
+  return g.CloudCramRhcsa10Ids;
+}
+
+function runPersistMigration(ls) {
+  const win = {};
+  bootRhcsa10Ids(win);
+  win.localStorage = ls;
+  const migJs = fs.readFileSync(path.join(ROOT, 'rhcsa10-question-id-migration.js'), 'utf8');
   const fn = new Function('localStorage', 'window', 'console', migJs);
-  fn(ls, win, { log: () => {}, warn: () => {}, error: () => {} });
+  fn(ls, win, console);
+}
+
+function loadGame() {
+  delete require.cache[require.resolve(gamePath)];
+  return require(gamePath);
+}
+
+function dedupCountForDay(ls, day) {
+  const raw = ls.getItem('cloudcram_game_v1');
+  if (!raw) return 0;
+  const parsed = JSON.parse(raw);
+  const dedup = parsed.answerDedup || {};
+  return Object.keys(dedup).filter(function (k) {
+    return k.indexOf(day + ':') === 0;
+  }).length;
 }
 
 function testRemapNumericAndStringIds() {
@@ -42,12 +77,12 @@ function testRemapNumericAndStringIds() {
   if (!map.forward[oldNum] || !map.forward[oldStr]) {
     throw new Error('fixture ids missing from map');
   }
-  var dedup = {};
+  const dedup = {};
   dedup['2026-11-24:sess1:' + oldNum] = true;
   dedup['2026-11-24:sess2:' + oldStr] = true;
   dedup['2026-11-24:sess3:other-quiz-1'] = true;
   ls.setItem('cloudcram_game_v1', JSON.stringify({ v: 1, answerDedup: dedup }));
-  runMigration(ls);
+  runPersistMigration(ls);
   const game = JSON.parse(ls.getItem('cloudcram_game_v1'));
   const d = game.answerDedup;
   if (!d['2026-11-24:sess1:' + map.forward[oldNum]]) {
@@ -62,52 +97,107 @@ function testRemapNumericAndStringIds() {
   if (d['2026-11-24:sess1:' + oldNum]) {
     throw new Error('old numeric key should be removed');
   }
-  if (ls.getItem('rhcsa10_question_ids_v1') !== 'true') {
-    throw new Error('migration flag not set');
+}
+
+function testTabMergeDedupesOldAndNew() {
+  const utils = loadUtils();
+  const map = loadMap();
+  const canon = map.forward['129'];
+  const mergedInput = {};
+  mergedInput['2026-11-24:sess-a:' + canon] = true;
+  mergedInput['2026-11-24:sess-b:129'] = true;
+  const merged = utils.normalizeAnswerDedup(mergedInput);
+  const keys = Object.keys(merged);
+  if (keys.length !== 2) {
+    throw new Error('expected two session keys after canonical merge, got ' + keys.length);
+  }
+  if (!merged['2026-11-24:sess-a:' + canon] || !merged['2026-11-24:sess-b:' + canon]) {
+    throw new Error('both sessions should use canonical id only');
   }
 }
 
-function testMissingMapDoesNotSetFlag() {
+function testImportThenReanswerNoExtraXp() {
+  const map = loadMap();
+  const canon = map.forward['129'];
+  const day = '2026-11-24';
   const ls = new LocalStorageMock();
-  const migJs = fs.readFileSync('rhcsa10-question-id-migration.js', 'utf8');
-  const fn = new Function('localStorage', 'window', 'console', migJs);
-  fn(ls, {}, { log: () => {}, warn: () => {}, error: () => {} });
-  if (ls.getItem('rhcsa10_question_ids_v1')) {
-    throw new Error('flag must not be set when map is missing');
-  }
+  bootRhcsa10Ids(globalThis);
+  const game = loadGame();
+  const now = Date.parse(day + 'T12:00:00Z');
+  game.setDeps({
+    localStorage: ls,
+    now: function () {
+      return now;
+    },
+    locks: null,
+    storageEventTarget: null
+  });
+  const imported = JSON.stringify({
+    v: 1,
+    answerDedup: { [day + ':import:sess:129']: true }
+  });
+  return game.importState(imported).then(function () {
+    const afterImport = dedupCountForDay(ls, day);
+    if (afterImport !== 1) {
+      throw new Error('imported legacy id should count once, got ' + afterImport);
+    }
+    return game.recordAnswer('live', '129').then(function () {
+      if (dedupCountForDay(ls, day) !== 2) {
+        throw new Error('new session with legacy id should add one dedup entry');
+      }
+      return game.recordAnswer('live', canon).then(function () {
+        if (dedupCountForDay(ls, day) !== 2) {
+          throw new Error('canonical re-answer must not double-count XP dedup');
+        }
+      });
+    });
+  });
 }
 
-function testIdempotent() {
+function testIdempotentPersist() {
   const ls = new LocalStorageMock();
   ls.setItem(
     'cloudcram_game_v1',
     JSON.stringify({ v: 1, answerDedup: { '2026-11-24:sess1:rhcsa10-0001': true } })
   );
-  runMigration(ls);
+  runPersistMigration(ls);
   const first = ls.getItem('cloudcram_game_v1');
-  runMigration(ls);
+  runPersistMigration(ls);
   if (ls.getItem('cloudcram_game_v1') !== first) {
-    throw new Error('second run should not change state');
+    throw new Error('second persist run should not change state');
   }
 }
 
+const syncTests = [
+  { name: 'remap numeric and string ids', fn: testRemapNumericAndStringIds },
+  { name: 'tab merge dedupes old and new ids', fn: testTabMergeDedupesOldAndNew },
+  { name: 'idempotent persist migration', fn: testIdempotentPersist }
+];
+
 let ok = 0;
 let fail = 0;
-[
-  { name: 'remap numeric and string ids', fn: testRemapNumericAndStringIds },
-  { name: 'missing map leaves flag unset', fn: testMissingMapDoesNotSetFlag },
-  { name: 'idempotent', fn: testIdempotent }
-].forEach(
-  function (t) {
-    try {
-      t.fn();
-      console.log('✓ ' + t.name);
-      ok++;
-    } catch (e) {
-      console.error('✗ ' + t.name);
-      console.error('  ' + e.message);
-      fail++;
-    }
+
+syncTests.forEach(function (t) {
+  try {
+    t.fn();
+    console.log('✓ ' + t.name);
+    ok++;
+  } catch (e) {
+    console.error('✗ ' + t.name);
+    console.error('  ' + e.message);
+    fail++;
   }
-);
-process.exit(fail ? 1 : 0);
+});
+
+testImportThenReanswerNoExtraXp()
+  .then(function () {
+    console.log('✓ import then re-answer does not double XP dedup');
+    ok++;
+    process.exit(fail ? 1 : 0);
+  })
+  .catch(function (e) {
+    console.error('✗ import then re-answer does not double XP dedup');
+    console.error('  ' + (e && e.message ? e.message : e));
+    fail++;
+    process.exit(1);
+  });

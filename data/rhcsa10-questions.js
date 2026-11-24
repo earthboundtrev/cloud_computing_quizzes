@@ -323,7 +323,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "id": "rhcsa10-0021",
     "mode": "exam",
     "topic": "Packages",
-    "q": "To install a package from a repository in RHEL 9:",
+    "q": "To install a package from a repository in RHEL 10:",
     "options": [
       "rpm -i package.rpm",
       "dnf install package",
@@ -331,7 +331,7 @@ window.QUESTION_BANK_RHCSA10 = [
       "Both B and C"
     ],
     "correct": 3,
-    "explain": "dnf install package. yum is symlink to dnf in RHEL 8/9.",
+    "explain": "dnf install package. yum is a compatibility symlink to dnf on RHEL 10.",
     "obj": "2.1",
     "level": 3
   },
@@ -739,7 +739,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "id": "rhcsa10-0047",
     "mode": "exam",
     "topic": "Networking",
-    "q": "To add a static route persistently (RHEL 9):",
+    "q": "To add a static route persistently (RHEL 10):",
     "options": [
       "Only route add",
       "nmcli con mod \"conn\" ipv4.routes \"192.168.2.0/24 10.0.0.1\"",
@@ -1483,7 +1483,7 @@ window.QUESTION_BANK_RHCSA10 = [
       "Only systemd-run"
     ],
     "correct": 1,
-    "explain": "CPUQuota=50% in unit [Service]. Or use slice. cgroup v2 in RHEL 9.",
+    "explain": "CPUQuota=50% in unit [Service]. Or use slice. cgroup v2 is default on RHEL 10.",
     "obj": "7.2",
     "level": 3
   },

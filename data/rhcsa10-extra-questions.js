@@ -43,7 +43,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
       "lvremove"
     ],
     "correct": 1,
-    "explain": "hostnamectl sets static hostname in systemd/RHEL 9.",
+    "explain": "hostnamectl sets static hostname in systemd on RHEL 10.",
     "obj": "8.3",
     "level": 3
   },
@@ -187,7 +187,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
       "grub2-install"
     ],
     "correct": 1,
-    "explain": "chronyd is default NTP client in RHEL 9; chronyc sources to verify.",
+    "explain": "chronyd is the default NTP client on RHEL 10; chronyc sources to verify.",
     "obj": "8.1",
     "level": 3
   },
@@ -499,12 +499,12 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "id": "rhcsa10-0144",
     "mode": "exam",
     "topic": "Boot",
-    "q": "Set root password in GRUB (break-in protection) on RHEL 9:",
+    "q": "Set root password in GRUB (break-in protection) on RHEL 10:",
     "options": [
       "grub2-setpassword",
       "passwd grub",
-      "nmcli",
-      "stratis"
+      "nmcli con add type bond",
+      "growpart"
     ],
     "correct": 0,
     "explain": "grub2-setpassword encrypts grub.cfg user; BIOS/UEFI password also recommended.",

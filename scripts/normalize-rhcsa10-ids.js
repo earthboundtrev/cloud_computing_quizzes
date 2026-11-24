@@ -10,9 +10,9 @@ const fs = require('fs');
 const vm = require('vm');
 
 const BANKS = [
-  { path: 'data/rhcsa10-questions.js', key: 'QUESTION_BANK_RHCSA10', varName: 'QUESTION_BANK_RHCSA10' },
-  { path: 'data/rhcsa10-extra-questions.js', key: 'QUESTION_BANK_RHCSA10_EXTRA', varName: 'QUESTION_BANK_RHCSA10_EXTRA' },
-  { path: 'data/rhcsa10-gap-questions.js', key: 'QUESTION_BANK_RHCSA10_GAP', varName: 'QUESTION_BANK_RHCSA10_GAP' }
+  { path: 'data/rhcsa10-questions.js', bankVar: 'QUESTION_BANK_RHCSA10', varName: 'QUESTION_BANK_RHCSA10' },
+  { path: 'data/rhcsa10-extra-questions.js', bankVar: 'QUESTION_BANK_RHCSA10_EXTRA', varName: 'QUESTION_BANK_RHCSA10_EXTRA' },
+  { path: 'data/rhcsa10-gap-questions.js', bankVar: 'QUESTION_BANK_RHCSA10_GAP', varName: 'QUESTION_BANK_RHCSA10_GAP' }
 ];
 
 function loadBank(filePath) {
@@ -38,7 +38,7 @@ function main() {
 
   BANKS.forEach(function (b) {
     const w = loadBank(b.path);
-    const qs = w[b.key] || [];
+    const qs = w[b.bankVar] || [];
     banksData.push({ meta: b, questions: qs });
     qs.forEach(function (q) {
       allOld.push({ oldId: q.id, bank: b.path });

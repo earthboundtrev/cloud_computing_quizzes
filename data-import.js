@@ -386,8 +386,7 @@
     if (key === 'quizCompleted') return mergeQuizCompleted(localRaw, importRaw);
     if (key === 'quizOrder') return mergeQuizOrder(localRaw, importRaw);
     if (key === 'cloudcram_push_local_v1') return mergePushLocal(localRaw, importRaw);
-    if (key.indexOf('rhcsa_migrated') === 0 || key === 'rhcsa_migrated_to_v10' ||
-        key === 'rhcsa_migrated_to_v10_2' || key === 'rhcsa_migrated_to_v10_3') {
+    if (key.indexOf('rhcsa_migrated') === 0) {
       return mergeMigrationFlag(localRaw, importRaw);
     }
     if (key === 'study_sessions_brain_dumps') return localRaw;

@@ -12,8 +12,8 @@ const { execSync } = require('child_process');
 
 const BASE = '1b9b020';
 const FILES = [
-  { path: 'data/rhcsa10-questions.js', key: 'QUESTION_BANK_RHCSA10' },
-  { path: 'data/rhcsa10-extra-questions.js', key: 'QUESTION_BANK_RHCSA10_EXTRA' }
+  { path: 'data/rhcsa10-questions.js', bankVar: 'QUESTION_BANK_RHCSA10' },
+  { path: 'data/rhcsa10-extra-questions.js', bankVar: 'QUESTION_BANK_RHCSA10_EXTRA' }
 ];
 
 function loadFromGit(rev, file) {
@@ -54,7 +54,7 @@ FILES.forEach(function (file) {
   const sandbox = { window: {} };
   vm.createContext(sandbox);
   vm.runInContext(fs.readFileSync(file.path, 'utf8'), sandbox);
-  const current = sandbox.window[file.key];
+  const current = sandbox.window[file.bankVar];
 
   const byId = new Map();
   baseline.forEach(function (q) {
@@ -74,6 +74,6 @@ FILES.forEach(function (file) {
     }
   });
 
-  writeBank(file.path, file.key, current);
+  writeBank(file.path, file.bankVar, current);
   console.log('Restored options from', BASE, 'for', file.path);
 });

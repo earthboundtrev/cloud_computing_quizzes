@@ -15,4 +15,14 @@ paths = [
   '''docs/android\.md''',
   '''\.gitleaks\.toml''',
   '''native/android/app/build\.gradle''',
+  '''scripts/normalize-rhcsa10-ids\.js''',
+  '''data/rhcsa10-question-id-map\.json''',
+  '''storage-keys\.js''',
+]
+regexes = [
+  '''(?i)key:\s*'rhcsa_migrated_''',
+  '''bankVar:\s*'QUESTION_BANK_RHCSA10''',
+  '''key: 'rhcsa_migrated_to_v10''',
+  '''key: 'rhcsa_migrated_to_v10_2''',
+  '''key: 'rhcsa_migrated_to_v10_3''',
 ]

@@ -49,7 +49,8 @@ function main() {
   const questions = loadBanks();
 
   const padRe = /\((alternative method|limited scope|incorrect for this task)\)/i;
-  const rhel9Re = /\bmodule (install|stream)|type team\b|teamd\b/i;
+  const rhel9Re = /\bmodule (install|stream)|type team\b|teamd\b|\bstratis\b/i;
+  const rhel9VerRe = /\bRHEL\s*9\b/i;
 
   const idRe = /^rhcsa10-\d{4}$/;
 
@@ -65,7 +66,10 @@ function main() {
     });
     const blob = (q.q || '') + ' ' + (q.explain || '') + ' ' + (q.options || []).join(' ');
     if (rhel9Re.test(blob)) {
-      fail(label + ' stem/explain references removed RHEL 9-only content (modularity/teamd)');
+      fail(label + ' stem/explain references removed RHEL 9-only content (modularity/teamd/stratis)');
+    }
+    if (rhel9VerRe.test(blob)) {
+      fail(label + ' stem/explain should reference RHEL 10, not RHEL 9');
     }
     if (q.obj && !objIds.has(q.obj)) {
       fail(label + " unknown obj '" + q.obj + "'");

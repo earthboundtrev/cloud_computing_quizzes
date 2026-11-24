@@ -107,6 +107,7 @@ const PRECACHE_PATHS = [
   '/quiz-init-rhcsa10.js',
   '/quiz-init-rhce.js',
   '/rhcsa-migration.js',
+  '/rhcsa10-question-id-utils.js',
   '/rhcsa10-question-id-migration.js',
   '/quiz-config.js',
   '/quiz-nav.js',

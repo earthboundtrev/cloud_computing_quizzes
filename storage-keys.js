@@ -31,7 +31,6 @@
     { id: 'rhcsa_migrated_to_v10', match: 'exact', key: 'rhcsa_migrated_to_v10', keepOnUpdate: true, deleteOnDelete: true },
     { id: 'rhcsa_migrated_to_v10_2', match: 'exact', key: 'rhcsa_migrated_to_v10_2', keepOnUpdate: true, deleteOnDelete: true },
     { id: 'rhcsa_migrated_to_v10_3', match: 'exact', key: 'rhcsa_migrated_to_v10_3', keepOnUpdate: true, deleteOnDelete: true },
-    { id: 'rhcsa10_question_ids_v1', match: 'exact', key: 'rhcsa10_question_ids_v1', keepOnUpdate: true, deleteOnDelete: true, note: 'RHCSA10 rhcsa10-NNNN id remap (#31)' },
     { id: 'rhcsa_migrated_flags', match: 'pattern', pattern: /^rhcsa_migrated_/, keepOnUpdate: true, deleteOnDelete: true },
     { id: 'cloudcram_quiz_ui', match: 'prefix', prefix: 'cloudcram_quiz_ui_', keepOnUpdate: false, deleteOnDelete: true, note: 'Transient in-quiz UI state; cleared on Update app' }
   ];

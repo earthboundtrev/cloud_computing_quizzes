@@ -16,6 +16,7 @@ const SCAN_FILES = [
   'brain-dump.js',
   'rhcsa-migration.js',
   'rhcsa10-question-id-migration.js',
+  'rhcsa10-question-id-utils.js',
   'quiz-config.js',
   'session-streak.js',
   'gamification.js',

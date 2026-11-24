@@ -23,6 +23,24 @@
   var VACATION_MAX_DAYS = 14;
   var VACATION_MAX_USES_PER_YEAR = 2;
   var GOAL_CHOICES = [3, 10, 20, 40];
+
+  function rhcsa10IdApi() {
+    var g = typeof globalThis !== 'undefined' ? globalThis : null;
+    return (g && g.CloudCramRhcsa10Ids) || null;
+  }
+
+  function rhcsa10CanonQuestionId(raw) {
+    var api = rhcsa10IdApi();
+    return api ? api.canonicalQuestionId(raw) : raw;
+  }
+
+  function rhcsa10NormalizeDedup(dedup) {
+    var api = rhcsa10IdApi();
+    if (api) {
+      return api.normalizeAnswerDedup(dedup);
+    }
+    return dedup && typeof dedup === 'object' ? dedup : {};
+  }
   var MS_DAY = 24 * 60 * 60 * 1000;
 
   var deps = {
@@ -271,7 +289,9 @@
         s.dayRecords[k] = normalizeDayRecord(raw.dayRecords[k]);
       });
     }
-    s.answerDedup = raw.answerDedup && typeof raw.answerDedup === 'object' ? Object.assign({}, raw.answerDedup) : {};
+    s.answerDedup = rhcsa10NormalizeDedup(
+      raw.answerDedup && typeof raw.answerDedup === 'object' ? Object.assign({}, raw.answerDedup) : {}
+    );
     if (raw.repair && typeof raw.repair === 'object') {
       s.repair = Object.assign({ metDays: [] }, raw.repair);
       if (!Array.isArray(s.repair.metDays)) s.repair.metDays = [];
@@ -551,7 +571,7 @@
     Object.keys(base.dayRecords).forEach(function (day) {
       if (!out.dayRecords[day]) out.dayRecords[day] = normalizeDayRecord(base.dayRecords[day]);
     });
-    out.answerDedup = Object.assign({}, base.answerDedup, other.answerDedup);
+    out.answerDedup = rhcsa10NormalizeDedup(Object.assign({}, base.answerDedup, other.answerDedup));
     Object.keys(out.dayRecords).forEach(function (day) {
       out.dayRecords[day].answers = Math.max(out.dayRecords[day].answers, countAnswersForDay(out, day));
     });
@@ -675,7 +695,7 @@
     if (!state || !sessionId || !questionId) return state;
     var now = deps.now();
     var today = todayOverride || processCalendar(state, now);
-    var key = today + ':' + String(sessionId) + ':' + String(questionId);
+    var key = today + ':' + String(sessionId) + ':' + String(rhcsa10CanonQuestionId(questionId));
     if (state.answerDedup[key]) return state;
     state.answerDedup[key] = true;
     reconcileAnswersFromDedup(state);
@@ -693,7 +713,9 @@
     var merge = getStorageMerge();
     if (!merge || !merge.peekGameAnswers) return state;
     merge.peekGameAnswers().forEach(function (msg) {
-      applyAnswerDelta(state, msg.sessionId, msg.questionId, msg.today);
+      var api = rhcsa10IdApi();
+      var normalized = api && api.normalizePendingGameAnswer ? api.normalizePendingGameAnswer(msg) : msg;
+      applyAnswerDelta(state, normalized.sessionId, normalized.questionId, normalized.today);
     });
     return state;
   }
