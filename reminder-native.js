@@ -182,6 +182,7 @@
   function planToNotifications(plan, exact) {
     var now = Date.now();
     var today = todayStr();
+    var sch = scheduleApi();
     return plan.map(function (item) {
       var at = item.at;
       if (!at || !(at instanceof Date)) return null;
@@ -190,23 +191,8 @@
         if (item.kind === 'evening' && item.date === today) return null;
         if (item.kind === 'daily' && item.date !== today) return null;
       }
-      return {
-        id: item.id,
-        title: item.title,
-        body: item.body,
-        largeBody: item.body,
-        summaryText: copyApi() ? copyApi().LOCK_SCREEN_GENERIC : 'Cloud Quizzes',
-        channelId: item.channelId,
-        schedule: {
-          at: at,
-          allowWhileIdle: true
-        },
-        sound: 'default',
-        actionTypeId: 'OPEN_QUICK',
-        extra: {
-          reminderKind: item.kind
-        }
-      };
+      if (!sch || typeof sch.pluginNotificationFromPlanItem !== 'function') return null;
+      return sch.pluginNotificationFromPlanItem(Object.assign({}, item, { at: at }));
     }).filter(Boolean);
   }
 
@@ -451,17 +437,19 @@
         var body = cpy.selectDailyBody(
           Object.assign({ isToday: true, date: ctx.today }, ctx, { goal: ctx.goal, streakDay: ctx.streak })
         );
+        var testItem = {
+          id: 91001,
+          kind: 'daily',
+          title: cpy.LOCK_SCREEN_GENERIC,
+          body: body,
+          channelId: sch.CHANNEL_DAILY,
+          visibility: 'secret',
+          lockScreenBody: cpy.LOCK_SCREEN_GENERIC,
+          at: new Date(Date.now() + 1500)
+        };
+        var testPayload = sch.pluginNotificationFromPlanItem(testItem);
         LN.schedule({
-          notifications: [
-            {
-              id: 91001,
-              title: cpy.LOCK_SCREEN_GENERIC,
-              body: body,
-              channelId: sch.CHANNEL_DAILY,
-              schedule: { at: new Date(Date.now() + 1500), allowWhileIdle: true },
-              actionTypeId: 'OPEN_QUICK'
-            }
-          ]
+          notifications: [testPayload]
         }).then(refreshStatusLine);
       });
     });
