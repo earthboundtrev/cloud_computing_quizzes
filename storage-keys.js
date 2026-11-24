@@ -104,11 +104,31 @@
     });
   }
 
+  var PUSH_LOCAL_EXPORT_KEY = 'cloudcram_push_local_v1';
+
+  function getPushLocalApi() {
+    if (typeof CloudCramPushLocal !== 'undefined') return CloudCramPushLocal;
+    try {
+      return require('./push-local-settings.js');
+    } catch (e0) {
+      return null;
+    }
+  }
+
+  function exportablePushLocalString(raw) {
+    var api = getPushLocalApi();
+    if (!api || typeof raw !== 'string') return null;
+    try {
+      return JSON.stringify(api.normalizeSettings(JSON.parse(raw)));
+    } catch (e1) {
+      return null;
+    }
+  }
+
   function isExportRedactedKey(storageKey) {
     if (EXPORT_REDACT_EXACT[storageKey]) return true;
-    if (storageKey.indexOf('push') !== -1 && storageKey.indexOf('cloudcram_push_local') === -1) {
-      return true;
-    }
+    if (storageKey === PUSH_LOCAL_EXPORT_KEY) return false;
+    if (storageKey.indexOf('push') !== -1) return true;
     return false;
   }
 
@@ -124,7 +144,12 @@
     listLocalStorageKeys(storage).forEach(function (key) {
       if (!isImportableKey(key)) return;
       try {
-        out[key] = storage.getItem(key);
+        var val = storage.getItem(key);
+        if (key === PUSH_LOCAL_EXPORT_KEY) {
+          val = exportablePushLocalString(val);
+          if (val == null) return;
+        }
+        out[key] = val;
       } catch (e) {}
     });
     return out;

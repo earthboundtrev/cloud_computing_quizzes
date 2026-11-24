@@ -10,6 +10,7 @@ const vm = require('vm');
 
 const ROOT = path.join(__dirname, '..');
 const registry = require(path.join(ROOT, 'storage-keys.js'));
+const pushLocal = require(path.join(ROOT, 'push-local-settings.js'));
 const dataImport = require(path.join(ROOT, 'data-import.js'));
 const mergeApi = require(path.join(ROOT, 'storage-tab-merge.js'));
 const game = require(path.join(ROOT, 'gamification.js'));
@@ -155,6 +156,123 @@ function createBrainDumpIdbHarness(seedRecords) {
 }
 
 (async function main() {
+  await test('isExportRedactedKey only exempts exact cloudcram_push_local_v1', function () {
+    assert(!registry.isExportRedactedKey('cloudcram_push_local_v1'), 'exact key not redacted');
+    assert(registry.isExportRedactedKey('cloudcram_push_local_v1x'), 'prefix variant redacted');
+    assert(registry.isExportRedactedKey('cloudcram_push_auth_token'), 'auth redacted');
+    assert(registry.isExportRedactedKey('cloudcram_push_endpoint'), 'endpoint key redacted');
+    assert(!registry.isImportableKey('cloudcram_push_endpoint'), 'endpoint not importable');
+    assert(!registry.isImportableKey('cloudcram_push_local_v1x'), 'prefix variant not importable');
+  });
+
+  await test('export normalizes push_local and omits forbidden or unparseable values', function () {
+    const valid = {
+      enabled: true,
+      time: '09:30',
+      streakNudgeEnabled: false,
+      optInDismissCount: 0,
+      lastOptInAskAt: 0,
+      firstGoalMetAt: 0,
+      permissionBannerAt: 0
+    };
+    const lsValid = new LocalStorageMock({
+      quizCompleted: '[]',
+      cloudcram_push_local_v1: JSON.stringify(valid)
+    });
+    let payload = registry.collectExportableLocalStorage(lsValid);
+    assert(payload.cloudcram_push_local_v1, 'valid push_local exported');
+    const parsed = JSON.parse(payload.cloudcram_push_local_v1);
+    assert(parsed.enabled === true && parsed.time === '09:30', 'normalized round-trip shape');
+    assert(!Object.prototype.hasOwnProperty.call(parsed, 'endpoint'), 'no endpoint field');
+
+    const contaminated = Object.assign({}, valid, {
+      endpoint: 'https://push.example.test',
+      keys: { p256dh: 'secret' }
+    });
+    const lsBad = new LocalStorageMock({
+      quizCompleted: '[]',
+      cloudcram_push_local_v1: JSON.stringify(contaminated)
+    });
+    payload = registry.collectExportableLocalStorage(lsBad);
+    const sanitized = JSON.parse(payload.cloudcram_push_local_v1);
+    assert(!Object.prototype.hasOwnProperty.call(sanitized, 'endpoint'), 'export strips endpoint');
+    assert(!Object.prototype.hasOwnProperty.call(sanitized, 'keys'), 'export strips keys');
+    assert(sanitized.enabled === false, 'forbidden top-level resets to defaults');
+
+    const lsGarbage = new LocalStorageMock({
+      quizCompleted: '[]',
+      cloudcram_push_local_v1: 'not-json{{'
+    });
+    payload = registry.collectExportableLocalStorage(lsGarbage);
+    assert(
+      !Object.prototype.hasOwnProperty.call(payload, 'cloudcram_push_local_v1'),
+      'unparseable push_local omitted from export'
+    );
+  });
+
+  await test('import rejects push_local values with endpoint or keys.p256dh', function () {
+    const ls = new LocalStorageMock({
+      quizCompleted: '[]',
+      cloudcram_push_local_v1: JSON.stringify(pushLocal.defaultSettings())
+    });
+    const before = snapshot(ls);
+
+    const withEndpoint = minimalPayload({
+      localStorage: {
+        quizCompleted: '[]',
+        cloudcram_push_local_v1: JSON.stringify({
+          enabled: true,
+          time: '10:00',
+          endpoint: 'https://leak.example'
+        })
+      }
+    });
+    assert(!dataImport.validatePayloadRoot(withEndpoint).ok, 'endpoint in push_local rejected');
+    assert(JSON.stringify(snapshot(ls)) === JSON.stringify(before), 'storage unchanged');
+
+    const withKeys = minimalPayload({
+      localStorage: {
+        quizCompleted: '[]',
+        cloudcram_push_local_v1: JSON.stringify({
+          enabled: true,
+          time: '10:00',
+          keys: { p256dh: 'x' }
+        })
+      }
+    });
+    assert(!dataImport.validatePayloadRoot(withKeys).ok, 'keys.p256dh rejected');
+    assert(JSON.stringify(snapshot(ls)) === JSON.stringify(before), 'storage unchanged after keys');
+  });
+
+  await test('push_local settings round-trip through export collection', function () {
+    const settings = {
+      enabled: true,
+      time: '12:15',
+      streakNudgeEnabled: true,
+      optInDismissCount: 1,
+      lastOptInAskAt: 100,
+      examDate: '2026-12-01',
+      firstGoalMetAt: 0,
+      permissionBannerAt: 0
+    };
+    const ls = new LocalStorageMock({
+      quizCompleted: '[]',
+      cloudcram_push_local_v1: JSON.stringify(settings)
+    });
+    const exported = registry.collectExportableLocalStorage(ls);
+    const validated = dataImport.validatePayloadRoot(
+      minimalPayload({
+        localStorage: {
+          quizCompleted: '[]',
+          cloudcram_push_local_v1: exported.cloudcram_push_local_v1
+        }
+      })
+    );
+    assert(validated.ok, 'exported push_local passes import validation');
+    const norm = JSON.parse(exported.cloudcram_push_local_v1);
+    assert(norm.enabled === true && norm.time === '12:15' && norm.examDate === '2026-12-01', 'fields preserved');
+  });
+
   await test('export allowlist omits unregistered and UI keys', function () {
     const ls = new LocalStorageMock({
       quizCompleted: '[]',
