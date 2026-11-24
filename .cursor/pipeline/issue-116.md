@@ -19,11 +19,11 @@ Post PRs #123, #124, #130, #131 — finding **still open**:
 | Stage | Status | Notes |
 |-------|--------|--------|
 | IMPLEMENT | Done | Registry entry; lint scan; `cloudcram-v55`; `?v=` bumps; regression tests |
-| BUGBOT | Pending | |
-| TESTS | Pending | Full `lint.yml` set locally |
-| ARCHITECT | Pending | |
-| SECURITY | Pending | Storage-keys scope per `security-review.mdc` |
-| DEPLOY | Pending | PR `Refs #116`; no merge |
+| BUGBOT | **Clean** | cursor-grok-4.6-high-fast — no findings |
+| TESTS | **Pass** | Full `lint.yml` set + Playwright offline/console + smoke --all |
+| ARCHITECT | **Merge-ready** | cursor-grok-4.6-high-fast — no blockers |
+| SECURITY | **Pass** | cursor-grok-4.6-high-fast — no medium+; storage/SW skim |
+| DEPLOY | PR open | `Refs #116`; no merge |
 
 ## Changes
 
@@ -37,16 +37,16 @@ Post PRs #123, #124, #130, #131 — finding **still open**:
 
 | When (UTC) | Model | Clean | Summary |
 |------------|-------|-------|---------|
-| | | | |
+| 2026-11-24 | cursor-grok-4.6-high-fast | **Yes** | Registry/lint/cache/tests consistent |
 
 ## Architect
 
 | When (UTC) | Model | Verdict |
 |------------|-------|---------|
-| | | |
+| 2026-11-24 | cursor-grok-4.6-high-fast | **Merge-ready** |
 
 ## Security
 
 | When (UTC) | Model | Verdict |
 |------------|-------|---------|
-| | | |
+| 2026-11-24 | cursor-grok-4.6-high-fast | **Pass** — exportable UI flag informational only |
