@@ -5,7 +5,7 @@
 | Issue | [#31](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/31) — **OPEN** |
 | PR | [#124](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/124) |
 | Branch | `cursor/issue-31-rhcsa10-id-fix-1d4a` |
-| Head | `a30728a` + follow-up (all-quiz wiring) |
+| Head | `587c902` |
 
 ## Pointer log
 
