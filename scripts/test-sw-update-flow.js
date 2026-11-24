@@ -52,7 +52,16 @@ function readCacheNameFromSw(source) {
   return m[1];
 }
 
+function readActivateStaleCachePredicate(swSource) {
+  const m = swSource.match(
+    /names\.filter\(function \(name\) \{\s*return ([^;]+);\s*\}\)\.map/
+  );
+  if (!m) throw new Error('activate names.filter predicate not found in sw.js');
+  return new Function('name', 'CACHE_NAME', 'return ' + m[1]);
+}
+
 const swCacheName = readCacheNameFromSw(sw);
+const shouldDeleteStaleCloudcramCache = readActivateStaleCachePredicate(sw);
 
 test('sw.js defines CACHE_NAME read from file (not hard-coded in tests)', function () {
   assert(/^cloudcram-v\d+$/.test(swCacheName), 'Expected cloudcram-vN CACHE_NAME, got ' + swCacheName);
@@ -78,12 +87,18 @@ test('sw.js activate still claims clients', function () {
 test('sw.js activate deletes only stale cloudcram- caches', function () {
   const activateBlock = sw.match(/addEventListener\('activate'[\s\S]*?\n\}\);/);
   assert(activateBlock, 'activate handler not found');
+  const filterBody = activateBlock[0].match(
+    /names\.filter\(function \(name\) \{([\s\S]*?)\}\)\.map/
+  );
+  assert(filterBody, 'activate names.filter not found');
+  const body = filterBody[1];
+  assert(/name\s*!==\s*CACHE_NAME/.test(body), 'activate must still skip current CACHE_NAME');
   assert(
-    /indexOf\('cloudcram-'\)\s*===\s*0/.test(activateBlock[0]) ||
-      /startsWith\('cloudcram-'\)/.test(activateBlock[0]),
+    /indexOf\('cloudcram-'\)\s*===\s*0/.test(body) ||
+      /startsWith\('cloudcram-'\)/.test(body),
     'cloudcram- prefix filter missing in activate cleanup'
   );
-  assert(/name\s*!==\s*CACHE_NAME/.test(activateBlock[0]), 'activate must still skip current CACHE_NAME');
+  assert(/&&/.test(body), 'CACHE_NAME and cloudcram- checks must be ANDed in activate filter');
 });
 
 test('activate cleanup (mocked caches) keeps foreign and current cloudcram- caches', function () {
@@ -109,11 +124,15 @@ test('activate cleanup (mocked caches) keeps foreign and current cloudcram- cach
   const names = caches.keys();
   names
     .filter(function (name) {
-      return name !== current && name.indexOf('cloudcram-') === 0;
+      return shouldDeleteStaleCloudcramCache(name, current);
     })
     .forEach(function (name) {
       caches.delete(name);
     });
+  assert(
+    !shouldDeleteStaleCloudcramCache('other-cloudcram-v1', current),
+    'substring cloudcram- name must not be deleted (prefix at index 0 only)'
+  );
   assert(deleted.indexOf('cloudcram-v51') !== -1, 'cloudcram-v51 should be deleted');
   assert(deleted.indexOf('cloudcram-v60') !== -1, 'cloudcram-v60 should be deleted');
   assert(deleted.indexOf(current) === -1, 'current CACHE_NAME must be kept');
