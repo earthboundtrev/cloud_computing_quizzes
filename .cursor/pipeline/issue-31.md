@@ -41,7 +41,7 @@
 | TESTS | **Pass** | Required scripts + `lint-rhcsa10.js --ci` + rhcsa10 smoke |
 | ARCHITECT | **Merge-ready** | `cursor-grok-4.6-high-fast` |
 | SECURITY | **PASS** | `cursor-grok-4.6-high-fast` — explain text + CACHE_NAME only |
-| DEPLOY | PR open | `Refs #31`, `Refs #117` (docs retro); no `Closes` |
+| DEPLOY | PR [#137](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/137) open | CI **green** @ `26b1124` (7 checks incl. gitleaks); `Refs #31`, `Refs #117`; no `Closes` |
 
 ### Content (`rhcsa10-0144`)
 
