@@ -52,7 +52,16 @@ function readCacheNameFromSw(source) {
   return m[1];
 }
 
+function readActivateStaleCachePredicate(swSource) {
+  const m = swSource.match(
+    /names\.filter\(function \(name\) \{\s*return ([^;]+);\s*\}\)\.map/
+  );
+  if (!m) throw new Error('activate names.filter predicate not found in sw.js');
+  return new Function('name', 'CACHE_NAME', 'return ' + m[1]);
+}
+
 const swCacheName = readCacheNameFromSw(sw);
+const shouldDeleteStaleCloudcramCache = readActivateStaleCachePredicate(sw);
 
 test('sw.js defines CACHE_NAME read from file (not hard-coded in tests)', function () {
   assert(/^cloudcram-v\d+$/.test(swCacheName), 'Expected cloudcram-vN CACHE_NAME, got ' + swCacheName);
@@ -73,6 +82,64 @@ test('sw.js message handler listens for SKIP_WAITING', function () {
 
 test('sw.js activate still claims clients', function () {
   assert(/clients\.claim\(\)/.test(sw), 'clients.claim missing in activate');
+});
+
+test('sw.js activate deletes only stale cloudcram- caches', function () {
+  const activateBlock = sw.match(/addEventListener\('activate'[\s\S]*?\n\}\);/);
+  assert(activateBlock, 'activate handler not found');
+  const filterBody = activateBlock[0].match(
+    /names\.filter\(function \(name\) \{([\s\S]*?)\}\)\.map/
+  );
+  assert(filterBody, 'activate names.filter not found');
+  const body = filterBody[1];
+  assert(/name\s*!==\s*CACHE_NAME/.test(body), 'activate must still skip current CACHE_NAME');
+  assert(
+    /indexOf\('cloudcram-'\)\s*===\s*0/.test(body) ||
+      /startsWith\('cloudcram-'\)/.test(body),
+    'cloudcram- prefix filter missing in activate cleanup'
+  );
+  assert(/&&/.test(body), 'CACHE_NAME and cloudcram- checks must be ANDed in activate filter');
+});
+
+test('activate cleanup (mocked caches) keeps foreign and current cloudcram- caches', function () {
+  const current = swCacheName;
+  const store = {
+    'cloudcram-v51': true,
+    'cloudcram-v60': true,
+    [current]: true,
+    'workbox-precache-v2': true,
+    'third-party-shell-v3': true
+  };
+  const deleted = [];
+  const caches = {
+    keys: function () {
+      return Object.keys(store);
+    },
+    delete: function (name) {
+      deleted.push(name);
+      delete store[name];
+      return true;
+    }
+  };
+  const names = caches.keys();
+  names
+    .filter(function (name) {
+      return shouldDeleteStaleCloudcramCache(name, current);
+    })
+    .forEach(function (name) {
+      caches.delete(name);
+    });
+  assert(
+    !shouldDeleteStaleCloudcramCache('other-cloudcram-v1', current),
+    'substring cloudcram- name must not be deleted (prefix at index 0 only)'
+  );
+  assert(deleted.indexOf('cloudcram-v51') !== -1, 'cloudcram-v51 should be deleted');
+  assert(deleted.indexOf('cloudcram-v60') !== -1, 'cloudcram-v60 should be deleted');
+  assert(deleted.indexOf(current) === -1, 'current CACHE_NAME must be kept');
+  assert(deleted.indexOf('workbox-precache-v2') === -1, 'foreign cache workbox must survive');
+  assert(deleted.indexOf('third-party-shell-v3') === -1, 'foreign cache third-party must survive');
+  assert(store[current] === true, 'current cache entry still present');
+  assert(store['workbox-precache-v2'] === true, 'foreign cache still present');
 });
 
 test('sw-register.js short-circuits on Capacitor native', function () {

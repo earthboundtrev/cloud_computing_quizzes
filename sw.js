@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE_NAME = 'cloudcram-v61';
+const CACHE_NAME = 'cloudcram-v62';
 
 const PRECACHE_PATHS = [
   '/index.html',
@@ -150,7 +150,9 @@ self.addEventListener('activate', function (event) {
   event.waitUntil(
     caches.keys().then(function (names) {
       return Promise.all(
-        names.filter(function (name) { return name !== CACHE_NAME; }).map(function (name) {
+        names.filter(function (name) {
+          return name !== CACHE_NAME && name.indexOf('cloudcram-') === 0;
+        }).map(function (name) {
           return caches.delete(name);
         })
       );
