@@ -20,7 +20,7 @@
 | TESTS | **Pass** | Migration 20/20; import-export 37/37; app-data-lifecycle 18/18; CI subset green |
 | ARCHITECT | **Merge-ready** | `cursor-grok-4.6-high-fast` |
 | SECURITY | **PASS** | `cursor-grok-4.6-high-fast`; no medium+ on diff |
-| DEPLOY | **Open PR #142** | `9b6bc4f`; body `Refs #127` only |
+| DEPLOY | **Open PR #142** | `6318a11`; body `Refs #127` only |
 
 ## Deliverables
 
