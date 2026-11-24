@@ -193,16 +193,18 @@ runGitleaks(
   'gitleaks detect branch history (HEAD ancestry)'
 );
 
-var probeBase = fs.mkdtempSync(path.join(os.tmpdir(), 'cloudcram-gitleaks-probe-'));
+var awsProbeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cloudcram-gitleaks-aws-'));
+var genericProbeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cloudcram-gitleaks-generic-'));
 try {
-  fs.writeFileSync(path.join(probeBase, 'aws-key.txt'), buildFakeAwsProbeLine(), 'utf8');
-  expectLeakInDir(probeBase, 'runtime-built fake AWS access key is detected');
+  fs.writeFileSync(path.join(awsProbeDir, 'aws-key.txt'), buildFakeAwsProbeLine(), 'utf8');
+  expectLeakInDir(awsProbeDir, 'runtime-built fake AWS access key is detected');
 
-  fs.writeFileSync(path.join(probeBase, 'generic-key.txt'), buildFakeGenericProbeLine(), 'utf8');
-  expectLeakInDir(probeBase, 'runtime-built generic api_key shape is detected');
+  fs.writeFileSync(path.join(genericProbeDir, 'generic-key.txt'), buildFakeGenericProbeLine(), 'utf8');
+  expectLeakInDir(genericProbeDir, 'runtime-built generic api_key shape is detected');
 } finally {
   try {
-    fs.rmSync(probeBase, { recursive: true, force: true });
+    fs.rmSync(awsProbeDir, { recursive: true, force: true });
+    fs.rmSync(genericProbeDir, { recursive: true, force: true });
   } catch (e2) { /* ignore */ }
 }
 
