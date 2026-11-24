@@ -12,6 +12,8 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -47,6 +49,11 @@ jobs:
     
     - name: Check service worker precache
       run: node scripts/check-sw-precache.js
+
+    - name: CACHE_NAME bump when PRECACHE_PATHS changes (#30)
+      env:
+        GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+      run: node scripts/check-sw-cache-name-bump.js
 
     - name: Service worker update flow (#71)
       run: node scripts/test-sw-update-flow.js
@@ -94,6 +101,9 @@ jobs:
 
     - name: Entry pages console-clean CSP (#111)
       run: node scripts/playwright-console-clean.mjs
+
+    - name: Offline first visit all quiz pages (#30)
+      run: node scripts/playwright-offline-first-visit.mjs
 
     - name: Concurrent quiz tabs Playwright (#68, #79)
       run: |
