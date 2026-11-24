@@ -4,7 +4,7 @@
 
 | Field | Value |
 |-------|--------|
-| PR | _(fill after create)_ |
+| PR | [#147](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/147) |
 | Branch | `cursor/actions-write-removal-af53` |
 | Diff scope | `.github/workflows/android-assemble-debug-optional.yml`, this retro |
 
