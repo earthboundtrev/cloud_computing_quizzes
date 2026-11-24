@@ -70,6 +70,25 @@ jobs:
     - name: Capacitor Android guardrails (#111)
       run: node scripts/test-capacitor-native.js
 
+    - name: Install gitleaks 8.24.3 with checksum (#119)
+      run: |
+        set -euo pipefail
+        GITLEAKS_VERSION=8.24.3
+        ARCHIVE="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+        BASE="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
+        curl -fsSL "${BASE}/gitleaks_${GITLEAKS_VERSION}_checksums.txt" -o /tmp/gitleaks_checksums.txt
+        EXPECTED=$(grep "  ${ARCHIVE}$" /tmp/gitleaks_checksums.txt | awk '{print $1}')
+        test -n "$EXPECTED"
+        curl -fsSL "${BASE}/${ARCHIVE}" -o "/tmp/${ARCHIVE}"
+        ACTUAL=$(sha256sum "/tmp/${ARCHIVE}" | awk '{print $1}')
+        test "$ACTUAL" = "$EXPECTED"
+        tar -xzf "/tmp/${ARCHIVE}" -C /tmp gitleaks
+        sudo install -m 0755 /tmp/gitleaks /usr/local/bin/gitleaks
+        gitleaks version | grep -F "${GITLEAKS_VERSION}"
+
+    - name: Gitleaks config guardrails (#119)
+      run: node scripts/test-gitleaks-config.js
+
     - name: Local reminder schedule (#112)
       run: node scripts/test-reminder-schedule.js
 

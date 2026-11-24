@@ -9,20 +9,22 @@ description = "Gradle keystore passwords"
 regex = '''(?i)(storePassword|keyPassword|keyAlias)\s*=\s*['"]?[^'"\s]+'''
 path = '''\.(gradle|properties)$'''
 
+# Regex-only allowlist (#119): no [allowlist].paths or globs.
+
 [allowlist]
-paths = [
-  '''\.gitignore''',
-  '''docs/android\.md''',
-  '''\.gitleaks\.toml''',
-  '''native/android/app/build\.gradle''',
-  '''scripts/normalize-rhcsa10-ids\.js''',
-  '''data/rhcsa10-question-id-map\.json''',
-  '''storage-keys\.js''',
-  '''data-import\.js''',
-  '''scripts/restore-rhcsa10-options-from-baseline\.js''',
-]
 regexes = [
-  '''(?i)key:\s*''rhcsa_migrated_''',
-  '''bankVar:\s*''QUESTION_BANK_RHCSA10''',
+  # storage-keys.js / data-import.js — localStorage flag `rhcsa_migrated_to_v10_3`, not a credential.
+  '''rhcsa_migrated_to_v10_3''',
+  # Same migration family flag `_v10_2` in history and import merge allowlist.
+  '''rhcsa_migrated_to_v10_2''',
+  # Original RHCSA v10 migration flag string referenced in registry and import.
+  '''rhcsa_migrated_to_v10''',
+  # Removed sticky flag name still in git history after #31 gamification fix.
   '''rhcsa10_question_ids_v1''',
+  # scripts/normalize-rhcsa10-ids.js bank symbol for gap bank file (public `window.*` name).
+  '''QUESTION_BANK_RHCSA10_GAP''',
+  # Extra bank symbol in normalize/restore scripts (public question bank global).
+  '''QUESTION_BANK_RHCSA10_EXTRA''',
+  # Base RHCSA10 bank symbol in migration scripts (public question bank global).
+  '''QUESTION_BANK_RHCSA10''',
 ]
