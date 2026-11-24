@@ -32,7 +32,8 @@
     { id: 'rhcsa_migrated_to_v10_2', match: 'exact', key: 'rhcsa_migrated_to_v10_2', keepOnUpdate: true, deleteOnDelete: true },
     { id: 'rhcsa_migrated_to_v10_3', match: 'exact', key: 'rhcsa_migrated_to_v10_3', keepOnUpdate: true, deleteOnDelete: true },
     { id: 'rhcsa_migrated_flags', match: 'pattern', pattern: /^rhcsa_migrated_/, keepOnUpdate: true, deleteOnDelete: true },
-    { id: 'cloudcram_quiz_ui', match: 'prefix', prefix: 'cloudcram_quiz_ui_', keepOnUpdate: false, deleteOnDelete: true, note: 'Transient in-quiz UI state; cleared on Update app' }
+    { id: 'cloudcram_quiz_ui', match: 'prefix', prefix: 'cloudcram_quiz_ui_', keepOnUpdate: false, deleteOnDelete: true, note: 'Transient in-quiz UI state; cleared on Update app' },
+    { id: 'cloudcram_native_import_card_dismissed', match: 'exact', key: 'cloudcram_native_import_card_dismissed', keepOnUpdate: true, deleteOnDelete: true, note: 'Android native import card dismiss (#111, #116)' }
   ];
 
   var IDB_DATABASES = [

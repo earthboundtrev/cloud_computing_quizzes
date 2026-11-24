@@ -87,6 +87,11 @@ test('native-app.js waits for DOMContentLoaded before hiding Update app', functi
   assert(/DOMContentLoaded/.test(src), 'native-app must defer DOM mutations');
 });
 
+test('lint-storage-keys.js scans native-app.js (#116)', function () {
+  var lintSrc = fs.readFileSync(path.join(ROOT, 'scripts/lint-storage-keys.js'), 'utf8');
+  assert(lintSrc.indexOf('native-app.js') >= 0, 'native-app.js must be in SCAN_FILES');
+});
+
 test('reminder modules are present and browser-safe', function () {
   ['push-local-settings.js', 'reminder-copy.js', 'reminder-schedule.js', 'reminder-native.js'].forEach(function (f) {
     var src = fs.readFileSync(path.join(ROOT, f), 'utf8');

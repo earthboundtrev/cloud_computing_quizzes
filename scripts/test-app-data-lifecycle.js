@@ -77,6 +77,13 @@ test('registry clears transient quiz UI keys on Update app', function () {
   assert(!registry.shouldKeepOnUpdate('cloudcram_quiz_ui_session_1'), 'quiz UI key cleared on update');
 });
 
+test('native import card dismiss key registered (#116)', function () {
+  const key = 'cloudcram_native_import_card_dismissed';
+  assert(registry.isRegisteredKey(key), 'dismiss key registered');
+  assert(registry.shouldDeleteOnDelete(key), 'dismiss key removed on Delete all my data');
+  assert(registry.shouldKeepOnUpdate(key), 'dismiss key kept on Update app');
+});
+
 test('pruneLocalStorageForUpdate removes unregistered keys only', function () {
   const ls = new LocalStorageMock();
   ls.setItem('quizCompleted', '[]');
