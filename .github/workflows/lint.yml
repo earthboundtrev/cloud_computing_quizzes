@@ -12,6 +12,8 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -49,6 +51,8 @@ jobs:
       run: node scripts/check-sw-precache.js
 
     - name: CACHE_NAME bump when PRECACHE_PATHS changes (#30)
+      env:
+        GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
       run: node scripts/check-sw-cache-name-bump.js
 
     - name: Service worker update flow (#71)

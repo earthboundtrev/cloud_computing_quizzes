@@ -28,10 +28,10 @@
 | Stage | Status | Notes |
 |-------|--------|--------|
 | IMPLEMENT | Done | `check-sw-cache-name-bump.js`, `playwright-offline-first-visit.mjs`, `lint.yml` |
-| BUGBOT | Pending | |
-| TESTS | Pending | full CI mirror |
-| ARCHITECT | Pending | |
-| SECURITY | Pending | |
+| BUGBOT | Clean (2nd pass) | P0 CI base ref + P1 offline oracles fixed |
+| TESTS | Pass | local CI mirror + Playwright offline 16/16 |
+| ARCHITECT | Pending | re-run after fixes |
+| SECURITY | Pass | no medium+ |
 | DEPLOY | Pending | `Refs #30` PR |
 
 ## Implemented in this PR

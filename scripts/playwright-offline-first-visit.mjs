@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Offline first visit (#30): fresh context, index only online, then each quiz page offline.
+ * Offline first visit (#30): one online index visit to install precache, then each quiz offline.
  * Skips if playwright is not installed (same pattern as other Playwright scripts in CI).
  */
 
@@ -22,6 +22,24 @@ try {
 }
 
 const { chromium } = playwrightMod;
+
+async function waitForPrecacheReady(page, timeoutMs) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const ready = await page.evaluate(async () => {
+      if (!navigator.serviceWorker || !navigator.serviceWorker.controller) {
+        return false;
+      }
+      const keys = await caches.keys();
+      return keys.some((k) => k.startsWith('cloudcram-v'));
+    });
+    if (ready) {
+      return;
+    }
+    await page.waitForTimeout(300);
+  }
+  throw new Error('service worker precache not ready before offline');
+}
 
 function loadQuizConfig() {
   const sandbox = { window: {}, console };
@@ -78,92 +96,105 @@ const quizzes = loadQuizConfig();
 const { port, server } = await listen(staticHandler);
 const baseUrl = 'http://127.0.0.1:' + port;
 const browser = await chromium.launch({ headless: true });
+const context = await browser.newContext();
+const page = await context.newPage();
 
-let failed = 0;
+const jsHtmlMismatches = [];
+const pageErrors = [];
 
-for (const quiz of quizzes) {
-  const context = await browser.newContext();
-  const page = await context.newPage();
-  const failedReqs = [];
-  page.on('requestfailed', (req) => {
-    const u = req.url();
-    if (u.startsWith(baseUrl)) failedReqs.push(u);
-  });
-
-  try {
-    await page.goto(baseUrl + '/index.html', { waitUntil: 'networkidle', timeout: 60000 });
-    await page.waitForFunction(
-      () => navigator.serviceWorker && navigator.serviceWorker.controller != null,
-      null,
-      { timeout: 45000 }
-    );
-    await page.waitForFunction(async () => {
-      const keys = await caches.keys();
-      return keys.some((k) => k.startsWith('cloudcram-v'));
-    }, null, { timeout: 45000 });
-
-    await context.setOffline(true);
-    failedReqs.length = 0;
-
-    await page.goto(baseUrl + '/' + quiz.href, { waitUntil: 'networkidle', timeout: 60000 });
-
-    if (failedReqs.length) {
-      throw new Error('failed requests offline: ' + failedReqs.slice(0, 5).join(', '));
-    }
-
-    const h1 = await page.locator('h1').first().innerText();
-    if (!h1 || h1.trim() === 'Study Sessions') {
-      throw new Error('got index fallback instead of quiz (h1=' + JSON.stringify(h1) + ')');
-    }
-    const titleOk = quiz.name
-      .replace(/&amp;/g, '&')
-      .split(/[\s(,]+/)
-      .filter((w) => w.length > 3)
-      .some((w) => h1.includes(w));
-    if (!titleOk) {
-      throw new Error('h1 does not look like quiz page: ' + h1 + ' (id=' + quiz.id + ')');
-    }
-
-    const startVisible = await page.locator('#start-btn').isVisible();
-    if (!startVisible) {
-      throw new Error('#start-btn not visible');
-    }
-
-    const engineOk = await page.evaluate(() => typeof window.QuizEngine !== 'undefined');
-    if (!engineOk) {
-      throw new Error('QuizEngine missing after offline load');
-    }
-
-    if (quiz.id === 'rhcsa10') {
-      const pool = await page.evaluate(() => {
-        const bank = (window.QUESTION_BANK_RHCSA10 || [])
-          .concat(window.QUESTION_BANK_RHCSA10_EXTRA || [])
-          .concat(window.QUESTION_BANK_RHCSA10_GAP || []);
-        const ids = bank.map((q) => String(q.id));
-        return { size: ids.length, unique: new Set(ids).size };
-      });
-      const expected = expectedPoolFromDesc(quiz.desc) || 293;
-      if (pool.unique !== expected || pool.unique !== pool.size) {
-        throw new Error(
-          'rhcsa10 bank expected ' + expected + ' unique ids, got ' + pool.unique + '/' + pool.size
-        );
-      }
-    }
-
-    console.log('OK offline first visit: ' + quiz.id + ' (' + quiz.href + ')');
-  } catch (err) {
-    failed++;
-    console.error('FAIL offline first visit: ' + quiz.id + ': ' + err.message);
-  } finally {
-    await context.close();
+page.on('pageerror', (err) => {
+  pageErrors.push(String(err.message || err));
+});
+page.on('response', (response) => {
+  const url = response.url();
+  if (!url.startsWith(baseUrl)) return;
+  const pathOnly = url.split('?')[0];
+  if (!pathOnly.endsWith('.js')) return;
+  const ct = (response.headers()['content-type'] || '').toLowerCase();
+  if (ct.includes('text/html')) {
+    jsHtmlMismatches.push(pathOnly);
   }
-}
+});
 
-await browser.close();
-server.close();
+try {
+  await page.goto(baseUrl + '/index.html', { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await waitForPrecacheReady(page, 90000);
 
-if (failed) {
-  console.error('\n' + failed + ' offline first-visit test(s) failed.');
-  process.exit(1);
+  await context.setOffline(true);
+
+  let failed = 0;
+
+  for (const quiz of quizzes) {
+    pageErrors.length = 0;
+    jsHtmlMismatches.length = 0;
+
+    try {
+      await page.goto(baseUrl + '/' + quiz.href, { waitUntil: 'domcontentloaded', timeout: 60000 });
+
+      if (jsHtmlMismatches.length) {
+        throw new Error('.js served as HTML: ' + jsHtmlMismatches.join(', '));
+      }
+      if (pageErrors.length) {
+        throw new Error('page errors: ' + pageErrors.slice(0, 3).join('; '));
+      }
+
+      const h1 = await page.locator('h1').first().innerText();
+      if (!h1 || h1.trim() === 'Study Sessions') {
+        throw new Error('got index fallback instead of quiz (h1=' + JSON.stringify(h1) + ')');
+      }
+      const titleOk = quiz.name
+        .replace(/&amp;/g, '&')
+        .split(/[\s(,]+/)
+        .filter((w) => w.length > 3)
+        .some((w) => h1.includes(w));
+      if (!titleOk) {
+        throw new Error('h1 does not look like quiz page: ' + h1 + ' (id=' + quiz.id + ')');
+      }
+
+      const startVisible = await page.locator('#start-btn').isVisible();
+      if (!startVisible) {
+        throw new Error('#start-btn not visible');
+      }
+
+      const engineOk = await page.evaluate(() => typeof window.QuizEngine !== 'undefined');
+      if (!engineOk) {
+        throw new Error('QuizEngine missing after offline load');
+      }
+
+      if (quiz.id === 'rhcsa10') {
+        const expected = expectedPoolFromDesc(quiz.desc) || 293;
+        const poolText = await page.locator('#start-screen p').first().innerText();
+        if (poolText.indexOf(String(expected)) === -1) {
+          throw new Error('start screen missing pool hint ' + expected + ': ' + poolText.slice(0, 80));
+        }
+        const pool = await page.evaluate(() => {
+          const bank = (window.QUESTION_BANK_RHCSA10 || [])
+            .concat(window.QUESTION_BANK_RHCSA10_EXTRA || [])
+            .concat(window.QUESTION_BANK_RHCSA10_GAP || []);
+          const ids = bank.map((q) => String(q.id));
+          return { size: ids.length, unique: new Set(ids).size };
+        });
+        if (pool.unique !== expected || pool.unique !== pool.size) {
+          throw new Error(
+            'rhcsa10 bank expected ' + expected + ' unique ids, got ' + pool.unique + '/' + pool.size
+          );
+        }
+      }
+
+      console.log('OK offline first visit: ' + quiz.id + ' (' + quiz.href + ')');
+    } catch (err) {
+      failed++;
+      console.error('FAIL offline first visit: ' + quiz.id + ': ' + err.message);
+    }
+  }
+
+  if (failed) {
+    console.error('\n' + failed + ' offline first-visit test(s) failed.');
+    process.exit(1);
+  }
+  console.log('\nAll offline first-visit tests passed (' + quizzes.length + ' quizzes).');
+} finally {
+  await context.close();
+  await browser.close();
+  server.close();
 }
-console.log('\nAll offline first-visit tests passed (' + quizzes.length + ' quizzes).');
