@@ -19,7 +19,7 @@
 | TESTS | **Pass** | Full `lint.yml` equivalent locally (Node + Playwright) |
 | ARCHITECT | **Merge-ready** | `cursor-grok-4.6-high-fast` |
 | SECURITY | **Pass / LOW** | `pull-requests: read` skips inline comments only |
-| DEPLOY | **Open PR** | Body uses `Refs #38` only |
+| DEPLOY | **Open PR #140** | CI green on head; body `Refs #38` only; Tester retest pending |
 
 ## Deliverables
 
