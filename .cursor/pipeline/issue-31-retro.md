@@ -1,31 +1,62 @@
-# Pipeline retro — GitHub #31 (RHCSA10 content)
+# Pipeline retro — GitHub #31 (RHCSA10 content quality, PR #124)
+
+**Purpose:** Record merge of [#124](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/124) after an earlier partial delivery (#47 / #53). Earlier retro for #47 remains historical; this doc is the merge record for uniform `rhcsa10-NNNN` ids and gamification dedup.
 
 | Field | Value |
 |-------|--------|
-| Issue | [#31](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/31) — **CLOSED** |
-| PR | [#47](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/47) (`d990a98`) |
-| Diff base | `1b9b020` |
-| Diff head | `d990a98` |
+| Issue | [#31](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/31) — **OPEN** |
+| PR | [#124](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/124) |
+| Branch head | `dabbbff` |
+| Merge commit on `main` | `b8b6116` |
+| Diff base (PR) | `3ee9b64` (main at PR open) |
+| Prior related PRs | [#47](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/47), [#53](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/53) (content/lint; mixed ids remained) |
 
 ## Pointer log
 
 | Stage | Status | Notes |
 |-------|--------|--------|
-| IMPLEMENT | Done (out of order) | #47 merged; issue closed |
-| BUGBOT | **FINDINGS** | Wrong keys after prefix rewrite; `(incorrect for this task)` leak; gap lint gaps |
-| TESTS | Pass | `lint-rhcsa10.js --ci` |
-| ARCHITECT | **Blockers** | HTML still 249 vs 293; gap content errors; mixed id types |
-| DEPLOY | Merged | Retro recommends follow-up despite closed issue |
+| IMPLEMENT | Done | 293× `rhcsa10-NNNN`; id map + utils; RHEL 10 sweep; `cloudcram-v53` |
+| BUGBOT | **Clean** (post Lead blockers) | Hub wiring; all quiz pages load utils; merge tests |
+| TESTS | **Pass** | CI green pre-merge (Lead); `test-rhcsa10-id-migration.js` |
+| ARCHITECT | **Merge-ready** | |
+| SECURITY | **PASS** (pre-merge); post-merge reviewer no blockers | P3 hardening filed separately |
+| DEPLOY | **Merged** | `b8b6116` via PR #124 |
+| TESTER | **Pending** | Retest on `b8b6116` not recorded here yet |
 
-## Bugbot summary
+## Lead Developer pre-merge blockers (round 1 → fixed before merge)
 
-- **P1:** `fix-rhcsa10-padded-distractors.js` broke correct indices (ids listed in retro run).
-- Padding leak `(incorrect for this task)`; gap bank not in `lint-banks.js`; dpkg-query on RHEL stem; weak teamd regex.
+| Finding | Fix (in #124) |
+|---------|----------------|
+| `index.html` did not load rhcsa10 id map/migration — hub export/visit left legacy `answerDedup` keys | Map + `rhcsa10-question-id-utils.js` + persist migration on hub and all `*_quiz.html` before `gamification.js` |
+| Sticky `rhcsa10_question_ids_v1` flag allowed double XP after tab merge or import | Removed flag; idempotent `normalizeAnswerDedup` on read, merge, record, broadcast, import |
+| gitleaks false positives | Narrow `.gitleaks.toml` allowlist; `bankVar` rename in normalize/restore scripts |
 
-## Architect summary
+## Other notes
 
-Would not certify merge-ready: **249 vs 293** copy mismatch; gap-043 wrong obj; AC id-type not met.
+- **gitleaks:** Pre-merge CI green (Lead); false positives on migration registry keys and `QUESTION_BANK_*` script fields.
+- **Content:** Remaining AC from reopen (uniform ids, items 129/136/137, lint gates) shipped in #124.
+- **Historical:** [#47](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/47) retro run documented mixed id types and gap errors; superseded by #124 for id-type AC.
+
+## Bugbot runs
+
+| When (UTC) | Model | Clean | Summary |
+|------------|-------|-------|---------|
+| 2026-11-24 | cursor-grok-4.6-high-fast | Yes → **Yes** (after wiring) | First pass: P1 missing utils on non-rhcsa quiz tabs; resolved before merge |
+
+## Architect
+
+| When (UTC) | Model | Verdict |
+|------------|-------|---------|
+| 2026-11-24 | cursor-grok-4.6-high-fast | **Merge-ready** after Lead blocker fixes |
+
+## Security
+
+| When (UTC) | Model | Verdict |
+|------------|-------|---------|
+| 2026-11-24 | cursor-grok-4.6-high-fast | **PASS** (no medium+) pre-merge |
+| Post-merge (Security Reviewer) | — | **No blockers**; P3 items filed separately |
 
 ## Follow-up PRs
 
-- **fix-retro-priority** — restore RHCSA options from baseline; gap/HTML/lint fixes
+- Live pipeline log: [issue-31.md](./issue-31.md)
+- **This retro PR** — docs only (`Refs #31`)

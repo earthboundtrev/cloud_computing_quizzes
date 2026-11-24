@@ -3,34 +3,35 @@
 | Field | Value |
 |-------|--------|
 | Issue | [#31](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/31) — **OPEN** |
-| PR | [#124](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/124) |
-| Branch | `cursor/issue-31-rhcsa10-id-fix-1d4a` |
-| Head | `587c902` |
+| PR | [#124](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/124) — **merged** |
+| Merge commit | `b8b6116` |
+| Branch head (PR) | `dabbbff` |
+| Retro | [issue-31-retro.md](./issue-31-retro.md) |
 
 ## Pointer log
 
 | Stage | Status | Notes |
 |-------|--------|--------|
-| IMPLEMENT | Done | idempotent dedup, index+all quiz wiring, RHEL10 sweep, gitleaks |
-| BUGBOT | Clean (post wiring) | P1 fixed: map/utils/migration on all quiz pages; mergeState tests |
-| TESTS | Pass | see PR body command list |
+| IMPLEMENT | Done | Uniform ids, gamification dedup, RHEL 10 content/lint, v53 cache |
+| BUGBOT | Clean | After Lead blockers (hub + all-quiz utils wiring) |
+| TESTS | Pass | CI green pre-merge (Lead); local lint + id migration tests |
 | ARCHITECT | Merge-ready | |
-| SECURITY | Pass | no medium+; checklist in PR |
-| DEPLOY | PR open | `Refs #31`, no merge |
+| SECURITY | Pass (pre-merge); post-merge no blockers | P3 hardening tracked separately |
+| DEPLOY | **Merged** | PR #124 @ `b8b6116` |
+| TESTER | **Pending** | Retest on `b8b6116` |
 
-## Review outcomes (@ follow-up commit)
+## Review outcomes (pre-merge)
 
 ### Bugbot
-- **Pre-wiring:** P1 other quiz pages lacked `CloudCramRhcsa10Ids` → **fixed** (all `*_quiz.html`).
-- **Tests:** P2 import key format + `mergeStates` tab test → **fixed**.
+- Round 1: hub lacked map/migration; sticky flag; cross-tab without utils — **fixed** in #124 before merge.
 
 ### Architect
-- **Merge-ready** on Lead Dev blockers (hub persist, idempotent paths, gitleaks, smoke exclusion, RHEL 10 lint/content).
+- **Merge-ready** after blocker fixes.
 
 ### Security
-- **PASS** — migration fail-closed, same-origin SW precache, import via `importState`/`normalizeState`, no new network/XSS sinks; LOW note on unlocked persist RMW race only.
+- **PASS** pre-merge; Post-merge Security Reviewer: no blockers.
 
-## Tests (local, latest)
+## Tests (recorded at merge)
 
 ```
 node scripts/lint-rhcsa10.js --ci
@@ -40,10 +41,8 @@ node scripts/check-sw-precache.js
 node scripts/check-page-banks.js
 node scripts/lint-storage-keys.js
 node scripts/test-rhcsa-migration.js
-node scripts/test-app-data-lifecycle.js
 node scripts/test-gamification.js
 node scripts/test-data-import-export.js
 node scripts/lint-html-entry.js
 node scripts/smoke-test-quiz.js --quiz rhcsa10
-gitleaks detect --config .gitleaks.toml  # no leaks found
 ```
