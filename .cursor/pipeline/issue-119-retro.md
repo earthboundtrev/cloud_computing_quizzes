@@ -5,7 +5,7 @@
 | Field | Value |
 |-------|--------|
 | Issue | [#119](https://github.com/earthboundtrev/cloud_computing_quizzes/issues/119) — **OPEN** until human close |
-| PR | _TBD — replacement for #135_ |
+| PR | [#136](https://github.com/earthboundtrev/cloud_computing_quizzes/pull/136) — replacement for closed #135 |
 | Branch | `cursor/gitleaks-tight-allowlist-v2-119-1851` |
 | Base | `68e0c3d` (`cloudcram-v55`) |
 | Diff scope | `.gitleaks.toml`, `.github/workflows/gitleaks.yml`, `.github/workflows/lint.yml`, `scripts/test-gitleaks-config.js`, pipeline logs |
