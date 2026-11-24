@@ -1,10 +1,6 @@
-/**
- * Additional RHCSA 10 (EX200 RHEL 10) practice questions
- * Includes storage, systemd, SELinux, networking, and gap-filling questions
- */
 window.QUESTION_BANK_RHCSA10_EXTRA = [
   {
-    "id": 113,
+    "id": "rhcsa10-0113",
     "mode": "exam",
     "topic": "systemd",
     "q": "Override only ExecStart for an existing unit without editing vendor file:",
@@ -20,7 +16,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 114,
+    "id": "rhcsa10-0114",
     "mode": "exam",
     "topic": "systemd",
     "q": "View logs for sshd service since today:",
@@ -36,7 +32,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 115,
+    "id": "rhcsa10-0115",
     "mode": "exam",
     "topic": "systemd",
     "q": "Set persistent system hostname to server1.example.com:",
@@ -47,12 +43,12 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
       "lvremove"
     ],
     "correct": 1,
-    "explain": "hostnamectl sets static hostname in systemd/RHEL 9.",
+    "explain": "hostnamectl sets static hostname in systemd on RHEL 10.",
     "obj": "8.3",
     "level": 3
   },
   {
-    "id": 116,
+    "id": "rhcsa10-0116",
     "mode": "exam",
     "topic": "Firewall",
     "q": "Open TCP port 443 permanently in default zone:",
@@ -68,7 +64,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 1
   },
   {
-    "id": 117,
+    "id": "rhcsa10-0117",
     "mode": "exam",
     "topic": "Firewall",
     "q": "Assign interface eth0 to internal zone:",
@@ -84,7 +80,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 118,
+    "id": "rhcsa10-0118",
     "mode": "exam",
     "topic": "SELinux",
     "q": "List SELinux booleans related to httpd:",
@@ -100,7 +96,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 1
   },
   {
-    "id": 119,
+    "id": "rhcsa10-0119",
     "mode": "exam",
     "topic": "SELinux",
     "q": "Restore default SELinux contexts on /web recursively:",
@@ -116,7 +112,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 1
   },
   {
-    "id": 120,
+    "id": "rhcsa10-0120",
     "mode": "exam",
     "topic": "SELinux",
     "q": "Troubleshoot AVC denials from today:",
@@ -132,7 +128,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 4
   },
   {
-    "id": 121,
+    "id": "rhcsa10-0121",
     "mode": "exam",
     "topic": "Networking",
     "q": "Configure static IP 192.168.1.10/24 on connection eth0 with nmcli:",
@@ -148,7 +144,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 122,
+    "id": "rhcsa10-0122",
     "mode": "exam",
     "topic": "Networking",
     "q": "Set default gateway 192.168.1.1 via nmcli on eth0:",
@@ -164,7 +160,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 123,
+    "id": "rhcsa10-0123",
     "mode": "exam",
     "topic": "Networking",
     "q": "Configure system to use DNS 10.0.0.53 via nmcli:",
@@ -180,7 +176,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 124,
+    "id": "rhcsa10-0124",
     "mode": "exam",
     "topic": "Networking",
     "q": "Synchronize time with chrony pool.ntp.org:",
@@ -191,12 +187,12 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
       "grub2-install"
     ],
     "correct": 1,
-    "explain": "chronyd is default NTP client in RHEL 9; chronyc sources to verify.",
+    "explain": "chronyd is the default NTP client on RHEL 10; chronyc sources to verify.",
     "obj": "8.1",
     "level": 3
   },
   {
-    "id": 125,
+    "id": "rhcsa10-0125",
     "mode": "exam",
     "topic": "Users/Groups",
     "q": "Create user bob with UID 1010 and home /home/bob:",
@@ -212,7 +208,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 1
   },
   {
-    "id": 126,
+    "id": "rhcsa10-0126",
     "mode": "exam",
     "topic": "Users/Groups",
     "q": "Lock user account alice (prevent password login):",
@@ -228,7 +224,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 127,
+    "id": "rhcsa10-0127",
     "mode": "exam",
     "topic": "Users/Groups",
     "q": "Allow user dev to run /usr/bin/systemctl restart httpd as root via sudo:",
@@ -244,7 +240,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 128,
+    "id": "rhcsa10-0128",
     "mode": "exam",
     "topic": "Permissions",
     "q": "Make file immutable (even root cannot modify until flag removed):",
@@ -260,7 +256,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 1
   },
   {
-    "id": 129,
+    "id": "rhcsa10-0129",
     "mode": "exam",
     "topic": "Packages",
     "q": "Install the Node.js runtime from RHEL 10 AppStream repositories:",
@@ -276,7 +272,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": 130,
+    "id": "rhcsa10-0130",
     "mode": "exam",
     "topic": "Packages",
     "q": "Exclude kernel package from updates in dnf:",
@@ -292,7 +288,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 1
   },
   {
-    "id": 131,
+    "id": "rhcsa10-0131",
     "mode": "exam",
     "topic": "Boot",
     "q": "Boot into single-user/rescue.target for maintenance:",
@@ -308,7 +304,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 132,
+    "id": "rhcsa10-0132",
     "mode": "exam",
     "topic": "Boot",
     "q": "Regenerate initramfs after fixing LVM in dracut:",
@@ -324,7 +320,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 1
   },
   {
-    "id": 133,
+    "id": "rhcsa10-0133",
     "mode": "exam",
     "topic": "Scheduling",
     "q": "Schedule daily script /usr/local/bin/backup at 02:30 for root:",
@@ -340,7 +336,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 134,
+    "id": "rhcsa10-0134",
     "mode": "exam",
     "topic": "Scheduling",
     "q": "List active systemd timers:",
@@ -356,7 +352,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 1
   },
   {
-    "id": 135,
+    "id": "rhcsa10-0135",
     "mode": "exam",
     "topic": "Storage",
     "q": "Add physical volume and extend volume group vg0:",
@@ -372,23 +368,23 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 136,
+    "id": "rhcsa10-0136",
     "mode": "exam",
     "topic": "Storage",
-    "q": "All extents on /dev/sdb in vg0 must move to /dev/sdc in the same volume group. What is the correct sequence?",
+    "q": "All allocated extents on PV /dev/sdb in vg0 must be evacuated to PV /dev/sdc in the same volume group. What command accomplishes that?",
     "options": [
-      "pvmove /dev/sdX vg1 after vgextend; or lvconvert move",
-      "mkfs",
-      "setfacl",
-      "podman pod"
+      "pvmove /dev/sdb /dev/sdc",
+      "vgmerge vg0 other_vg to move extents between disks",
+      "lvconvert --type mirror /dev/vg0/lv0 to relocate PV data",
+      "pvremove /dev/sdb without pvmove first"
     ],
     "correct": 0,
-    "explain": "pvmove migrates extents between PVs in one VG. There is no lvconvert move for cross-VG LV moves.",
+    "explain": "pvmove migrates allocated extents from one PV to another inside the same VG. vgmerge/split move whole LVs between VGs; lvconvert does not replace pvmove for PV evacuation.",
     "obj": "5.3",
     "level": 4
   },
   {
-    "id": 137,
+    "id": "rhcsa10-0137",
     "mode": "exam",
     "topic": "Networking",
     "q": "Configure active-backup bond bond0 with enp1s0 and enp2s0 using NetworkManager:",
@@ -404,7 +400,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 138,
+    "id": "rhcsa10-0138",
     "mode": "exam",
     "topic": "Networking",
     "q": "Disable IPv6 on connection eth0 via nmcli:",
@@ -420,7 +416,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 139,
+    "id": "rhcsa10-0139",
     "mode": "exam",
     "topic": "Firewall",
     "q": "Masquerade (NAT) for subnet in internal zone:",
@@ -436,7 +432,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 140,
+    "id": "rhcsa10-0140",
     "mode": "exam",
     "topic": "SELinux",
     "q": "Change type of /custom/html to httpd_sys_content_t persistently:",
@@ -452,7 +448,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 141,
+    "id": "rhcsa10-0141",
     "mode": "exam",
     "topic": "systemd",
     "q": "Mask service httpd (prevent start even manually):",
@@ -468,7 +464,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 1
   },
   {
-    "id": 142,
+    "id": "rhcsa10-0142",
     "mode": "exam",
     "topic": "systemd",
     "q": "Change default target to multi-user (no GUI):",
@@ -484,7 +480,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 1
   },
   {
-    "id": 143,
+    "id": "rhcsa10-0143",
     "mode": "exam",
     "topic": "Packages",
     "q": "Register system with subscription-manager and attach pool:",
@@ -500,15 +496,15 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 144,
+    "id": "rhcsa10-0144",
     "mode": "exam",
     "topic": "Boot",
-    "q": "Set root password in GRUB (break-in protection) on RHEL 9:",
+    "q": "Set root password in GRUB (break-in protection) on RHEL 10:",
     "options": [
       "grub2-setpassword",
       "passwd grub",
-      "nmcli",
-      "stratis"
+      "nmcli con add type bond",
+      "growpart"
     ],
     "correct": 0,
     "explain": "grub2-setpassword encrypts grub.cfg user; BIOS/UEFI password also recommended.",
@@ -516,7 +512,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 1
   },
   {
-    "id": 145,
+    "id": "rhcsa10-0145",
     "mode": "exam",
     "topic": "Storage",
     "q": "Find which process is using deleted file (disk full):",
@@ -532,7 +528,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 4
   },
   {
-    "id": 146,
+    "id": "rhcsa10-0146",
     "mode": "exam",
     "topic": "Storage",
     "q": "Swap on newly created 2G LV swaplv in vg0:",
@@ -548,7 +544,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 147,
+    "id": "rhcsa10-0147",
     "mode": "exam",
     "topic": "Networking",
     "q": "Test DNS resolution for host.example.com:",
@@ -564,7 +560,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 148,
+    "id": "rhcsa10-0148",
     "mode": "exam",
     "topic": "Users/Groups",
     "q": "Set password aging: max 90 days, warn 7 days for user sam:",
@@ -580,7 +576,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 1
   },
   {
-    "id": 149,
+    "id": "rhcsa10-0149",
     "mode": "exam",
     "topic": "Permissions",
     "q": "Sticky bit on /tmp prevents:",
@@ -596,7 +592,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 150,
+    "id": "rhcsa10-0150",
     "mode": "exam",
     "topic": "systemd",
     "q": "Analyze boot time per unit:",
@@ -612,7 +608,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 4
   },
   {
-    "id": 151,
+    "id": "rhcsa10-0151",
     "mode": "exam",
     "topic": "Firewall",
     "q": "Forward port 8080 to 80 on host 192.168.1.50 in firewalld:",
@@ -628,7 +624,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 152,
+    "id": "rhcsa10-0152",
     "mode": "exam",
     "topic": "Packages",
     "q": "Create local repo from DVD mount /mnt/dvd:",
@@ -644,7 +640,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 153,
+    "id": "rhcsa10-0153",
     "mode": "exam",
     "topic": "Storage",
     "q": "Force fsck on ext4 root at next reboot:",
@@ -660,7 +656,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 154,
+    "id": "rhcsa10-0154",
     "mode": "exam",
     "topic": "Networking",
     "q": "Bring connection eth0 down with nmcli:",
@@ -676,7 +672,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 1
   },
   {
-    "id": 155,
+    "id": "rhcsa10-0155",
     "mode": "exam",
     "topic": "SELinux",
     "q": "Put SELinux in permissive mode until reboot (troubleshooting):",
@@ -692,7 +688,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 4
   },
   {
-    "id": 156,
+    "id": "rhcsa10-0156",
     "mode": "exam",
     "topic": "systemd",
     "q": "Reload systemd after unit file change:",
@@ -708,7 +704,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 157,
+    "id": "rhcsa10-0157",
     "mode": "exam",
     "topic": "Storage",
     "q": "Mount by UUID in /etc/fstab for reliability:",
@@ -724,7 +720,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 158,
+    "id": "rhcsa10-0158",
     "mode": "exam",
     "topic": "Users/Groups",
     "q": "Add user to supplementary group wheel:",
@@ -740,7 +736,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 1
   },
   {
-    "id": 159,
+    "id": "rhcsa10-0159",
     "mode": "exam",
     "topic": "Packages",
     "q": "Remove package httpd and dependencies no longer needed:",
@@ -756,7 +752,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 1
   },
   {
-    "id": 160,
+    "id": "rhcsa10-0160",
     "mode": "exam",
     "topic": "Boot",
     "q": "Reset root password from rescue mode (high level):",
@@ -772,7 +768,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 161,
+    "id": "rhcsa10-0161",
     "mode": "exam",
     "topic": "Networking",
     "q": "Show routing table:",
@@ -788,7 +784,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 1
   },
   {
-    "id": 162,
+    "id": "rhcsa10-0162",
     "mode": "exam",
     "topic": "Firewall",
     "q": "Default zone for interfaces not explicitly assigned:",
@@ -804,7 +800,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 1
   },
   {
-    "id": 163,
+    "id": "rhcsa10-0163",
     "mode": "exam",
     "topic": "Storage",
     "q": "Activate all logical volumes in volume group vg0:",
@@ -820,7 +816,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 1
   },
   {
-    "id": 164,
+    "id": "rhcsa10-0164",
     "mode": "exam",
     "topic": "systemd",
     "q": "Limit httpd service to 512M memory:",
@@ -836,7 +832,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 165,
+    "id": "rhcsa10-0165",
     "mode": "exam",
     "topic": "Packages",
     "q": "Download package nginx without installing:",
@@ -852,7 +848,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 1
   },
   {
-    "id": 166,
+    "id": "rhcsa10-0166",
     "mode": "exam",
     "topic": "Networking",
     "q": "Permanently set hostname in /etc/hostname is:",
@@ -868,7 +864,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 167,
+    "id": "rhcsa10-0167",
     "mode": "exam",
     "topic": "SELinux",
     "q": "Generate custom module from audit denial (last resort):",
@@ -884,7 +880,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 168,
+    "id": "rhcsa10-0168",
     "mode": "exam",
     "topic": "Storage",
     "q": "Display block device hierarchy:",
@@ -900,7 +896,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 1
   },
   {
-    "id": 169,
+    "id": "rhcsa10-0169",
     "mode": "exam",
     "topic": "Scheduling",
     "q": "Allow user mike to use at jobs:",
@@ -916,7 +912,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 170,
+    "id": "rhcsa10-0170",
     "mode": "exam",
     "topic": "systemd",
     "q": "Kill all processes in cgroup of service httpd:",
@@ -932,7 +928,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 1
   },
   {
-    "id": 171,
+    "id": "rhcsa10-0171",
     "mode": "exam",
     "topic": "Packages",
     "q": "Group install Development Tools:",
@@ -948,7 +944,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": 172,
+    "id": "rhcsa10-0172",
     "mode": "exam",
     "topic": "Boot",
     "q": "Verify boot loader config after editing /etc/default/grub:",
@@ -964,7 +960,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 1
   },
   {
-    "id": "rhcsa10-f001",
+    "id": "rhcsa10-0173",
     "mode": "exam",
     "topic": "Flatpak",
     "q": "To add the Flathub repository as a system-wide source:",
@@ -980,7 +976,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-f002",
+    "id": "rhcsa10-0174",
     "mode": "exam",
     "topic": "Flatpak",
     "q": "To install a Flatpak application from Flathub:",
@@ -996,7 +992,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-f003",
+    "id": "rhcsa10-0175",
     "mode": "exam",
     "topic": "Flatpak",
     "q": "To list all installed Flatpak applications:",
@@ -1012,7 +1008,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-f004",
+    "id": "rhcsa10-0176",
     "mode": "exam",
     "topic": "Flatpak",
     "q": "To remove a Flatpak application:",
@@ -1028,7 +1024,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-f005",
+    "id": "rhcsa10-0177",
     "mode": "exam",
     "topic": "Flatpak",
     "q": "To update all installed Flatpak applications:",
@@ -1044,7 +1040,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-f006",
+    "id": "rhcsa10-0178",
     "mode": "exam",
     "topic": "Flatpak",
     "q": "To run a Flatpak application from the command line:",
@@ -1060,7 +1056,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-f007",
+    "id": "rhcsa10-0179",
     "mode": "exam",
     "topic": "Flatpak",
     "q": "Flatpak applications run in:",
@@ -1076,7 +1072,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-f008",
+    "id": "rhcsa10-0180",
     "mode": "exam",
     "topic": "Flatpak",
     "q": "To list available remotes:",
@@ -1092,7 +1088,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-t001",
+    "id": "rhcsa10-0181",
     "mode": "exam",
     "topic": "tuned",
     "q": "To list all available tuned profiles:",
@@ -1108,7 +1104,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-t002",
+    "id": "rhcsa10-0182",
     "mode": "exam",
     "topic": "tuned",
     "q": "To set the throughput-performance profile:",
@@ -1124,7 +1120,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-t003",
+    "id": "rhcsa10-0183",
     "mode": "exam",
     "topic": "tuned",
     "q": "To check the currently active tuned profile:",
@@ -1140,7 +1136,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-t004",
+    "id": "rhcsa10-0184",
     "mode": "exam",
     "topic": "tuned",
     "q": "Which tuned profile is recommended for virtual machines?",
@@ -1156,7 +1152,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-t005",
+    "id": "rhcsa10-0185",
     "mode": "exam",
     "topic": "tuned",
     "q": "To get tuned's recommended profile for the system:",
@@ -1172,7 +1168,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-t006",
+    "id": "rhcsa10-0186",
     "mode": "exam",
     "topic": "tuned",
     "q": "To disable all tuning (turn off tuned):",
@@ -1188,7 +1184,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-t007",
+    "id": "rhcsa10-0187",
     "mode": "exam",
     "topic": "tuned",
     "q": "tuned profiles are stored in:",
@@ -1204,7 +1200,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-t008",
+    "id": "rhcsa10-0188",
     "mode": "exam",
     "topic": "tuned",
     "q": "Which profile optimizes for low power consumption?",
@@ -1220,7 +1216,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-st001",
+    "id": "rhcsa10-0189",
     "mode": "exam",
     "topic": "Scheduling",
     "q": "To list all active systemd timers:",
@@ -1236,7 +1232,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-st002",
+    "id": "rhcsa10-0190",
     "mode": "exam",
     "topic": "Scheduling",
     "q": "<pre>cat /etc/systemd/system/backup.timer\n[Timer]\nOnCalendar=daily\nPersistent=true</pre>What does Persistent=true do?",
@@ -1252,7 +1248,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 4
   },
   {
-    "id": "rhcsa10-st003",
+    "id": "rhcsa10-0191",
     "mode": "exam",
     "topic": "Scheduling",
     "q": "To create a timer that runs a service 5 minutes after boot:",
@@ -1268,7 +1264,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-st004",
+    "id": "rhcsa10-0192",
     "mode": "exam",
     "topic": "Scheduling",
     "q": "A timer unit must have a corresponding:",
@@ -1284,7 +1280,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-st005",
+    "id": "rhcsa10-0193",
     "mode": "exam",
     "topic": "Scheduling",
     "q": "<pre>OnCalendar=Mon,Wed,Fri 14:00</pre>This timer runs:",
@@ -1300,7 +1296,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 4
   },
   {
-    "id": "rhcsa10-st006",
+    "id": "rhcsa10-0194",
     "mode": "exam",
     "topic": "Scheduling",
     "q": "To manually trigger a timer's service without waiting:",
@@ -1316,7 +1312,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-st007",
+    "id": "rhcsa10-0195",
     "mode": "exam",
     "topic": "Scheduling",
     "q": "To see when a timer will next trigger:",
@@ -1332,7 +1328,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-st008",
+    "id": "rhcsa10-0196",
     "mode": "exam",
     "topic": "Scheduling",
     "q": "systemd timers are installed in which directories?",
@@ -1348,7 +1344,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-a001",
+    "id": "rhcsa10-0197",
     "mode": "exam",
     "topic": "autofs",
     "q": "<pre>cat /etc/auto.master\n/mnt /etc/auto.misc</pre>This configures autofs to:",
@@ -1364,7 +1360,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 4
   },
   {
-    "id": "rhcsa10-a002",
+    "id": "rhcsa10-0198",
     "mode": "exam",
     "topic": "autofs",
     "q": "<pre>cat /etc/auto.nfs\ndata -rw,soft server1:/exports/data</pre>If /etc/auto.master has '/net /etc/auto.nfs', accessing /net/data will:",
@@ -1380,7 +1376,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 4
   },
   {
-    "id": "rhcsa10-a003",
+    "id": "rhcsa10-0199",
     "mode": "exam",
     "topic": "NFS",
     "q": "To persistently mount NFS share server:/export at /mnt/nfs:",
@@ -1396,7 +1392,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-a004",
+    "id": "rhcsa10-0200",
     "mode": "exam",
     "topic": "NFS",
     "q": "To show currently mounted NFS shares:",
@@ -1412,7 +1408,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-a005",
+    "id": "rhcsa10-0201",
     "mode": "exam",
     "topic": "autofs",
     "q": "After editing /etc/auto.master, which command reloads autofs configuration?",
@@ -1428,7 +1424,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-a006",
+    "id": "rhcsa10-0202",
     "mode": "exam",
     "topic": "NFS",
     "q": "Which NFS mount option allows continued operation if server is unreachable?",
@@ -1444,7 +1440,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-c001",
+    "id": "rhcsa10-0203",
     "mode": "exam",
     "topic": "Networking",
     "q": "To configure chrony to use internal NTP server 10.0.0.1:",
@@ -1460,7 +1456,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-c002",
+    "id": "rhcsa10-0204",
     "mode": "exam",
     "topic": "Networking",
     "q": "To check chrony synchronization status and sources:",
@@ -1476,7 +1472,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-c003",
+    "id": "rhcsa10-0205",
     "mode": "exam",
     "topic": "Networking",
     "q": "chrony is preferred over ntpd in RHEL 10 because:",
@@ -1492,7 +1488,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-c004",
+    "id": "rhcsa10-0206",
     "mode": "exam",
     "topic": "Networking",
     "q": "<pre>chronyc sources\nMS Name/IP address         Stratum Poll</pre>^* means:",
@@ -1508,7 +1504,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 4
   },
   {
-    "id": "rhcsa10-c005",
+    "id": "rhcsa10-0207",
     "mode": "exam",
     "topic": "Networking",
     "q": "To allow chrony to step (large-jump) the clock on first sync:",
@@ -1524,7 +1520,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-c006",
+    "id": "rhcsa10-0208",
     "mode": "exam",
     "topic": "Networking",
     "q": "To manually force chrony to sync immediately:",
@@ -1540,7 +1536,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-c007",
+    "id": "rhcsa10-0209",
     "mode": "exam",
     "topic": "Networking",
     "q": "chrony drift file location (stores clock rate adjustment):",
@@ -1556,7 +1552,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-g001",
+    "id": "rhcsa10-0210",
     "mode": "exam",
     "topic": "Boot",
     "q": "To add a kernel parameter (e.g., quiet) permanently using grubby:",
@@ -1572,7 +1568,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-g002",
+    "id": "rhcsa10-0211",
     "mode": "exam",
     "topic": "Boot",
     "q": "To remove a kernel parameter (e.g., rhgb) from all kernels:",
@@ -1588,7 +1584,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-g003",
+    "id": "rhcsa10-0212",
     "mode": "exam",
     "topic": "Boot",
     "q": "To set the default boot kernel to a specific version:",
@@ -1604,7 +1600,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-g004",
+    "id": "rhcsa10-0213",
     "mode": "exam",
     "topic": "Boot",
     "q": "To view information about the default boot kernel:",
@@ -1620,7 +1616,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-g005",
+    "id": "rhcsa10-0214",
     "mode": "exam",
     "topic": "Boot",
     "q": "grubby modifies which file on UEFI systems?",
@@ -1636,7 +1632,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-g006",
+    "id": "rhcsa10-0215",
     "mode": "exam",
     "topic": "Boot",
     "q": "To list all installed kernels managed by grubby:",
@@ -1652,7 +1648,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-g007",
+    "id": "rhcsa10-0216",
     "mode": "exam",
     "topic": "Boot",
     "q": "To add a kernel parameter for one boot only (not persistent):",
@@ -1668,7 +1664,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-g008",
+    "id": "rhcsa10-0217",
     "mode": "exam",
     "topic": "Boot",
     "q": "After kernel update, how to set the new kernel as default?",
@@ -1684,7 +1680,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-scp001",
+    "id": "rhcsa10-0218",
     "mode": "exam",
     "topic": "Networking",
     "q": "To copy local file /etc/hosts to remote server1 /tmp/ as user bob:",
@@ -1700,7 +1696,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-scp002",
+    "id": "rhcsa10-0219",
     "mode": "exam",
     "topic": "Networking",
     "q": "To copy a directory /data from remote server2 to local /backup/:",
@@ -1716,7 +1712,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-scp003",
+    "id": "rhcsa10-0220",
     "mode": "exam",
     "topic": "Networking",
     "q": "To start an interactive sftp session to server3 as user alice:",
@@ -1732,7 +1728,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-scp004",
+    "id": "rhcsa10-0221",
     "mode": "exam",
     "topic": "Networking",
     "q": "<pre>sftp> get /remote/file.txt</pre>This command:",
@@ -1748,7 +1744,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-scp005",
+    "id": "rhcsa10-0222",
     "mode": "exam",
     "topic": "Networking",
     "q": "To preserve file permissions and timestamps when using scp:",
@@ -1764,7 +1760,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-scp006",
+    "id": "rhcsa10-0223",
     "mode": "exam",
     "topic": "Networking",
     "q": "To use scp with a non-standard SSH port 2222:",
@@ -1780,7 +1776,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-scp007",
+    "id": "rhcsa10-0224",
     "mode": "exam",
     "topic": "Networking",
     "q": "<pre>sftp> put /local/file.txt /remote/backup/</pre>This:",
@@ -1796,7 +1792,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-scp008",
+    "id": "rhcsa10-0225",
     "mode": "exam",
     "topic": "Networking",
     "q": "scp and sftp authenticate using:",
@@ -1812,7 +1808,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-nice001",
+    "id": "rhcsa10-0226",
     "mode": "exam",
     "topic": "Processes",
     "q": "To start a command with lower priority (nice value +10):",
@@ -1828,7 +1824,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-nice002",
+    "id": "rhcsa10-0227",
     "mode": "exam",
     "topic": "Processes",
     "q": "To change the nice value of running process PID 1234 to -5:",
@@ -1844,7 +1840,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-nice003",
+    "id": "rhcsa10-0228",
     "mode": "exam",
     "topic": "Processes",
     "q": "A process with nice value -20:",
@@ -1860,7 +1856,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-nice004",
+    "id": "rhcsa10-0229",
     "mode": "exam",
     "topic": "Processes",
     "q": "To view the nice value of processes:",
@@ -1876,7 +1872,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-nice005",
+    "id": "rhcsa10-0230",
     "mode": "exam",
     "topic": "Processes",
     "q": "Non-root users can:",
@@ -1892,7 +1888,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-nice006",
+    "id": "rhcsa10-0231",
     "mode": "exam",
     "topic": "Processes",
     "q": "To renice all processes owned by user bob:",
@@ -1908,7 +1904,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-nice007",
+    "id": "rhcsa10-0232",
     "mode": "exam",
     "topic": "Processes",
     "q": "<pre>$ nice -n 15 /usr/bin/backup.sh</pre>This command:",
@@ -1924,7 +1920,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 4
   },
   {
-    "id": "rhcsa10-nice008",
+    "id": "rhcsa10-0233",
     "mode": "exam",
     "topic": "Processes",
     "q": "nice values affect:",
@@ -1940,7 +1936,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-jp001",
+    "id": "rhcsa10-0234",
     "mode": "exam",
     "topic": "systemd",
     "q": "To make systemd journal persistent across reboots:",
@@ -1956,7 +1952,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-jp002",
+    "id": "rhcsa10-0235",
     "mode": "exam",
     "topic": "systemd",
     "q": "<pre>cat /etc/systemd/journald.conf\nStorage=volatile</pre>This means:",
@@ -1972,7 +1968,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 4
   },
   {
-    "id": "rhcsa10-jp003",
+    "id": "rhcsa10-0236",
     "mode": "exam",
     "topic": "systemd",
     "q": "To view journal disk usage:",
@@ -1988,7 +1984,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-jp004",
+    "id": "rhcsa10-0237",
     "mode": "exam",
     "topic": "systemd",
     "q": "To limit journal size to 500M:",
@@ -2004,7 +2000,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-jp005",
+    "id": "rhcsa10-0238",
     "mode": "exam",
     "topic": "systemd",
     "q": "To delete journal entries older than 2 weeks:",
@@ -2020,7 +2016,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-jp006",
+    "id": "rhcsa10-0239",
     "mode": "exam",
     "topic": "systemd",
     "q": "Persistent journal files are stored in:",
@@ -2036,7 +2032,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-jp007",
+    "id": "rhcsa10-0240",
     "mode": "exam",
     "topic": "systemd",
     "q": "After changing /etc/systemd/journald.conf, apply changes with:",
@@ -2052,7 +2048,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-jp008",
+    "id": "rhcsa10-0241",
     "mode": "exam",
     "topic": "systemd",
     "q": "To verify persistent journal is enabled:",
@@ -2068,7 +2064,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gpt001",
+    "id": "rhcsa10-0242",
     "mode": "exam",
     "topic": "Storage",
     "q": "To create a new GPT partition table on /dev/sdc:",
@@ -2084,7 +2080,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-gpt002",
+    "id": "rhcsa10-0243",
     "mode": "exam",
     "topic": "Storage",
     "q": "<pre>parted /dev/sdd mkpart primary 1MiB 1GiB</pre>This creates:",
@@ -2100,7 +2096,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 4
   },
   {
-    "id": "rhcsa10-gpt003",
+    "id": "rhcsa10-0244",
     "mode": "exam",
     "topic": "Storage",
     "q": "GPT supports up to how many partitions without extended partitions?",
@@ -2116,7 +2112,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gpt004",
+    "id": "rhcsa10-0245",
     "mode": "exam",
     "topic": "Storage",
     "q": "To list partitions on GPT disk /dev/sdd:",
@@ -2132,7 +2128,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gpt005",
+    "id": "rhcsa10-0246",
     "mode": "exam",
     "topic": "Storage",
     "q": "To delete partition 3 on /dev/sde using parted:",
@@ -2148,7 +2144,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-gpt006",
+    "id": "rhcsa10-0247",
     "mode": "exam",
     "topic": "Storage",
     "q": "GPT advantage over MBR includes:",
@@ -2164,7 +2160,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gpt007",
+    "id": "rhcsa10-0248",
     "mode": "exam",
     "topic": "Storage",
     "q": "To set a partition name 'database' on GPT partition /dev/sdf2:",
@@ -2180,7 +2176,7 @@ window.QUESTION_BANK_RHCSA10_EXTRA = [
     "level": 3
   },
   {
-    "id": "rhcsa10-gpt008",
+    "id": "rhcsa10-0249",
     "mode": "exam",
     "topic": "Storage",
     "q": "After creating a GPT partition, next step before mounting is:",

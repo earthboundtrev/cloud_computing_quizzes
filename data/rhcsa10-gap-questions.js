@@ -1,17 +1,14 @@
-/**
- * RHCSA10 gap-fill questions for objective coverage (#31).
- */
 window.QUESTION_BANK_RHCSA10_GAP = [
   {
-    "id": "rhcsa10-gap-001",
+    "id": "rhcsa10-0250",
     "mode": "exam",
     "topic": "RHCSA gap fill",
-    "q": "Send stdout of rpm -qa to a file on RHEL (concept: redirection):",
+    "q": "Save the output of rpm -qa to /tmp/packages.txt on RHEL:",
     "options": [
-      "cmd 2>&1 | tee log",
-      "cmd > outfile.txt",
-      "cmd < infile",
-      "cmd & background only"
+      "rpm -qa | wc -l",
+      "rpm -qa > /tmp/packages.txt",
+      "rpm -qa < /tmp/packages.txt",
+      "rpm -qa & /tmp/packages.txt"
     ],
     "correct": 1,
     "explain": "Single > redirects stdout. 2>&1 merges stderr; tee writes and displays.",
@@ -19,7 +16,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-002",
+    "id": "rhcsa10-0251",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Append errors from a script to /var/log/my.log:",
@@ -35,7 +32,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-003",
+    "id": "rhcsa10-0252",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Find lines containing \"Failed password\" in /var/log/secure:",
@@ -51,7 +48,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-004",
+    "id": "rhcsa10-0253",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Match lines starting with ERROR in app.log (regex):",
@@ -67,7 +64,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-005",
+    "id": "rhcsa10-0254",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Copy file backup.tar.gz to admin@host:/backups/ securely:",
@@ -83,7 +80,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-006",
+    "id": "rhcsa10-0255",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "SSH to server1 as user ops on port 2222:",
@@ -99,7 +96,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-007",
+    "id": "rhcsa10-0256",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Switch to multi-user.target (no GUI) for current boot:",
@@ -115,7 +112,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-008",
+    "id": "rhcsa10-0257",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Allow user bob to log in locally but block SSH (high level):",
@@ -131,7 +128,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-009",
+    "id": "rhcsa10-0258",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Create compressed tarball of /etc preserving permissions:",
@@ -147,7 +144,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-010",
+    "id": "rhcsa10-0259",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Extract archive app.tar.bz2 in current directory:",
@@ -163,7 +160,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-011",
+    "id": "rhcsa10-0260",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Open existing file notes.txt for editing in vi:",
@@ -179,7 +176,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-012",
+    "id": "rhcsa10-0261",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Replace all \"old\" with \"new\" in file.cfg in place with sed:",
@@ -195,7 +192,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-013",
+    "id": "rhcsa10-0262",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Move directory /data to /archive/data atomically on same filesystem:",
@@ -211,7 +208,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-014",
+    "id": "rhcsa10-0263",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Create parent path /opt/apps/myapp in one mkdir command:",
@@ -227,7 +224,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-015",
+    "id": "rhcsa10-0264",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Create symbolic link /usr/bin/myvi pointing to /usr/bin/vim:",
@@ -243,7 +240,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-016",
+    "id": "rhcsa10-0265",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Show inode number for file report.pdf:",
@@ -259,7 +256,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-017",
+    "id": "rhcsa10-0266",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Search man pages for keyword chrony:",
@@ -275,7 +272,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-018",
+    "id": "rhcsa10-0267",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Read documentation for passwd command:",
@@ -291,7 +288,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-019",
+    "id": "rhcsa10-0268",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Test if file /etc/hosts exists in bash script:",
@@ -307,7 +304,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-020",
+    "id": "rhcsa10-0269",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Run command only if previous succeeded ($?):",
@@ -323,7 +320,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-021",
+    "id": "rhcsa10-0270",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Loop over files *.log in /var/log in bash:",
@@ -339,7 +336,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-022",
+    "id": "rhcsa10-0271",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Read file line by line in bash script:",
@@ -355,7 +352,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-023",
+    "id": "rhcsa10-0272",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "First positional argument in script is referenced as:",
@@ -371,7 +368,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-024",
+    "id": "rhcsa10-0273",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Pass all arguments to backup.sh from wrapper script:",
@@ -387,7 +384,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-025",
+    "id": "rhcsa10-0274",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Capture output of hostname into variable h:",
@@ -403,7 +400,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-026",
+    "id": "rhcsa10-0275",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Check exit status of last command:",
@@ -419,7 +416,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-027",
+    "id": "rhcsa10-0276",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Break into root shell at boot for password reset (dracut):",
@@ -435,7 +432,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-028",
+    "id": "rhcsa10-0277",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Find process using most CPU sorted:",
@@ -451,7 +448,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-029",
+    "id": "rhcsa10-0278",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Send SIGKILL to PID 1234:",
@@ -467,7 +464,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-030",
+    "id": "rhcsa10-0279",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Show journal logs for current boot only:",
@@ -483,7 +480,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-031",
+    "id": "rhcsa10-0280",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Follow sshd logs live from journal:",
@@ -499,7 +496,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-032",
+    "id": "rhcsa10-0281",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Remove logical volume lv0 from vg0 without deleting PVs:",
@@ -515,7 +512,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-033",
+    "id": "rhcsa10-0282",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Extend LV and grow ext4 filesystem online:",
@@ -531,7 +528,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-034",
+    "id": "rhcsa10-0283",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Grant user dana read/write on file shared.txt without changing ugo:",
@@ -547,7 +544,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-035",
+    "id": "rhcsa10-0284",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Default ACL so new files in /projects inherit group dev rw:",
@@ -563,7 +560,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-036",
+    "id": "rhcsa10-0285",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Make graphical.target the default boot target:",
@@ -579,7 +576,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-037",
+    "id": "rhcsa10-0286",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Install updates from enabled repos on registered system:",
@@ -595,7 +592,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-038",
+    "id": "rhcsa10-0287",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Add user alice to supplementary group dev:",
@@ -611,7 +608,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-039",
+    "id": "rhcsa10-0288",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Install SSH public key for user bob login:",
@@ -627,7 +624,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-040",
+    "id": "rhcsa10-0289",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Generate ed25519 key pair for user mike:",
@@ -643,7 +640,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-041",
+    "id": "rhcsa10-0290",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Allow httpd to connect to network (SELinux boolean):",
@@ -659,7 +656,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-042",
+    "id": "rhcsa10-0291",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Give group dev write permission on file report.txt without world write:",
@@ -667,7 +664,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
       "chmod g+w report.txt",
       "chmod 777 report.txt",
       "chown dev report.txt only changes owner",
-      "setfacl only way (incorrect)"
+      "umask 0022 removes all group permissions globally"
     ],
     "correct": 0,
     "explain": "chmod g+w adds group write; or chmod 664 if group already assigned.",
@@ -675,7 +672,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-043",
+    "id": "rhcsa10-0292",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "RHEL 10 UEFI systems typically boot with:",
@@ -691,7 +688,7 @@ window.QUESTION_BANK_RHCSA10_GAP = [
     "level": 2
   },
   {
-    "id": "rhcsa10-gap-044",
+    "id": "rhcsa10-0293",
     "mode": "exam",
     "topic": "RHCSA gap fill",
     "q": "Preferred tools instead of legacy ifconfig/route on RHEL 10:",

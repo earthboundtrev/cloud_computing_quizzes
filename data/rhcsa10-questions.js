@@ -1,6 +1,6 @@
 window.QUESTION_BANK_RHCSA10 = [
   {
-    "id": 1,
+    "id": "rhcsa10-0001",
     "mode": "exam",
     "topic": "Storage",
     "q": "To create an XFS file system on /dev/sdb1, which command?",
@@ -16,7 +16,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 2,
+    "id": "rhcsa10-0002",
     "mode": "exam",
     "topic": "Storage",
     "q": "To extend an XFS file system after expanding the underlying partition, you:",
@@ -32,7 +32,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 3,
+    "id": "rhcsa10-0003",
     "mode": "exam",
     "topic": "systemd",
     "q": "To enable a service to start at boot, which command?",
@@ -48,7 +48,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 4,
+    "id": "rhcsa10-0004",
     "mode": "exam",
     "topic": "systemd",
     "q": "To view logs for a specific systemd service:",
@@ -64,7 +64,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 5,
+    "id": "rhcsa10-0005",
     "mode": "exam",
     "topic": "Firewall",
     "q": "To allow HTTP through firewalld persistently:",
@@ -80,7 +80,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 6,
+    "id": "rhcsa10-0006",
     "mode": "exam",
     "topic": "Users/Groups",
     "q": "To create a user with a specific UID and primary group:",
@@ -96,7 +96,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 7,
+    "id": "rhcsa10-0007",
     "mode": "exam",
     "topic": "SELinux",
     "q": "To check SELinux status:",
@@ -112,7 +112,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 8,
+    "id": "rhcsa10-0008",
     "mode": "exam",
     "topic": "SELinux",
     "q": "To temporarily set SELinux to permissive mode:",
@@ -128,7 +128,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 9,
+    "id": "rhcsa10-0009",
     "mode": "exam",
     "topic": "Storage",
     "q": "LVM physical volumes are created with:",
@@ -144,7 +144,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 10,
+    "id": "rhcsa10-0010",
     "mode": "exam",
     "topic": "Storage",
     "q": "To add a new disk to an existing LVM volume group:",
@@ -160,7 +160,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 11,
+    "id": "rhcsa10-0011",
     "mode": "exam",
     "topic": "Scheduling",
     "q": "To schedule a recurring job for a user, which is used?",
@@ -176,7 +176,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 12,
+    "id": "rhcsa10-0012",
     "mode": "exam",
     "topic": "Networking",
     "q": "To configure a static IP using nmcli:",
@@ -192,7 +192,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 13,
+    "id": "rhcsa10-0013",
     "mode": "exam",
     "topic": "Networking",
     "q": "To see active NetworkManager connections:",
@@ -208,7 +208,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 14,
+    "id": "rhcsa10-0014",
     "mode": "exam",
     "topic": "Users/Groups",
     "q": "To set a password policy (e.g., max days) for users:",
@@ -224,7 +224,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 15,
+    "id": "rhcsa10-0015",
     "mode": "exam",
     "topic": "Filesystems",
     "q": "To persistently mount a filesystem by UUID, you add an entry to:",
@@ -240,7 +240,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 16,
+    "id": "rhcsa10-0016",
     "mode": "exam",
     "topic": "Filesystems",
     "q": "To find files by name:",
@@ -256,7 +256,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 17,
+    "id": "rhcsa10-0017",
     "mode": "exam",
     "topic": "Permissions",
     "q": "To set setuid on a binary so it runs as owner:",
@@ -272,7 +272,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 18,
+    "id": "rhcsa10-0018",
     "mode": "exam",
     "topic": "systemd",
     "q": "To mask a service so it cannot be started:",
@@ -288,7 +288,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 19,
+    "id": "rhcsa10-0019",
     "mode": "exam",
     "topic": "Storage",
     "q": "Swap space can be created with:",
@@ -304,7 +304,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 20,
+    "id": "rhcsa10-0020",
     "mode": "exam",
     "topic": "SELinux",
     "q": "restorecon is used to:",
@@ -320,10 +320,10 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 4
   },
   {
-    "id": 21,
+    "id": "rhcsa10-0021",
     "mode": "exam",
     "topic": "Packages",
-    "q": "To install a package from a repository in RHEL 9:",
+    "q": "To install a package from a repository in RHEL 10:",
     "options": [
       "rpm -i package.rpm",
       "dnf install package",
@@ -331,12 +331,12 @@ window.QUESTION_BANK_RHCSA10 = [
       "Both B and C"
     ],
     "correct": 3,
-    "explain": "dnf install package. yum is symlink to dnf in RHEL 8/9.",
+    "explain": "dnf install package. yum is a compatibility symlink to dnf on RHEL 10.",
     "obj": "2.1",
     "level": 3
   },
   {
-    "id": 22,
+    "id": "rhcsa10-0022",
     "mode": "exam",
     "topic": "Packages",
     "q": "To list installed packages:",
@@ -352,7 +352,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 23,
+    "id": "rhcsa10-0023",
     "mode": "exam",
     "topic": "Boot",
     "q": "To set default boot target (e.g., multi-user):",
@@ -368,7 +368,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 24,
+    "id": "rhcsa10-0024",
     "mode": "exam",
     "topic": "SELinux",
     "q": "chcon is used to:",
@@ -384,7 +384,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 25,
+    "id": "rhcsa10-0025",
     "mode": "exam",
     "topic": "Storage",
     "q": "To create a swap file (not partition):",
@@ -400,7 +400,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 26,
+    "id": "rhcsa10-0026",
     "mode": "exam",
     "topic": "Users/Groups",
     "q": "To give a user sudo access without password:",
@@ -416,7 +416,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 27,
+    "id": "rhcsa10-0027",
     "mode": "exam",
     "topic": "Firewall",
     "q": "To list all firewalld zones:",
@@ -432,7 +432,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 28,
+    "id": "rhcsa10-0028",
     "mode": "exam",
     "topic": "Storage",
     "q": "To display disk usage by directory:",
@@ -448,7 +448,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 29,
+    "id": "rhcsa10-0029",
     "mode": "exam",
     "topic": "Networking",
     "q": "To add a host entry for name resolution:",
@@ -464,7 +464,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 30,
+    "id": "rhcsa10-0030",
     "mode": "exam",
     "topic": "systemd",
     "q": "To reload a service's configuration without full restart:",
@@ -480,7 +480,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 31,
+    "id": "rhcsa10-0031",
     "mode": "exam",
     "topic": "Filesystems",
     "q": "To create an ext4 filesystem:",
@@ -496,7 +496,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 32,
+    "id": "rhcsa10-0032",
     "mode": "exam",
     "topic": "Storage",
     "q": "To list LVM volume groups:",
@@ -512,7 +512,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 33,
+    "id": "rhcsa10-0033",
     "mode": "exam",
     "topic": "systemd",
     "q": "To see why a unit failed:",
@@ -528,7 +528,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 4
   },
   {
-    "id": 34,
+    "id": "rhcsa10-0034",
     "mode": "exam",
     "topic": "Firewall",
     "q": "To set default zone in firewalld:",
@@ -544,7 +544,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 35,
+    "id": "rhcsa10-0035",
     "mode": "exam",
     "topic": "Users/Groups",
     "q": "To change a user's primary group:",
@@ -560,7 +560,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 36,
+    "id": "rhcsa10-0036",
     "mode": "exam",
     "topic": "SELinux",
     "q": "getsebool shows:",
@@ -576,7 +576,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 37,
+    "id": "rhcsa10-0037",
     "mode": "exam",
     "topic": "Storage",
     "q": "To reduce an LVM logical volume size (shrink):",
@@ -592,7 +592,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 38,
+    "id": "rhcsa10-0038",
     "mode": "exam",
     "topic": "Networking",
     "q": "To set DNS via nmcli:",
@@ -608,7 +608,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 39,
+    "id": "rhcsa10-0039",
     "mode": "exam",
     "topic": "Scheduling",
     "q": "To run a job at a specific time once:",
@@ -624,7 +624,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 40,
+    "id": "rhcsa10-0040",
     "mode": "exam",
     "topic": "Filesystems",
     "q": "To check filesystem (ext4):",
@@ -640,7 +640,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 41,
+    "id": "rhcsa10-0041",
     "mode": "exam",
     "topic": "Permissions",
     "q": "Sticky bit on directory:",
@@ -656,7 +656,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 42,
+    "id": "rhcsa10-0042",
     "mode": "exam",
     "topic": "systemd",
     "q": "To list all units (including inactive):",
@@ -672,7 +672,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 43,
+    "id": "rhcsa10-0043",
     "mode": "exam",
     "topic": "Packages",
     "q": "To remove a package and its unused dependencies:",
@@ -688,7 +688,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 44,
+    "id": "rhcsa10-0044",
     "mode": "exam",
     "topic": "Boot",
     "q": "To boot into single-user (rescue) from grub:",
@@ -704,7 +704,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 45,
+    "id": "rhcsa10-0045",
     "mode": "exam",
     "topic": "Users/Groups",
     "q": "To lock a user account:",
@@ -720,7 +720,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 46,
+    "id": "rhcsa10-0046",
     "mode": "exam",
     "topic": "SELinux",
     "q": "semanage fcontext is used to:",
@@ -736,10 +736,10 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 47,
+    "id": "rhcsa10-0047",
     "mode": "exam",
     "topic": "Networking",
-    "q": "To add a static route persistently (RHEL 9):",
+    "q": "To add a static route persistently (RHEL 10):",
     "options": [
       "Only route add",
       "nmcli con mod \"conn\" ipv4.routes \"192.168.2.0/24 10.0.0.1\"",
@@ -752,7 +752,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 48,
+    "id": "rhcsa10-0048",
     "mode": "exam",
     "topic": "systemd",
     "q": "To run a command when a unit starts:",
@@ -768,7 +768,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 49,
+    "id": "rhcsa10-0049",
     "mode": "exam",
     "topic": "Storage",
     "q": "To see which process is using a file:",
@@ -784,7 +784,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 4
   },
   {
-    "id": 50,
+    "id": "rhcsa10-0050",
     "mode": "exam",
     "topic": "Firewall",
     "q": "To add a port to a zone in firewalld:",
@@ -800,7 +800,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 51,
+    "id": "rhcsa10-0051",
     "mode": "exam",
     "topic": "Packages",
     "q": "To install a package from a specific repo:",
@@ -816,7 +816,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 52,
+    "id": "rhcsa10-0052",
     "mode": "exam",
     "topic": "Filesystems",
     "q": "To mount an NFS share at boot:",
@@ -832,7 +832,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 53,
+    "id": "rhcsa10-0053",
     "mode": "exam",
     "topic": "Permissions",
     "q": "setgid on directory:",
@@ -848,7 +848,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 54,
+    "id": "rhcsa10-0054",
     "mode": "exam",
     "topic": "Users/Groups",
     "q": "To expire a user account on a date:",
@@ -864,7 +864,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 55,
+    "id": "rhcsa10-0055",
     "mode": "exam",
     "topic": "SELinux",
     "q": "To allow a service to bind to a non-default port (SELinux):",
@@ -880,7 +880,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 56,
+    "id": "rhcsa10-0056",
     "mode": "exam",
     "topic": "Storage",
     "q": "To create an LVM snapshot:",
@@ -896,7 +896,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 57,
+    "id": "rhcsa10-0057",
     "mode": "exam",
     "topic": "systemd",
     "q": "To run a service after network is up:",
@@ -912,7 +912,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 58,
+    "id": "rhcsa10-0058",
     "mode": "exam",
     "topic": "Networking",
     "q": "To see listening TCP ports:",
@@ -928,7 +928,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 59,
+    "id": "rhcsa10-0059",
     "mode": "exam",
     "topic": "Packages",
     "q": "To show what provides a file:",
@@ -944,7 +944,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 60,
+    "id": "rhcsa10-0060",
     "mode": "exam",
     "topic": "Boot",
     "q": "To set kernel parameter persistently (e.g., selinux=0 for one boot, not recommended):",
@@ -960,7 +960,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 61,
+    "id": "rhcsa10-0061",
     "mode": "exam",
     "topic": "Firewall",
     "q": "To block an IP in firewalld (rich rule):",
@@ -976,7 +976,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 62,
+    "id": "rhcsa10-0062",
     "mode": "exam",
     "topic": "Users/Groups",
     "q": "To create a group with GID 2000:",
@@ -992,7 +992,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 63,
+    "id": "rhcsa10-0063",
     "mode": "exam",
     "topic": "SELinux",
     "q": "audit2allow generates:",
@@ -1008,7 +1008,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 64,
+    "id": "rhcsa10-0064",
     "mode": "exam",
     "topic": "Scheduling",
     "q": "System-wide cron (all users) is in:",
@@ -1024,7 +1024,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 65,
+    "id": "rhcsa10-0065",
     "mode": "exam",
     "topic": "Filesystems",
     "q": "To set noexec on a mount:",
@@ -1040,7 +1040,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 66,
+    "id": "rhcsa10-0066",
     "mode": "exam",
     "topic": "systemd",
     "q": "To list dependencies of a unit:",
@@ -1056,7 +1056,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 67,
+    "id": "rhcsa10-0067",
     "mode": "exam",
     "topic": "Networking",
     "q": "To configure a bond (network bonding):",
@@ -1072,7 +1072,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 68,
+    "id": "rhcsa10-0068",
     "mode": "exam",
     "topic": "Storage",
     "q": "To see LVM physical volume details:",
@@ -1088,7 +1088,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 69,
+    "id": "rhcsa10-0069",
     "mode": "exam",
     "topic": "Packages",
     "q": "To update only security-related packages:",
@@ -1104,7 +1104,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 70,
+    "id": "rhcsa10-0070",
     "mode": "exam",
     "topic": "Boot",
     "q": "Default GRUB config file location (x86 UEFI):",
@@ -1120,7 +1120,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 71,
+    "id": "rhcsa10-0071",
     "mode": "exam",
     "topic": "Users/Groups",
     "q": "To force password change at next login:",
@@ -1136,7 +1136,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 72,
+    "id": "rhcsa10-0072",
     "mode": "exam",
     "topic": "SELinux",
     "q": "To check SELinux context of a process:",
@@ -1152,7 +1152,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 73,
+    "id": "rhcsa10-0073",
     "mode": "exam",
     "topic": "Storage",
     "q": "To add a new partition with parted (non-interactive):",
@@ -1168,7 +1168,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 74,
+    "id": "rhcsa10-0074",
     "mode": "exam",
     "topic": "systemd",
     "q": "To create a user systemd service (run as user):",
@@ -1184,7 +1184,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 75,
+    "id": "rhcsa10-0075",
     "mode": "exam",
     "topic": "Firewall",
     "q": "To remove a service from a zone:",
@@ -1200,7 +1200,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 76,
+    "id": "rhcsa10-0076",
     "mode": "exam",
     "topic": "Networking",
     "q": "To test connectivity to a host and port:",
@@ -1216,7 +1216,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 77,
+    "id": "rhcsa10-0077",
     "mode": "exam",
     "topic": "Filesystems",
     "q": "To create a bind mount:",
@@ -1232,7 +1232,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 78,
+    "id": "rhcsa10-0078",
     "mode": "exam",
     "topic": "Permissions",
     "q": "Default umask 022 means new file permission:",
@@ -1248,7 +1248,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 79,
+    "id": "rhcsa10-0079",
     "mode": "exam",
     "topic": "Packages",
     "q": "To rollback a dnf transaction:",
@@ -1264,7 +1264,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 80,
+    "id": "rhcsa10-0080",
     "mode": "exam",
     "topic": "Storage",
     "q": "To encrypt a block device with LUKS:",
@@ -1280,7 +1280,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 81,
+    "id": "rhcsa10-0081",
     "mode": "exam",
     "topic": "Boot",
     "q": "To reinstall GRUB to a disk (e.g., after repair):",
@@ -1296,7 +1296,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 82,
+    "id": "rhcsa10-0082",
     "mode": "exam",
     "topic": "Scheduling",
     "q": "anacron is used for:",
@@ -1312,7 +1312,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 83,
+    "id": "rhcsa10-0083",
     "mode": "exam",
     "topic": "Users/Groups",
     "q": "To list members of a group:",
@@ -1328,7 +1328,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 84,
+    "id": "rhcsa10-0084",
     "mode": "exam",
     "topic": "SELinux",
     "q": "To temporarily allow a domain to do something (permissive domain):",
@@ -1344,7 +1344,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 85,
+    "id": "rhcsa10-0085",
     "mode": "exam",
     "topic": "Networking",
     "q": "To configure a bridge (br0) with nmcli:",
@@ -1360,7 +1360,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 86,
+    "id": "rhcsa10-0086",
     "mode": "exam",
     "topic": "systemd",
     "q": "To run a one-shot service that exits:",
@@ -1376,7 +1376,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 87,
+    "id": "rhcsa10-0087",
     "mode": "exam",
     "topic": "Storage",
     "q": "To see disk and partition layout:",
@@ -1392,7 +1392,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 88,
+    "id": "rhcsa10-0088",
     "mode": "exam",
     "topic": "Firewall",
     "q": "To make a zone active for an interface:",
@@ -1408,7 +1408,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 89,
+    "id": "rhcsa10-0089",
     "mode": "exam",
     "topic": "Filesystems",
     "q": "To create a tmpfs mount:",
@@ -1424,7 +1424,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 90,
+    "id": "rhcsa10-0090",
     "mode": "exam",
     "topic": "Packages",
     "q": "To exclude a package from updates:",
@@ -1440,7 +1440,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 91,
+    "id": "rhcsa10-0091",
     "mode": "exam",
     "topic": "Boot",
     "q": "To set default kernel (by index) in GRUB:",
@@ -1456,7 +1456,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 92,
+    "id": "rhcsa10-0092",
     "mode": "exam",
     "topic": "Users/Groups",
     "q": "To set default umask for new users:",
@@ -1472,7 +1472,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 93,
+    "id": "rhcsa10-0093",
     "mode": "exam",
     "topic": "systemd",
     "q": "To limit CPU for a service:",
@@ -1483,12 +1483,12 @@ window.QUESTION_BANK_RHCSA10 = [
       "Only systemd-run"
     ],
     "correct": 1,
-    "explain": "CPUQuota=50% in unit [Service]. Or use slice. cgroup v2 in RHEL 9.",
+    "explain": "CPUQuota=50% in unit [Service]. Or use slice. cgroup v2 is default on RHEL 10.",
     "obj": "7.2",
     "level": 3
   },
   {
-    "id": 94,
+    "id": "rhcsa10-0094",
     "mode": "exam",
     "topic": "Networking",
     "q": "To set hostname persistently:",
@@ -1504,7 +1504,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 95,
+    "id": "rhcsa10-0095",
     "mode": "exam",
     "topic": "SELinux",
     "q": "To list all SELinux booleans:",
@@ -1520,7 +1520,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 96,
+    "id": "rhcsa10-0096",
     "mode": "exam",
     "topic": "Storage",
     "q": "To remove an LVM physical volume from a VG:",
@@ -1536,7 +1536,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 5
   },
   {
-    "id": 97,
+    "id": "rhcsa10-0097",
     "mode": "exam",
     "topic": "Firewall",
     "q": "To list all rules in firewalld (current):",
@@ -1552,7 +1552,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 98,
+    "id": "rhcsa10-0098",
     "mode": "exam",
     "topic": "Packages",
     "q": "To install debuginfo for a package:",
@@ -1568,7 +1568,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 99,
+    "id": "rhcsa10-0099",
     "mode": "exam",
     "topic": "Boot",
     "q": "rescue.target vs emergency.target:",
@@ -1584,7 +1584,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 100,
+    "id": "rhcsa10-0100",
     "mode": "exam",
     "topic": "Scheduling",
     "q": "To run a cron job every 2 hours:",
@@ -1600,7 +1600,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 101,
+    "id": "rhcsa10-0101",
     "mode": "exam",
     "topic": "Users/Groups",
     "q": "To add a user to supplementary group:",
@@ -1616,7 +1616,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 102,
+    "id": "rhcsa10-0102",
     "mode": "exam",
     "topic": "systemd",
     "q": "To see boot time and uptime:",
@@ -1632,7 +1632,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 103,
+    "id": "rhcsa10-0103",
     "mode": "exam",
     "topic": "Networking",
     "q": "To bring down an interface with nmcli:",
@@ -1648,7 +1648,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 104,
+    "id": "rhcsa10-0104",
     "mode": "exam",
     "topic": "Storage",
     "q": "To check LUKS header backup:",
@@ -1664,7 +1664,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 105,
+    "id": "rhcsa10-0105",
     "mode": "exam",
     "topic": "SELinux",
     "q": "To get help on an SELinux type:",
@@ -1680,7 +1680,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 106,
+    "id": "rhcsa10-0106",
     "mode": "exam",
     "topic": "Packages",
     "q": "To see changelog of an installed package:",
@@ -1696,7 +1696,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 1
   },
   {
-    "id": 107,
+    "id": "rhcsa10-0107",
     "mode": "exam",
     "topic": "Boot",
     "q": "To boot to specific kernel once:",
@@ -1712,7 +1712,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 108,
+    "id": "rhcsa10-0108",
     "mode": "exam",
     "topic": "Storage",
     "q": "Grow an XFS filesystem after LVM logical volume extension:",
@@ -1728,7 +1728,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 109,
+    "id": "rhcsa10-0109",
     "mode": "exam",
     "topic": "Storage",
     "q": "Reduce size of an ext4 filesystem (offline) after shrinking LV:",
@@ -1744,7 +1744,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 5
   },
   {
-    "id": 110,
+    "id": "rhcsa10-0110",
     "mode": "exam",
     "topic": "Storage",
     "q": "Set default permissions on new files in /shared with setgid:",
@@ -1760,7 +1760,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 111,
+    "id": "rhcsa10-0111",
     "mode": "exam",
     "topic": "Storage",
     "q": "Configure autofs to mount NFS export /data on access at /mnt/data:",
@@ -1776,7 +1776,7 @@ window.QUESTION_BANK_RHCSA10 = [
     "level": 3
   },
   {
-    "id": 112,
+    "id": "rhcsa10-0112",
     "mode": "exam",
     "topic": "systemd",
     "q": "Make a custom service start at multi-user.target:",

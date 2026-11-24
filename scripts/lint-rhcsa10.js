@@ -49,10 +49,16 @@ function main() {
   const questions = loadBanks();
 
   const padRe = /\((alternative method|limited scope|incorrect for this task)\)/i;
-  const rhel9Re = /\bmodule (install|stream)|type team\b|teamd\b/i;
+  const rhel9Re = /\bmodule (install|stream)|type team\b|teamd\b|\bstratis\b/i;
+  const rhel9VerRe = /\bRHEL\s*9\b/i;
+
+  const idRe = /^rhcsa10-\d{4}$/;
 
   questions.forEach(function (q, idx) {
     const label = 'q id ' + q.id;
+    if (typeof q.id !== 'string' || !idRe.test(q.id)) {
+      fail(label + ' must be string rhcsa10-NNNN (four digits)');
+    }
     (q.options || []).forEach(function (opt, oi) {
       if (padRe.test(opt)) {
         fail(label + ' option[' + oi + '] still has padded distractor text');
@@ -60,7 +66,10 @@ function main() {
     });
     const blob = (q.q || '') + ' ' + (q.explain || '') + ' ' + (q.options || []).join(' ');
     if (rhel9Re.test(blob)) {
-      fail(label + ' stem/explain references removed RHEL 9-only content (modularity/teamd)');
+      fail(label + ' stem/explain references removed RHEL 9-only content (modularity/teamd/stratis)');
+    }
+    if (rhel9VerRe.test(blob)) {
+      fail(label + ' stem/explain should reference RHEL 10, not RHEL 9');
     }
     if (q.obj && !objIds.has(q.obj)) {
       fail(label + " unknown obj '" + q.obj + "'");

@@ -69,11 +69,17 @@
 
   function publishGameAnswer(today, sessionId, questionId) {
     if (!sessionId || !questionId) return;
+    var canon = questionId;
+    if (typeof globalThis !== 'undefined' && globalThis.CloudCramRhcsa10Ids) {
+      canon = globalThis.CloudCramRhcsa10Ids.canonicalQuestionId(questionId);
+    } else if (typeof window !== 'undefined' && window.CloudCramRhcsa10Ids) {
+      canon = window.CloudCramRhcsa10Ids.canonicalQuestionId(questionId);
+    }
     emitMessage({
       type: 'game-answer',
       today: String(today),
       sessionId: String(sessionId),
-      questionId: String(questionId)
+      questionId: String(canon)
     });
   }
 

@@ -3,7 +3,7 @@
 const fs = require('fs');
 
 const gap = [
-  { id: 'rhcsa10-gap-001', obj: '1.2', q: 'Send stdout of dpkg-query to a file on RHEL (concept: redirection):', opts: ['cmd 2>&1 | tee log', 'cmd > outfile.txt', 'cmd < infile', 'cmd & background only'], c: 1, e: 'Single > redirects stdout. 2>&1 merges stderr; tee writes and displays.' },
+  { id: 'rhcsa10-gap-001', obj: '1.2', q: 'Save the output of rpm -qa to /tmp/packages.txt on RHEL 10:', opts: ['rpm -qa | wc -l', 'rpm -qa > /tmp/packages.txt', 'rpm -qa < /tmp/packages.txt', 'rpm -qa & /tmp/packages.txt'], c: 1, e: 'Single > redirects stdout to a file.' },
   { id: 'rhcsa10-gap-002', obj: '1.2', q: 'Append errors from a script to /var/log/my.log:', opts: ['script >> /var/log/my.log 2>&1', 'script > /var/log/my.log only', 'script 2> /dev/null always', 'script | less'], c: 0, e: '>> appends; 2>&1 includes stderr in the redirect target.' },
   { id: 'rhcsa10-gap-003', obj: '1.3', q: 'Find lines containing "Failed password" in /var/log/secure:', opts: ['grep "Failed password" /var/log/secure', 'ls -l /var/log/secure', 'chmod +x /var/log/secure', 'man grep only'], c: 0, e: 'grep filters text; -i for case; regex for patterns.' },
   { id: 'rhcsa10-gap-004', obj: '1.3', q: 'Match lines starting with ERROR in app.log (regex):', opts: ['grep "^ERROR" app.log', 'grep ERROR$ app.log', 'cat app.log | wc', 'touch app.log'], c: 0, e: '^ anchors start of line in basic regex.' },
@@ -44,8 +44,8 @@ const gap = [
   { id: 'rhcsa10-gap-039', obj: '10.3', q: 'Install SSH public key for user bob login:', opts: ['Place key in ~bob/.ssh/authorized_keys with correct perms', 'Put key in /etc/ssh/ssh_host_rsa_key', 'chmod 777 ~bob/.ssh', 'Disable sshd'], c: 0, e: '~/.ssh authorized_keys; dir 700; file 600.' },
   { id: 'rhcsa10-gap-040', obj: '10.3', q: 'Generate ed25519 key pair for user mike:', opts: ['ssh-keygen -t ed25519', 'ssh-keygen -t rsa1', 'openssl genrsa only without ssh format', 'scp generates keys automatically'], c: 0, e: 'ssh-keygen creates key pair; ssh-copy-id installs pubkey.' },
   { id: 'rhcsa10-gap-041', obj: '10.8', q: 'Allow httpd to connect to network (SELinux boolean):', opts: ['setsebool -P httpd_can_network_connect on', 'setenforce 0 permanently', 'chmod 777 /var/www', 'audit2allow without need'], c: 0, e: 'setsebool -P persistent; getsebool -a | grep httpd.' },
-  { id: 'rhcsa10-gap-042', obj: '1.10', q: 'Give group dev write permission on file report.txt without world write:', opts: ['chmod g+w report.txt', 'chmod 777 report.txt', 'chown dev report.txt only changes owner', 'setfacl only way (incorrect)'], c: 0, e: 'chmod g+w adds group write; or chmod 664 if group already assigned.' },
-  { id: 'rhcsa10-gap-043', obj: '2.3', q: 'RHEL 10 UEFI systems typically boot with:', opts: ['GRUB2 and shim for Secure Boot', 'LILO bootloader', 'SysV init only', 'No bootloader on UEFI'], c: 0, e: 'GRUB2 + shim; mokutil for MOK enrollment.' },
+  { id: 'rhcsa10-gap-042', obj: '1.10', q: 'Give group dev write permission on file report.txt without world write:', opts: ['chmod g+w report.txt', 'chmod 777 report.txt', 'chown dev report.txt only changes owner', 'umask 0022 removes all group permissions globally'], c: 0, e: 'chmod g+w adds group write; or chmod 664 if group already assigned.' },
+  { id: 'rhcsa10-gap-043', obj: '7.6', q: 'RHEL 10 UEFI systems typically boot with:', opts: ['GRUB2 and shim for Secure Boot', 'LILO bootloader', 'SysV init only', 'No bootloader on UEFI'], c: 0, e: 'GRUB2 + shim; mokutil for MOK enrollment.' },
   { id: 'rhcsa10-gap-044', obj: '8.1', q: 'Preferred tools instead of legacy ifconfig/route on RHEL 10:', opts: ['ip and nmcli', 'ifconfig from net-tools is default', 'route only', 'brctl only'], c: 0, e: 'ip/ss/nmcli replace net-tools; DNF provides packages.' }
 ];
 

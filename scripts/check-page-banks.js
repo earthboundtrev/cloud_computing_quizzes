@@ -4,7 +4,7 @@
  * 
  * Validates:
  * 1. Every data/*-questions.js file is loaded by a page or is allowlisted
- * 2. RHCSA10 bank has exactly 249 unique IDs (as specified in quiz-config.js)
+ * 2. RHCSA10 bank size matches quiz-config.js (293 unique rhcsa10-NNNN ids)
  * 3. No duplicate IDs within each quiz's combined bank
  * 
  * Exit 0 on success, 1 on failure.
