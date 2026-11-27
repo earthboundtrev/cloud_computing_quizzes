@@ -18,6 +18,7 @@
   var ENTRIES = [
     { id: 'quizCompleted', match: 'exact', key: 'quizCompleted', keepOnUpdate: true, deleteOnDelete: true },
     { id: 'quizOrder', match: 'exact', key: 'quizOrder', keepOnUpdate: true, deleteOnDelete: true },
+    { id: 'quiz_reorder_hint_dismissed', match: 'exact', key: 'quiz_reorder_hint_dismissed', keepOnUpdate: true, deleteOnDelete: true, note: 'Launcher reorder tip dismiss (#1)' },
     { id: 'study_sessions_brain_dumps', match: 'exact', key: 'study_sessions_brain_dumps', keepOnUpdate: true, deleteOnDelete: true },
     { id: 'study_sessions_profile', match: 'prefix', prefix: 'study_sessions_profile_', keepOnUpdate: true, deleteOnDelete: true },
     { id: 'cloudcram_study_last_date', match: 'exact', key: 'cloudcram_study_last_date', keepOnUpdate: true, deleteOnDelete: true },
