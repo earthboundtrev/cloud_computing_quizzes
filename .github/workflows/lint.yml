@@ -33,6 +33,12 @@ jobs:
     - name: lint-banks per-track window isolation (#36)
       run: node scripts/test-lint-banks-window-isolation.js
 
+    - name: Quiz rich-text helper (#37)
+      run: node scripts/test-rich-text.js
+
+    - name: Bank markup lint (#37)
+      run: node scripts/test-lint-banks-markup.js
+
     - name: RHCSA migration regression (#41)
       run: node scripts/test-rhcsa-migration.js
 
@@ -124,6 +130,9 @@ jobs:
 
     - name: Gamification Playwright smoke (#68)
       run: node scripts/playwright-gamification-test.mjs
+
+    - name: Rich-text browser check at 375px (#37)
+      run: node scripts/playwright-rich-text-quiz.mjs
 
     - name: Entry pages console-clean CSP (#111)
       run: node scripts/playwright-console-clean.mjs

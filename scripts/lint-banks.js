@@ -20,6 +20,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const RichText = require(path.join(__dirname, '..', 'rich-text.js'));
 
 // ===========================
 // Configuration
@@ -224,6 +225,10 @@ function validateSchema(questions, trackId, fileName) {
     if (!q.q) {
       error(`${qId}: missing question stem 'q' field`);
     }
+
+    RichText.validateQuestionMarkup(q, qId).forEach(function (msg) {
+      error(msg);
+    });
 
     const qType = q.type || 'single';
 
@@ -617,7 +622,7 @@ function main() {
     }
   });
   
-  ['quiz-config.js', 'quiz-engine.js'].forEach(file => {
+  ['quiz-config.js', 'quiz-engine.js', 'rich-text.js'].forEach(file => {
     if (fs.existsSync(file)) {
       syntaxOk = checkSyntax(file) && syntaxOk;
     }
@@ -790,5 +795,6 @@ module.exports = {
   loadObjectives,
   validateObjectiveWeights,
   validateObjectiveMetadata,
-  objectiveItems
+  objectiveItems,
+  RichText,
 };

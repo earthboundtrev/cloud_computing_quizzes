@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE_NAME = 'cloudcram-v65';
+const CACHE_NAME = 'cloudcram-v66';
 
 const PRECACHE_PATHS = [
   '/index.html',
@@ -32,6 +32,7 @@ const PRECACHE_PATHS = [
   '/icons/favicon-32.png',
   '/favicon.ico',
   '/css/quiz-common.css',
+  '/rich-text.js',
   '/quiz-engine.js',
   '/app-reset.js',
   '/storage-keys.js',
