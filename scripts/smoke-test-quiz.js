@@ -393,7 +393,7 @@ function scriptsForQuizHtml(htmlPath) {
   let m;
   while ((m = re.exec(html)) !== null) {
     const src = m[1].split('?')[0];
-    if (src === 'quiz-engine.js' || src.startsWith('quiz-init-')) {
+    if (src === 'rich-text.js' || src === 'quiz-engine.js' || src.startsWith('quiz-init-')) {
       scripts.push(src);
     } else if (src.startsWith('data/') && src.indexOf('question-id-map') === -1) {
       scripts.push(src);

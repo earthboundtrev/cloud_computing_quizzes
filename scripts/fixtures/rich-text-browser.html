@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rich text browser fixture (#37)</title>
+  <link rel="stylesheet" href="/css/quiz-common.css?v=6">
+  <style>
+    body { margin: 0; padding: 1rem; max-width: 100vw; overflow-x: hidden; }
+    .panel { margin-bottom: 1.5rem; }
+    h2 { font-size: 1rem; margin: 0 0 0.5rem; }
+  </style>
+  <script src="/rich-text.js?v=1"></script>
+</head>
+<body>
+  <div class="panel">
+    <h2>Stem</h2>
+    <div id="question-text" class="question-text"></div>
+  </div>
+  <div class="panel">
+    <h2>Option</h2>
+    <div id="option-fixture" class="option"></div>
+  </div>
+  <div class="panel">
+    <h2>Explanation</h2>
+    <div id="explain-fixture" class="explanation"></div>
+  </div>
+  <div class="panel">
+    <h2>Disallowed tag</h2>
+    <div id="disallowed-fixture"></div>
+  </div>
+  <script>
+    var STEM = '<pre>cat /etc/systemd/system/backup.timer\\n[Timer]\\nOnCalendar=daily\\nPersistent=true</pre>What does Persistent=true do?';
+    var OPT = '<pre>systemctl list-timers</pre>Shows active timers';
+    var EXPLAIN = '<pre>systemctl list-timers --all</pre>Persistent=true triggers missed runs at boot.';
+    var BAD = 'Before <b>risky</b> after';
+    RichText.renderRichText(document.getElementById('question-text'), STEM);
+    RichText.renderRichText(document.getElementById('option-fixture'), OPT);
+    RichText.renderRichText(document.getElementById('explain-fixture'), EXPLAIN);
+    RichText.renderRichText(document.getElementById('disallowed-fixture'), BAD);
+  </script>
+</body>
+</html>
