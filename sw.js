@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE_NAME = 'cloudcram-v64';
+const CACHE_NAME = 'cloudcram-v65';
 
 const PRECACHE_PATHS = [
   '/index.html',
@@ -16,7 +16,7 @@ const PRECACHE_PATHS = [
   '/az900_azure_fundamentals_quiz.html',
   '/az104_azure_administrator_quiz.html',
   '/az305_azure_solutions_architect_quiz.html',
-  '/ai900_azure_ai_fundamentals_quiz.html',
+  '/ai901_azure_ai_fundamentals_quiz.html',
   '/aws_mlea_quiz.html',
   '/aws_data_engineering_quiz.html',
   '/aws_genai_quiz.html',
@@ -47,7 +47,7 @@ const PRECACHE_PATHS = [
   '/data/gcp-pca-scenario-questions.js',
   '/data/gcp-ace-questions.js',
   '/data/az900-questions.js',
-  '/data/ai900-questions.js',
+  '/data/ai901-questions.js',
   '/data/az104-questions.js',
   '/data/az104-extra-questions.js',
   '/data/az104-boost-questions.js',
@@ -95,7 +95,7 @@ const PRECACHE_PATHS = [
   '/quiz-init-gcp-pca.js',
   '/quiz-init-gcp-ace.js',
   '/quiz-init-az900.js',
-  '/quiz-init-ai900.js',
+  '/quiz-init-ai901.js',
   '/quiz-init-az104.js',
   '/quiz-init-az305.js',
   '/quiz-init-aws-mlea.js',
@@ -108,6 +108,7 @@ const PRECACHE_PATHS = [
   '/quiz-init-rhce.js',
   '/reserved-key-names.js',
   '/rhcsa-migration.js',
+  '/ai901-migration.js',
   '/rhcsa10-question-id-utils.js',
   '/rhcsa10-question-id-migration.js',
   '/quiz-config.js',

@@ -36,6 +36,9 @@ jobs:
     - name: RHCSA migration regression (#41)
       run: node scripts/test-rhcsa-migration.js
 
+    - name: AI-901 track rename migration (#22, #33)
+      run: node scripts/test-ai901-migration.js
+
     - name: RHCSA10 question id migration (#31)
       run: node scripts/test-rhcsa10-id-migration.js
 

@@ -27,4 +27,10 @@ regexes = [
   '''QUESTION_BANK_RHCSA10_EXTRA''',
   # Base RHCSA10 bank symbol in migration scripts (public question bank global).
   '''QUESTION_BANK_RHCSA10''',
+  # localStorage migration flag ai900→ai901 (#22, #33); not a credential.
+  '''ai901_migrated_from_ai900''',
+  # Launcher notice gate after migration; not a credential.
+  '''ai901_migration_data_moved''',
+  # Dismiss state for AI-901 migration notice on the hub.
+  '''ai901_notice_seen''',
 ]

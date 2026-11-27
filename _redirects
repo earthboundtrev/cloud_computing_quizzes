@@ -5,3 +5,9 @@
 /data/rhcsa9-questions.js  /data/rhcsa10-questions.js 301
 /data/rhcsa9-extra-questions.js /data/rhcsa10-extra-questions.js 301
 /data/rhcsa9-objectives.js /data/rhcsa10-objectives.js 301
+
+# AI-900 → AI-901 track rename (301 permanent redirects)
+/ai900_azure_ai_fundamentals_quiz.html    /ai901_azure_ai_fundamentals_quiz.html    301
+/quiz-init-ai900.js                       /quiz-init-ai901.js                       301
+/data/ai900-questions.js                  /data/ai901-questions.js                  301
+/data/ai900-objectives.js                 /data/ai901-objectives.js                 301

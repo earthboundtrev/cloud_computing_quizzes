@@ -73,6 +73,36 @@
         }
       });
     }
+
+    (function maybeShowAi901MigrationNotice() {
+      if (window.cloudCramStorageWritesBlocked && window.cloudCramStorageWritesBlocked()) return;
+      try {
+        if (localStorage.getItem('ai901_notice_seen') === 'true') return;
+        if (localStorage.getItem('ai901_migration_data_moved') !== 'true') return;
+        var item = document.querySelector('.quiz-card-item[data-id="ai901"]');
+        if (!item) return;
+        item.classList.add('ai901-notice-wrap');
+        var notice = document.createElement('div');
+        notice.className = 'ai901-launcher-notice';
+        notice.setAttribute('role', 'status');
+        var text = document.createElement('span');
+        text.textContent = 'Azure AI Fundamentals moved to AI-901. Your progress and completed mark came with it.';
+        var dismiss = document.createElement('button');
+        dismiss.type = 'button';
+        dismiss.className = 'ai901-launcher-notice-dismiss';
+        dismiss.textContent = 'Dismiss';
+        dismiss.addEventListener('click', function () {
+          try {
+            localStorage.setItem('ai901_notice_seen', 'true');
+          } catch (e) {}
+          notice.remove();
+          item.classList.remove('ai901-notice-wrap');
+        });
+        notice.appendChild(text);
+        notice.appendChild(dismiss);
+        item.insertBefore(notice, item.firstChild);
+      } catch (eNotice) {}
+    })();
   }
 
   var btn = document.getElementById('review-dumps-btn');

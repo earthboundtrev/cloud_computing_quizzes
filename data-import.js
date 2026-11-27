@@ -220,6 +220,102 @@
     return null;
   }
 
+  var LEGACY_AI_QUIZ_ID = 'ai900';
+  var CANONICAL_AI_QUIZ_ID = 'ai901';
+
+  function remapAi900QuizIdInJsonArray(raw) {
+    if (typeof raw !== 'string' || !raw) return raw;
+    try {
+      var arr = JSON.parse(raw);
+      if (!Array.isArray(arr)) return raw;
+      var changed = false;
+      arr = arr.map(function (id) {
+        if (id === LEGACY_AI_QUIZ_ID) {
+          changed = true;
+          return CANONICAL_AI_QUIZ_ID;
+        }
+        return id;
+      });
+      if (!changed) return raw;
+      var seen = Object.create(null);
+      arr = arr.filter(function (id) {
+        if (seen[id]) return false;
+        seen[id] = true;
+        return true;
+      });
+      return JSON.stringify(arr);
+    } catch (e) {
+      return raw;
+    }
+  }
+
+  function touchImportedProfileQuizId(raw) {
+    if (typeof raw !== 'string' || !raw) return raw;
+    try {
+      var profile = JSON.parse(raw);
+      if (!profile || typeof profile !== 'object') return raw;
+      if (profile.quizId === LEGACY_AI_QUIZ_ID) {
+        profile.quizId = CANONICAL_AI_QUIZ_ID;
+        return JSON.stringify(profile);
+      }
+    } catch (e2) {}
+    return raw;
+  }
+
+  function remapBrainDumpsQuizIdsInJson(raw) {
+    if (typeof raw !== 'string' || !raw) return raw;
+    try {
+      var list = JSON.parse(raw);
+      if (!Array.isArray(list)) return raw;
+      var changed = false;
+      list.forEach(function (rec) {
+        if (rec && rec.quizId === LEGACY_AI_QUIZ_ID) {
+          rec.quizId = CANONICAL_AI_QUIZ_ID;
+          changed = true;
+        }
+      });
+      return changed ? JSON.stringify(list) : raw;
+    } catch (e3) {
+      return raw;
+    }
+  }
+
+  function remapLegacyAi900LocalStorage(ls) {
+    if (!ls || typeof ls !== 'object' || Array.isArray(ls)) return ls;
+    var out = Object.create(null);
+    Object.keys(ls).forEach(function (key) {
+      var newKey = key.indexOf(LEGACY_AI_QUIZ_ID) !== -1
+        ? key.split(LEGACY_AI_QUIZ_ID).join(CANONICAL_AI_QUIZ_ID)
+        : key;
+      var val = ls[key];
+      if (newKey === 'quizCompleted' || newKey === 'quizOrder') {
+        val = remapAi900QuizIdInJsonArray(val);
+      } else if (newKey === 'study_sessions_brain_dumps') {
+        val = remapBrainDumpsQuizIdsInJson(val);
+      } else if (newKey.indexOf(PROFILE_PREFIX) === 0) {
+        val = touchImportedProfileQuizId(val);
+      }
+      if (out[newKey] === undefined) {
+        out[newKey] = val;
+      } else if (newKey.indexOf(PROFILE_PREFIX) === 0 && typeof val === 'string' && typeof out[newKey] === 'string') {
+        out[newKey] = val;
+      } else if (newKey !== key) {
+        out[newKey] = val;
+      }
+    });
+    return out;
+  }
+
+  function remapLegacyAi900BrainRecords(list) {
+    if (!Array.isArray(list)) return list;
+    list.forEach(function (rec) {
+      if (rec && rec.quizId === LEGACY_AI_QUIZ_ID) {
+        rec.quizId = CANONICAL_AI_QUIZ_ID;
+      }
+    });
+    return list;
+  }
+
   function validatePayloadRoot(parsed) {
     if (!isPlainObject(parsed)) return reject('schema', 'Not a Cloud Cram progress file.');
     if (containsReservedKey(parsed, 0)) {
@@ -231,7 +327,10 @@
     if (parsed.localStorage !== undefined && !isPlainObject(parsed.localStorage)) {
       return reject('localStorage', 'Invalid localStorage section.');
     }
-    var ls = parsed.localStorage || {};
+    var ls = remapLegacyAi900LocalStorage(parsed.localStorage || {});
+    if (parsed.brainDumpsIndexedDB) {
+      remapLegacyAi900BrainRecords(parsed.brainDumpsIndexedDB);
+    }
     var lsKeys = Object.keys(ls);
     if (lsKeys.length > MAX_LS_KEYS) {
       return reject('localStorage_count', 'Too many localStorage keys.');
@@ -403,6 +502,9 @@
     if (key === 'quizOrder') return mergeQuizOrder(localRaw, importRaw);
     if (key === 'cloudcram_push_local_v1') return mergePushLocal(localRaw, importRaw);
     if (key.indexOf('rhcsa_migrated') === 0) {
+      return mergeMigrationFlag(localRaw, importRaw);
+    }
+    if (key.indexOf('ai901_migrated') === 0 || key === 'ai901_migration_data_moved' || key === 'ai901_notice_seen') {
       return mergeMigrationFlag(localRaw, importRaw);
     }
     if (key === 'study_sessions_brain_dumps') return localRaw;
@@ -1189,6 +1291,9 @@
     runValidatedImport: runValidatedImport,
     readBrainDumpsFromIdb: readBrainDumpsFromIdb,
     writeBrainDumpsToIdb: writeBrainDumpsToIdb,
-    replaceAllBrainDumpsInIdb: replaceAllBrainDumpsInIdb
+    replaceAllBrainDumpsInIdb: replaceAllBrainDumpsInIdb,
+    remapLegacyAi900LocalStorage: remapLegacyAi900LocalStorage,
+    remapAi900QuizIdInJsonArray: remapAi900QuizIdInJsonArray,
+    touchImportedProfileQuizId: touchImportedProfileQuizId
   };
 });

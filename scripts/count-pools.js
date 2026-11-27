@@ -10,7 +10,7 @@ const banks = {
   az900: ['az900-questions.js'],
   az104: ['az104-questions.js', 'az104-extra-questions.js', 'az104-boost-questions.js', 'az104-scenario-questions.js'],
   az305: ['az305-questions.js', 'az305-extra-questions.js', 'az305-boost-questions.js', 'az305-scenario-questions.js'],
-  ai900: ['ai900-questions.js'],
+  ai901: ['ai901-questions.js'],
   aws_mlea: ['aws-mlea-questions.js', 'aws-mlea-extra-questions.js', 'aws-mlea-scenario-questions.js'],
   aws_dea: ['aws-data-engineering-questions.js', 'aws-dea-extra-questions.js', 'aws-dea-scenario-questions.js'],
   aws_genai: ['aws-genai-questions.js', 'aws-genai-scenario-questions.js', 'aws-genai-ramp-questions.js'],
