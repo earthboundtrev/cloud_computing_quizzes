@@ -15,7 +15,7 @@
 | TESTS | **Pass** (local) | See table |
 | ARCHITECT | **Merge-ready** | `cursor-grok-4.6-high-fast` 2026-11-27 |
 | SECURITY | **PASS** | Low/informational; no blockers |
-| DEPLOY | Pending | PR `Refs #37`; no merge |
+| DEPLOY | Pending | PR #149 CI green; human merge |
 
 ## TESTS (local)
 
@@ -28,6 +28,7 @@
 | `check-sw-cache-name-bump.js` | v65→v66 |
 | `playwright-rich-text-quiz.mjs` | Pass @ 375px |
 | `smoke-test-quiz.js --all` | 16/16 |
+| GitHub Actions PR #149 | 7/7 green @ `bce8a52` |
 
 ## Bugbot runs
 
