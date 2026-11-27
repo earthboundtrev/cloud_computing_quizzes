@@ -322,9 +322,15 @@
     }
   }
 
-  if (typeof indexedDB !== 'undefined') {
+  if (allOk && dataMoved && typeof indexedDB !== 'undefined') {
     try {
       var idbReq = indexedDB.open('StudySessionsBrainDumps', 1);
+      idbReq.onupgradeneeded = function (ev) {
+        var database = ev.target.result;
+        if (!database.objectStoreNames.contains('dumps')) {
+          database.createObjectStore('dumps', { keyPath: 'id', autoIncrement: true });
+        }
+      };
       idbReq.onsuccess = function () {
         var db = idbReq.result;
         if (!db.objectStoreNames.contains('dumps')) {
