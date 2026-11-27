@@ -134,6 +134,9 @@ jobs:
     - name: Rich-text browser check at 375px (#37)
       run: node scripts/playwright-rich-text-quiz.mjs
 
+    - name: Launcher reorder CSP Playwright (#1)
+      run: node scripts/playwright-launcher-reorder.mjs
+
     - name: Entry pages console-clean CSP (#111)
       run: node scripts/playwright-console-clean.mjs
 

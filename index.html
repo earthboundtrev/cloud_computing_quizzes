@@ -59,14 +59,113 @@
     .quiz-card .desc { display: block; font-size: 0.9rem; color: var(--text-muted); }
     .quiz-card.completed { opacity: 0.85; }
     .quiz-card .completed-badge { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem; }
-    .quiz-card-item { display: flex; align-items: stretch; gap: 0.5rem; }
+    .quiz-list-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+      max-width: 100%;
+    }
+    .quiz-reorder-hint {
+      flex: 1 1 12rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0.6rem 0.85rem;
+      border-radius: 8px;
+      background: rgba(66, 133, 244, 0.12);
+      border: 1px solid rgba(66, 133, 244, 0.35);
+      font-size: 0.9rem;
+      color: var(--text);
+      min-width: 0;
+    }
+    .quiz-reorder-hint-dismiss,
+    .quiz-reset-order-btn {
+      flex-shrink: 0;
+      min-height: 44px;
+      min-width: 44px;
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      background: var(--surface);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .quiz-reset-order-btn { margin-left: auto; }
+    .quiz-card-item {
+      display: flex;
+      align-items: stretch;
+      gap: 0.35rem;
+      max-width: 100%;
+      min-width: 0;
+    }
     .drag-handle {
-      flex-shrink: 0; display: flex; align-items: center; padding: 0 0.5rem;
-      color: var(--text-muted); cursor: grab; touch-action: none; user-select: none;
-      font-size: 1rem; line-height: 1;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 44px;
+      min-height: 44px;
+      padding: 0;
+      margin: 0;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      font-size: 1rem;
+      line-height: 1;
+      font-family: inherit;
     }
     .drag-handle:active { cursor: grabbing; }
+    .drag-handle:focus { outline: none; }
+    .drag-handle:focus-visible {
+      outline: 2px solid #60a5fa;
+      outline-offset: 2px;
+      border-color: rgba(96, 165, 250, 0.55);
+    }
+    .quiz-move-col {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      justify-content: center;
+    }
+    .quiz-move-btn {
+      min-width: 44px;
+      min-height: 44px;
+      padding: 0.2rem 0.35rem;
+      border-radius: 8px;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      background: var(--surface);
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-family: inherit;
+      cursor: pointer;
+      line-height: 1.1;
+    }
+    .quiz-move-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .quiz-move-btn:focus { outline: none; }
+    .quiz-move-btn:focus-visible {
+      outline: 2px solid #60a5fa;
+      outline-offset: 2px;
+    }
     .quiz-card-item .quiz-card { flex: 1; min-width: 0; }
+    @media (max-width: 380px) {
+      .quiz-card-item { flex-wrap: wrap; row-gap: 0.35rem; }
+      .quiz-card-item .quiz-card { flex: 1 1 calc(100% - 7.5rem); min-width: 0; }
+      .quiz-complete-label { margin-left: auto; }
+      .quiz-complete-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+    }
     .quiz-complete-label {
       flex-shrink: 0; display: flex; align-items: center; gap: 0.35rem;
       cursor: pointer; color: var(--text-muted); font-size: 0.85rem; user-select: none;
@@ -162,7 +261,7 @@
     <div id="quiz-list-container"></div>
   </div>
   <script src="quiz-nav.js?v=2"></script>
-  <script src="storage-keys.js?v=5"></script>
+  <script src="storage-keys.js?v=6"></script>
   <script src="reminder-server.js?v=1"></script>
   <script src="data-export.js?v=2"></script>
   <script src="push-local-settings.js?v=1"></script>
@@ -170,9 +269,9 @@
   <script src="reminder-schedule.js?v=2"></script>
   <script src="data-import.js?v=9"></script>
   <script src="app-reset.js?v=6"></script>
-  <script src="build-meta.js?v=9"></script>
+  <script src="build-meta.js?v=10"></script>
   <script src="native-app.js?v=1"></script>
   <script src="reminder-native.js?v=2"></script>
-  <script src="index-init.js?v=10"></script>
+  <script src="index-init.js?v=11"></script>
 </body>
 </html>

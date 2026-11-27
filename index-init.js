@@ -5,31 +5,129 @@
     return div.innerHTML;
   }
 
-  var getOrdered = window.getQuizOrderedConfig;
-  var getCompleted = window.getQuizCompletedIds;
-  var config = getOrdered ? getOrdered() : window.QUIZ_CONFIG;
-  var completedIds = getCompleted ? getCompleted() : [];
-  var container = document.getElementById('quiz-list-container');
-  if (config && container) {
-    var html = '<nav class="quiz-list" id="quiz-sortable-list">';
-    for (var i = 0; i < config.length; i++) {
-      var q = config[i];
-      var isCompleted = q.closed || completedIds.indexOf(q.id) >= 0;
-      var cardClass = 'quiz-card ' + q.cardClass + (isCompleted ? ' completed' : '');
-      html += '<div class="quiz-card-item" data-id="' + escapeHtml(q.id) + '">' +
-        '<span class="drag-handle" aria-label="Drag to reorder" title="Drag to reorder">⋮⋮</span>' +
-        '<a href="' + q.href + '" class="' + cardClass + '">' +
-        '<span class="name">' + escapeHtml(q.name) + '</span>' +
-        '<span class="desc">' + q.desc + '</span>' +
-        (isCompleted ? '<span class="completed-badge">Completed</span>' : '') +
-        '</a>' +
-        '<label class="quiz-complete-label" title="Mark as complete">' +
-        '<input type="checkbox" class="quiz-complete-checkbox" data-quiz-id="' + escapeHtml(q.id) + '"' + (isCompleted ? ' checked' : '') + '>' +
-        '<span class="quiz-complete-text">Done</span></label></div>';
-    }
-    html += '</nav>';
-    container.innerHTML = html;
+  var REORDER_HINT_KEY = 'quiz_reorder_hint_dismissed';
+  var sortableInstance = null;
 
+  function getLiveRegion() {
+    var el = document.getElementById('quiz-reorder-live');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'quiz-reorder-live';
+      el.className = 'visually-hidden';
+      el.setAttribute('aria-live', 'polite');
+      el.setAttribute('aria-atomic', 'true');
+      document.body.appendChild(el);
+    }
+    return el;
+  }
+
+  function announceReorder(message) {
+    var live = getLiveRegion();
+    live.textContent = '';
+    window.setTimeout(function () {
+      live.textContent = message;
+    }, 30);
+  }
+
+  function certLabelFromItem(item) {
+    var nameEl = item && item.querySelector('.quiz-card .name');
+    return nameEl ? nameEl.textContent : 'Quiz';
+  }
+
+  function positionOfItem(item, listEl) {
+    var items = listEl.querySelectorAll('.quiz-card-item');
+    for (var i = 0; i < items.length; i++) {
+      if (items[i] === item) return i + 1;
+    }
+    return 0;
+  }
+
+  function persistQuizOrder(listEl) {
+    var ids = [];
+    var items = listEl.querySelectorAll('.quiz-card-item');
+    for (var j = 0; j < items.length; j++) ids.push(items[j].getAttribute('data-id'));
+    if (window.cloudCramStorageWritesBlocked && window.cloudCramStorageWritesBlocked()) return;
+    try {
+      localStorage.setItem('quizOrder', JSON.stringify(ids));
+    } catch (e) {}
+    if (window.refreshQuizNav) window.refreshQuizNav();
+  }
+
+  function updateMoveButtonStates(listEl) {
+    var items = listEl.querySelectorAll('.quiz-card-item');
+    for (var i = 0; i < items.length; i++) {
+      var up = items[i].querySelector('.quiz-move-up');
+      var down = items[i].querySelector('.quiz-move-down');
+      if (up) up.disabled = i === 0;
+      if (down) down.disabled = i === items.length - 1;
+    }
+  }
+
+  function focusItemHandle(item) {
+    var handle = item && item.querySelector('.drag-handle');
+    if (handle && typeof handle.focus === 'function') handle.focus();
+  }
+
+  function moveQuizItem(item, delta, listEl) {
+    if (!item || !listEl) return;
+    var items = listEl.querySelectorAll('.quiz-card-item');
+    var idx = -1;
+    for (var i = 0; i < items.length; i++) {
+      if (items[i] === item) {
+        idx = i;
+        break;
+      }
+    }
+    var target = idx + delta;
+    if (idx < 0 || target < 0 || target >= items.length) return;
+    var ref = delta < 0 ? items[target] : items[target].nextSibling;
+    listEl.insertBefore(item, ref);
+    updateMoveButtonStates(listEl);
+    persistQuizOrder(listEl);
+    var label = certLabelFromItem(item);
+    var pos = positionOfItem(item, listEl);
+    announceReorder(label + ' moved to position ' + pos + ' of ' + items.length);
+    focusItemHandle(item);
+  }
+
+  function destroySortable() {
+    if (sortableInstance && typeof sortableInstance.destroy === 'function') {
+      sortableInstance.destroy();
+    }
+    sortableInstance = null;
+  }
+
+  function initSortable(listEl) {
+    destroySortable();
+    if (!listEl || !window.Sortable) return;
+    var coarsePointer =
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(pointer: coarse)').matches;
+    sortableInstance = window.Sortable.create(listEl, {
+      animation: 150,
+      handle: '.drag-handle',
+      delay: 200,
+      delayOnTouchOnly: true,
+      ghostClass: 'quiz-card-item-ghost',
+      dragClass: 'quiz-card-item-drag',
+      forceFallback: coarsePointer,
+      fallbackTolerance: coarsePointer ? 5 : 0,
+      onEnd: function (evt) {
+        var item = evt.item;
+        updateMoveButtonStates(listEl);
+        persistQuizOrder(listEl);
+        if (item) {
+          var label = certLabelFromItem(item);
+          var total = listEl.querySelectorAll('.quiz-card-item').length;
+          var pos = positionOfItem(item, listEl);
+          announceReorder(label + ' moved to position ' + pos + ' of ' + total);
+          focusItemHandle(item);
+        }
+      }
+    });
+  }
+
+  function wireQuizListInteractions(container, listEl) {
     container.querySelectorAll('.quiz-complete-checkbox').forEach(function (cb) {
       cb.addEventListener('change', function () {
         var id = this.getAttribute('data-quiz-id');
@@ -48,33 +146,117 @@
       });
     });
 
-    var listEl = document.getElementById('quiz-sortable-list');
-    if (listEl && window.Sortable) {
-      var coarsePointer =
-        typeof window.matchMedia === 'function' &&
-        window.matchMedia('(pointer: coarse)').matches;
-      window.Sortable.create(listEl, {
-        animation: 150,
-        handle: '.drag-handle',
-        ghostClass: 'quiz-card-item-ghost',
-        dragClass: 'quiz-card-item-drag',
-        /* Native HTML5 DnD is unreliable on touch; fallback uses touch/pointer consistently. */
-        forceFallback: coarsePointer,
-        fallbackTolerance: coarsePointer ? 5 : 0,
-        onEnd: function () {
-          var ids = [];
-          var items = listEl.querySelectorAll('.quiz-card-item');
-          for (var j = 0; j < items.length; j++) ids.push(items[j].getAttribute('data-id'));
-          if (window.cloudCramStorageWritesBlocked && window.cloudCramStorageWritesBlocked()) return;
-          try {
-            localStorage.setItem('quizOrder', JSON.stringify(ids));
-          } catch (e) {}
-          if (window.refreshQuizNav) window.refreshQuizNav();
-        }
+    listEl.querySelectorAll('.quiz-move-up').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var item = this.closest('.quiz-card-item');
+        moveQuizItem(item, -1, listEl);
+      });
+    });
+    listEl.querySelectorAll('.quiz-move-down').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var item = this.closest('.quiz-card-item');
+        moveQuizItem(item, 1, listEl);
+      });
+    });
+
+    listEl.querySelectorAll('.drag-handle').forEach(function (handle) {
+      handle.addEventListener('keydown', function (ev) {
+        if (ev.key !== 'ArrowUp' && ev.key !== 'ArrowDown') return;
+        ev.preventDefault();
+        var item = this.closest('.quiz-card-item');
+        moveQuizItem(item, ev.key === 'ArrowUp' ? -1 : 1, listEl);
+      });
+    });
+
+    var hintDismiss = container.querySelector('.quiz-reorder-hint-dismiss');
+    if (hintDismiss) {
+      hintDismiss.addEventListener('click', function () {
+        var wrap = container.querySelector('.quiz-reorder-hint');
+        if (wrap) wrap.remove();
+        if (window.cloudCramStorageWritesBlocked && window.cloudCramStorageWritesBlocked()) return;
+        try {
+          localStorage.setItem(REORDER_HINT_KEY, 'true');
+        } catch (e) {}
       });
     }
 
-    (function maybeShowAi901MigrationNotice() {
+    var resetBtn = container.querySelector('#quiz-reset-order-btn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        if (window.cloudCramStorageWritesBlocked && window.cloudCramStorageWritesBlocked()) return;
+        try {
+          localStorage.removeItem('quizOrder');
+        } catch (e) {}
+        renderQuizList();
+        if (window.refreshQuizNav) window.refreshQuizNav();
+        announceReorder('Quiz order reset to default');
+        var focusReset = document.getElementById('quiz-reset-order-btn');
+        if (focusReset) focusReset.focus();
+      });
+    }
+
+    updateMoveButtonStates(listEl);
+    initSortable(listEl);
+  }
+
+  function renderQuizList() {
+    var getOrdered = window.getQuizOrderedConfig;
+    var getCompleted = window.getQuizCompletedIds;
+    var config = getOrdered ? getOrdered() : window.QUIZ_CONFIG;
+    var completedIds = getCompleted ? getCompleted() : [];
+    var container = document.getElementById('quiz-list-container');
+    if (!config || !container) return;
+
+    destroySortable();
+
+    var showHint = true;
+    try {
+      if (localStorage.getItem(REORDER_HINT_KEY) === 'true') showHint = false;
+    } catch (eHint) {}
+
+    var html = '<div class="quiz-list-toolbar">';
+    if (showHint) {
+      html +=
+        '<div class="quiz-reorder-hint" role="status">' +
+        '<span>Tip: hold ⋮⋮ to reorder</span>' +
+        '<button type="button" class="quiz-reorder-hint-dismiss" aria-label="Dismiss reorder tip">Dismiss</button>' +
+        '</div>';
+    }
+    html +=
+      '<button type="button" class="quiz-reset-order-btn" id="quiz-reset-order-btn">Reset order</button>' +
+      '</div><nav class="quiz-list" id="quiz-sortable-list">';
+
+    for (var i = 0; i < config.length; i++) {
+      var q = config[i];
+      var isCompleted = q.closed || completedIds.indexOf(q.id) >= 0;
+      var cardClass = 'quiz-card ' + q.cardClass + (isCompleted ? ' completed' : '');
+      html +=
+        '<div class="quiz-card-item" data-id="' + escapeHtml(q.id) + '">' +
+        '<button type="button" class="drag-handle" aria-label="Reorder ' + escapeHtml(q.name) + '" title="Drag to reorder">' +
+        '<span aria-hidden="true">⋮⋮</span></button>' +
+        '<div class="quiz-move-col">' +
+        '<button type="button" class="quiz-move-btn quiz-move-up" aria-label="Move ' + escapeHtml(q.name) + ' up">Up</button>' +
+        '<button type="button" class="quiz-move-btn quiz-move-down" aria-label="Move ' + escapeHtml(q.name) + ' down">Down</button>' +
+        '</div>' +
+        '<a href="' + q.href + '" class="' + cardClass + '">' +
+        '<span class="name">' + escapeHtml(q.name) + '</span>' +
+        '<span class="desc">' + q.desc + '</span>' +
+        (isCompleted ? '<span class="completed-badge">Completed</span>' : '') +
+        '</a>' +
+        '<label class="quiz-complete-label" title="Mark as complete">' +
+        '<input type="checkbox" class="quiz-complete-checkbox" data-quiz-id="' + escapeHtml(q.id) + '"' +
+        (isCompleted ? ' checked' : '') + '>' +
+        '<span class="quiz-complete-text">Done</span></label></div>';
+    }
+    html += '</nav>';
+    container.innerHTML = html;
+
+    var listEl = document.getElementById('quiz-sortable-list');
+    wireQuizListInteractions(container, listEl);
+    maybeShowAi901MigrationNotice();
+  }
+
+  function maybeShowAi901MigrationNotice() {
       if (window.cloudCramStorageWritesBlocked && window.cloudCramStorageWritesBlocked()) return;
       try {
         if (localStorage.getItem('ai901_notice_seen') === 'true') return;
@@ -102,8 +284,9 @@
         notice.appendChild(dismiss);
         item.insertBefore(notice, item.firstChild);
       } catch (eNotice) {}
-    })();
   }
+
+  renderQuizList();
 
   var btn = document.getElementById('review-dumps-btn');
   if (btn && window.BrainDump) {

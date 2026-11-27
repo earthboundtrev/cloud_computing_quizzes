@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const CACHE_NAME = 'cloudcram-v66';
+const CACHE_NAME = 'cloudcram-v67';
 
 const PRECACHE_PATHS = [
   '/index.html',
@@ -125,6 +125,7 @@ const PRECACHE_PATHS = [
   '/sw-register.js',
   '/index-init.js',
   '/vendor/sortablejs/Sortable.min.js',
+  '/vendor/sortablejs/LICENSE',
   '/capacitor-env.js',
   '/native-app.js',
   '/build-meta.js'
