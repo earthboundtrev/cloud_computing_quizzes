@@ -36,7 +36,7 @@ const EXPECTED_EXAM_CODES = {
   'az900': 'AZ-900',
   'az104': 'AZ-104',
   'az305': 'AZ-305',
-  'ai900': 'AI-901',  // Updated from AI-900
+  'ai901': 'AI-901',
   'aws_mlea': 'MLA-C02',  // Updated from MLA-C01
   'aws_dea': 'DEA-C01',
   'aws_genai': 'AIP-C01',
@@ -63,7 +63,7 @@ const BANK_FILES = {
   'az900': ['data/az900-questions.js'],
   'az104': ['data/az104-questions.js', 'data/az104-extra-questions.js', 'data/az104-boost-questions.js', 'data/az104-case-studies.js', 'data/az104-scenario-questions.js'],
   'az305': ['data/az305-questions.js', 'data/az305-extra-questions.js', 'data/az305-boost-questions.js', 'data/az305-case-studies.js', 'data/az305-scenario-questions.js'],
-  'ai900': ['data/ai900-questions.js'],
+  'ai901': ['data/ai901-questions.js'],
   'aws_mlea': ['data/aws-mlea-questions.js', 'data/aws-mlea-extra-questions.js', 'data/aws-mlea-case-studies.js', 'data/aws-mlea-scenario-questions.js'],
   'aws_dea': ['data/aws-data-engineering-questions.js', 'data/aws-dea-extra-questions.js', 'data/aws-dea-case-studies.js', 'data/aws-dea-scenario-questions.js'],
   'aws_genai': ['data/aws-genai-questions.js', 'data/aws-genai-case-studies.js', 'data/aws-genai-scenario-questions.js', 'data/aws-genai-ramp-questions.js'],
@@ -82,7 +82,7 @@ const OBJECTIVES_FILES = {
   'az900': 'data/az900-objectives.js',
   'az104': 'data/az104-objectives.js',
   'az305': 'data/az305-objectives.js',
-  'ai900': 'data/ai900-objectives.js',
+  'ai901': 'data/ai901-objectives.js',
   'aws_mlea': 'data/aws-mlea-objectives.js',
   'aws_dea': 'data/aws-dea-objectives.js',
   'aws_genai': 'data/aws-genai-objectives.js',

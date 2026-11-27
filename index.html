@@ -75,6 +75,34 @@
     .quiz-complete-checkbox { cursor: pointer; }
     .quiz-card-item-ghost { opacity: 0.4; }
     .quiz-card-item-drag { opacity: 0.9; }
+    .quiz-card-item.ai901-notice-wrap { flex-wrap: wrap; }
+    .ai901-launcher-notice {
+      flex: 1 1 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.35rem;
+      border-radius: 8px;
+      background: rgba(0, 120, 212, 0.12);
+      border: 1px solid rgba(0, 120, 212, 0.35);
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+    .ai901-launcher-notice-dismiss {
+      flex-shrink: 0;
+      min-height: 44px;
+      min-width: 44px;
+      padding: 0.5rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      background: var(--surface);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
   </style>
   <script src="vendor/sortablejs/Sortable.min.js"></script>
   <script src="capacitor-env.js?v=1"></script>
@@ -82,10 +110,11 @@
   <script src="storage-tab-merge.js?v=6"></script>
   <script src="reserved-key-names.js?v=1"></script>
   <script src="rhcsa-migration.js?v=6"></script>
+  <script src="ai901-migration.js?v=1"></script>
   <script src="data/rhcsa10-question-id-map.js?v=1"></script>
   <script src="rhcsa10-question-id-utils.js?v=3"></script>
   <script src="rhcsa10-question-id-migration.js?v=2"></script>
-  <script src="quiz-config.js?v=10"></script>
+  <script src="quiz-config.js?v=11"></script>
   <script src="sw-register.js?v=5"></script>
   <script src="brain-dump.js?v=2"></script>
   <script src="motivation.js?v=5"></script>
@@ -133,17 +162,17 @@
     <div id="quiz-list-container"></div>
   </div>
   <script src="quiz-nav.js?v=2"></script>
-  <script src="storage-keys.js?v=4"></script>
+  <script src="storage-keys.js?v=5"></script>
   <script src="reminder-server.js?v=1"></script>
   <script src="data-export.js?v=2"></script>
   <script src="push-local-settings.js?v=1"></script>
   <script src="reminder-copy.js?v=2"></script>
   <script src="reminder-schedule.js?v=2"></script>
-  <script src="data-import.js?v=8"></script>
+  <script src="data-import.js?v=9"></script>
   <script src="app-reset.js?v=6"></script>
   <script src="build-meta.js?v=9"></script>
   <script src="native-app.js?v=1"></script>
   <script src="reminder-native.js?v=2"></script>
-  <script src="index-init.js?v=9"></script>
+  <script src="index-init.js?v=10"></script>
 </body>
 </html>
