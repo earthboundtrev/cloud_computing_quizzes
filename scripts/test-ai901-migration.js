@@ -185,6 +185,30 @@ function testNoStaleAi900References() {
   assert(offenders.length === 0, 'Unexpected ai900 references: ' + offenders.join(', '));
 }
 
+function testMergeWhenBothProfilesExist() {
+  const ls = new LocalStorageMock();
+  ls.setItem(
+    'study_sessions_profile_ai900',
+    JSON.stringify({
+      quizId: 'ai900',
+      topicStats: { AI: { correct: 8, total: 10 } },
+      topicMissesFromImports: {}
+    })
+  );
+  ls.setItem(
+    'study_sessions_profile_ai901',
+    JSON.stringify({
+      quizId: 'ai901',
+      topicStats: { AI: { correct: 0, total: 1 } },
+      topicMissesFromImports: {}
+    })
+  );
+  executeMigration(ls);
+  const merged = JSON.parse(ls.getItem('study_sessions_profile_ai901'));
+  assertEqual(merged.topicStats.AI.total, 10, 'keeps richer old stats');
+  assert(ls.getItem('study_sessions_profile_ai900') === null, 'old profile removed after merge');
+}
+
 function testFreshUserNoFlag() {
   const ls = new LocalStorageMock();
   executeMigration(ls);
@@ -197,6 +221,7 @@ console.log('\n=== Testing ai901-migration.js ===\n');
 const tests = [
   ['Moves profile, quizCompleted, quizOrder', testMovesProfileAndLauncherKeys],
   ['Re-run is no-op', testRerunNoOp],
+  ['Merge when both ai900 and ai901 profiles exist', testMergeWhenBothProfilesExist],
   ['Failed copy keeps old data', testFailedCopyKeepsOld],
   ['Import remap ai900 → ai901', testImportRemap],
   ['Fresh user: migrated flag, no data-moved flag', testFreshUserNoFlag],

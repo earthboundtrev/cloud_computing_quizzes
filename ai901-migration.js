@@ -73,19 +73,96 @@
     return key.split(OLD_QUIZ_ID).join(NEW_QUIZ_ID);
   }
 
+  function profileAnswerTotal(stats) {
+    if (!stats || typeof stats !== 'object') return 0;
+    var total = 0;
+    Object.keys(stats).forEach(function (topic) {
+      if (isReservedKeyName(topic)) return;
+      var stat = stats[topic];
+      if (stat && typeof stat.total === 'number') total += stat.total;
+    });
+    return total;
+  }
+
+  function mergeRenameProfiles(oldRaw, newRaw) {
+    var oldP = JSON.parse(oldRaw);
+    var newP = JSON.parse(newRaw);
+    if (!newP || typeof newP !== 'object') {
+      newP = { quizId: NEW_QUIZ_ID, topicStats: {}, topicMissesFromImports: {} };
+    }
+    if (!oldP || typeof oldP !== 'object') return JSON.stringify(newP);
+    if (!newP.topicStats || typeof newP.topicStats !== 'object') newP.topicStats = {};
+    if (!oldP.topicStats || typeof oldP.topicStats !== 'object') oldP.topicStats = {};
+    if (!newP.topicMissesFromImports || typeof newP.topicMissesFromImports !== 'object') {
+      newP.topicMissesFromImports = {};
+    }
+    if (!oldP.topicMissesFromImports || typeof oldP.topicMissesFromImports !== 'object') {
+      oldP.topicMissesFromImports = {};
+    }
+    if (profileAnswerTotal(oldP.topicStats) > profileAnswerTotal(newP.topicStats)) {
+      newP.topicStats = oldP.topicStats;
+      newP.topicMissesFromImports = oldP.topicMissesFromImports;
+    } else {
+      Object.keys(oldP.topicStats).forEach(function (topic) {
+        if (isReservedKeyName(topic)) return;
+        if (!newP.topicStats[topic]) newP.topicStats[topic] = oldP.topicStats[topic];
+      });
+      Object.keys(oldP.topicMissesFromImports).forEach(function (topic) {
+        if (isReservedKeyName(topic)) return;
+        if (newP.topicMissesFromImports[topic] == null) {
+          newP.topicMissesFromImports[topic] = oldP.topicMissesFromImports[topic];
+        }
+      });
+    }
+    newP.quizId = NEW_QUIZ_ID;
+    return JSON.stringify(newP);
+  }
+
+  function migrateProfileRename() {
+    var oldRaw = localStorage.getItem(profileOld);
+    if (oldRaw == null) return { ok: true, moved: false };
+    var newRaw = localStorage.getItem(profileNew);
+    var nextRaw;
+    if (newRaw == null) {
+      nextRaw = touchProfileQuizId(oldRaw);
+    } else {
+      try {
+        nextRaw = mergeRenameProfiles(oldRaw, newRaw);
+      } catch (eMerge) {
+        console.error('[Migration] Profile merge failed:', eMerge);
+        return { ok: false, moved: false };
+      }
+    }
+    try {
+      localStorage.setItem(profileNew, nextRaw);
+    } catch (eWrite) {
+      console.error('[Migration] Failed to write merged profile:', eWrite);
+      return { ok: false, moved: false };
+    }
+    if (localStorage.getItem(profileNew) !== nextRaw) {
+      return { ok: false, moved: false };
+    }
+    try {
+      localStorage.removeItem(profileOld);
+    } catch (eRm) {
+      return { ok: false, moved: true };
+    }
+    if (localStorage.getItem(profileOld) !== null) {
+      return { ok: false, moved: true };
+    }
+    return { ok: true, moved: true };
+  }
+
   function copyVerifyRemove(oldKey, newKey) {
     var oldVal = localStorage.getItem(oldKey);
     if (oldVal == null) return { ok: true, moved: false };
-    if (localStorage.getItem(newKey) != null) {
-      try {
-        localStorage.removeItem(oldKey);
-      } catch (eRm) {
-        console.error('[Migration] Failed to remove old key after new exists:', oldKey, eRm);
-        return { ok: false, moved: true };
-      }
-      return { ok: true, moved: true };
+    if (oldKey === profileOld && newKey === profileNew) {
+      return migrateProfileRename();
     }
-  try {
+    if (localStorage.getItem(newKey) != null) {
+      return { ok: true, moved: false };
+    }
+    try {
     localStorage.setItem(newKey, oldVal);
     } catch (writeErr) {
       console.error('[Migration] Failed to write', newKey, writeErr);
@@ -182,25 +259,15 @@
   var profileOld = 'study_sessions_profile_' + OLD_QUIZ_ID;
   var profileNew = 'study_sessions_profile_' + NEW_QUIZ_ID;
 
-  if (snapshotKeys.indexOf(profileOld) !== -1) {
-    var oldProf = localStorage.getItem(profileOld);
-    var normalized = touchProfileQuizId(oldProf);
-    if (normalized !== oldProf && oldProf != null) {
-      try {
-        localStorage.setItem(profileOld, normalized);
-        oldProf = normalized;
-      } catch (eNorm) {
-        allOk = false;
-      }
-    }
-    var profResult = copyVerifyRemove(profileOld, profileNew);
+  if (snapshotKeys.indexOf(profileOld) !== -1 || snapshotKeys.indexOf(profileNew) !== -1) {
+    var profResult = migrateProfileRename();
     if (!profResult.ok) allOk = false;
     if (profResult.moved) dataMoved = true;
   }
 
   snapshotKeys.forEach(function (key) {
     if (!key || shouldSkipRemapKey(key) || isReservedKeyName(key)) return;
-    if (key === profileOld) return;
+    if (key === profileOld || key === profileNew) return;
     var newKey = remapKeyName(key);
     if (!newKey || newKey === key) return;
     if (key === QUIZ_COMPLETED_KEY || key === QUIZ_ORDER_KEY || key === BRAIN_LS_KEY) return;
@@ -244,18 +311,6 @@
   if (!brainRes.ok) allOk = false;
   if (brainRes.moved) dataMoved = true;
 
-  var newProfileRaw = localStorage.getItem(profileNew);
-  if (newProfileRaw) {
-    var fixed = touchProfileQuizId(newProfileRaw);
-    if (fixed !== newProfileRaw) {
-      try {
-        localStorage.setItem(profileNew, fixed);
-      } catch (eFix) {
-        allOk = false;
-      }
-    }
-  }
-
   if (allOk) {
     try {
       localStorage.setItem(MIGRATION_FLAG, 'true');
@@ -264,6 +319,36 @@
       }
     } catch (eFlag) {
       console.error('[Migration] Failed to set migration flag', eFlag);
+    }
+  }
+
+  if (typeof indexedDB !== 'undefined') {
+    try {
+      var idbReq = indexedDB.open('StudySessionsBrainDumps', 1);
+      idbReq.onsuccess = function () {
+        var db = idbReq.result;
+        if (!db.objectStoreNames.contains('dumps')) {
+          db.close();
+          return;
+        }
+        var tx = db.transaction('dumps', 'readwrite');
+        var store = tx.objectStore('dumps');
+        store.openCursor().onsuccess = function (ev) {
+          var cursor = ev.target.result;
+          if (!cursor) return;
+          var rec = cursor.value;
+          if (rec && rec.quizId === OLD_QUIZ_ID) {
+            rec.quizId = NEW_QUIZ_ID;
+            cursor.update(rec);
+          }
+          cursor.continue();
+        };
+        tx.oncomplete = function () {
+          db.close();
+        };
+      };
+    } catch (eIdb) {
+      console.error('[Migration] IndexedDB brain dump quizId remap skipped:', eIdb);
     }
   }
 
